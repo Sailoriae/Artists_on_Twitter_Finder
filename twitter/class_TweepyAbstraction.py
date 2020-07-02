@@ -43,3 +43,17 @@ class TweepyAbtraction :
                 print( "Erreur en récupérant les informations du Tweet " + str(tweet_id) + "." )
                 print( error.reason )
                 return None
+    
+    """
+    @param account_name Le nom d'utilisateur du compte dont on veut l'ID.
+                        Attention : Le nom d'utilisateur est ce qu'il y a après
+                        le @ ! Par exemple : Si on veut scanner @jack, il faut
+                        entrer dans cette fonction la chaine "jack".
+    @return L'ID du compte
+            Ou None si le compte est introuvable
+    """
+    def get_account_id ( self, account_name : str ) -> int :
+        try :
+            return self.api.get_user( account_name ).id
+        except tweepy.TweepError :
+            return None
