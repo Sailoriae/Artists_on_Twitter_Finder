@@ -25,6 +25,7 @@ class SQLite :
         
         c = self.conn.cursor()
         c.execute( "CREATE TABLE IF NOT EXISTS tweets ( account_id INTEGER, tweet_id INTEGER, image_features TEXT )" )
+        c.execute( "CREATE TABLE IF NOT EXISTS accounts ( account_id INTEGER PRIMARY KEY, last_scan STRING )" )
         self.conn.commit()
     
     """
@@ -64,6 +65,37 @@ class SQLite :
             c.execute( "SELECT account_id, tweet_id, image_features FROM tweets" )
         
         return SQLite_Image_Features_Iterator( c )
+    
+    """
+    Stocker la date du dernier scan d'un compte Twitter
+    Si le compte Twitter est déjà dans la base de données, sa date de dernier
+    scan sera mise à jour
+    
+    @param account_id ID du compte Twitter
+    @param last_scan Date du dernier scan, au format YYYY-MM-DD
+    """
+    def set_account_last_scan( self, account_id : int, last_update : str ) :
+        c = self.conn.cursor()
+        c.execute( """INSERT INTO accounts VALUES ( ?, ? )
+                      ON CONFLICT ( account_id ) DO UPDATE SET last_scan = ?""",
+                   ( account_id, last_update, last_update, ) )
+        self.conn.commit()
+    
+    """
+    Récupérer la date du dernier scan d'un compte Twitter
+    @param account_id ID du compte Twitter
+    @return Date du dernier scan, au format YYYY-MM-DD
+            Ou None si le compte est inconnu
+    """
+    def get_account_last_scan( self, account_id : int ) -> str :
+        c = self.conn.cursor()
+        c.execute( "SELECT last_scan FROM accounts WHERE account_id = ?",
+                   ( account_id, ) )
+        last_scan = c.fetchone()
+        if last_scan != None :
+            return last_scan[0]
+        else :
+            return None
 
 
 """
@@ -74,5 +106,8 @@ if __name__ == '__main__' :
     bdd.insert_tweet( 12, 42, [0.0000000001, 1000000000] )
     bdd.insert_tweet( 12, 42, [10.01, 1.1] )
     bdd.get_images_in_db_iterator( 12 )
+    
+    bdd.set_account_last_scan( 12, "2020-07-02" )
+    bdd.get_account_last_scan( 13 )
     
     bdd.conn.close()
