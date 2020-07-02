@@ -118,6 +118,15 @@ class TweetManager:
 
                     tweet.urls = ",".join(urls)
 
+                    images = []
+                    for image in tweetPQ("div.AdaptiveMedia-photoContainer"):
+                        try:
+                            images.append((image.attrib["data-image-url"]))
+                        except KeyError as e:
+                            pass
+                    
+                    tweet.images = images
+
                     results.append(tweet)
                     resultsAux.append(tweet)
                     
