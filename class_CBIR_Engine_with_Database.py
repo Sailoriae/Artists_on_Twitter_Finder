@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 # coding: utf-8
 
+import lib_GetOldTweets3 as GetOldTweets3
+
 from cbir_engine import CBIR_Engine
 from database import SQLite
 from twitter import TweepyAbtraction
@@ -84,6 +86,46 @@ class CBIR_Engine_with_Database :
         return True
     
     """
+    Scanner tous les tweets d'un compte (Les retweets ne comptent pas).
+    Seuls les tweets avec des médias seront scannés.
+    Et parmis eux, seuls les tweets avec 1 à 4 images seront indexés.
+    Cette méthode n'utilise pas l'API publique de Twitter, mais la librairie
+    GetOldTweets3, qui utilise l'API de https://twitter.com/search.
+    
+    @param account_name Le nom d'utilisateur du compte à scanner
+                        Attention : Le nom d'utilisateur est ce qu'il y a après
+                        le @ ! Par exemple : Si on veut scanner @jack, il faut
+                        entrer dans cette fonction la chaine "jack".
+    @param since_date Date du dernier scan, au format YYYY-MM-DD (OPTIONNEL).
+                      Si cette date n'est pas indiquée, tous les tweets avec
+                      média du compte seront scannés.
+    """
+    def index_all_account_tweets( self, account_name : str, since_date : str = None ) :
+        tweetCriteria = GetOldTweets3.manager.TweetCriteria()\
+            .setQuerySearch( "from:" + account_name + " filter:media -filter:retweets" )
+        
+        if since_date != None :
+            tweetCriteria.setSince( since_date )
+        
+        print( "Scan des Tweets de @" + account_name + "." )
+        
+        tweets_to_scan = GetOldTweets3.manager.TweetManager.getTweets(tweetCriteria)
+        length = len( tweets_to_scan )
+        
+        print( str(length) + " Tweets à scanner." )
+        
+        for i in range( length ) :
+            print( "Scan tweet %s (%d/%d)." % ( tweets_to_scan[i].id, i, length) )
+            for image_url in tweets_to_scan[i].images :
+                self.bdd.insert_tweet(
+                    tweets_to_scan[i].author_id,
+                    tweets_to_scan[i].id,
+                    self.cbir_engine.index_cbir(
+                        url_to_cv2_image( image_url )
+                    )
+                )
+    
+    """
     Rechercher un tweet dans la base de donnée grâce à une image
     @param image_url L'URL de l'image à chercher
     @param account_id L'ID du compte Twitter dans lequel chercher (OPTIONNEL)
@@ -109,6 +151,10 @@ if __name__ == '__main__' :
     index = engine.index_tweet( 1272649003570565120 )
     if index : print( "Test d'indexation OK." )
     else : print( "Erreur durant le test d'indexation !" )
+    
+    # Attention : Test vachement long, car il y a actuellement environ 2000
+    # tweets sur ce compte, et que presque tous ont des médias
+    engine.index_all_account_tweets( "MingjueChen" )
     
     founded_tweets = engine.search_tweet(
         "https://pbs.twimg.com/media/EByx4lXUcAEzrly.jpg"
