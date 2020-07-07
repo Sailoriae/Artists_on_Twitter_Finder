@@ -14,6 +14,13 @@ OAUTH_TOKEN = ""
 OAUTH_TOKEN_SECRET = ""
 
 """
+Paramètres pour l'accès à l'API Pixiv.
+Il est très recommandé de ne pas utiliser un compte personnel !
+"""
+PIXIV_USERNAME = ""
+PIXIV_PASSWORD = ""
+
+"""
 Paramètres pour l'utilisation de SQLite.
 """
 SQLITE_DATABASE_NAME = "SQLite_Database.db"
