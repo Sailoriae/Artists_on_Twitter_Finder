@@ -119,10 +119,19 @@ def link_finder_thread_main( thread_id : int ) :
         # Si jamais l'URL de la requête est invalide, on ne va pas plus loin
         # avec elle (On passe donc son status à 6)
         if twitter_accounts == None :
-            request.problem = "URL invalide ou site non supporté."
+            request.problem = "URL invalide ! Elle ne mène pas à une illustration."
             request.status = 6
             
-            print( "[link_finder_th" + str(thread_id) + "] URL invalide ou site non supporté !" )
+            print( "[link_finder_th" + str(thread_id) + "] URL invalide ! Elle ne mène pas à une illustration." )
+            continue
+        
+        # Si jamais le site n'est pas supporté, on ne va pas plus loin avec
+        # cette requête (On passe donc son status à 6)
+        elif twitter_accounts == False :
+            request.problem = "Site non supporté !"
+            request.status = 6
+            
+            print( "[link_finder_th" + str(thread_id) + "] Site non supporté !" )
             continue
         
         # Si jamais aucun compte Twitter n'a été trouvé, on ne va pas plus loin

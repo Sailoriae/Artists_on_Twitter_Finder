@@ -40,8 +40,9 @@ class Link_Finder :
     @param illust_url L'URL d'une illustration postée sur l'un des sites
                       supportés.
     @return L'URL de l'image.
-            Ou None si il y a  eu un problème, c'est à dire que l'URL donnée
-            ne mène pas à une illustration sur un des sites supportés.
+            None si l'URL est invalide (Mais que le site est supporté), c'est à
+            dire que l'URL donnée ne mène pas à une illustration.
+            False si le site n'est pas supporté.
     """
     def get_image_url ( self, illust_url : str ) -> str :
         # Ce sont les clases qui analysent les URL et vont dire si elles
@@ -54,7 +55,7 @@ class Link_Finder :
             return self.pixiv.get_image_url( illust_url )
         
         else :
-            return None
+            return False # Oui c'est une bidouille
     
     """
     @param illust_url L'URL d'une illustration postée sur l'un des sites
@@ -62,8 +63,9 @@ class Link_Finder :
     @return Une liste de comptes Twitter.
             Ou une liste vide si aucun URL de compte Twitter valide n'a été
             trouvé.
-            Ou None si il y a  eu un problème, c'est à dire que l'URL donnée
-            ne mène pas à une illustration sur un des sites supportés.
+            None si l'URL est invalide (Mais que le site est supporté), c'est à
+            dire que l'URL donnée ne mène pas à une illustration.
+            False si le site n'est pas supporté.
     """
     def get_twitter_accounts ( self, illust_url : str ) -> str :
         # Ce sont les clases qui analysent les URL et vont dire si elles
@@ -76,7 +78,7 @@ class Link_Finder :
             return self.pixiv.get_twitter_accounts( illust_url )
         
         else :
-            return None
+            return False # Oui c'est une bidouille
 
 
 """
