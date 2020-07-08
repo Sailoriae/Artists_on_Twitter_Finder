@@ -11,8 +11,15 @@ Obtenir une image depuis une URL, et la convertir au bon format pour le moteur
 de recherche d'image par le contenu.
 """
 def url_to_cv2_image ( url : str ) -> np.ndarray :
+    # Construire la requête
+    request = urllib.request.Request( url )
+    # Problème : Pour télécharger une image sur Pixiv, il faut que le champs
+    # Referer de la requête soit Pixiv. Oui c'est nul. Donc on fait simple avec
+    # cette petite bidouille, sans régex :
+    if url[:20] == "https://i.pximg.net/" :
+        request.add_header('Referer', 'https://www.pixiv.net/')
     # Télécharger l'image
-    response = urllib.request.urlopen( url )
+    response = urllib.request.urlopen( request )
     # La convertir en array Numpy
     array = np.asarray( bytearray( response.read() ), dtype="uint8" )
     # La lire avec le format d'OpenCV
