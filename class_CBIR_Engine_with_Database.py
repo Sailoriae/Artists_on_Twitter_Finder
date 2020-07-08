@@ -171,10 +171,16 @@ class CBIR_Engine_with_Database :
     """
     Rechercher un tweet dans la base de donnée grâce à une image
     @param image_url L'URL de l'image à chercher
-    @param account_id L'ID du compte Twitter dans lequel chercher (OPTIONNEL)
+    @param account_name Le nom du compte Twitter dans lequel chercher, c'est à
+                        dire ce qu'il y a après le @ (OPTIONNEL)
     @return Liste des ID de tweets contenant cette image
     """
-    def search_tweet( self, image_url : str, account_id : int = 0 ) -> List[int] :
+    def search_tweet( self, image_url : str, account_name : str = None ) -> List[int] :
+        if account_name != None :
+            account_id = self.twitter.get_account_id( account_name )
+        else :
+            account_id = 0
+        
         return self.cbir_engine.search_cbir(
             url_to_cv2_image( image_url ),
             self.bdd.get_images_in_db_iterator( account_id )
