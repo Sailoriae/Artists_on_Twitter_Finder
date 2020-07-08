@@ -55,5 +55,6 @@ class TweepyAbtraction :
     def get_account_id ( self, account_name : str ) -> int :
         try :
             return self.api.get_user( account_name ).id
-        except tweepy.TweepError :
+        except tweepy.TweepError as error :
+            print( error )
             return None
