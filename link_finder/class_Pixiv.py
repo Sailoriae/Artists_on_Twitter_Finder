@@ -100,6 +100,21 @@ class Pixiv :
             return None
         
         # On retourne le résultat voulu
+        # 
+        # Problème avec Pixiv : Il peut y avoir plusieurs illustrations dans
+        # une même page ! C'est chiant. On se contente donc de retourner que la
+        # principale, c'est à dire la première.
+        #
+        # Comme l'utilisateur entre l'URL de la page, et non de l'image, on
+        # devrait donc retourner ici une liste d'URL, et donc scanner plusieurs
+        # images dans notre moteur CBIR.
+        # Ce qui fait que plusieurs tweets séraient retournés, et ça serait à
+        # l'utilisateur de choisir quel est le tweet qui contient l'image
+        # qu'il voulait.
+        # 
+        # Cela serait impossible dans le cas d'un robot qui utilise notre
+        # système !
+        # Il faudrait donc revoir beaucoup de choses...
         return self.cache_illust_url_json["illust"]["image_urls"]["large"]
     
     """
