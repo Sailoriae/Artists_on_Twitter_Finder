@@ -13,7 +13,10 @@ except ModuleNotFoundError : # Si on a été exécuté en temps que module
 # Seuil de distance maximale (Calculé par la fonction "chi2_distance") entre
 # deux listes de caractéristiques d'images, pour dire que ces deux images sont
 # similaires ou sont les mêmes
-SEUIL = 0.1
+# TODO : Faire des recherches sur comment fonctionne la fonction index_cbir()
+# pour affiner ce seuil
+# Là on a pris une grosse marge
+SEUIL = 0.5
 
 
 """
@@ -39,6 +42,9 @@ class CBIR_Engine :
     """
     Test du khi-deux / khi carré
     https://fr.wikipedia.org/wiki/Test_du_%CF%87%C2%B2
+    
+    Plus précisemment, il s'agit du test du khi-deux de Pearson
+    https://fr.wikipedia.org/wiki/Test_du_%CF%87%C2%B2_de_Pearson
     
     @return La différence entre les deux images
             Plus elle est faible, plus les images sont similaires
