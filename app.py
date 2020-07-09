@@ -360,6 +360,7 @@ reverse_search_thread.start()
 Entrée en ligne de commande.
 """
 print( "Vous êtes en ligne de commande.")
+print( "Tapez `help` pour afficher l'aide.")
 
 while True :
     command = input()
@@ -427,15 +428,19 @@ while True :
     
     elif args[0] == "help" :
         if len(args) == 1 :
-            print( "Scanner un compte : scan [Nom du compte à scanner]" )
-            print( "Lancer la procédure complète pour un illustration : request [URL de l'illustration]" )
-            print( "Voir le status d'une requête : status [URL de l'illustration]" )
-            print( "Voir le résultat d'une requête : result [URL de l'illustration]" )
-            print( "Afficher des statistiques de la base de données : stats" )
-            print( "Arrêter le service : stop" )
-            print( "Afficher l'aide : help" )
-            print( "" )
-            print( "Note : Les requêtes sont identifiées par l'URL de l'illustration." )
+            print( "Lancer une requête : request [URL de l'illustration]\n" +
+                   "Voir le status d'une requête : status [URL de l'illustration]\n" +
+                   "Voir le résultat d'une requête : result [URL de l'illustration]\n" +
+                   "\n" +
+                   "Notes :\n" +
+                   " - Une requête est une procédure complète pour un illustration\n" +
+                   " - Les requêtes sont identifiées par l'URL de l'illustration.\n" +
+                   "\n" +
+                   "Forcer l'indexation de tous les tweets d'un compte : scan [Nom du compte à scanner]\n" +
+                   "\n" +
+                   "Afficher des statistiques de la base de données : stats\n" +
+                   "Arrêter le service : stop\n" +
+                   "Afficher l'aide : help\n" )
         else :
             print( "Utilisation : help" )
     
