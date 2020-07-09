@@ -13,9 +13,10 @@ except ImportError : # Si on a été exécuté en temps que module
     from .utils import validate_twitter_account_url
 
 
-pixiv_artwork_id_regex = re.compile(
+pixiv_artwork_id_regex_new = re.compile(
     "http(?:s)?:\/\/(?:www\.)?pixiv\.net\/(?:en\/)?artworks\/([0-9]+)(?:\/)?" )
-
+pixiv_artwork_id_regex_old = re.compile(
+    "http(?:s)?:\/\/(?:www\.)?pixiv\.net\/(?:en\/)?member_illust\.php\?(?:[a-zA-Z0-9=_\-&]+)?illust_id=([0-9]+)(?:\/)?" )
 
 """
 Couche d'abstraction à la librairie PixivPy3 pour utiliser l'API publique de
@@ -54,9 +55,12 @@ class Pixiv :
             Ou None si ce n'est pas un artwork Pixiv.
     """
     def artwork_url_to_id ( self, artwork_url : str ) :
-        result = re.match( pixiv_artwork_id_regex, artwork_url )
-        if result != None :
-            return result.group( 1 )
+        result_new = re.match( pixiv_artwork_id_regex_new, artwork_url )
+        result_old = re.match( pixiv_artwork_id_regex_old, artwork_url )
+        if result_new != None :
+            return result_new.group( 1 )
+        if result_old != None :
+            return result_old.group( 1 )
         return None
     
     """
