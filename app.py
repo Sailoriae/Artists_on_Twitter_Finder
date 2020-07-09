@@ -285,6 +285,11 @@ Lancement de la procédure pour une URL d'illustration.
 @param illust_url L'illustration d'entrée.
 """
 def launch_process ( illust_url : str ) :
+    # Vérifier d'abord qu'on n'est pas déjà en train de traiter cette illustration
+    for request in requests :
+        if request.input_url == illust_url :
+            return
+    
     request = Request( illust_url )
     requests.append( request ) # Passé par adresse car c'est un objet
     link_finder_queue.put( request ) # Passé par addresse car c'est un objet
