@@ -301,6 +301,20 @@ def get_request_status ( illust_url : str ) -> int :
             return request.status
     return None
 
+"""
+Obtenir le résultat.
+@param illust_url L'illustration d'entrée.
+@return La liste des tweets trouvés, associés à leur distance.
+        Ou une liste vide si aucun tweet n'a été trouvé (Peut-être parce que la
+        procédure pour cette requpete n'est pas encore terminée).
+        Ou None si la requête est inconnue.
+"""
+def get_request_result ( illust_url : str ) :
+    for request in requests :
+        if request.input_url == illust_url :
+            return request.tweets_id
+    return None
+
 
 """
 Démarrage des threads.
@@ -347,6 +361,16 @@ while True :
         else :
             print( "Utilisation : status [URL de l'illustration]" )
     
+    elif args[0] == "result" :
+        if len(args) == 2 :
+            result = get_request_result( args[1] )
+            if result != None :
+                print( "Résultat : " + str(result) )
+            else :
+                print( "Requête inconnue pour cet URL !" )
+        else :
+            print( "Utilisation : result [URL de l'illustration]" )
+    
     elif args[0] == "scan" :
         if len(args) == 2 :
             # Vérification que le nom d'utilisateur Twitter est possible
@@ -377,6 +401,7 @@ while True :
             print( "Scanner un compte : scan [Nom du compte à scanner]" )
             print( "Lancer la procédure complète pour un illustration : request [URL de l'illustration]" )
             print( "Voir le status d'une requête : status [URL de l'illustration]" )
+            print( "Voir le résultat d'une requête : result [URL de l'illustration]" )
             print( "Arrêter le service : stop" )
             print( "Afficher l'aide : help" )
             print( "" )
