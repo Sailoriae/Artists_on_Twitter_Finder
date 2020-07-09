@@ -144,7 +144,7 @@ class CBIR_Engine_with_Database :
         if since_date != None :
             tweetCriteria.setSince( since_date )
         
-        print( "Scan des Tweets de @" + account_name + "." )
+        print( "Indexation / scan des Tweets de @" + account_name + "." )
         
         tweets_to_scan = GetOldTweets3.manager.TweetManager.getTweets(tweetCriteria)
         length = len( tweets_to_scan )
@@ -153,10 +153,10 @@ class CBIR_Engine_with_Database :
         # plus récent
         scan_date = tweets_to_scan[0].date.strftime('%Y-%m-%d')
         
-        print( str(length) + " Tweets à scanner." )
+        print( str(length) + " Tweets à indexer." )
         
         for i in range( length ) :
-            print( "Scan tweet %s (%d/%d)." % ( tweets_to_scan[i].id, i+1, length) )
+            print( "Indexation tweet %s (%d/%d)." % ( tweets_to_scan[i].id, i+1, length) )
             for image_url in tweets_to_scan[i].images :
                 self.bdd.insert_tweet(
                     tweets_to_scan[i].author_id,

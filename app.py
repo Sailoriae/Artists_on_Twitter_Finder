@@ -46,9 +46,11 @@ class Request :
         # 0 = En attente de traitement par un thread de Link Finder
         # 1 = En cours de traitement par un thread de Link Finder
         #     link_finder_thread_main()
-        # 2 = En attente de traitement par un thread de scan de comptes Twitter
-        # 3 = En cours de traitement par un thread de scan de comptes Twitter
-        #     scan_twitter_account_thread_main()
+        # 2 = En attente de traitement par un thread d'indexation des tweet
+        #     d'un compte Twitter
+        # 3 = En cours de traitement par un thread d'indexation des tweets d'un
+        #     compte Twitter
+        #     index_twitter_account_thread_main()
         # 4 = En attente de traitement par un thread de recherche d'image inversée
         # 5 = En cours de traitement par un thread de recherche d'image inversée
         #     reverse_search_thread_main()
@@ -59,9 +61,9 @@ class Request :
         self.status = 0
     def set_status_link_finder( self ):
         self.status = 1
-    def set_status_wait_scan_twitter_account( self ):
+    def set_status_wait_index_twitter_account( self ):
         self.status = 2
-    def set_status_scan_twitter_account( self ):
+    def set_status_index_twitter_account( self ):
         self.status = 3
     def set_status_wait_reverse_search_thread( self ):
         self.status = 4
@@ -91,8 +93,8 @@ requests = []
 link_finder_queue = queue.Queue()
 
 # ETAPE 2, code de status de la requête : 3
-# File d'attente de scan de comptes Twitter
-scan_twitter_account_queue = queue.Queue()
+# File d'attente d'indexation des tweets d'un compte Twitter
+index_twitter_account_queue = queue.Queue()
 
 # ETAPE 3, code de status de la requête : 5
 # File d'attente de la recherche d'image inversée
@@ -169,13 +171,14 @@ def link_finder_thread_main( thread_id : int ) :
                "[link_finder_th" + str(thread_id) + "] " + request.image_url )
         
         # On passe le status de la requête à "En attente de traitement par un
-        # thread de scan de comptes Twitter"
-        request.set_status_wait_scan_twitter_account()
+        # thread d'indexation des tweets d'un compte Twitter"
+        request.set_status_wait_index_twitter_account()
         
-        # On met la requête dans la file d'attente de scan de comptes Twitter
+        # On met la requête dans la file d'attente d'indexation des tweets d'un
+        # compte Twitter
         # Si on est dans le cas d'une procédure complète
         if request in requests :
-            scan_twitter_account_queue.put( request )
+            index_twitter_account_queue.put( request )
     
     print( "[link_finder_th" + str(thread_id) + "] Arrêté !" )
     return
@@ -183,8 +186,7 @@ def link_finder_thread_main( thread_id : int ) :
 
 """
 ETAPE 2 du traitement d'une requête.
-Thread de scan de comptes Twitter.
-Ou : Thread d'indexation des tweets d'un compte Twitter.
+Thread d'indexation des tweets d'un compte Twitter.
 
 Note importante : Ce thread doit être unique ! Il ne doit pas être exécuté
 plusieurs fois.
@@ -192,7 +194,7 @@ En effet, il ne doit pas y avoir deux scans en même temps. Pour deux raisons :
 - On pourrait scanner un même compte Twitter en même temps, deux fois donc,
 - Et l'API Twitter nous bloque si on fait trop de requêtes.
 """
-def scan_twitter_account_thread_main( thread_id : int ) :
+def index_twitter_account_thread_main( thread_id : int ) :
     # Initialisation de notre moteur de recherche d'image par le contenu
     cbir_engine = CBIR_Engine_with_Database()
     
@@ -201,19 +203,19 @@ def scan_twitter_account_thread_main( thread_id : int ) :
         
         # On tente de sortir une requête de la file d'attente
         try :
-            request = scan_twitter_account_queue.get( block = False )
+            request = index_twitter_account_queue.get( block = False )
         # Si la queue est vide, on attend une seconde et on réessaye
         except queue.Empty :
             sleep( 1 )
             continue
         
         # On passe le status de la requête à "En cours de traitement par un
-        # thread de scan de comptes Twitter"
-        request.set_status_scan_twitter_account()
+        # thread d'indexation des tweets d'un compte Twitter"
+        request.set_status_index_twitter_account()
         
-        # On scan les comptes Twitter de la requête
+        # On index / scan les comptes Twitter de la requête
         for twitter_account in request.twitter_accounts :
-            print( "[scan_twitter_account_th" + str(thread_id) + "] Scan du compte Twitter @" + twitter_account + "." )
+            print( "[index_twitter_account_th" + str(thread_id) + "] Indexation / scan du compte Twitter @" + twitter_account + "." )
             
             cbir_engine.index_or_update_all_account_tweets( twitter_account )
         
@@ -226,7 +228,7 @@ def scan_twitter_account_thread_main( thread_id : int ) :
         if request in requests :
             reverse_search_queue.put( request )
     
-    print( "[scan_twitter_account_th" + str(thread_id) + "] Arrêté !" )
+    print( "[index_twitter_account_th" + str(thread_id) + "] Arrêté !" )
     return
 
 
@@ -329,10 +331,10 @@ link_finder_thread = threading.Thread( name = "link_finder",
                                        args = ( 1, ) )
 link_finder_thread.start()
 
-scan_twitter_account_thread = threading.Thread( name = "scan_twitter_account",
-                                                target = scan_twitter_account_thread_main,
-                                                args = ( 1, ) )
-scan_twitter_account_thread.start()
+index_twitter_account_thread = threading.Thread( name = "index_twitter_account",
+                                                 target = index_twitter_account_thread_main,
+                                                 args = ( 1, ) )
+index_twitter_account_thread.start()
 
 reverse_search_thread = threading.Thread( name = "reverse_search",
                                           target = reverse_search_thread_main,
@@ -380,14 +382,14 @@ while True :
         if len(args) == 2 :
             # Vérification que le nom d'utilisateur Twitter est possible
             if re.compile("^@?(\w){1,15}$").match(args[1]) :
-                print( "Demande de scan du compte @" + args[1] + "." )
+                print( "Demande de scan / d'indexation du compte @" + args[1] + "." )
                 
                 # Fabrication de l'objet Request
                 request = Request( None )
                 request.twitter_accounts = [ args[1] ]
                 
                 # Lancement du scan
-                scan_twitter_account_queue.put( request )
+                index_twitter_account_queue.put( request )
             else :
                 print( "Nom de compte Twitter impossible !" )
         else :
@@ -423,5 +425,5 @@ Arrêt du système.
 """
 # Attendre que les threads aient fini
 link_finder_thread.join()
-scan_twitter_account_thread.join()
+index_twitter_account_thread.join()
 reverse_search_thread.join()
