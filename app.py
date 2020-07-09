@@ -58,6 +58,21 @@ class Request :
         #     reverse_search_thread_main()
         # 6 = Fin de traitement
         self.status = 0
+    
+    def set_status_wait_link_finder( self ):
+        self.status = 0
+    def set_status_link_finder( self ):
+        self.status = 1
+    def set_status_wait_scan_twitter_account( self ):
+        self.status = 2
+    def set_status_scan_twitter_account( self ):
+        self.status = 3
+    def set_status_wait_reverse_search_thread( self ):
+        self.status = 4
+    def set_status_reverse_search_thread( self ):
+        self.status = 5
+    def set_status_done( self ):
+        self.status = 6
 
 
 """
@@ -107,8 +122,9 @@ def link_finder_thread_main( thread_id : int ) :
             sleep( 1 )
             continue
         
-        # On passe le status de la requête à 1
-        request.status = 1
+        # On passe le status de la requête à "En cours de traitement par un
+        # thread de Link Finder"
+        request.set_status_link_finder()
         
         print( "[link_finder_th" + str(thread_id) + "] Link Finder pour :\n" +
                "[link_finder_th" + str(thread_id) + "] " + request.input_url )
@@ -117,28 +133,28 @@ def link_finder_thread_main( thread_id : int ) :
         twitter_accounts = finder_engine.get_twitter_accounts( request.input_url )
         
         # Si jamais l'URL de la requête est invalide, on ne va pas plus loin
-        # avec elle (On passe donc son status à 6)
+        # avec elle (On passe donc son status à "Fin de traitement")
         if twitter_accounts == None :
             request.problem = "URL invalide ! Elle ne mène pas à une illustration."
-            request.status = 6
+            request.set_status_done()
             
             print( "[link_finder_th" + str(thread_id) + "] URL invalide ! Elle ne mène pas à une illustration." )
             continue
         
         # Si jamais le site n'est pas supporté, on ne va pas plus loin avec
-        # cette requête (On passe donc son status à 6)
+        # cette requête (On passe donc son status à "Fin de traitement")
         elif twitter_accounts == False :
             request.problem = "Site non supporté !"
-            request.status = 6
+            request.set_status_done()
             
             print( "[link_finder_th" + str(thread_id) + "] Site non supporté !" )
             continue
         
         # Si jamais aucun compte Twitter n'a été trouvé, on ne va pas plus loin
-        # avec la requête (On passe donc son status à 6)
+        # avec la requête (On passe donc son status à "Fin de traitement")
         elif twitter_accounts == []:
             request.problem = "Aucun compte Twitter trouvé pour cet artiste."
-            request.status = 6
+            request.set_status_done()
             
             print( "[link_finder_th" + str(thread_id) + "] Aucun compte Twitter trouvé pour l'artiste de cette illustration !" )
             continue
@@ -156,8 +172,9 @@ def link_finder_thread_main( thread_id : int ) :
         print( "[link_finder_th" + str(thread_id) + "] URL de l'image trouvée :\n" +
                "[link_finder_th" + str(thread_id) + "] " + request.image_url )
         
-        # On passe le status de la requête à 2
-        request.status = 2
+        # On passe le status de la requête à "En attente de traitement par un
+        # thread de scan de comptes Twitter"
+        request.set_status_wait_scan_twitter_account()
         
         # On met la requête dans la file d'attente de scan de comptes Twitter
         # Si on est dans le cas d'une procédure complète
@@ -194,8 +211,9 @@ def scan_twitter_account_thread_main( thread_id : int ) :
             sleep( 1 )
             continue
         
-        # On passe le status de la requête à 3
-        request.status = 3
+        # On passe le status de la requête à "En cours de traitement par un
+        # thread de scan de comptes Twitter"
+        request.set_status_scan_twitter_account()
         
         # On scan les comptes Twitter de la requête
         for twitter_account in request.twitter_accounts :
@@ -203,8 +221,9 @@ def scan_twitter_account_thread_main( thread_id : int ) :
             
             cbir_engine.index_or_update_all_account_tweets( twitter_account )
         
-        # On passe le status de la requête à 4
-        request.status = 4
+        # On passe le status de la requête à "En attente de traitement par un
+        # thread de recherche d'image inversée"
+        request.set_status_wait_reverse_search_thread()
         
         # On met la requête dans la file d'attente de la recherche d'image inversée
         # Si on est dans le cas d'une procédure complète
@@ -235,8 +254,9 @@ def reverse_search_thread_main( thread_id : int ) :
             sleep( 1 )
             continue
         
-        # On passe le status de la requête à 5
-        request.status = 5
+        # On passe le status de la requête à "En cours de traitement par un
+        # thread de recherche d'image inversée"
+        request.set_status_reverse_search_thread()
         
         print( "[reverse_search_th" + str(thread_id) + "] Recherche de l'image suivante :\n" +
                "[reverse_search_th" + str(thread_id) + "] " + request.input_url )
@@ -250,8 +270,8 @@ def reverse_search_thread_main( thread_id : int ) :
         
         print( "[reverse_search_th" + str(thread_id) + "] Tweets trouvés : " + str( request.tweets_id ) )
         
-        # On passe le status de la requête à 6
-        request.status = 6
+        # On passe le status de la requête à "Fin de traitement"
+        request.set_status_done()
     
     print( "[reverse_search_th" + str(thread_id) + "] Arrêté !" )
     return
