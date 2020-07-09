@@ -173,9 +173,12 @@ class CBIR_Engine_with_Database :
     @param image_url L'URL de l'image à chercher
     @param account_name Le nom du compte Twitter dans lequel chercher, c'est à
                         dire ce qu'il y a après le @ (OPTIONNEL)
-    @return Liste des ID de tweets contenant cette image
+    @return Liste de tuples, contenant :
+            - L'ID du Tweet contenant cette image (Parmis un maximum de 4
+              images par Tweets)
+            - La distance entre l'image de requête et l'image du Tweet
     """
-    def search_tweet( self, image_url : str, account_name : str = None ) -> List[int] :
+    def search_tweet( self, image_url : str, account_name : str = None ) :
         if account_name != None :
             account_id = self.twitter.get_account_id( account_name )
         else :
@@ -210,7 +213,7 @@ if __name__ == '__main__' :
     )
     print( "Tweets contenant une image recherchée :")
     print( founded_tweets )
-    if 1160998394887716864 in founded_tweets :
+    if 1160998394887716864 in [ data[0] for data in founded_tweets ] :
         print( "Test de recherche OK." )
     else :
         print( "Problème durant le test de recherche !" )

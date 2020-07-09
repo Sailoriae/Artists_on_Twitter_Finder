@@ -9,15 +9,11 @@ import threading
 import queue
 from time import sleep
 import re
+from typing import List
 
 from class_CBIR_Engine_with_Database import CBIR_Engine_with_Database
 from class_Link_Finder import Link_Finder
 
-
-# TODO : RETOURNER LES TWEETS TROUVES EN LES ASSOCIANT A LEUR DISTANCE DE
-# L'IMAGE DE REQUETE !
-# Ce qui permet de les classer ! Car je le rappel, un artiste peut avoir
-# plusieurs comptes
 
 # TODO : Thread de vidage de la liste des requêtes lorsqu'elles sont au niveau
 # de traitement 6 (= Fin de traitement)
@@ -44,7 +40,7 @@ class Request :
         self.image_url = None
         
         # Résultats de la recherche inversée de l'image
-        self.tweets_id = []
+        self.tweets_id : List[ (int, float) ] = []
         
         # Status du traitement de cette requête :
         # 0 = En attente de traitement par un thread de Link Finder
@@ -268,7 +264,14 @@ def reverse_search_thread_main( thread_id : int ) :
             
             request.tweets_id += cbir_engine.search_tweet( request.image_url, twitter_account )
         
-        print( "[reverse_search_th" + str(thread_id) + "] Tweets trouvés : " + str( request.tweets_id ) )
+        # Trier la liste des résultats
+        # On trie une liste de tuple par rapport au deuxième élément
+        request.tweets_id = sorted( request.tweets_id,
+                                    key = lambda x: x[1],
+                                    reverse = False )
+        
+        print( "[reverse_search_th" + str(thread_id) + "] Tweets trouvés (Du plus au moins proche) :\n" +
+               "[reverse_search_th" + str(thread_id) + "] " + str( [ data[0] for data in request.tweets_id ] ) )
         
         # On passe le status de la requête à "Fin de traitement"
         request.set_status_done()

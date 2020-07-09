@@ -65,12 +65,17 @@ class CBIR_Engine :
                            - image_features : La liste des caractéristiques
                                               de l'image
                            - identifier : Un identifiant pour cette image
-    @return Liste d'identifiants d'images
-            Elements du même type que images_iterator.identifier
+    @return Liste de tuples, contenant :
+            - L'identifiant de l'image, qui est du même type que
+              images_iterator.identifier
+            - La distance calculée avec l'image de requête, de type float
+            Cette liste ne contient pas toutes les images de la BDD, mais
+            seulement celles qui ont une distance de l'image de requête
+            inférieure à la variable SEUIL
     """
     def search_cbir( self, image : np.ndarray, images_iterator ) :
         # Liste d'identifiants d'images trouvées
-        results : List[ type(images_iterator) ] = []
+        results : List[ ( type(images_iterator), float ) ] = []
         
         # On commence par calculer la liste des caractéristiques de l'image de
         # requête, afin de la comparer à celles de la base de données (Ou
@@ -88,7 +93,7 @@ class CBIR_Engine :
             # l'identifiant de l'image en cours sur l'itérateur à notre liste
             # de résultatts
             if d < SEUIL :
-                results.append( image.identifier )
+                results.append( (image.identifier, d) )
         
         # Retourner  la liste des résultats
         return results
