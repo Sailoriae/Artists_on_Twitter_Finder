@@ -19,6 +19,13 @@ Cet objet doit uniquement être instancié par la méthode
 class SQLite_Image_Features_Iterator :
     def __init__( self, cursor : sqlite3.Cursor ) :
         self.cursor : sqlite3.Cursor = cursor
+        
+        # Ligne dans la base de données en cours de lecture
+        self.current_line = self.cursor.fetchone()
+        
+        # Image de la ligne en cours de lecture (Car il peut y avoir 4 images
+        # par ligne, pusique maximum de 4 images par Tweets)
+        self.image_cursor = 0
 
     def __iter__( self ) :
         return self
@@ -27,9 +34,31 @@ class SQLite_Image_Features_Iterator :
     @return Un objet Image_in_DB
     """
     def __next__( self ) -> Image_in_DB:
-        line = self.cursor.fetchone()
-        if line == None :
+        if self.current_line == None :
             raise StopIteration
-        return Image_in_DB( line[0],
-                            line[1],
-                            [ float(value) for value in line[2].split(';') ] )
+        
+        # Si le curseur pointe vers une image non-vide
+        if self.current_line[ 2 +  self.image_cursor ] != None :
+            # A retourner
+            # On doit le faire avant car on modifie des valeurs juste après
+            to_return = Image_in_DB(
+                self.current_line[0], # ID du compte Twitter
+                self.current_line[1], # ID du Tweet
+                [ float(value) for value in self.current_line[ 2 +  self.image_cursor ].split(';') ] # Features CBIR de l'image
+            )
+            
+            # Si c'était la dernière image, on prépare pour passer au Tweet suivant
+            if self.image_cursor == 3 :
+                self.image_cursor = 0
+                self.current_line = self.cursor.fetchone()
+            
+            # Sinon, on prépare pour passer à l'image suivante
+            else :
+                self.image_cursor += 1
+                
+            return to_return
+        
+        # Sinon, on passe au Tweet suivant
+        self.image_cursor = 0
+        self.current_line = self.cursor.fetchone()
+        return self.__next__()

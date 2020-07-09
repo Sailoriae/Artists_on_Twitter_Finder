@@ -24,7 +24,7 @@ class SQLite :
         self.conn = sqlite3.connect( database_name )
         
         c = self.conn.cursor()
-        c.execute( "CREATE TABLE IF NOT EXISTS tweets ( account_id INTEGER, tweet_id INTEGER, image_features TEXT )" )
+        c.execute( "CREATE TABLE IF NOT EXISTS tweets ( account_id INTEGER, tweet_id INTEGER PRIMARY KEY, image_1_features TEXT, image_2_features TEXT, image_3_features TEXT, image_4_features TEXT )" )
         c.execute( "CREATE TABLE IF NOT EXISTS accounts ( account_id INTEGER PRIMARY KEY, last_scan STRING )" )
         self.conn.commit()
     
@@ -38,14 +38,50 @@ class SQLite :
     Ajouter un tweet à la base de données
     @param account_id L'ID du compte associé au tweet
     @param tweet_id L'ID du tweet à ajouter
-    @param cbir_features La liste des caractéristiques issues de l'analyse CBIR
+    @param cbir_features_1 La liste des caractéristiques issues de l'analyse
+                           CBIR pour la première image du Tweet
+    @param cbir_features_2 La liste des caractéristiques issues de l'analyse
+                           CBIR pour la seconde image du Tweet
+                           (OPTIONNEL)
+    @param cbir_features_3 La liste des caractéristiques issues de l'analyse
+                           CBIR pour la troisième image du Tweet
+                           (OPTIONNEL)
+    @param cbir_features_4 La liste des caractéristiques issues de l'analyse
+                           CBIR pour la quatrième image du Tweet
+                           (OPTIONNEL)
     """
-    def insert_tweet( self, account_id : int, tweet_id : int, cbir_features : List[float] ) :
+    def insert_tweet( self, account_id : int, tweet_id : int,
+                      cbir_features_1 : List[float],
+                      cbir_features_2 : List[float] = None,
+                      cbir_features_3 : List[float] = None,
+                      cbir_features_4 : List[float] = None ) :
         c = self.conn.cursor()
-        c.execute( "INSERT INTO tweets VALUES ( ?, ?, ? )",
+        
+        cbir_features_1_str = ";".join( [ str( value ) for value in cbir_features_1 ] )
+        
+        if cbir_features_2 != None :
+            cbir_features_2_str = ";".join( [ str( value ) for value in cbir_features_2 ] )
+        else :
+            cbir_features_2_str = None
+        
+        if cbir_features_3 != None :
+            cbir_features_3_str = ";".join( [ str( value ) for value in cbir_features_3 ] )
+        else :
+            cbir_features_3_str = None
+        
+        if cbir_features_4 != None :
+            cbir_features_4_str = ";".join( [ str( value ) for value in cbir_features_4 ] )
+        else :
+            cbir_features_4_str = None
+        
+        c.execute( """INSERT INTO tweets VALUES ( ?, ?, ?, ?, ?, ? )
+                      ON CONFLICT ( tweet_id ) DO NOTHING """, # Si le tweet est déjà stocké, on ne fait rien
                    ( account_id,
                      tweet_id,
-                     ";".join( [ str( value ) for value in cbir_features ] ) , ) )
+                     cbir_features_1_str,
+                     cbir_features_2_str,
+                     cbir_features_3_str,
+                     cbir_features_4_str,) )
         self.conn.commit()
     
     """
@@ -59,10 +95,10 @@ class SQLite :
         c = self.conn.cursor()
         
         if account_id != 0 :
-            c.execute( "SELECT account_id, tweet_id, image_features FROM tweets WHERE account_id = ?",
+            c.execute( "SELECT account_id, tweet_id, image_1_features, image_2_features, image_3_features, image_4_features FROM tweets WHERE account_id = ?",
                        ( account_id, ) )
         else :
-            c.execute( "SELECT account_id, tweet_id, image_features FROM tweets" )
+            c.execute( "SELECT account_id, tweet_id, image_1_features, image_2_features, image_3_features, image_4_features FROM tweets" )
         
         return SQLite_Image_Features_Iterator( c )
     

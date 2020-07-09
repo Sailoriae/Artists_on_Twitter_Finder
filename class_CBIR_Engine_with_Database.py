@@ -74,14 +74,40 @@ class CBIR_Engine_with_Database :
             print( "Images trouvées dans le tweet " + str( tweet_id ) + " :" )
             print( str( tweet_images_url ) )
         
-        for tweet_image_url in tweet_images_url :
-            self.bdd.insert_tweet(
-                tweet._json["user"]["id"],
-                tweet_id,
-                self.cbir_engine.index_cbir(
-                    url_to_cv2_image( tweet_image_url )
-                )
-            )
+        image_1 = None
+        image_2 = None
+        image_3 = None
+        image_4 = None
+        
+        length = len( tweet_images_url )
+        
+        if length == 0 :
+            print( "Tweet sans image, on le passe !" )
+            return False
+        
+        # Traitement des images du Tweet
+        if length > 0 :
+            image_1 = self.cbir_engine.index_cbir(
+                          url_to_cv2_image( tweet_images_url[0] ) )
+        if length > 1 :
+            image_2 = self.cbir_engine.index_cbir(
+                          url_to_cv2_image( tweet_images_url[1] ) )
+        if length > 2 :
+            image_3 = self.cbir_engine.index_cbir(
+                          url_to_cv2_image( tweet_images_url[2] ) )
+        if length > 3 :
+            image_4 = self.cbir_engine.index_cbir(
+                          url_to_cv2_image( tweet_images_url[3] ) )
+        
+        # Stockage des résultats
+        self.bdd.insert_tweet(
+            tweet._json["user"]["id"],
+            tweet_id,
+            image_1,
+            image_2,
+            image_3,
+            image_4,
+        )
         
         return True
     
@@ -157,14 +183,41 @@ class CBIR_Engine_with_Database :
         
         for i in range( length ) :
             print( "Indexation tweet %s (%d/%d)." % ( tweets_to_scan[i].id, i+1, length) )
-            for image_url in tweets_to_scan[i].images :
-                self.bdd.insert_tweet(
-                    tweets_to_scan[i].author_id,
-                    tweets_to_scan[i].id,
-                    self.cbir_engine.index_cbir(
-                        url_to_cv2_image( image_url )
-                    )
-                )
+            
+            image_1 = None
+            image_2 = None
+            image_3 = None
+            image_4 = None
+            
+            tweets_to_scan_length = len( tweets_to_scan[i].images )
+            
+            if tweets_to_scan_length == 0 :
+                print( "Tweet sans image, on le passe !" )
+                continue
+            
+            # Traitement des images du Tweet
+            if tweets_to_scan_length > 0 :
+                image_1 = self.cbir_engine.index_cbir(
+                          url_to_cv2_image( tweets_to_scan[i].images[0] ) )
+            if tweets_to_scan_length > 1 :
+                image_2 = self.cbir_engine.index_cbir(
+                          url_to_cv2_image( tweets_to_scan[i].images[1] ) )
+            if tweets_to_scan_length > 2 :
+                image_3 = self.cbir_engine.index_cbir(
+                          url_to_cv2_image( tweets_to_scan[i].images[2] ) )
+            if tweets_to_scan_length > 3 :
+                image_4 = self.cbir_engine.index_cbir(
+                          url_to_cv2_image( tweets_to_scan[i].images[3] ) )
+            
+            # Stockage des résultats
+            self.bdd.insert_tweet(
+                tweets_to_scan[i].author_id,
+                tweets_to_scan[i].id,
+                image_1,
+                image_2,
+                image_3,
+                image_4,
+            )
         
         return scan_date
     
