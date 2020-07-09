@@ -96,6 +96,20 @@ class SQLite :
             return last_scan[0]
         else :
             return None
+    
+    """
+    Obtenir des statistiques sur la base de données
+    @return Une liste contenant, dans l'ordre suivant :
+            - Le nombre de tweets indexés
+            - Le nombre de comptes indexés
+    """
+    def get_stats( self ) :
+        c = self.conn.cursor()
+        c.execute( "SELECT COUNT( * ) FROM tweets" )
+        count_tweets = c.fetchone()[0]
+        c.execute( "SELECT COUNT( * ) FROM accounts" )
+        count_accounts = c.fetchone()[0]
+        return [ count_tweets, count_accounts ]
 
 
 """

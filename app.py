@@ -13,6 +13,7 @@ from typing import List
 
 from class_CBIR_Engine_with_Database import CBIR_Engine_with_Database
 from class_Link_Finder import Link_Finder
+import parameters as param
 
 
 # TODO : Thread de vidage de la liste des requêtes lorsqu'elles sont au niveau
@@ -322,6 +323,19 @@ def get_request_result ( illust_url : str ) :
             return request.tweets_id
     return None
 
+"""
+Obtenir des statistiques sur la base de données
+@return Une liste contenant, dans l'ordre suivant :
+        - Le nombre de tweets indexés
+        - Le nombre de comptes indexés
+"""
+# Accès direct à la base de données pour le processus principal
+# N'UTILISER QUE DES METHODES QUI FONT SEULEMENT DES SELECT !
+from database import SQLite
+bdd_direct_access = SQLite( param.SQLITE_DATABASE_NAME )
+def get_stats() :
+    return bdd_direct_access.get_stats()
+
 
 """
 Démarrage des threads.
@@ -395,6 +409,14 @@ while True :
         else :
             print( "Utilisation : scan [Nom du compte à scanner]" )
     
+    elif args[0] == "stats" :
+        if len(args) == 1 :
+            stats = get_stats()
+            print( "Nombre de tweets indexés : ", stats[0] )
+            print( "Nombre de comptes Twitter indexés : ", stats[1] )
+        else :
+            print( "Utilisation : stats")
+    
     elif args[0] == "stop" :
         if len(args) == 1 :
             print( "Arrêt à la fin des procédures en cours..." )
@@ -409,6 +431,7 @@ while True :
             print( "Lancer la procédure complète pour un illustration : request [URL de l'illustration]" )
             print( "Voir le status d'une requête : status [URL de l'illustration]" )
             print( "Voir le résultat d'une requête : result [URL de l'illustration]" )
+            print( "Afficher des statistiques de la base de données : stats" )
             print( "Arrêter le service : stop" )
             print( "Afficher l'aide : help" )
             print( "" )
