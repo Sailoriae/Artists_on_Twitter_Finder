@@ -156,7 +156,7 @@ class CBIR_Engine_with_Database :
         print( str(length) + " Tweets à scanner." )
         
         for i in range( length ) :
-            print( "Scan tweet %s (%d/%d)." % ( tweets_to_scan[i].id, i, length) )
+            print( "Scan tweet %s (%d/%d)." % ( tweets_to_scan[i].id, i+1, length) )
             for image_url in tweets_to_scan[i].images :
                 self.bdd.insert_tweet(
                     tweets_to_scan[i].author_id,
