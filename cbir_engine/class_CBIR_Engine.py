@@ -16,7 +16,7 @@ except ModuleNotFoundError : # Si on a été exécuté en temps que module
 # TODO : Faire des recherches sur comment fonctionne la fonction index_cbir()
 # pour affiner ce seuil
 # Là on a pris une grosse marge
-SEUIL = 0.5
+SEUIL = 4
 
 
 """
