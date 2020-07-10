@@ -96,18 +96,26 @@ class CBIR_Engine_with_Database :
             return False
         
         # Traitement des images du Tweet
-        if length > 0 :
-            image_1 = self.cbir_engine.index_cbir(
-                          url_to_cv2_image( tweet_images_url[0] ) )
-        if length > 1 :
-            image_2 = self.cbir_engine.index_cbir(
-                          url_to_cv2_image( tweet_images_url[1] ) )
-        if length > 2 :
-            image_3 = self.cbir_engine.index_cbir(
-                          url_to_cv2_image( tweet_images_url[2] ) )
-        if length > 3 :
-            image_4 = self.cbir_engine.index_cbir(
-                          url_to_cv2_image( tweet_images_url[3] ) )
+        try :
+            if length > 0 :
+                image_1 = self.cbir_engine.index_cbir(
+                              url_to_cv2_image( tweet_images_url[0] ) )
+            if length > 1 :
+                image_2 = self.cbir_engine.index_cbir(
+                              url_to_cv2_image( tweet_images_url[1] ) )
+            if length > 2 :
+                image_3 = self.cbir_engine.index_cbir(
+                              url_to_cv2_image( tweet_images_url[2] ) )
+            if length > 3 :
+                image_4 = self.cbir_engine.index_cbir(
+                              url_to_cv2_image( tweet_images_url[3] ) )
+        
+        # Oui, c'est possible, Twitter n'est pas parfait
+        # Exemple : https://twitter.com/apofissx/status/219051550696407040
+        # Ce tweet est indiqué comme ayant une image, mais elle est en 404 !
+        except Exception as error :
+            print( error )
+            return False
         
         # Stockage des résultats
         self.bdd.insert_tweet(
@@ -206,26 +214,34 @@ class CBIR_Engine_with_Database :
                 continue
             
             # Traitement des images du Tweet
-            if tweets_to_scan_length > 0 :
-                image_1 = self.cbir_engine.index_cbir(
-                          url_to_cv2_image(
-#                              add_argument_to_url( tweets_to_scan[i].images[0], "name=large" ) ) )
-                              tweets_to_scan[i].images[0] ) )
-            if tweets_to_scan_length > 1 :
-                image_2 = self.cbir_engine.index_cbir(
-                          url_to_cv2_image(
-#                              add_argument_to_url( tweets_to_scan[i].images[1], "name=large" ) ) )
-                              tweets_to_scan[i].images[0] ) )
-            if tweets_to_scan_length > 2 :
-                image_3 = self.cbir_engine.index_cbir(
-                          url_to_cv2_image(
-#                              add_argument_to_url( tweets_to_scan[i].images[2], "name=large" ) ) )
-                              tweets_to_scan[i].images[0] ) )
-            if tweets_to_scan_length > 3 :
-                image_4 = self.cbir_engine.index_cbir(
-                          url_to_cv2_image(
-#                              add_argument_to_url( tweets_to_scan[i].images[3], "name=large" ) ) )
-                              tweets_to_scan[i].images[0] ) )
+            try :
+                if tweets_to_scan_length > 0 :
+                    image_1 = self.cbir_engine.index_cbir(
+                              url_to_cv2_image(
+    #                              add_argument_to_url( tweets_to_scan[i].images[0], "name=large" ) ) )
+                                  tweets_to_scan[i].images[0] ) )
+                if tweets_to_scan_length > 1 :
+                    image_2 = self.cbir_engine.index_cbir(
+                              url_to_cv2_image(
+    #                              add_argument_to_url( tweets_to_scan[i].images[1], "name=large" ) ) )
+                                  tweets_to_scan[i].images[0] ) )
+                if tweets_to_scan_length > 2 :
+                    image_3 = self.cbir_engine.index_cbir(
+                              url_to_cv2_image(
+    #                              add_argument_to_url( tweets_to_scan[i].images[2], "name=large" ) ) )
+                                  tweets_to_scan[i].images[0] ) )
+                if tweets_to_scan_length > 3 :
+                    image_4 = self.cbir_engine.index_cbir(
+                              url_to_cv2_image(
+    #                              add_argument_to_url( tweets_to_scan[i].images[3], "name=large" ) ) )
+                                  tweets_to_scan[i].images[0] ) )
+            
+            # Oui, c'est possible, Twitter n'est pas parfait
+            # Exemple : https://twitter.com/apofissx/status/219051550696407040
+            # Ce tweet est indiqué comme ayant une image, mais elle est en 404 !
+            except Exception as error :
+                print( error )
+                continue
             
             # Stockage des résultats
             self.bdd.insert_tweet(
