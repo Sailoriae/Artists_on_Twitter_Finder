@@ -265,7 +265,11 @@ def reverse_search_thread_main( thread_id : int ) :
         for twitter_account in request.twitter_accounts :
             print( "[reverse_search_th" + str(thread_id) + "] Recherche sur le compte Twitter @" + twitter_account + "." )
             
-            request.tweets_id += cbir_engine.search_tweet( request.image_url, twitter_account )
+            result = cbir_engine.search_tweet( request.image_url, twitter_account )
+            if result != None :
+                request.tweets_id += result
+            else :
+                print( "[reverse_search_th" + str(thread_id) + "] Erreur lors de la recherche d'image inversée." )
         
         # Trier la liste des résultats
         # On trie une liste de tuple par rapport au deuxième élément

@@ -230,6 +230,7 @@ class CBIR_Engine_with_Database :
             - L'ID du Tweet contenant cette image (Parmis un maximum de 4
               images par Tweets)
             - La distance entre l'image de requête et l'image du Tweet
+            None si il y a eu un problème
     """
     def search_tweet( self, image_url : str, account_name : str = None ) :
         if account_name != None :
@@ -237,8 +238,14 @@ class CBIR_Engine_with_Database :
         else :
             account_id = 0
         
+        try :
+            image = url_to_cv2_image( image_url )
+        except Exception :
+            print( "L'URL \"" + str(image_url) + "\" ne mène pas à une image !" )
+            return None
+        
         return self.cbir_engine.search_cbir(
-            url_to_cv2_image( image_url ),
+            image,
             self.bdd.get_images_in_db_iterator( account_id )
         )
 
