@@ -386,32 +386,6 @@ def get_request ( illust_url : str ) -> Request :
     return None
 
 """
-Obtenir le status d'une requête.
-@param illust_url L'illustration d'entrée.
-@return Le numéro du status de la requête (Voir l'objet Request),
-        Ou None si la requête est inconnue.
-"""
-def get_request_status ( illust_url : str ) -> int :
-    for request in requests :
-        if request.input_url == illust_url :
-            return request.status
-    return None
-
-"""
-Obtenir le résultat.
-@param illust_url L'illustration d'entrée.
-@return La liste des tweets trouvés, associés à leur distance.
-        Ou une liste vide si aucun tweet n'a été trouvé (Peut-être parce que la
-        procédure pour cette requpete n'est pas encore terminée).
-        Ou None si la requête est inconnue.
-"""
-def get_request_result ( illust_url : str ) :
-    for request in requests :
-        if request.input_url == illust_url :
-            return request.tweets_id
-    return None
-
-"""
 Obtenir des statistiques sur la base de données
 @return Une liste contenant, dans l'ordre suivant :
         - Le nombre de tweets indexés
@@ -468,7 +442,7 @@ while True :
     
     elif args[0] == "status" :
         if len(args) == 2 :
-            status = get_request_status( args[1] )
+            status = get_request( args[1] ).status
             if status != None :
                 print( "Status : " + str(status) )
             else :
@@ -478,7 +452,7 @@ while True :
     
     elif args[0] == "result" :
         if len(args) == 2 :
-            result = get_request_result( args[1] )
+            result = get_request( args[1] ).tweets_id
             if result != None :
                 print( "Résultat : " + str(result) )
             else :
