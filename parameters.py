@@ -33,3 +33,10 @@ MYSQL_PORT = "3306"
 MYSQL_USERNAME = ""
 MYSQL_PASSWORD = ""
 MYSQL_DATABASE_NAME = ""
+
+"""
+Port du serveur HTTP.
+NE PAS OUVRIR AU PUBLIQUE ! Utiliser un vrai serveur web comme Apache 2 ou
+Nginx comme proxy.
+"""
+HTTP_SERVER_PORT = 3301

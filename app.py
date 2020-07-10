@@ -11,6 +11,9 @@ from time import sleep
 import re
 from typing import List
 
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from urllib.parse import parse_qs, urlsplit
+
 from class_CBIR_Engine_with_Database import CBIR_Engine_with_Database
 from class_Link_Finder import Link_Finder
 import parameters as param
@@ -18,8 +21,6 @@ import parameters as param
 
 # TODO : Thread de vidage de la liste des requêtes lorsqu'elles sont au niveau
 # de traitement 6 (= Fin de traitement)
-
-# TODO : Serveur HTTP
 
 
 """
@@ -298,8 +299,67 @@ def reverse_search_thread_main( thread_id : int ) :
 
 
 """
+Serveur HTTP
+"""
+class HTTP_Server( BaseHTTPRequestHandler ) :
+    def do_GET( self ) :
+        self.send_response(200)
+        self.send_header("Content-type", "application/json")
+        self.end_headers()
+        
+        parameters = dict( parse_qs( urlsplit( self.path ).query ) )
+        
+        response = "{"
+        
+        # On envoit forcément les mêmes champs, même si ils sont vides !
+        try :
+            illust_url = parameters["url"][0]
+        except KeyError :
+            response += "\"status\" : \"6\""
+            response += ", \"results\" : []"
+            response += ", \"error\" : \"Pas de champs 'url'.\""
+        else :
+            request = get_request( illust_url )
+            
+            # Si la requête n'a pas encore été faite, on lance la procédure et
+            # on affiche son status à 0
+            if request == None :
+                request = launch_process( illust_url )
+            
+            # On envoit les informations sur la requête
+            response += "\"status\" : \"" + str(request.status) + "\""
+            response += ", \"results\" : ["
+            for result in request.tweets_id :
+                response += " { "
+                response += "\"tweet_id\" : \"" + str(result[0]) + "\", " # Envoyer en string et non en int
+                response += "\"distance\" : " + str(result[1])
+                response += " },"
+            if response[-1] == "," : # Supprimer la dernière virgule
+                response = response[:-1]
+            response += "]"
+            if request.problem != None :
+                response += ", \"error\" : \"" + request.problem + "\""
+            else :
+                response += ", \"error\" : \"\""
+            
+        response += "}\n"
+        
+        self.wfile.write( response.encode("utf-8") )
+
+"""
+Thread du serveur HTTP.
+"""
+def http_server_thread_main( thread_id : int ) :
+    http_server = HTTPServer( ("", param.HTTP_SERVER_PORT ), HTTP_Server )
+    while keep_service_alive :
+        http_server.handle_request()
+    http_server.server_close()
+
+
+"""
 Lancement de la procédure pour une URL d'illustration.
 @param illust_url L'illustration d'entrée.
+@return L'objet Request créé.
 """
 def launch_process ( illust_url : str ) :
     # Vérifier d'abord qu'on n'est pas déjà en train de traiter cette illustration
@@ -310,6 +370,20 @@ def launch_process ( illust_url : str ) :
     request = Request( illust_url )
     requests.append( request ) # Passé par adresse car c'est un objet
     link_finder_queue.put( request ) # Passé par addresse car c'est un objet
+    
+    return request
+
+"""
+Obtenir l'objet d'une requête.
+@param illust_url L'illustration d'entrée.
+@return Un objet Request,
+        Ou None si la requête est inconnue.
+"""
+def get_request ( illust_url : str ) -> Request :
+    for request in requests :
+        if request.input_url == illust_url :
+            return request
+    return None
 
 """
 Obtenir le status d'une requête.
@@ -368,6 +442,11 @@ reverse_search_thread = threading.Thread( name = "reverse_search",
                                           target = reverse_search_thread_main,
                                           args = ( 1, ) )
 reverse_search_thread.start()
+
+http_server_thread = threading.Thread( name = "http_server_thread",
+                                       target = http_server_thread_main,
+                                       args = ( 1, ) )
+http_server_thread.start()
 
 
 """
@@ -492,3 +571,4 @@ Arrêt du système.
 link_finder_thread.join()
 index_twitter_account_thread.join()
 reverse_search_thread.join()
+http_server_thread.join()
