@@ -271,6 +271,16 @@ def reverse_search_thread_main( thread_id : int ) :
             else :
                 print( "[reverse_search_th" + str(thread_id) + "] Erreur lors de la recherche d'image inversée." )
         
+        # Si il n'y a pas de compte Twitter dans la requête
+        if request.twitter_accounts == []:
+            print( "[reverse_search_th" + str(thread_id) + "] Recherche dans toute la base de données." )
+            
+            result = cbir_engine.search_tweet( request.image_url )
+            if result != None :
+                request.tweets_id += result
+            else :
+                print( "[reverse_search_th" + str(thread_id) + "] Erreur lors de la recherche d'image inversée." )
+        
         # Trier la liste des résultats
         # On trie une liste de tuple par rapport au deuxième élément
         request.tweets_id = sorted( request.tweets_id,
@@ -414,6 +424,28 @@ while True :
         else :
             print( "Utilisation : scan [Nom du compte à scanner]" )
     
+    elif args[0] == "search" :
+        if len(args) in [ 2, 3 ] :
+            # Fabrication de l'objet Request
+            request = Request( args[1] )
+            request.image_url = args[1]
+            
+            if len(args) == 3 :
+                # Vérification que le nom d'utilisateur Twitter est possible
+                if re.compile("^@?(\w){1,15}$").match(args[2]) :
+                    print( "Recherche sur le compte @" + args[2] + "." )
+                    request.twitter_accounts = [ args[2] ]
+                    # Lancement de la recherche
+                    reverse_search_queue.put( request )
+                else :
+                    print( "Nom de compte Twitter impossible !" )
+            else :
+                print( "Recherche dans toute la base de données !" )
+                # Lancement de la recherche
+                reverse_search_queue.put( request )
+        else :
+            print( "Utilisation : search [URL de l'image à chercher] [Nom du compte Twitter (OPTIONNEL)]" )
+    
     elif args[0] == "stats" :
         if len(args) == 1 :
             stats = get_stats()
@@ -441,6 +473,7 @@ while True :
                    " - Les requêtes sont identifiées par l'URL de l'illustration.\n" +
                    "\n" +
                    "Forcer l'indexation de tous les tweets d'un compte : scan [Nom du compte à scanner]\n" +
+                   "Rechercher une image dans la base de données : search [URL de l'image] [Nom du compte Twitter (OPTIONNEL)]\n" +
                    "\n" +
                    "Afficher des statistiques de la base de données : stats\n" +
                    "Arrêter le service : stop\n" +
