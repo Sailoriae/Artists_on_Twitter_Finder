@@ -10,6 +10,16 @@ from utils import url_to_cv2_image
 from typing import List
 import parameters as param
 
+# On peut télécharger les images des tweets donnés par GetOldTweets3 en
+# meilleure qualité. Cependant, cela n'améliore pas de beaucoup la précision du
+# calcul de la distance entre les images indexées et l'image de requête.
+# En effet, il y a 4 niveaux de qualité sur Twitter : "thumb", "small",
+# "medium" et "large". Et par défaut, si rien n'est indiqué, le serveur nous
+# envoit la qualité "medium". Donc il n'y a pas une grande différence
+# Laisser désactiver, car on ne sait pas s'il y a une qualité "large" pour
+# toutes les images !
+#from utils import add_argument_to_url
+
 
 """
 Moteur de recherche d'image par le contenu ("content-based image retrieval",
@@ -198,16 +208,24 @@ class CBIR_Engine_with_Database :
             # Traitement des images du Tweet
             if tweets_to_scan_length > 0 :
                 image_1 = self.cbir_engine.index_cbir(
-                          url_to_cv2_image( tweets_to_scan[i].images[0] ) )
+                          url_to_cv2_image(
+#                              add_argument_to_url( tweets_to_scan[i].images[0], "name=large" ) ) )
+                              tweets_to_scan[i].images[0] ) )
             if tweets_to_scan_length > 1 :
                 image_2 = self.cbir_engine.index_cbir(
-                          url_to_cv2_image( tweets_to_scan[i].images[1] ) )
+                          url_to_cv2_image(
+#                              add_argument_to_url( tweets_to_scan[i].images[1], "name=large" ) ) )
+                              tweets_to_scan[i].images[0] ) )
             if tweets_to_scan_length > 2 :
                 image_3 = self.cbir_engine.index_cbir(
-                          url_to_cv2_image( tweets_to_scan[i].images[2] ) )
+                          url_to_cv2_image(
+#                              add_argument_to_url( tweets_to_scan[i].images[2], "name=large" ) ) )
+                              tweets_to_scan[i].images[0] ) )
             if tweets_to_scan_length > 3 :
                 image_4 = self.cbir_engine.index_cbir(
-                          url_to_cv2_image( tweets_to_scan[i].images[3] ) )
+                          url_to_cv2_image(
+#                              add_argument_to_url( tweets_to_scan[i].images[3], "name=large" ) ) )
+                              tweets_to_scan[i].images[0] ) )
             
             # Stockage des résultats
             self.bdd.insert_tweet(
