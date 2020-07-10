@@ -73,6 +73,22 @@ class Request :
         self.status = 5
     def set_status_done( self ):
         self.status = 6
+    
+    def get_status_string( self ):
+        if self.status == 0 :
+            return "WAIT_LINK_FINDER"
+        if self.status == 1 :
+            return "LINK_FINDER"
+        if self.status == 2 :
+            return "WAIT_INDEX_ACCOUNT_TWEETS"
+        if self.status == 3 :
+            return "INDEX_ACCOUNT_TWEETS"
+        if self.status == 4 :
+            return "WAIT_IMAGE_REVERSE_SEARCH"
+        if self.status == 5 :
+            return "IMAGE_REVERSE_SEARCH"
+        if self.status == 6 :
+            return "END"
 
 
 """
@@ -135,7 +151,7 @@ def link_finder_thread_main( thread_id : int ) :
         # Si jamais l'URL de la requête est invalide, on ne va pas plus loin
         # avec elle (On passe donc son status à "Fin de traitement")
         if twitter_accounts == None :
-            request.problem = "URL invalide ! Elle ne mène pas à une illustration."
+            request.problem = "INVALID_URL"
             request.set_status_done()
             
             print( "[link_finder_th" + str(thread_id) + "] URL invalide ! Elle ne mène pas à une illustration." )
@@ -144,7 +160,7 @@ def link_finder_thread_main( thread_id : int ) :
         # Si jamais le site n'est pas supporté, on ne va pas plus loin avec
         # cette requête (On passe donc son status à "Fin de traitement")
         elif twitter_accounts == False :
-            request.problem = "Site non supporté !"
+            request.problem = "UNSUPPORTED_WEBSITE"
             request.set_status_done()
             
             print( "[link_finder_th" + str(thread_id) + "] Site non supporté !" )
@@ -153,7 +169,7 @@ def link_finder_thread_main( thread_id : int ) :
         # Si jamais aucun compte Twitter n'a été trouvé, on ne va pas plus loin
         # avec la requête (On passe donc son status à "Fin de traitement")
         elif twitter_accounts == []:
-            request.problem = "Aucun compte Twitter trouvé pour cet artiste."
+            request.problem = "NO_TWITTER_ACCOUNT_FOR_THIS_ARTIST"
             request.set_status_done()
             
             print( "[link_finder_th" + str(thread_id) + "] Aucun compte Twitter trouvé pour l'artiste de cette illustration !" )
@@ -315,9 +331,9 @@ class HTTP_Server( BaseHTTPRequestHandler ) :
         try :
             illust_url = parameters["url"][0]
         except KeyError :
-            response += "\"status\" : \"6\""
+            response += "\"status\" : \"END\""
             response += ", \"results\" : []"
-            response += ", \"error\" : \"Pas de champs 'url'.\""
+            response += ", \"error\" : \"NO_URL_FIELD\""
         else :
             request = get_request( illust_url )
             
@@ -327,7 +343,7 @@ class HTTP_Server( BaseHTTPRequestHandler ) :
                 request = launch_process( illust_url )
             
             # On envoit les informations sur la requête
-            response += "\"status\" : \"" + str(request.status) + "\""
+            response += "\"status\" : \"" + request.get_status_string() + "\""
             response += ", \"results\" : ["
             for result in request.tweets_id :
                 response += " { "
