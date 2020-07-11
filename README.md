@@ -83,3 +83,5 @@ Liste des erreurs possibles :
 - `NO_TWITTER_ACCOUNT_FOR_THIS_ARTIST` : Aucun compte Twitter trouvé pour l'artiste de l'illustration.
 
 La liste `results` peut être vide, ou comporter plusieurs résultats. Ils sont alors classés par ordre croissant de distance avec l'illustration de requête.
+
+L'API peut aussi fournir des statistiques sur la base de données : `GET /stats`

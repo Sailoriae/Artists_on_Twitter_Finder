@@ -18,6 +18,8 @@ from class_CBIR_Engine_with_Database import CBIR_Engine_with_Database
 from class_Link_Finder import Link_Finder
 import parameters as param
 
+from database import SQLite
+
 
 # TODO : Thread de vidage de la liste des requêtes lorsqu'elles sont au niveau
 # de traitement 6 (= Fin de traitement)
@@ -318,49 +320,89 @@ def reverse_search_thread_main( thread_id : int ) :
 Serveur HTTP
 """
 class HTTP_Server( BaseHTTPRequestHandler ) :
-    def do_GET( self ) :
-        self.send_response(200)
-        self.send_header("Content-type", "application/json")
-        self.end_headers()
+    def __init__( self, *args, **kwargs ) :
+        # Accès direct à la base de données pour le processus principal
+        # N'UTILISER QUE DES METHODES QUI FONT SEULEMENT DES SELECT !
+        self.bdd_direct_access = SQLite( param.SQLITE_DATABASE_NAME )
         
+        super(BaseHTTPRequestHandler, self).__init__(*args, **kwargs)
+    
+    def do_GET( self ) :
+        page = urlsplit( self.path ).path
+        if page[0] == "/" :
+            page = page[1:] # On enlève le premier "/"
+        page = page.split("/")
         parameters = dict( parse_qs( urlsplit( self.path ).query ) )
         
-        response = "{"
-        
-        # On envoit forcément les mêmes champs, même si ils sont vides !
-        try :
-            illust_url = parameters["url"][0]
-        except KeyError :
-            response += "\"status\" : \"END\""
-            response += ", \"results\" : []"
-            response += ", \"error\" : \"NO_URL_FIELD\""
-        else :
-            request = get_request( illust_url )
+        # Si on est à la racine
+        # GET /
+        # GET /?url=[URL de l'illustration de requête]
+        if len(page) == 1 and page[0] == "" :
+            self.send_response(200)
+            self.send_header("Content-type", "application/json")
+            self.end_headers()
             
-            # Si la requête n'a pas encore été faite, on lance la procédure et
-            # on affiche son status à 0
-            if request == None :
-                request = launch_process( illust_url )
+            response = "{"
             
-            # On envoit les informations sur la requête
-            response += "\"status\" : \"" + request.get_status_string() + "\""
-            response += ", \"results\" : ["
-            for result in request.tweets_id :
-                response += " { "
-                response += "\"tweet_id\" : \"" + str(result[0]) + "\", " # Envoyer en string et non en int
-                response += "\"distance\" : " + str(result[1])
-                response += " },"
-            if response[-1] == "," : # Supprimer la dernière virgule
-                response = response[:-1]
-            response += "]"
-            if request.problem != None :
-                response += ", \"error\" : \"" + request.problem + "\""
+            # On envoit forcément les mêmes champs, même si ils sont vides !
+            try :
+                illust_url = parameters["url"][0]
+            except KeyError :
+                response += "\"status\" : \"END\""
+                response += ", \"results\" : []"
+                response += ", \"error\" : \"NO_URL_FIELD\""
             else :
-                response += ", \"error\" : \"\""
+                request = get_request( illust_url )
+                
+                # Si la requête n'a pas encore été faite, on lance la procédure et
+                # on affiche son status à 0
+                if request == None :
+                    request = launch_process( illust_url )
+                
+                # On envoit les informations sur la requête
+                response += "\"status\" : \"" + request.get_status_string() + "\""
+                response += ", \"results\" : ["
+                for result in request.tweets_id :
+                    response += " { "
+                    response += "\"tweet_id\" : \"" + str(result[0]) + "\", " # Envoyer en string et non en int
+                    response += "\"distance\" : " + str(result[1])
+                    response += " },"
+                if response[-1] == "," : # Supprimer la dernière virgule
+                    response = response[:-1]
+                response += "]"
+                if request.problem != None :
+                    response += ", \"error\" : \"" + request.problem + "\""
+                else :
+                    response += ", \"error\" : \"\""
+                
+            response += "}\n"
             
-        response += "}\n"
+            self.wfile.write( response.encode("utf-8") )
         
-        self.wfile.write( response.encode("utf-8") )
+        # Si on demande les stats
+        # GET /stats
+        elif len(page) == 1 and page[0] == "stats" : 
+            self.send_response(200)
+            self.send_header("Content-type", "application/json")
+            self.end_headers()
+            
+            response = "{"
+            
+            stats = self.bdd_direct_access.get_stats()
+            response += "\"indexed_tweets_count\" : " + str(stats[0]) + ", "
+            response += "\"indexed_accounts_count\" : " + str(stats[1])
+            
+            response += "}\n"
+            
+            self.wfile.write( response.encode("utf-8") )
+        
+        # Sinon, page inconnue, erreur 404
+        else :
+            self.send_response(404)
+            self.send_header("Content-type", "text/plain")
+            self.end_headers()
+            
+            self.wfile.write( "404 Not Found\n".encode("utf-8") )
 
 """
 Thread du serveur HTTP.
@@ -409,7 +451,6 @@ Obtenir des statistiques sur la base de données
 """
 # Accès direct à la base de données pour le processus principal
 # N'UTILISER QUE DES METHODES QUI FONT SEULEMENT DES SELECT !
-from database import SQLite
 bdd_direct_access = SQLite( param.SQLITE_DATABASE_NAME )
 def get_stats() :
     return bdd_direct_access.get_stats()
