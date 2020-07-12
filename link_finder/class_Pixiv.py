@@ -6,10 +6,8 @@ from typing import List
 import re
 
 try :
-    from utils import filter_twitter_accounts_list
     from utils import validate_twitter_account_url
 except ImportError : # Si on a été exécuté en temps que module
-    from .utils import filter_twitter_accounts_list
     from .utils import validate_twitter_account_url
 
 
@@ -168,4 +166,4 @@ class Pixiv :
                 if temp != None :
                     twitter_accounts.append( temp )
         
-        return filter_twitter_accounts_list( twitter_accounts )
+        return twitter_accounts

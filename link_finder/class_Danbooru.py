@@ -6,11 +6,9 @@ from typing import List
 import re
 
 try :
-    from utils import filter_twitter_accounts_list
     from utils import Webpage_to_Twitter_Accounts
     from utils import validate_pixiv_account_url
 except ImportError : # Si on a été exécuté en temps que module
-    from .utils import filter_twitter_accounts_list
     from .utils import Webpage_to_Twitter_Accounts
     from .utils import validate_pixiv_account_url
 
@@ -135,7 +133,7 @@ class Danbooru :
         # On met en mode STRICT
         twitter_accounts += scanner.scan( STRICT = True )
         
-        return filter_twitter_accounts_list( twitter_accounts )
+        return twitter_accounts
     
     """
     Pour beaucoup d'artistes sur Danboru, on peut trouver leur compte Pixiv, et

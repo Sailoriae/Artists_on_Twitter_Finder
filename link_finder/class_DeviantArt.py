@@ -5,10 +5,8 @@ import requests
 from typing import List
 
 try :
-    from utils import filter_twitter_accounts_list
     from utils import Webpage_to_Twitter_Accounts
 except ImportError : # Si on a été exécuté en temps que module
-    from .utils import filter_twitter_accounts_list
     from .utils import Webpage_to_Twitter_Accounts
 
 
@@ -124,7 +122,7 @@ class DeviantArt :
         twitter_accounts += scanner2.scan()
         
         
-        return filter_twitter_accounts_list( twitter_accounts )
+        return twitter_accounts
 
 
 """

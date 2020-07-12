@@ -81,10 +81,16 @@ class Link_Finder :
         # mènent bien vers des illustrations.
         # Ici, on vérifie juste le domaine.
         if re.search( deviantart_url, illust_url ) != None :
-            return self.deviantart.get_twitter_accounts( illust_url )
+            accounts = self.deviantart.get_twitter_accounts( illust_url )
+            if accounts == None :
+                return None
+            return filter_twitter_accounts_list( accounts )
         
         elif re.search( pixiv_url, illust_url ) != None :
-            return self.pixiv.get_twitter_accounts( illust_url )
+            accounts = self.pixiv.get_twitter_accounts( illust_url )
+            if accounts == None :
+                return None
+            return filter_twitter_accounts_list( accounts )
         
         elif re.search( danbooru_url, illust_url ) != None :
             # Pour beaucoup d'artistes sur Danbooru, on peut trouver leur
@@ -99,8 +105,13 @@ class Link_Finder :
                     if accounts != None :
                         twitter_accounts += accounts
             
-            return filter_twitter_accounts_list(
-                twitter_accounts + self.danbooru.get_twitter_accounts( illust_url ) )
+            accounts = self.danbooru.get_twitter_accounts( illust_url )
+            if accounts != None :
+                twitter_accounts += accounts
+            else : # L'URL est invalide
+                return None
+            
+            return filter_twitter_accounts_list( twitter_accounts )
         
         else :
             return False # Oui c'est une bidouille
