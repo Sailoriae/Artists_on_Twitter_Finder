@@ -30,7 +30,18 @@ Classe représentant une requête dans notre système.
 Cet objet est le même durant tout le processus.
 """
 class Request :
-    def __init__ ( self, input_url ) :
+    """
+    @param input_url URL de l'illustration de requête.
+    @param full_pipeline Est ce que la requête a été mise dans la liste
+                         `requests`... C'est à dire : Doit elle faire toute la
+                         procédure de traitement / tout le pipeline ?
+                         (OPTIONNEL, non par défaut)
+                         Seule la fonction launch_process() doit être utilisée
+                         pour lancer une procédure complète.
+    """
+    def __init__ ( self, input_url, full_pipeline = False ) :
+        self.full_pipeline = full_pipeline
+        
         # Une requête est identifiée par son URL de requête, c'est à dire l'URL
         # de l'illustration demandée
         self.input_url = input_url
@@ -219,7 +230,7 @@ def link_finder_thread_main( thread_id : int ) :
         # On met la requête dans la file d'attente de listage des tweets d'un
         # compte Twitter
         # Si on est dans le cas d'une procédure complète
-        if request in requests :
+        if request.full_pipeline :
             list_account_tweets_queue.put( request )
     
     print( "[link_finder_th" + str(thread_id) + "] Arrêté !" )
@@ -269,7 +280,7 @@ def list_account_tweets_thread_main( thread_id : int ) :
         # On met la requête dans la file d'attente d'indexation des tweets d'un
         # compte Twitter
         # Si on est dans le cas d'une procédure complète
-        if request in requests :
+        if request.full_pipeline :
             index_twitter_account_queue.put( request )
     
     print( "[list_account_tweets_th" + str(thread_id) + "] Arrêté !" )
@@ -321,7 +332,7 @@ def index_twitter_account_thread_main( thread_id : int ) :
         
         # On met la requête dans la file d'attente de la recherche d'image inversée
         # Si on est dans le cas d'une procédure complète
-        if request in requests :
+        if request.full_pipeline :
             reverse_search_queue.put( request )
     
     print( "[index_twitter_account_th" + str(thread_id) + "] Arrêté !" )
@@ -501,7 +512,7 @@ def launch_process ( illust_url : str ) :
         if request.input_url == illust_url :
             return
     
-    request = Request( illust_url )
+    request = Request( illust_url, full_pipeline = True )
     requests.append( request ) # Passé par adresse car c'est un objet
     link_finder_queue.put( request ) # Passé par addresse car c'est un objet
     
