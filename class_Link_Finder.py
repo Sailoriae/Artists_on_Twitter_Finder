@@ -5,6 +5,7 @@ import re
 
 from link_finder import DeviantArt
 from link_finder import Pixiv
+from link_finder import Danbooru
 import parameters as param
 
 
@@ -16,6 +17,8 @@ deviantart_url = re.compile(
     "^http(?:s)?:\/\/(?:([a-zA-Z0-9]+)\.)?deviantart\.com" )
 pixiv_url = re.compile(
     "^http(?:s)?:\/\/(?:www\.)?pixiv\.net" )
+danbooru_url = re.compile(
+    "^http(?:s)?:\/\/danbooru\.donmai\.us" )
 
 
 """
@@ -35,6 +38,7 @@ class Link_Finder :
     def __init__ ( self ) :
         self.deviantart = DeviantArt()
         self.pixiv = Pixiv( param.PIXIV_USERNAME, param.PIXIV_PASSWORD )
+        self.danbooru = Danbooru()
     
     """
     @param illust_url L'URL d'une illustration postée sur l'un des sites
@@ -53,6 +57,9 @@ class Link_Finder :
         
         elif re.search( pixiv_url, illust_url ) != None :
             return self.pixiv.get_image_url( illust_url )
+        
+        elif re.search( danbooru_url, illust_url ) != None :
+            return self.danbooru.get_image_url( illust_url )
         
         else :
             return False # Oui c'est une bidouille
@@ -76,6 +83,9 @@ class Link_Finder :
         
         elif re.search( pixiv_url, illust_url ) != None :
             return self.pixiv.get_twitter_accounts( illust_url )
+        
+        elif re.search( danbooru_url, illust_url ) != None :
+            return self.danbooru.get_twitter_accounts( illust_url )
         
         else :
             return False # Oui c'est une bidouille

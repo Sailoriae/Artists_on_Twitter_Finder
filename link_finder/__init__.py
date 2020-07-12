@@ -3,3 +3,4 @@
 
 from .class_DeviantArt import DeviantArt
 from .class_Pixiv import Pixiv
+from .class_Danbooru import Danbooru
