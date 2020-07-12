@@ -29,6 +29,16 @@ Les tweets doivent contenir au moins une image, sinon, ils seront rejetés.
 Chaque image est stocké dans la base de données, associée à l'ID de son tweet,
 l'ID de l'auteur du tweet, et la liste des caractéristiques extraites par le
 moteur CBIR.
+
+Méthode disponibles :
+- index_tweet() : Indexer un Tweet unique (A éviter).
+- index_or_update_all_account_tweets() : Indexer tous les Tweets d'un compte.
+- get_GOT3_list() : Faire l'étape de listage des Tweets de la méthode
+                    ci-dessus. Passer son résultat à la méthode ci-dessus.
+                    Permet de paralléliser les deux étapes longues de
+                    l'indexation d'un compte Twitter.
+- search_tweet() : Rechercher un Tweet dans la base de donnée qui contient une
+                   image de requête.
 """
 class CBIR_Engine_with_Database :
     """
@@ -130,6 +140,34 @@ class CBIR_Engine_with_Database :
         return True
     
     """
+    Obtenir la liste des Tweets trouvés par GetOldTweets3.
+    
+    @param account_name Le nom d'utilisateur du compte à scanner
+    @return La liste des tweets du compte à partir de la date du dernier scan.
+            Associée à l'ID du compte Twitter.
+            False si le nom du compte est introuvable.
+    """
+    def get_GOT3_list( self, account_name : str ) :
+        # Prendre la date du dernier Tweet
+        account_id = self.twitter.get_account_id( account_name )
+        if account_id == None :
+            print( "Compte @" + account_name + " introuvable !" )
+            return False
+        
+        print( "Listage des Tweets de @" + account_name + "." )
+        
+        since_date = self.bdd.get_account_last_scan( account_id )
+        
+        tweetCriteria = GetOldTweets3.manager.TweetCriteria()\
+            .setQuerySearch( "from:" + account_name + " filter:media -filter:retweets" )
+        
+        if since_date != None :
+            tweetCriteria.setSince( since_date )
+        
+        return ( GetOldTweets3.manager.TweetManager.getTweets(tweetCriteria),
+                 account_id )
+    
+    """
     Scanner tous les tweets d'un compte (Les retweets ne comptent pas).
     Seuls les tweets avec des médias seront scannés.
     Et parmis eux, seuls les tweets avec 1 à 4 images seront indexés.
@@ -140,57 +178,34 @@ class CBIR_Engine_with_Database :
     En effet, elle commence sont analyse à la date du dernier scan.
     Si le compte n'a pas déjà été scanné, tous ses tweets le seront.
     
+    C'est la méthode get_GOT3_list() qui vérifie si le nom de compte Twitter
+    entré ici est valide !
+    
     @param account_name Le nom d'utilisateur du compte à scanner
                         Attention : Le nom d'utilisateur est ce qu'il y a après
                         le @ ! Par exemple : Si on veut scanner @jack, il faut
                         entrer dans cette fonction la chaine "jack".
+    @param get_GOT3_list_result Liste des tweets retournés par la méthode
+                                get_GOT3_list() ci-dessus, associée à l'ID du
+                                compte Twitter.
+                                Permet de paralléliser cette opération sur un
+                                autre thread.
+                                (OPTIONNEL)
     @return True si tout s'est bien passé
             False si le compte est introuvable
     """
     
-    def index_or_update_all_account_tweets( self, account_name : str ) -> bool :
-        account_id = self.twitter.get_account_id( account_name )
-        if account_id == None :
-            print( "Compte @" + account_name + " introuvable !" )
+    def index_or_update_all_account_tweets( self, account_name : str,
+                                            get_GOT3_list_result = None ) -> bool :
+        if get_GOT3_list_result == None :
+            get_GOT3_list_result = self.get_GOT3_list( account_name )
+        if get_GOT3_list_result == False : # Si le nom du compte est introuvable
             return False
         
-        # On scanne le compte depuis la dernière date dans la base de données,
-        # ce qui nous renvoit la date de ce nouveau scan
-        scan_date = self.index_all_account_tweets(
-            account_name,
-            since_date = self.bdd.get_account_last_scan( account_id )
-        )
-        
-        # On met à jour la date du dernier scan dans la base de données
-        if scan_date != None :
-            self.bdd.set_account_last_scan( account_id, scan_date )
-        
-        return True
-    
-    """
-    Même méthode que la précédente, mais ne prend pas elle-même la date du
-    dernier scan dans la base de données.
-    EVITER D'UTILISER CETTE METHODE !
-    Sauf la précédente qui l'appelle.
-    
-    @param account_name Idem que dans la méthode précédente
-    @param since_date Date du dernier scan, au format YYYY-MM-DD (OPTIONNEL).
-                      Si cette date n'est pas indiquée, tous les tweets avec
-                      média du compte seront scannés.
-    @return Date du premier tweet scanné, c'est à dire le plus récent, au
-            format YYYY-MM-DD.
-            Ou None si aucun Tweet n'a été scanné !
-    """
-    def index_all_account_tweets( self, account_name : str, since_date : str = None ) :
-        tweetCriteria = GetOldTweets3.manager.TweetCriteria()\
-            .setQuerySearch( "from:" + account_name + " filter:media -filter:retweets" )
-        
-        if since_date != None :
-            tweetCriteria.setSince( since_date )
+        tweets_to_scan, account_id = get_GOT3_list_result
         
         print( "Indexation / scan des Tweets de @" + account_name + "." )
         
-        tweets_to_scan = GetOldTweets3.manager.TweetManager.getTweets(tweetCriteria)
         length = len( tweets_to_scan )
         
         # Stocker la date du premier tweet que l'on va scanner, c'est à dire le
@@ -253,7 +268,11 @@ class CBIR_Engine_with_Database :
                 image_4,
             )
         
-        return scan_date
+        # On met à jour la date du dernier scan dans la base de données
+        if scan_date != None :
+            self.bdd.set_account_last_scan( account_id, scan_date )
+        
+        return True
     
     """
     Rechercher un tweet dans la base de donnée grâce à une image
@@ -300,7 +319,7 @@ if __name__ == '__main__' :
     
     # Attention : Test vachement long, car il y a actuellement environ 2000
     # tweets sur ce compte, et que presque tous ont des médias
-    engine.index_all_account_tweets( "MingjueChen" )
+    engine.index_or_update_all_account_tweets( "MingjueChen" )
     
     founded_tweets = engine.search_tweet(
         "https://pbs.twimg.com/media/EByx4lXUcAEzrly.jpg"
