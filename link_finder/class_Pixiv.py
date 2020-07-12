@@ -125,18 +125,24 @@ class Pixiv :
     Retourne les noms des comptes Twitter trouvés.
     
     @param illust_id L'URL de l'illustration Pixiv.
+    @param force_pixiv_account_id Forcer l'ID du compte Pixiv (OPTIONNEL).
     @return Une liste de comptes Twitter.
             Ou une liste vide si aucun URL de compte Twitter valide n'a été
             trouvé.
             Ou None si il y a eu un problème, c'est à dire que l'ID donné n'est
             pas une illustration sur Pixiv.
     """
-    def get_twitter_accounts ( self, illust_url : int ) -> List[str] :
-        # On met en cache si ce n'est pas déjà fait
-        if not self.cache_or_get( illust_url ) :
-            return None
+    def get_twitter_accounts ( self, illust_url : int,
+                               force_pixiv_account_id = None ) -> List[str] :
+        if force_pixiv_account_id != None :
+            user_id = force_pixiv_account_id
         
-        user_id = self.cache_illust_url_json["illust"]["user"]["id"]
+        else :
+            # On met en cache si ce n'est pas déjà fait
+            if not self.cache_or_get( illust_url ) :
+                return None
+            user_id = self.cache_illust_url_json["illust"]["user"]["id"]
+        
         user_id_json = self.api.user_detail( user_id )
         
         twitter_accounts = []

@@ -8,9 +8,11 @@ import re
 try :
     from utils import filter_twitter_accounts_list
     from utils import Webpage_to_Twitter_Accounts
+    from utils import validate_pixiv_account_url
 except ImportError : # Si on a été exécuté en temps que module
     from .utils import filter_twitter_accounts_list
     from .utils import Webpage_to_Twitter_Accounts
+    from .utils import validate_pixiv_account_url
 
 
 danbooru_post_id_regex = re.compile(
@@ -134,6 +136,44 @@ class Danbooru :
         twitter_accounts += scanner.scan( STRICT = True )
         
         return filter_twitter_accounts_list( twitter_accounts )
+    
+    """
+    Pour beaucoup d'artistes sur Danboru, on peut trouver leur compte Pixiv, et
+    donc aller y chercher leurs éventuels comptes Twitter.
+    
+    @param illust_id L'URL de l'illustration postée sur Danbooru.
+    @return Une liste d'ID de comptes Pixiv.
+            Ou une liste vide si aucun URL de compte Pixiv valide n'a été
+            trouvé.
+            Ou None si il y a eu un problème, c'est à dire que l'ID donné n'est
+            pas une illustration sur Danbooru.
+    """
+    def get_pixiv_accounts ( self, illust_url : int ) -> List[str] :
+        # On met en cache si ce n'est pas déjà fait
+        if not self.cache_or_get( illust_url ) :
+            return None
+        
+        artist_tag = self.cache_illust_url_json["tag_string_artist"]
+        
+        pixiv_accounts = []
+        
+        # SCAN PAGE DU TAG DE L'ARTISTE
+        
+        # Problème Danbooru : Le JSON d'une page sur un tag ne donne pas les
+        # URL qu'ils ont trouvés. Donc on doit le faire sur une page HTML.
+        scanner = Webpage_to_Twitter_Accounts(
+            "https://danbooru.donmai.us/artists/show_or_new?name=" + artist_tag,
+            )
+        
+        # Se concentrer que sur la div contenant les données.
+        scanner.soup = scanner.soup.find("div", {"id": "c-artists"})
+        
+        # On met en mode STRICT
+        pixiv_accounts += scanner.scan(
+            STRICT = True,
+            validator_function = validate_pixiv_account_url )
+        
+        return pixiv_accounts
 
 
 """
@@ -141,12 +181,22 @@ Test du bon fonctionnement de cette classe
 """
 if __name__ == '__main__' :
     danbooru = Danbooru()
-    test = []
-    test.append(
+    test_twitter = []
+    test_twitter.append(
         danbooru.get_twitter_accounts(
             "https://danbooru.donmai.us/posts/3994568" ) )
     
-    if test == [['brillewind']] :
-        print( "Tests OK !" )
+    test_pixiv = []
+    test_pixiv.append(
+        danbooru.get_pixiv_accounts(
+            "https://danbooru.donmai.us/posts/3994568" ) )
+    
+    if test_twitter == [['brillewind']] :
+        print( "Tests Twitter OK !" )
     else :
-        print( "Tests échoués !" )
+        print( "Tests Twitter échoués !" )
+        
+    if test_pixiv == [['9224174']] :
+        print( "Tests Pixiv OK !" )
+    else :
+        print( "Tests Pixiv échoués !" )

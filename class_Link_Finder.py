@@ -6,6 +6,8 @@ import re
 from link_finder import DeviantArt
 from link_finder import Pixiv
 from link_finder import Danbooru
+
+from link_finder.utils import filter_twitter_accounts_list
 import parameters as param
 
 
@@ -85,7 +87,20 @@ class Link_Finder :
             return self.pixiv.get_twitter_accounts( illust_url )
         
         elif re.search( danbooru_url, illust_url ) != None :
-            return self.danbooru.get_twitter_accounts( illust_url )
+            # Pour beaucoup d'artistes sur Danbooru, on peut trouver leur
+            # compte Pixiv, et donc s'assurer de touver leurs comptes Twitter.
+            pixiv_accounts = self.danbooru.get_pixiv_accounts( illust_url )
+            twitter_accounts = []
+            if pixiv_accounts != None :
+                for pixiv_account in pixiv_accounts :
+                    accounts = self.pixiv.get_twitter_accounts(
+                        None,
+                        force_pixiv_account_id = pixiv_account )
+                    if accounts != None :
+                        twitter_accounts += accounts
+            
+            return filter_twitter_accounts_list(
+                twitter_accounts + self.danbooru.get_twitter_accounts( illust_url ) )
         
         else :
             return False # Oui c'est une bidouille
