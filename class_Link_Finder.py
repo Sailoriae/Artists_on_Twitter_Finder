@@ -14,13 +14,17 @@ import parameters as param
 #twitter_url = re.compile(
 #    "http(?:s)?:\/\/(?:www\.)?twitter\.com" )
 
-# ^ = Début de la chaine
+# ^ = Début de la chaine, $ = Fin de la chaine
 deviantart_url = re.compile(
-    "^http(?:s)?:\/\/(?:([a-zA-Z0-9]+)\.)?deviantart\.com" )
+    "^http(?:s)?:\/\/(?:([a-zA-Z0-9]+)\.)?deviantart\.com(?:\/|$)" )
 pixiv_url = re.compile(
-    "^http(?:s)?:\/\/(?:www\.)?pixiv\.net" )
+    "^http(?:s)?:\/\/(?:www\.)?pixiv\.net(?:\/|$)" )
 danbooru_url = re.compile(
-    "^http(?:s)?:\/\/danbooru\.donmai\.us" )
+    "^http(?:s)?:\/\/danbooru\.donmai\.us(?:\/|$)" )
+
+# Bien mettre (?:\/|$) au bout pour s'assurer qu'il y a un "/" ou qu'on est à
+# la fin de la chaine. Permet d'éviter de passer des sous domaines. Par exemple
+# deviantart.com.example.tld, ce qui pourrait être une faille de sécurité.
 
 
 """

@@ -13,8 +13,9 @@ except ImportError : # Si on a été exécuté en temps que module
     from .utils import validate_pixiv_account_url
 
 
+# ^ = Début de la chaine
 danbooru_post_id_regex = re.compile(
-    "http(?:s)?:\/\/danbooru\.donmai\.us\/posts\/([0-9]+)(?:\/)?" )
+    "^http(?:s)?:\/\/danbooru\.donmai\.us\/posts\/([0-9]+)(?:\/)?" )
 
 
 """
