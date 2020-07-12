@@ -17,6 +17,9 @@ except ModuleNotFoundError : # Si on a été exécuté en temps que module
 """
 Scanne une page web à la recherche de comptes Twitter.
 
+Cette classe peut chercher autre chose que des comptes Twitter, avec une
+fonction similaire à "validate_twitter_account_url".
+
 Mis sous la forme d'un objet afin de pouvoir modifier la sélection de
 BeautifulSoup avant de lancer le scan.
 Cela permer de scanner qu'une partie de la page !
@@ -52,19 +55,25 @@ class Webpage_to_Twitter_Accounts :
                   Cela peut être intéressant si on veut scanner une URL de
                   redirection, contenant l'URL du compte Twitter.
                   (OPTIONNEL)
+    @param validator_function Fonction valide une URL comme l'URL d'un compte,
+                              et retourne l'identifiant de ce compte.
+                              Permet de chercher autre chose que des comptes
+                              Twitter.
+                              (OPTIONNEL)
     @return La liste des comptes Twitter trouvés.
             Ou None si il y a un problème avec l'URL.
             Peut retourner une liste vide si aucun compte Twitter n'a été
             trouvé.
     """
-    def scan ( self, STRICT : bool = False ) -> List[str] :
+    def scan ( self, STRICT : bool = False,
+               validator_function = validate_twitter_account_url ) -> List[str] :
         # Scan avec BeautifulSoup4
         if self.USE_BS4  :
-            accounts_founded = self.scan_beautifulsoup( STRICT )
+            accounts_founded = self.scan_beautifulsoup( STRICT, validator_function )
         
         # Scan avec Regex
         else :
-            accounts_founded = self.scan_regex( STRICT )
+            accounts_founded = self.scan_regex( STRICT, validator_function )
         
         # Filtrer (Supprimer les doublons et les comptes officiels) et retourner
         return filter_twitter_accounts_list( accounts_founded )
@@ -72,7 +81,7 @@ class Webpage_to_Twitter_Accounts :
     """
     Méthode privée, appelée par la méthode "scan()".
     """
-    def scan_beautifulsoup ( self, STRICT : bool ) -> List[str] :
+    def scan_beautifulsoup ( self, STRICT : bool, validator_function ) -> List[str] :
         # Initialiser la liste que l'on va retourner
         accounts_founded : List[str] = []
         
@@ -81,7 +90,7 @@ class Webpage_to_Twitter_Accounts :
             href = link.get("href")
             if href == None :
                 continue
-            result = validate_twitter_account_url( link.get("href"), STRICT = STRICT )
+            result = validator_function( link.get("href"), STRICT = STRICT )
             if result != None :
                 accounts_founded.append( result )
         
@@ -91,7 +100,7 @@ class Webpage_to_Twitter_Accounts :
     """
     Méthode privée, appelée par la méthode "scan()".
     """
-    def scan_regex ( self, STRICT : bool ) -> List[str] :
+    def scan_regex ( self, STRICT : bool, validator_function ) -> List[str] :
         # Initialiser la liste que l'on va retourner
         accounts_founded : List[str] = []
         
@@ -99,7 +108,7 @@ class Webpage_to_Twitter_Accounts :
         for link in re.findall( r"(https?://[^\s]+)", self.response.text) :
             if link == None :
                 continue
-            result = validate_twitter_account_url( link, STRICT = STRICT )
+            result = validator_function( link, STRICT = STRICT )
             if result != None :
                 accounts_founded.append( result )
         
