@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 # coding: utf-8
 
+from cv2 import error as ErrorOpenCV
+
 import lib_GetOldTweets3 as GetOldTweets3
 
 from cbir_engine import CBIR_Engine
@@ -256,6 +258,8 @@ class CBIR_Engine_with_Database :
             # Oui, c'est possible, Twitter n'est pas parfait
             # Exemple : https://twitter.com/apofissx/status/219051550696407040
             # Ce tweet est indiqué comme ayant une image, mais elle est en 404 !
+            #
+            # Permet aussi de gérer les images avec des formats à la noix
             except Exception as error :
                 print( error )
                 continue
@@ -299,10 +303,16 @@ class CBIR_Engine_with_Database :
             print( "L'URL \"" + str(image_url) + "\" ne mène pas à une image !" )
             return None
         
-        return self.cbir_engine.search_cbir(
-            image,
-            self.bdd.get_images_in_db_iterator( account_id )
-        )
+        try :
+            return self.cbir_engine.search_cbir(
+                image,
+                self.bdd.get_images_in_db_iterator( account_id )
+            )
+        # Si j'amais l'image passée a un format à la noix et fait planter notre
+        # moteur CBIR
+        except ErrorOpenCV :
+            print( ErrorOpenCV )
+            return None
 
 
 """
