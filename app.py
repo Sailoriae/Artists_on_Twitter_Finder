@@ -270,8 +270,22 @@ def list_account_tweets_thread_main( thread_id : int ) :
         for twitter_account in request.twitter_accounts :
             print( "[list_account_tweets_th" + str(thread_id) + "] Listage des tweets du compte Twitter @" + twitter_account + "." )
             
+            GOT3_list = cbir_engine.get_GOT3_list( twitter_account )
+            
+            if GOT3_list == None :
+                continue
+            
             request.get_GOT3_list_result.append( ( twitter_account,
-                                                   cbir_engine.get_GOT3_list( twitter_account ) ) )
+                                                   GOT3_list ) )
+        
+        # Si la liste des tweets trouvés par GetOldTweets3 est vide, ça ne sert
+        # à rien de continuer !
+        if request.get_GOT3_list_result == [] :
+            request.problem = "NO_TWITTER_ACCOUNT_FOR_THIS_ARTIST"
+            request.set_status_done()
+            
+            print( "[list_account_tweets_th" + str(thread_id) + "] Aucun compte Twitter valide !" )
+            continue # On arrête là
         
         # On passe le status de la requête à "En attente de traitement par un
         # thread d'indexation des tweets d'un compte Twitter"
