@@ -376,6 +376,7 @@ def reverse_search_thread_main( thread_id : int ) :
                 request.tweets_id += result
             else :
                 print( "[reverse_search_th" + str(thread_id) + "] Erreur lors de la recherche d'image inversée." )
+                request.problem = "ERROR_DURING_REVERSE_SEARCH"
         
         # Si il n'y a pas de compte Twitter dans la requête
         if request.twitter_accounts == []:
