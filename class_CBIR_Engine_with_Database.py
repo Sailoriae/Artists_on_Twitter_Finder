@@ -18,6 +18,8 @@ import parameters as param
 # envoit la qualité "medium". Donc il n'y a pas une grande différence
 # Laisser désactiver, car on ne sait pas s'il y a une qualité "large" pour
 # toutes les images !
+# De plus, laisser désactiver nous fait gagner un peu de connexion internet !
+# Ca se sent bien sur les gros comptes !
 #from utils import add_argument_to_url
 
 
