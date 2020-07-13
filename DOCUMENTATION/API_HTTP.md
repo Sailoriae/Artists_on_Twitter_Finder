@@ -11,7 +11,7 @@ Le serveur répond par un JSON qui contient toujours les mêmes champs :
 {
 	"status" : "END",
 	"twitter_accounts" : [
-		"serafleur"
+		{ "account_name" : "serafleur", "account_id" : "3064686505" }
 	],
 	"results" : [
 		{ "tweet_id" : 797039787534262272, "distance" : 0.4124855017771303 }
@@ -36,6 +36,7 @@ Liste des erreurs possibles :
 - `INVALID_URL` : L'URL passée en paramètre est invalide.
 - `UNSUPPORTED_WEBSITE` : Le site passé en paramètre n'est pas supporté.
 - `NO_TWITTER_ACCOUNT_FOR_THIS_ARTIST` : Aucun compte Twitter trouvé pour l'artiste de l'illustration.
+- `NO_VALID_TWITTER_ACCOUNT_FOR_THIS_ARTIST` : Des comptes Twitter ont étés trouvés, mais ils sont invalides.
 - `ERROR_DURING_REVERSE_SEARCH` : Erreur durant la recherche d'image inversée. Est ce que l'illustration n'a pas un format à la noix ? Par exemple GIF animé ?
 
 La liste `results` peut être vide, ou comporter plusieurs résultats. Ils sont alors classés par ordre croissant de distance avec l'illustration de requête.

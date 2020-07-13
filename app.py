@@ -19,6 +19,7 @@ from class_Link_Finder import Link_Finder
 import parameters as param
 
 from database import SQLite
+from twitter import TweepyAbtraction
 
 
 # TODO : Thread de vidage de la liste des requêtes lorsqu'elles sont au niveau
@@ -53,6 +54,11 @@ class Request :
         # Résultats du Link Finder
         self.twitter_accounts = []
         self.image_url = None
+        
+        # Liste de tuples (str, int), avec le nom du compte Twitter, et son ID
+        # On est certain que ces comptes existent, contrairement au résultat
+        # Link Finder
+        self.twitter_accounts_with_id = []
         
         # Résultats de la fonction get_GOT3_list() dans la classe
         # CBIR_Engine_with_Database, associés au compte Twitter scanné.
@@ -162,6 +168,12 @@ def link_finder_thread_main( thread_id : int ) :
     # Initialisation de notre moteur de recherche des comptes Twitter
     finder_engine = Link_Finder()
     
+    # Initialisation de notre couche d'abstraction à l'API Twitter
+    twitter = TweepyAbtraction( param.API_KEY,
+                                param.API_SECRET,
+                                param.OAUTH_TOKEN,
+                                param.OAUTH_TOKEN_SECRET )
+    
     # Tant que on ne nous dit pas de nous arrêter
     while keep_service_alive :
         
@@ -212,6 +224,22 @@ def link_finder_thread_main( thread_id : int ) :
         
         # Stocker les comptes Twitter trouvés
         request.twitter_accounts = twitter_accounts
+        
+        # On vérifie la liste des comptes Twitter
+        for account in twitter_accounts :
+            account_id = twitter.get_account_id( account )
+            if account_id != None :
+                request.twitter_accounts_with_id.append( ( account, account_id ) )
+        
+        # Si jamais aucun compte Twitter valide n'a été trouvé, on ne va pas
+        # plus loin avec la requête (On passe donc son status à "Fin de
+        # traitement")
+        if twitter_accounts == []:
+            request.problem = "NO_VALID_TWITTER_ACCOUNT_FOR_THIS_ARTIST"
+            request.set_status_done()
+            
+            print( "[link_finder_th" + str(thread_id) + "] Aucun compte Twitter valide trouvé pour l'artiste de cette illustration !" )
+            continue
         
         print( "[link_finder_th" + str(thread_id) + "] Comptes Twitter trouvés pour cet artiste :\n" +
                "[link_finder_th" + str(thread_id) + "] " + str( twitter_accounts ) )
@@ -451,7 +479,7 @@ class HTTP_Server( BaseHTTPRequestHandler ) :
                 illust_url = parameters["url"][0]
             except KeyError :
                 response += "\"status\" : \"END\""
-                response += ", \"founded_twitter_accounts\" : [ ]"
+                response += ", \"twitter_accounts\" : [ ]"
                 response += ", \"results\" : [ ]"
                 response += ", \"error\" : \"NO_URL_FIELD\""
             else :
@@ -466,8 +494,11 @@ class HTTP_Server( BaseHTTPRequestHandler ) :
                 response += "\"status\" : \"" + request.get_status_string() + "\""
                 
                 response += ", \"twitter_accounts\" : ["
-                for account in request.twitter_accounts :
-                    response += " \"" + account + "\","
+                for account in request.twitter_accounts_with_id :
+                    response += " { "
+                    response += "\"account_name\" : \"" + str(account[0]) + "\", "
+                    response += "\"account_id\" : \"" + str(account[1]) + "\""  # Envoyer en string et non en int
+                    response += " },"
                 if response[-1] == "," : # Supprimer la dernière virgule
                     response = response[:-1]
                 response += " ]"
