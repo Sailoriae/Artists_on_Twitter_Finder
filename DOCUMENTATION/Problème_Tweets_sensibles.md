@@ -27,9 +27,10 @@ Bref. Il y aurait 4 alternatives à GOT3 :
 3. Utiliser la vraie API publique Twitter de recherche... Oui mais :
    - On ne peut pas aller au delà de 7 jours dans le passé, c'est pour ça que GetOldTweets3 existe.
 
-4. Payer Twitter pour avoir accès à la "Full-Archive API" (Et pas une "30-day Search API"), ou la "Premium Search API" (API de recherche avec autorisation d'aller plus loin que 7 jours, mais c'est limité à 30 si j'ai bien compris)... Et je n'ai pas bien compris la différence... Bref : Oui mais :
+4. Payer Twitter pour avoir accès aux API de recherche Premiums : La "Full-Archive API" (Et pas une "30-day Search API"), ou la "Premium Search API" (API de recherche avec autorisation d'aller plus loin que 7 jours, mais c'est limité à 30). Bref : Oui mais :
    - C'EST CHER !
    - ARGENT !
+   - C'est une API de recherche, donc si l'utilisateur n'est pas indexé, ça ne sert à rien.
 
 En cherchant sur GitHub des scripts Python pour faire ce travail, je n'ai trouvé que ces solutions. Personne n'a cherché à reverse-engineer l'API des JavaScript de l'UI Twitter... Surement parce que c'est trop compliqué, et bien évidemment pas du tout documenté. En même temps, ils veulent qu'on paye. :D
 
@@ -48,3 +49,15 @@ Et c'est impossible, parce qu'on est dans tous les cas limité à 3 200 tweets. 
 https://developer.twitter.com/en/docs/tweets/timelines/api-reference/get-statuses-user_timeline
 
 La solution la moins limité est donc l'API payante de Twitter. Et sans payer, c'est GetOldTweets3.
+
+___
+
+La seule solution pour améliorer est donc de payer l'API de recherche... Puisqu'il est impossible de dépasser la limite de 3 200 Tweets sur un compte, aucun moyen de payer pour dépasser.
+
+Maximum du gratuit : 50 requêtes de 100 Tweets par mois. Donc 5 000 Tweets par mois. Autant oublie
+
+2 500 requêtes de 500 tweets par mois, soit 1 250 000 Tweets par mois : 1 900 dollars. On oublie direct.
+
+https://developer.twitter.com/en/pricing/search-fullarchive
+
+La meilleure solution est donc GetOldTweets3... Ou un autre service comme Google Images ou 
