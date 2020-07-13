@@ -16,5 +16,6 @@ class Image_in_DB :
         self.tweet_id : int = tweet_id
         self.image_features : List[int] = image_features
         
-        # Utilisé par le module "cbir_engine" pour identifier l'image
-        self.identifier = self.tweet_id
+        # Utilisé par le module "cbir_engine" pour stocker la distance entre
+        # l'image de requête et cette image dans la base de données
+        self.distance : int = None

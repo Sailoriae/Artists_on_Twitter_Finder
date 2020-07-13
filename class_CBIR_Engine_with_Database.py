@@ -285,10 +285,10 @@ class CBIR_Engine_with_Database :
     @param image_url L'URL de l'image à chercher
     @param account_name Le nom du compte Twitter dans lequel chercher, c'est à
                         dire ce qu'il y a après le @ (OPTIONNEL)
-    @return Liste de tuples, contenant :
-            - L'ID du Tweet contenant cette image (Parmis un maximum de 4
-              images par Tweets)
-            - La distance entre l'image de requête et l'image du Tweet
+    @return Liste d'objets Image_in_DB, contenant les attributs suivants :
+            - account_id : L'ID du compte Twitter
+            - tweet_id : L'ID du Tweet contenant l'image
+            - distance : La distance calculée avec l'image de requête
             None si il y a eu un problème
     """
     def search_tweet( self, image_url : str, account_name : str = None ) :
@@ -304,7 +304,7 @@ class CBIR_Engine_with_Database :
             return None
         
         try :
-            return self.cbir_engine.search_cbir(
+            to_return = self.cbir_engine.search_cbir(
                 image,
                 self.bdd.get_images_in_db_iterator( account_id )
             )
@@ -313,6 +313,14 @@ class CBIR_Engine_with_Database :
         except ErrorOpenCV :
             print( ErrorOpenCV )
             return None
+        
+        # Suppression des attributs "image_features" pour gagner un peu de
+        # mémoire
+        for image in to_return :
+            image.image_features = []
+        
+        # Retourner
+        return to_return
 
 
 """
@@ -338,7 +346,7 @@ if __name__ == '__main__' :
     )
     print( "Tweets contenant une image recherchée :")
     print( founded_tweets )
-    if 1160998394887716864 in [ data[0] for data in founded_tweets ] :
+    if 1160998394887716864 in [ data.tweet_id for data in founded_tweets ] :
         print( "Test de recherche OK." )
     else :
         print( "Problème durant le test de recherche !" )

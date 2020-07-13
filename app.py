@@ -66,7 +66,8 @@ class Request :
         self.get_GOT3_list_result = []
         
         # Résultats de la recherche inversée de l'image
-        self.tweets_id : List[ (int, float) ] = []
+        # Est une liste d'objets Image_in_DB
+        self.founded_tweets = []
         
         # Status du traitement de cette requête :
         # 0 = En attente de traitement par un thread de Link Finder
@@ -415,7 +416,7 @@ def reverse_search_thread_main( thread_id : int ) :
             
             result = cbir_engine.search_tweet( request.image_url, twitter_account )
             if result != None :
-                request.tweets_id += result
+                request.founded_tweets += result
             else :
                 print( "[reverse_search_th" + str(thread_id) + "] Erreur lors de la recherche d'image inversée." )
                 request.problem = "ERROR_DURING_REVERSE_SEARCH"
@@ -426,18 +427,18 @@ def reverse_search_thread_main( thread_id : int ) :
             
             result = cbir_engine.search_tweet( request.image_url )
             if result != None :
-                request.tweets_id += result
+                request.founded_tweets += result
             else :
                 print( "[reverse_search_th" + str(thread_id) + "] Erreur lors de la recherche d'image inversée." )
         
         # Trier la liste des résultats
-        # On trie une liste de tuple par rapport au deuxième élément
-        request.tweets_id = sorted( request.tweets_id,
-                                    key = lambda x: x[1],
-                                    reverse = False )
+        # On trie une liste d'objets par rapport à leur attribut "distance"
+        request.founded_tweets = sorted( request.founded_tweets,
+                                         key = lambda x: x.distance,
+                                         reverse = False )
         
         print( "[reverse_search_th" + str(thread_id) + "] Tweets trouvés (Du plus au moins proche) :\n" +
-               "[reverse_search_th" + str(thread_id) + "] " + str( [ data[0] for data in request.tweets_id ] ) )
+               "[reverse_search_th" + str(thread_id) + "] " + str( [ data.tweet_id for data in request.founded_tweets ] ) )
         
         # On passe le status de la requête à "Fin de traitement"
         request.set_status_done()
@@ -504,10 +505,11 @@ class HTTP_Server( BaseHTTPRequestHandler ) :
                 response += " ]"
                 
                 response += ", \"results\" : ["
-                for result in request.tweets_id :
+                for result in request.founded_tweets :
                     response += " { "
-                    response += "\"tweet_id\" : \"" + str(result[0]) + "\", " # Envoyer en string et non en int
-                    response += "\"distance\" : " + str(result[1])
+                    response += "\"tweet_id\" : \"" + str(result.tweet_id) + "\", " # Envoyer en string et non en int
+                    response += "\"account_id\" : \"" + str(result.account_id) + "\", " # Envoyer en string et non en int
+                    response += "\"distance\" : " + str(result.distance)
                     response += " },"
                 if response[-1] == "," : # Supprimer la dernière virgule
                     response = response[:-1]
@@ -657,9 +659,9 @@ while True :
     
     elif args[0] == "result" :
         if len(args) == 2 :
-            result = get_request( args[1] ).tweets_id
+            result = get_request( args[1] ).founded_tweets
             if result != None :
-                print( "Résultat : " + str(result) )
+                print( "Résultat : " + str( [ (data.tweet_id, data.distance) for data in result ] ) )
             else :
                 print( "Requête inconnue pour cet URL !" )
         else :
