@@ -10,6 +10,9 @@ Le serveur répond par un JSON qui contient toujours les mêmes champs :
 ```
 {
 	"status" : "END",
+	"twitter_accounts" : [
+		"serafleur"
+	],
 	"results" : [
 		{ "tweet_id" : 797039787534262272, "distance" : 0.4124855017771303 }
 	],

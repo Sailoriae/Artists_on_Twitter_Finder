@@ -451,7 +451,8 @@ class HTTP_Server( BaseHTTPRequestHandler ) :
                 illust_url = parameters["url"][0]
             except KeyError :
                 response += "\"status\" : \"END\""
-                response += ", \"results\" : []"
+                response += ", \"founded_twitter_accounts\" : [ ]"
+                response += ", \"results\" : [ ]"
                 response += ", \"error\" : \"NO_URL_FIELD\""
             else :
                 request = get_request( illust_url )
@@ -463,6 +464,14 @@ class HTTP_Server( BaseHTTPRequestHandler ) :
                 
                 # On envoit les informations sur la requête
                 response += "\"status\" : \"" + request.get_status_string() + "\""
+                
+                response += ", \"twitter_accounts\" : ["
+                for account in request.twitter_accounts :
+                    response += " \"" + account + "\","
+                if response[-1] == "," : # Supprimer la dernière virgule
+                    response = response[:-1]
+                response += " ]"
+                
                 response += ", \"results\" : ["
                 for result in request.tweets_id :
                     response += " { "
@@ -471,7 +480,8 @@ class HTTP_Server( BaseHTTPRequestHandler ) :
                     response += " },"
                 if response[-1] == "," : # Supprimer la dernière virgule
                     response = response[:-1]
-                response += "]"
+                response += " ]"
+                
                 if request.problem != None :
                     response += ", \"error\" : \"" + request.problem + "\""
                 else :
