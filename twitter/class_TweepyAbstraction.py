@@ -53,8 +53,19 @@ class TweepyAbtraction :
             Ou None si le compte est introuvable
     """
     def get_account_id ( self, account_name : str ) -> int :
-        try :
-            return self.api.get_user( account_name ).id
-        except tweepy.TweepError as error :
-            print( error )
-            return None
+        retry = True
+        while retry :
+            retry = False
+            try :
+                return self.api.get_user( account_name ).id
+            except tweepy.error.RateLimitError as error :
+                print( "Limite atteinte en récupérant l'ID du compte @" + str(account_name) + "." )
+                print( error.reason )
+                print( "On va réessayer dans 60 secondes... ", end='' )
+                time.sleep( 60 )
+                print( "On réessaye !" )
+                retry = True
+            except tweepy.TweepError as error :
+                print( "Erreur en récupérant l'ID du compte @" + str(account_name) + "." )
+                print( error.reason )
+                return None
