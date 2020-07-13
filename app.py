@@ -130,35 +130,73 @@ class Request :
 
 
 """
+Classe contenant l'ensemble des requêtes dans le système.
+A INITIALISER UNE SEULE FOIS !
+"""
+class Pipeline :
+    def __init__ ( self ) :
+        # Les objets sont passés par adresse en Python
+        # Donc ils peuvent être en même dans dans la liste "requests" en en même temps
+        # dans les différentes files d'attente
+        
+        # De plus, l'objet queue.Queue() est safe pour le multi-threads
+        
+        # Liste des requêtes effectuées sur notre système
+        self.requests = []
+        
+        # ETAPE 1, code de status de la requête : 1
+        # File d'attente de Link Finder
+        self.link_finder_queue = queue.Queue()
+        
+        # ETAPE 2, PARTIE 1/2, code de status de la requête : 3
+        # File d'attente de listage des tweets d'un compte Twitter
+        self.list_account_tweets_queue = queue.Queue()
+        
+        # ETAPE 2, PARTIE 2/2, code de status de la requête : 5
+        # File d'attente d'indexation des tweets d'un compte Twitter
+        self.index_twitter_account_queue = queue.Queue()
+        
+        # ETAPE 3, code de status de la requête : 7
+        # File d'attente de la recherche d'image inversée
+        self.reverse_search_queue = queue.Queue()
+    
+    """
+    Lancement de la procédure complète pour une URL d'illustration.
+    @param illust_url L'illustration d'entrée.
+    @return L'objet Request créé.
+    """
+    def launch_full_process ( self, illust_url : str ) :
+        # Vérifier d'abord qu'on n'est pas déjà en train de traiter cette illustration
+        for request in self.requests :
+            if request.input_url == illust_url :
+                return
+        
+        request = Request( illust_url, full_pipeline = True )
+        self.requests.append( request ) # Passé par adresse car c'est un objet
+        self.link_finder_queue.put( request ) # Passé par addresse car c'est un objet
+        
+        return request
+    
+    """
+    Obtenir l'objet d'une requête.
+    @param illust_url L'illustration d'entrée.
+    @return Un objet Request,
+            Ou None si la requête est inconnue.
+    """
+    def get_request ( self, illust_url : str ) -> Request :
+        for request in self.requests :
+            if request.input_url == illust_url :
+                return request
+        return None
+
+
+"""
 Variables globales, partagées entre les Threads.
 """
 # Variable pour éteindre le service
 keep_service_alive = True
 
-# Les objets sont passés par adresse en Python
-# Donc ils peuvent être en même dans dans la liste "requests" en en même temps
-# dans les différentes files d'attente
-
-# De plus, l'objet queue.Queue() est safe pour le multi-threads
-
-# Liste des requêtes effectuées sur notre système
-requests = []
-
-# ETAPE 1, code de status de la requête : 1
-# File d'attente de Link Finder
-link_finder_queue = queue.Queue()
-
-# ETAPE 2, PARTIE 1/2, code de status de la requête : 3
-# File d'attente de listage des tweets d'un compte Twitter
-list_account_tweets_queue = queue.Queue()
-
-# ETAPE 2, PARTIE 2/2, code de status de la requête : 5
-# File d'attente d'indexation des tweets d'un compte Twitter
-index_twitter_account_queue = queue.Queue()
-
-# ETAPE 3, code de status de la requête : 7
-# File d'attente de la recherche d'image inversée
-reverse_search_queue = queue.Queue()
+pipeline = Pipeline()
 
 
 """
@@ -180,7 +218,7 @@ def link_finder_thread_main( thread_id : int ) :
         
         # On tente de sortir une requête de la file d'attente
         try :
-            request = link_finder_queue.get( block = False )
+            request = pipeline.link_finder_queue.get( block = False )
         # Si la queue est vide, on attend une seconde et on réessaye
         except queue.Empty :
             sleep( 1 )
@@ -260,7 +298,7 @@ def link_finder_thread_main( thread_id : int ) :
         # compte Twitter
         # Si on est dans le cas d'une procédure complète
         if request.full_pipeline :
-            list_account_tweets_queue.put( request )
+            pipeline.list_account_tweets_queue.put( request )
     
     print( "[link_finder_th" + str(thread_id) + "] Arrêté !" )
     return
@@ -285,7 +323,7 @@ def list_account_tweets_thread_main( thread_id : int ) :
         
         # On tente de sortir une requête de la file d'attente
         try :
-            request = list_account_tweets_queue.get( block = False )
+            request = pipeline.list_account_tweets_queue.get( block = False )
         # Si la queue est vide, on attend une seconde et on réessaye
         except queue.Empty :
             sleep( 1 )
@@ -324,7 +362,7 @@ def list_account_tweets_thread_main( thread_id : int ) :
         # compte Twitter
         # Si on est dans le cas d'une procédure complète
         if request.full_pipeline :
-            index_twitter_account_queue.put( request )
+            pipeline.index_twitter_account_queue.put( request )
     
     print( "[list_account_tweets_th" + str(thread_id) + "] Arrêté !" )
     return
@@ -349,7 +387,7 @@ def index_twitter_account_thread_main( thread_id : int ) :
         
         # On tente de sortir une requête de la file d'attente
         try :
-            request = index_twitter_account_queue.get( block = False )
+            request = pipeline.index_twitter_account_queue.get( block = False )
         # Si la queue est vide, on attend une seconde et on réessaye
         except queue.Empty :
             sleep( 1 )
@@ -376,7 +414,7 @@ def index_twitter_account_thread_main( thread_id : int ) :
         # On met la requête dans la file d'attente de la recherche d'image inversée
         # Si on est dans le cas d'une procédure complète
         if request.full_pipeline :
-            reverse_search_queue.put( request )
+            pipeline.reverse_search_queue.put( request )
     
     print( "[index_twitter_account_th" + str(thread_id) + "] Arrêté !" )
     return
@@ -396,7 +434,7 @@ def reverse_search_thread_main( thread_id : int ) :
         
         # On tente de sortir une requête de la file d'attente
         try :
-            request = reverse_search_queue.get( block = False )
+            request = pipeline.reverse_search_queue.get( block = False )
         # Si la queue est vide, on attend une seconde et on réessaye
         except queue.Empty :
             sleep( 1 )
@@ -484,12 +522,12 @@ class HTTP_Server( BaseHTTPRequestHandler ) :
                 response += ", \"results\" : [ ]"
                 response += ", \"error\" : \"NO_URL_FIELD\""
             else :
-                request = get_request( illust_url )
+                request = pipeline.get_request( illust_url )
                 
                 # Si la requête n'a pas encore été faite, on lance la procédure et
                 # on affiche son status à 0
                 if request == None :
-                    request = launch_process( illust_url )
+                    request = pipeline.launch_full_process( illust_url )
                 
                 # On envoit les informations sur la requête
                 response += "\"status\" : \"" + request.get_status_string() + "\""
@@ -561,35 +599,6 @@ def http_server_thread_main( thread_id : int ) :
 
 
 """
-Lancement de la procédure pour une URL d'illustration.
-@param illust_url L'illustration d'entrée.
-@return L'objet Request créé.
-"""
-def launch_process ( illust_url : str ) :
-    # Vérifier d'abord qu'on n'est pas déjà en train de traiter cette illustration
-    for request in requests :
-        if request.input_url == illust_url :
-            return
-    
-    request = Request( illust_url, full_pipeline = True )
-    requests.append( request ) # Passé par adresse car c'est un objet
-    link_finder_queue.put( request ) # Passé par addresse car c'est un objet
-    
-    return request
-
-"""
-Obtenir l'objet d'une requête.
-@param illust_url L'illustration d'entrée.
-@return Un objet Request,
-        Ou None si la requête est inconnue.
-"""
-def get_request ( illust_url : str ) -> Request :
-    for request in requests :
-        if request.input_url == illust_url :
-            return request
-    return None
-
-"""
 Obtenir des statistiques sur la base de données
 @return Une liste contenant, dans l'ordre suivant :
         - Le nombre de tweets indexés
@@ -644,13 +653,13 @@ while True :
     if args[0] == "request" :
         if len(args) == 2 :
             print( "Lancement de la procédure !" )
-            launch_process( args[1] )
+            pipeline.launch_full_process( args[1] )
         else :
             print( "Utilisation : request [URL de l'illustration]" )
     
     elif args[0] == "status" :
         if len(args) == 2 :
-            request = get_request( args[1] )
+            request = pipeline.get_request( args[1] )
             if request != None :
                 print( "Status : " + str(request.status) + " " + request.get_status_string() )
             else :
@@ -660,7 +669,7 @@ while True :
     
     elif args[0] == "result" :
         if len(args) == 2 :
-            request = get_request( args[1] )
+            request = pipeline.get_request( args[1] )
             if request != None :
                 print( "Résultat : " + str( [ (data.tweet_id, data.distance) for data in request.founded_tweets ] ) )
             else :
@@ -679,7 +688,7 @@ while True :
                 request.twitter_accounts = [ args[1] ]
                 
                 # Lancement du scan
-                index_account_tweets_queue.put( request )
+                pipeline.index_account_tweets_queue.put( request )
             else :
                 print( "Nom de compte Twitter impossible !" )
         else :
@@ -697,13 +706,13 @@ while True :
                     print( "Recherche sur le compte @" + args[2] + "." )
                     request.twitter_accounts = [ args[2] ]
                     # Lancement de la recherche
-                    reverse_search_queue.put( request )
+                    pipeline.reverse_search_queue.put( request )
                 else :
                     print( "Nom de compte Twitter impossible !" )
             else :
                 print( "Recherche dans toute la base de données !" )
                 # Lancement de la recherche
-                reverse_search_queue.put( request )
+                pipeline.reverse_search_queue.put( request )
         else :
             print( "Utilisation : search [URL de l'image à chercher] [Nom du compte Twitter (OPTIONNEL)]" )
     
