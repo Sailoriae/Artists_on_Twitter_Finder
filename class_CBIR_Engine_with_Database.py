@@ -289,6 +289,7 @@ class CBIR_Engine_with_Database :
             - account_id : L'ID du compte Twitter
             - tweet_id : L'ID du Tweet contenant l'image
             - distance : La distance calculée avec l'image de requête
+            - image_position : La position de l'image dans le Tweet (1-4)
             None si il y a eu un problème
     """
     def search_tweet( self, image_url : str, account_name : str = None ) :

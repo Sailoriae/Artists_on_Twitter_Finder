@@ -44,7 +44,8 @@ class SQLite_Image_Features_Iterator :
             to_return = Image_in_DB(
                 self.current_line[0], # ID du compte Twitter
                 self.current_line[1], # ID du Tweet
-                [ float(value) for value in self.current_line[ 2 +  self.image_cursor ].split(';') ] # Features CBIR de l'image
+                [ float(value) for value in self.current_line[ 2 +  self.image_cursor ].split(';') ], # Features CBIR de l'image
+                self.image_cursor + 1
             )
             
             # Si c'était la dernière image, on prépare pour passer au Tweet suivant

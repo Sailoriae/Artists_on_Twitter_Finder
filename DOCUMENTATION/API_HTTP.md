@@ -14,7 +14,7 @@ Le serveur répond par un JSON qui contient toujours les mêmes champs :
 		{ "account_name" : "serafleur", "account_id" : "3064686505" }
 	],
 	"results" : [
-		{ "tweet_id" : 797039787534262272, "account_id" : 3064686505, "distance" : 0.4124855017771303 }
+		{ "tweet_id" : 797039787534262272, "account_id" : 3064686505, "image_position" : 1, "distance" : 0.4124855017771303 }
 	],
 	"error" : ""
 }

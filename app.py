@@ -509,6 +509,7 @@ class HTTP_Server( BaseHTTPRequestHandler ) :
                     response += " { "
                     response += "\"tweet_id\" : \"" + str(result.tweet_id) + "\", " # Envoyer en string et non en int
                     response += "\"account_id\" : \"" + str(result.account_id) + "\", " # Envoyer en string et non en int
+                    response += "\"image_position\" : " + str(result.image_position) + ", "
                     response += "\"distance\" : " + str(result.distance)
                     response += " },"
                 if response[-1] == "," : # Supprimer la dernière virgule
