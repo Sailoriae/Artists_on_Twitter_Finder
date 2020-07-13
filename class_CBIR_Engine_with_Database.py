@@ -212,6 +212,10 @@ class CBIR_Engine_with_Database :
         
         length = len( tweets_to_scan )
         
+        # Si la liste est vide, c'est qu'il n'y a aucun Tweet à indexer
+        if length == 0 :
+            return True
+        
         # Stocker la date du premier tweet que l'on va scanner, c'est à dire le
         # plus récent
         scan_date = tweets_to_scan[0].date.strftime('%Y-%m-%d')
