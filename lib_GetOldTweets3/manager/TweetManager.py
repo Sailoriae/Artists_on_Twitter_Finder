@@ -24,7 +24,7 @@ class TweetManager:
     ]
 
     @staticmethod
-    def getTweets(tweetCriteria, receiveBuffer=None, bufferLength=100, proxy=None, debug=False):
+    def getTweets(tweetCriteria, receiveBuffer=None, bufferLength=100, proxy=None, debug=False, auth_token=None):
         """Get tweets that match the tweetCriteria parameter
         A static method.
 
@@ -64,7 +64,12 @@ class TweetManager:
 
             active = True
             while active:
-                json = TweetManager.getJsonResponse(tweetCriteria, refreshCursor, cookieJar, proxy, user_agent, debug=debug)
+                json = TweetManager.getJsonResponse(tweetCriteria, refreshCursor, cookieJar, proxy, user_agent, debug=debug, auth_token=auth_token)
+
+                # Petite différence dans la réponse si on est connecté ou pas
+                if auth_token != None :
+                    json = json["inner"]
+
                 if len(json['items_html'].strip()) == 0:
                     break
 
@@ -282,7 +287,29 @@ class TweetManager:
         return attr
 
     @staticmethod
-    def getJsonResponse(tweetCriteria, refreshCursor, cookieJar, proxy, useragent=None, debug=False):
+    def getJsonResponse(tweetCriteria, refreshCursor, cookieJar, proxy, useragent=None, debug=False, auth_token=None):
+        if auth_token != None :
+            auth_token_cookie = http.cookiejar.Cookie(  version=0,
+                                                        name="auth_token",
+                                                        value=auth_token,
+                                                        port=None,
+                                                        port_specified=False,
+                                                        domain='.twitter.com',
+                                                        domain_specified=True,
+                                                        domain_initial_dot=True,
+                                                        path='/',
+                                                        path_specified=True,
+                                                        secure=True,
+                                                        expires=None,
+                                                        discard=True,
+                                                        comment=None,
+                                                        comment_url=None,
+                                                        rest={'HTTPOnly': False,
+                                                              'SameSite': None},
+                                                        rfc2109=False
+                                                      )
+            cookieJar.set_cookie( auth_token_cookie )
+
         """Invoke an HTTP query to Twitter.
         Should not be used as an API function. A static method.
         """

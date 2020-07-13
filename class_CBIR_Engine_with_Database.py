@@ -163,12 +163,13 @@ class CBIR_Engine_with_Database :
         since_date = self.bdd.get_account_last_scan( account_id )
         
         tweetCriteria = GetOldTweets3.manager.TweetCriteria()\
-            .setQuerySearch( "from:" + account_name + " filter:media -filter:retweets" )
+            .setQuerySearch( "from:" + account_name + " filter:media -filter:retweets -filter:safe" )
         
         if since_date != None :
             tweetCriteria.setSince( since_date )
         
-        return ( GetOldTweets3.manager.TweetManager.getTweets(tweetCriteria),
+        return ( GetOldTweets3.manager.TweetManager.getTweets(tweetCriteria,
+                                                              auth_token=param.TWITTER_AUTH_TOKEN),
                  account_id )
     
     """

@@ -14,6 +14,23 @@ OAUTH_TOKEN = ""
 OAUTH_TOKEN_SECRET = ""
 
 """
+Token de connexion à un compte Twitter.
+1. Ouvrir un compte Twitter dans un navigateur,
+2. Mettre ici la valeur du cookie "auth_token",
+3. Et ne surtout pas déconnecter ce compte, ni effacer la session !
+   Effacer les cookies du navigateur plutôt.
+
+Ce compte utilisé doit pouvoir voir les médias sensibles dans les recherches !
+OPTION A DECOCHER :
+Paramètres -> Confidentialité et sécurité -> Sécurité -> Filtres de recherche
+-> Masquer les contenus offensants
+
+Il est très recommandé d'utiliser ici un compte "inutile", en cas de piratage
+du serveur (Et de vol de l'"auth_token" ci-dessous).
+"""
+TWITTER_AUTH_TOKEN = ""
+
+"""
 Paramètres pour l'accès à l'API Pixiv.
 Il est très recommandé de ne pas utiliser un compte personnel !
 """

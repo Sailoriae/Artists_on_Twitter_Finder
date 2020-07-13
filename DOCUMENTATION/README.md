@@ -6,3 +6,4 @@ Veuillez d'abord lire le `README.md` du répertoire parent à celui-ci.
 * `Avertissement_utilisation.md` : Avertissement sur l'indexation de comptes Twitter dans la base de données.
 * `Pipeline_de_traitement.md` : Documentation de la chaine de traitement d'une requête dans `app.py`.
 * `Modules.md` : Liste des modules de ce projet, ainsi que de leur utilisation indépendante possible.
+* `Problème_Tweets_sensibles.md` : Pourquoi on ne peut pas indexer les Tweets sensibles.
