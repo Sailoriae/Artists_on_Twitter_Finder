@@ -12,6 +12,7 @@ import re
 from typing import List
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from socketserver import ThreadingMixIn
 from urllib.parse import parse_qs, urlsplit
 
 from class_CBIR_Engine_with_Database import CBIR_Engine_with_Database
@@ -599,13 +600,23 @@ class HTTP_Server( BaseHTTPRequestHandler ) :
             self.wfile.write( "404 Not Found\n".encode("utf-8") )
 
 """
+Pour faire du multi-thread du serveur HTTP
+Source : https://pymotw.com/2/BaseHTTPServer/index.html#threading-and-forking
+"""
+class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
+    """Handle requests in a separate thread."""
+
+"""
 Thread du serveur HTTP.
 """
 def http_server_thread_main( thread_id : int ) :
-    http_server = HTTPServer( ("", param.HTTP_SERVER_PORT ), HTTP_Server )
+    http_server = ThreadedHTTPServer( ("", param.HTTP_SERVER_PORT ), HTTP_Server )
     while keep_service_alive :
         http_server.handle_request()
     http_server.server_close()
+    
+    print( "[http_server_th" + str(thread_id) + "] Arrêté !" )
+    return
 
 
 """
@@ -624,30 +635,45 @@ def get_stats() :
 """
 Démarrage des threads.
 """
-link_finder_thread = threading.Thread( name = "link_finder",
-                                       target = link_finder_thread_main,
-                                       args = ( 1, ) )
-link_finder_thread.start()
+link_finder_threads = []
+for i in range( param.NUMBER_OF_LINK_FINDER_THREADS ) :
+    link_finder_thread = threading.Thread( name = "link_finder_" + str(i+1),
+                                           target = link_finder_thread_main,
+                                           args = ( i+1, ) )
+    link_finder_thread.start()
+    link_finder_threads.append( link_finder_thread )
 
-list_account_tweets_thread = threading.Thread( name = "list_account_tweets",
-                                                 target = list_account_tweets_thread_main,
-                                                 args = ( 1, ) )
-list_account_tweets_thread.start()
+list_account_tweets_threads = []
+for i in range( param.NUMBER_OF_LIST_ACCOUNT_TWEETS_THREADS ) :
+    list_account_tweets_thread = threading.Thread( name = "list_account_tweets_" + str(i+1),
+                                                     target = list_account_tweets_thread_main,
+                                                     args = ( i+1, ) )
+    list_account_tweets_thread.start()
+    list_account_tweets_threads.append( list_account_tweets_thread )
 
-index_twitter_account_thread = threading.Thread( name = "index_twitter_account",
-                                                 target = index_twitter_account_thread_main,
-                                                 args = ( 1, ) )
-index_twitter_account_thread.start()
+index_twitter_account_threads = []
+for i in range( param.NUMBER_OF_INDEX_TWITTER_ACCOUNT_THREADS ) :
+    index_twitter_account_thread = threading.Thread( name = "index_twitter_account_" + str(i+1),
+                                                     target = index_twitter_account_thread_main,
+                                                     args = ( i+1, ) )
+    index_twitter_account_thread.start()
+    index_twitter_account_threads.append( index_twitter_account_thread )
 
-reverse_search_thread = threading.Thread( name = "reverse_search",
-                                          target = reverse_search_thread_main,
-                                          args = ( 1, ) )
-reverse_search_thread.start()
+reverse_search_threads = []
+for i in range( param.NUMBER_OF_REVERSE_SEARCH_THREADS ) :
+    reverse_search_thread = threading.Thread( name = "reverse_search_" + str(i+1),
+                                              target = reverse_search_thread_main,
+                                              args = ( i+1, ) )
+    reverse_search_thread.start()
+    reverse_search_threads.append( reverse_search_thread )
 
-http_server_thread = threading.Thread( name = "http_server_thread",
-                                       target = http_server_thread_main,
-                                       args = ( 1, ) )
-http_server_thread.start()
+http_server_threads = []
+for i in range( param.NUMBER_OF_HTTP_SERVER_THREADS ) :
+    http_server_thread = threading.Thread( name = "http_server_thread_" + str(i+1),
+                                           target = http_server_thread_main,
+                                           args = ( i+1, ) )
+    http_server_thread.start()
+    http_server_threads.append( http_server_thread )
 
 
 """
@@ -769,8 +795,13 @@ while True :
 Arrêt du système.
 """
 # Attendre que les threads aient fini
-link_finder_thread.join()
-list_account_tweets_thread.join()
-index_twitter_account_thread.join()
-reverse_search_thread.join()
-http_server_thread.join()
+for thread in link_finder_threads :
+    thread.join()
+for thread in list_account_tweets_threads :
+    thread.join()
+for thread in index_twitter_account_threads :
+    thread.join()
+for thread in reverse_search_threads :
+    thread.join()
+for thread in http_server_threads :
+    thread.join()
