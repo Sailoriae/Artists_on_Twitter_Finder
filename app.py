@@ -144,6 +144,9 @@ class Pipeline :
         # Liste des requêtes effectuées sur notre système
         self.requests = []
         
+        # Sémaphore pour l'accès à la liste request
+        self.requests_sem = threading.Semaphore()
+        
         # ETAPE 1, code de status de la requête : 1
         # File d'attente de Link Finder
         self.link_finder_queue = queue.Queue()
@@ -167,9 +170,12 @@ class Pipeline :
     """
     def launch_full_process ( self, illust_url : str ) :
         # Vérifier d'abord qu'on n'est pas déjà en train de traiter cette illustration
+        self.requests_sem.acquire()
         for request in self.requests :
             if request.input_url == illust_url :
+                self.requests_sem.release()
                 return
+        self.requests_sem.release()
         
         request = Request( illust_url, full_pipeline = True )
         self.requests.append( request ) # Passé par adresse car c'est un objet
@@ -184,9 +190,13 @@ class Pipeline :
             Ou None si la requête est inconnue.
     """
     def get_request ( self, illust_url : str ) -> Request :
+        self.requests_sem.acquire()
         for request in self.requests :
             if request.input_url == illust_url :
+                self.requests_sem.release()
                 return request
+        self.requests_sem.release()
+        
         return None
 
 
