@@ -650,9 +650,9 @@ while True :
     
     elif args[0] == "status" :
         if len(args) == 2 :
-            status = get_request( args[1] ).status
-            if status != None :
-                print( "Status : " + str(status) )
+            request = get_request( args[1] )
+            if request != None :
+                print( "Status : " + str(request.status) + " " + request.get_status_string() )
             else :
                 print( "Requête inconnue pour cet URL !" )
         else :
@@ -660,9 +660,9 @@ while True :
     
     elif args[0] == "result" :
         if len(args) == 2 :
-            result = get_request( args[1] ).founded_tweets
-            if result != None :
-                print( "Résultat : " + str( [ (data.tweet_id, data.distance) for data in result ] ) )
+            request = get_request( args[1] )
+            if request != None :
+                print( "Résultat : " + str( [ (data.tweet_id, data.distance) for data in request.founded_tweets ] ) )
             else :
                 print( "Requête inconnue pour cet URL !" )
         else :
