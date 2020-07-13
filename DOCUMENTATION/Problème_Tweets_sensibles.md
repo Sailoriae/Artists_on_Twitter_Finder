@@ -36,3 +36,15 @@ En cherchant sur GitHub des scripts Python pour faire ce travail, je n'ai trouv�
 **Conclusion : GetOldTweets3, c'est bien, et tant pis pour les tweets sensibles.**
 
 **PS :** GOT3 ne permet pas non plus de trouver les Tweets de comptes qui ne sont pas indexés dans le moteur de recherche. Mais ce sont souvent des robots qui sont dans ce cas, et non des artistes.
+
+___
+
+**NON EN FAIT !** Exemple : @MayoRiyo, avec se 17 000 médias (juillet 2020)... GOT3 n'en trouve que 171. Aie ! Parce que cet artiste est mal indexé dans la recherche !
+
+**Solution à trouver :** Obtenir l'intégralité des tweets d'un utilisateur, et pas depuis une API de recherche (Car GOT3 utilise une API de recherche).
+
+Et c'est impossible, parce qu'on est dans tous les cas limité à 3 200 tweets. Même depuis l'UI web.
+
+https://developer.twitter.com/en/docs/tweets/timelines/api-reference/get-statuses-user_timeline
+
+La solution la moins limité est donc l'API payante de Twitter. Et sans payer, c'est GetOldTweets3.
