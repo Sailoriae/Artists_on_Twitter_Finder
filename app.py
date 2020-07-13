@@ -163,6 +163,22 @@ class Pipeline :
         # ETAPE 3, code de status de la requête : 7
         # File d'attente de la recherche d'image inversée
         self.reverse_search_queue = queue.Queue()
+        
+        
+        # Liste des ID de comptes Twitter en cours de listage
+        # Dans un thread list_account_tweets_thread_main()
+        self.currently_listing = []
+        
+        # Sémaphore d'accès à la liste précédente
+        self.currently_listing_sem = threading.Semaphore()
+        
+        
+        # Liste des ID de comptes Twitter en cours d'indexation
+        # Dans un thread index_twitter_account_thread_main()
+        self.currently_indexing = []
+        
+        # Sémaphore d'accès à la liste précédente
+        self.currently_indexing_sem = threading.Semaphore()
     
     """
     Lancement de la procédure complète pour une URL d'illustration.
@@ -176,10 +192,12 @@ class Pipeline :
             if request.input_url == illust_url :
                 self.requests_sem.release()
                 return
-        self.requests_sem.release()
         
         request = Request( illust_url, full_pipeline = True )
         self.requests.append( request ) # Passé par adresse car c'est un objet
+        
+        self.requests_sem.release() # Seulement ici !
+        
         self.link_finder_queue.put( request ) # Passé par addresse car c'est un objet
         
         return request
@@ -199,6 +217,88 @@ class Pipeline :
         self.requests_sem.release()
         
         return None
+    
+    """
+    Dire qu'on est en train de lister les tweets de ces IDs de comptes Twitter.
+    
+    @param twitter_account_IDs Liste d'IDs de comptes Twitter
+    @return False si aucun des IDs de la liste était en cours de listage.
+            True si au moins un ID était déjà en cours de listage ! Les autres
+            IDs n'ont pas étés marqués comme en cours de listage, il ne faut
+            pas continuer avec cette liste !
+    """
+    def is_listing ( self, twitter_account_IDs : List[int] ) -> bool :
+        self.currently_listing_sem.acquire()
+        
+        IDs_to_add = []
+        
+        for account_id in twitter_account_IDs :
+            # Vérifier que l'ID n'est pas déjà dans la liste
+            if account_id in self.currently_listing :
+                self.currently_listing_sem.release()
+                return True
+            else :
+                IDs_to_add.append( account_id )
+        
+        self.currently_listing += IDs_to_add
+        self.currently_listing_sem.release()
+        
+        return False
+    
+    """
+    Dire qu'on est en train d'indexer les tweets de ces IDs de comptes Twitter.
+    
+    @param twitter_account_IDs Liste d'IDs de comptes Twitter
+    @return False si aucun des IDs de la liste était en cours de indexation.
+            True si au moins un ID était déjà en cours de indexation ! Les autres
+            IDs n'ont pas étés marqués comme en cours de indexation, il ne faut
+            pas continuer avec cette liste !
+    """
+    def is_indexing ( self, twitter_account_IDs : List[int] ) -> bool :
+        self.currently_indexing_sem.acquire()
+        
+        IDs_to_add = []
+        
+        for account_id in twitter_account_IDs :
+            # Vérifier que l'ID n'est pas déjà dans la liste
+            if account_id in self.currently_indexing :
+                self.currently_indexing_sem.release()
+                return True
+            else :
+                IDs_to_add.append( account_id )
+        
+        self.currently_indexing += IDs_to_add
+        self.currently_indexing_sem.release()
+        
+        return False
+    
+    """
+    Dire qu'on a fini de lister les tweets de ces IDs de compte Twitter.
+    
+    @param twitter_account_IDs Liste d'IDs de comptes Twitter
+    """
+    def listing_done ( self, twitter_account_IDs : List[int] ) :
+        self.currently_listing_sem.acquire()
+        new_list = []
+        for account_id in self.currently_listing :
+            if not account_id in twitter_account_IDs :
+                new_list.append( account_id )
+        self.currently_listing = new_list
+        self.currently_listing_sem.release()
+    
+    """
+    Dire qu'on a fini d'indexer les tweets de ces IDs de compte Twitter.
+    
+    @param twitter_account_IDs Liste d'IDs de comptes Twitter
+    """
+    def indexing_done ( self, twitter_account_IDs : List[int] ) :
+        self.currently_indexing_sem.acquire()
+        new_list = []
+        for account_id in self.currently_indexing :
+            if not account_id in twitter_account_IDs :
+                new_list.append( account_id )
+        self.currently_indexing = new_list
+        self.currently_indexing_sem.release()
 
 
 """
@@ -340,6 +440,17 @@ def list_account_tweets_thread_main( thread_id : int ) :
             sleep( 1 )
             continue
         
+        # Si un un des ID des comptes Twitter de la requête est indiqué comme
+        # en cours de listage, on remet cette requête en haut de la file
+        # d'attente, nous permettant de traiter d'autres requêtes
+        #
+        # Ceci est possible si deux requêtes différentes ont le même compte
+        # Twitter
+        if pipeline.is_listing( [ data[1] for data in request.twitter_accounts_with_id ] ) :
+            pipeline.list_account_tweets_queue.put( request )
+            sleep( 1 )
+            continue
+        
         # On passe le status de la requête à "En cours de traitement par un
         # thread de listage des tweets d'un compte Twitter"
         request.set_status_list_account_tweets()
@@ -374,6 +485,10 @@ def list_account_tweets_thread_main( thread_id : int ) :
         # Si on est dans le cas d'une procédure complète
         if request.full_pipeline :
             pipeline.index_twitter_account_queue.put( request )
+        
+        # On dit qu'on a fini le listage pour les comptes de cette requête
+        pipeline.listing_done(
+            [ data[1] for data in request.twitter_accounts_with_id ] )
     
     print( "[list_account_tweets_th" + str(thread_id) + "] Arrêté !" )
     return
@@ -404,6 +519,17 @@ def index_twitter_account_thread_main( thread_id : int ) :
             sleep( 1 )
             continue
         
+        # Si un un des ID des comptes Twitter de la requête est indiqué comme
+        # en cours d'indexation, on remet cette requête en haut de la file
+        # d'attente, nous permettant de traiter d'autres requêtes
+        #
+        # Ceci est possible si deux requêtes différentes ont le même compte
+        # Twitter
+        if pipeline.is_indexing( [ data[1] for data in request.twitter_accounts_with_id ] ) :
+            pipeline.index_twitter_account_queue.put( request )
+            sleep( 1 )
+            continue
+        
         # On passe le status de la requête à "En cours de traitement par un
         # thread d'indexation des tweets d'un compte Twitter"
         request.set_status_index_twitter_account()
@@ -426,6 +552,10 @@ def index_twitter_account_thread_main( thread_id : int ) :
         # Si on est dans le cas d'une procédure complète
         if request.full_pipeline :
             pipeline.reverse_search_queue.put( request )
+        
+        # On dit qu'on a fini l'indexation pour les comptes de cette requête
+        pipeline.indexing_done(
+            [ data[1] for data in request.twitter_accounts_with_id ] )
     
     print( "[index_twitter_account_th" + str(thread_id) + "] Arrêté !" )
     return
