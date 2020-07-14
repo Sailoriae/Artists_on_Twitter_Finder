@@ -118,6 +118,9 @@ class Danbooru :
         
         artist_tag = self.cache_illust_url_json["tag_string_artist"]
         
+        if artist_tag == "" :
+            return []
+        
         twitter_accounts = []
         
         # SCAN PAGE DU TAG DE L'ARTISTE
@@ -153,6 +156,9 @@ class Danbooru :
             return None
         
         artist_tag = self.cache_illust_url_json["tag_string_artist"]
+        
+        if artist_tag == "" :
+            return []
         
         pixiv_accounts = []
         
