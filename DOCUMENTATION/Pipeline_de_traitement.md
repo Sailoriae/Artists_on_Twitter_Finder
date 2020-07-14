@@ -13,22 +13,22 @@ Voici les 4 étapes de traitement d'une requête :
    * Procédure du thread de traitement : `link_finder_thread_main`
    * ID et nom du status : `1`, `LINK_FINDER`
 
-2. Listage des tweets d'un compte avec GetOldTweets3.
+2. Listage des tweets d'un compte avec GetOldTweets3 puis avec l'API Twitter publique.
    * File d'attente : `list_account_tweets_queue`
    * Procédure du thread de traitement : `list_account_tweets_thread_main`
-   * ID et nom du status : `1`, `LIST_ACCOUNT_TWEETS`
+   * ID et nom du status : `3`, `LIST_ACCOUNT_TWEETS`
    * Il ne peut y avoir qu'un seul thread pour cette étape !
 
-3. Indexation des tweets trouvés par GetOldTweets3 : Détection d'images, calcul de la liste des caractéristiques avec le moteur CBIR, stockage dans la base de données.
+3. Indexation des tweets trouvés par GetOldTweets3 puis avec l'API Twitter publique : Détection d'images, calcul de la liste des caractéristiques avec le moteur CBIR, stockage dans la base de données.
    * File d'attente : `index_twitter_account_queue`
    * Procédure du thread de traitement : `index_twitter_account_thread_main`
-   * ID et nom du status : `1`, `INDEX_ACCOUNT_TWEETS`
+   * ID et nom du status : `5`, `INDEX_ACCOUNT_TWEETS`
    * Il ne peut y avoir qu'un seul thread pour cette étape !
 
 4. Recherche inversée d'image.
    * File d'attente : `reverse_search_queue`
    * Procédure du thread de traitement : `reverse_search_thread_main`
-   * ID et nom du status : `1`, `IMAGE_REVERSE_SEARCH`
+   * ID et nom du status : `7`, `IMAGE_REVERSE_SEARCH`
 
 A tout moment, on peut connaitre le status d'une requête via la CLI dans le processus principal, ou via l'API, gérée par le thread `http_server_thread_main`.
 Lorsque la procédure est terminée, on peut aussi voir son résultat.

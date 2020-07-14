@@ -23,7 +23,7 @@ class TweepyAbtraction :
     
     """
     @param tweet_id L'ID du Tweet
-    @return Un objet Tweet (Librairie Tweepy)
+    @return Un objet Status (= Tweet de la librairie Tweepy)
             None si il y a eu un problème
     """
     def get_tweet ( self, tweet_id ) :
@@ -69,3 +69,19 @@ class TweepyAbtraction :
                 print( "Erreur en récupérant l'ID du compte @" + str(account_name) + "." )
                 print( error.reason )
                 return None
+    
+    """
+    Obtenir les Tweets d'un utilisateur.
+    ATTENTION ! Contient tous les Tweets, même les RT.
+    ATTENTION ! Est forcément limité à 3 200 Tweets maximum !
+    
+    @param account_id L'ID du compte Twitter (Ou son nom d'utilisateur)
+    @param since_tweet_id L'ID du tweet depuis lequel scanner (OPTIONNEL)
+    @return Un liste d'objets Status (= Tweet de la librairie Tweepy)
+    """
+    def get_account_tweets ( self, account_id : int, since_tweet_id : int = None ) :
+        return tweepy.Cursor( self.api.user_timeline,
+                              id = account_id,
+                              since_id = since_tweet_id,
+                              tweet_mode = "extended"
+                             ).items()

@@ -26,7 +26,7 @@ class SQLite :
         
         c = self.conn.cursor()
         c.execute( "CREATE TABLE IF NOT EXISTS tweets ( account_id INTEGER, tweet_id INTEGER PRIMARY KEY, image_1_features TEXT, image_2_features TEXT, image_3_features TEXT, image_4_features TEXT, hashtags TEXT )" )
-        c.execute( "CREATE TABLE IF NOT EXISTS accounts ( account_id INTEGER PRIMARY KEY, last_GOT3_indexing_api_date STRING, last_GOT3_indexing_local_date TIMESTAMP )" )
+        c.execute( "CREATE TABLE IF NOT EXISTS accounts ( account_id INTEGER PRIMARY KEY, last_GOT3_indexing_api_date STRING, last_GOT3_indexing_local_date TIMESTAMP, last_TwitterAPI_indexing_tweet_id INTEGER, last_TwitterAPI_indexing_local_date TIMESTAMP )" )
         self.conn.commit()
     
     """
@@ -122,9 +122,26 @@ class SQLite :
     def set_account_last_scan( self, account_id : int, last_update : str ) :
         now = datetime.now()
         c = self.conn.cursor()
-        c.execute( """INSERT INTO accounts VALUES ( ?, ?, ? )
+        c.execute( """INSERT INTO accounts ( account_id, last_GOT3_indexing_api_date, last_GOT3_indexing_local_date ) VALUES ( ?, ?, ? )
                       ON CONFLICT ( account_id ) DO UPDATE SET last_GOT3_indexing_api_date = ?, last_GOT3_indexing_local_date = ?""",
                    ( account_id, last_update, now, last_update, now ) )
+        self.conn.commit()
+    
+    """
+    Stocker l'ID du Tweet le plus récent scanné d'un compte Twitter, via l'API
+    publique de Twitter
+    Si le compte Twitter est déjà dans la base de données, sa date de dernier
+    scan sera mise à jour
+    
+    @param account_id ID du compte Twitter
+    @param tweet_id ID du Tweet scanné le plus récent
+    """
+    def set_account_last_scan_with_TwitterAPI( self, account_id : int, tweet_id : int ) :
+        now = datetime.now()
+        c = self.conn.cursor()
+        c.execute( """INSERT INTO accounts ( account_id, last_TwitterAPI_indexing_tweet_id, last_TwitterAPI_indexing_local_date ) VALUES ( ?, ?, ? )
+                      ON CONFLICT ( account_id ) DO UPDATE SET last_TwitterAPI_indexing_tweet_id = ?, last_TwitterAPI_indexing_local_date = ?""",
+                   ( account_id, tweet_id, now, tweet_id, now ) )
         self.conn.commit()
     
     """
@@ -140,6 +157,26 @@ class SQLite :
         last_scan = c.fetchone()
         if last_scan != None :
             return last_scan[0]
+        else :
+            return None
+    
+    """
+    Récupérer l'ID du dernier Tweet scanné avec l'API Twitter, associé à la
+    date locale de ce dernier scan.
+    
+    @param account_id ID du compte Twitter
+    @return Tuple :
+            - ID du dernier Tweet scanné
+            - 
+            Ou None si le compte est inconnu
+    """
+    def get_account_last_scan_with_TwitterAPI( self, account_id : int ) -> str :
+        c = self.conn.cursor()
+        c.execute( "SELECT last_TwitterAPI_indexing_tweet_id, last_TwitterAPI_indexing_local_date FROM accounts WHERE account_id = ?",
+                   ( account_id, ) )
+        last_scan = c.fetchone()
+        if last_scan != None :
+            return last_scan[0], last_scan[1]
         else :
             return None
     

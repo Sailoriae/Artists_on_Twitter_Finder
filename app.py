@@ -455,9 +455,10 @@ def list_account_tweets_thread_main( thread_id : int ) :
         # thread de listage des tweets d'un compte Twitter"
         request.set_status_list_account_tweets()
         
-        # On liste les tweets des comptes Twitter de la requête
+        # On liste les tweets des comptes Twitter de la requête avec
+        # GetOldTweets3
         for twitter_account in request.twitter_accounts :
-            print( "[list_account_tweets_th" + str(thread_id) + "] Listage des tweets du compte Twitter @" + twitter_account + "." )
+            print( "[list_account_tweets_th" + str(thread_id) + "] Listage des tweets du compte Twitter @" + twitter_account + " avec GetOldTweets3." )
             
             GOT3_list = cbir_engine.get_GOT3_list( twitter_account )
             
@@ -467,9 +468,9 @@ def list_account_tweets_thread_main( thread_id : int ) :
             request.get_GOT3_list_result.append( ( twitter_account,
                                                    GOT3_list ) )
         
-        # Si la liste des tweets trouvés par GetOldTweets3 est vide, ça ne sert
-        # à rien de continuer !
-        if request.get_GOT3_list_result == [] :
+        # Si la liste des tweets trouvés par GetOldTweets3 et par l'API Twitter
+        # sont vides, ça ne sert à rien de continuer !
+        if request.get_GOT3_list_result == [] and request.get_TwitterAPI_list_result == [] :
             request.problem = "NO_TWITTER_ACCOUNT_FOR_THIS_ARTIST"
             request.set_status_done()
             
@@ -534,15 +535,25 @@ def index_twitter_account_thread_main( thread_id : int ) :
         # thread d'indexation des tweets d'un compte Twitter"
         request.set_status_index_twitter_account()
         
-        # On index / scan les comptes Twitter de la requête
+        # On index / scan les comptes Twitter de la requête avec GetOldTweets3
         for (twitter_account, get_GOT3_list_result) in request.get_GOT3_list_result :
-            print( "[index_twitter_account_th" + str(thread_id) + "] Indexation / scan du compte Twitter @" + twitter_account + "." )
+            print( "[index_twitter_account_th" + str(thread_id) + "] Indexation / scan du compte Twitter @" + twitter_account + " avec GetOldTweets3." )
             
             cbir_engine.index_or_update_all_account_tweets( twitter_account, get_GOT3_list_result )
+        
+        # On index / scan les comptes Twitter de la requête avec l'API Twitter
+        for (twitter_account, get_TwitterAPI_list_result) in request.get_TwitterAPI_list_result :
+            print( "[index_twitter_account_th" + str(thread_id) + "] Indexation / scan du compte Twitter @" + twitter_account + " avec l'API Twitter." )
+            
+            cbir_engine.index_or_update_with_TwitterAPI( twitter_account )
         
         # Vider la liste get_GOT3_list_result parce que c'est lourd et qu'on
         # en n'aura plus besoin
         request.get_GOT3_list_result = []
+        
+        # Vider la liste get_TwitterAPI_list_result parce que c'est lourd et qu'on
+        # en n'aura plus besoin
+        request.get_TwitterAPI_list_result = []
         
         # On passe le status de la requête à "En attente de traitement par un
         # thread de recherche d'image inversée"

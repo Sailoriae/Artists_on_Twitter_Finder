@@ -43,6 +43,10 @@ Méthode disponibles :
                     l'indexation d'un compte Twitter.
 - search_tweet() : Rechercher un Tweet dans la base de donnée qui contient une
                    image de requête.
+
+- index_or_update_with_TwitterAPI() : Idem que index_or_update_all_account_tweets(), mais
+                                      avec l'API publique de Twitter via la librairie
+                                      Tweepy.
 """
 class CBIR_Engine_with_Database :
     """
@@ -65,15 +69,21 @@ class CBIR_Engine_with_Database :
     et la liste des caractéristiques extraites par le moteur CBIR.
     
     @param tweet_id L'ID du tweet à indexer
+    @param tweepy_Status_object L'objet Status de la librairie Tweepy, écrase
+                                le paramètre tweet_id (OPTIONNEL)
     @return True si l'indexation a réussi
             False sinon
     """
-    def index_tweet( self, tweet_id : int ) -> bool :
-        tweet = self.twitter.get_tweet( tweet_id )
-        
-        if tweet == None :
-            print( "Impossible d'indexer le Tweet " + str( tweet_id ) + "." )
-            return False
+    def index_tweet( self, tweet_id : int, tweepy_Status_object = None ) -> bool :
+        if tweepy_Status_object == None :
+            tweet = self.twitter.get_tweet( tweet_id )
+            
+            if tweet == None :
+                print( "Impossible d'indexer le Tweet " + str( tweet_id ) + "." )
+                return False
+        else :
+            tweet = tweepy_Status_object
+            tweet_id = tweet.id
         
         print( "Scan tweet " + str( tweet_id ) + "." )
         
@@ -397,6 +407,61 @@ class CBIR_Engine_with_Database :
         
         # Retourner
         return to_return
+    
+    """
+    Scanner tous les tweets d'un compte (Les retweets ne comptent pas).
+    Seuls les tweets avec des médias seront scannés.
+    Et parmis eux, seuls les tweets avec 1 à 4 images seront indexés.
+    Cette méthode utilise l'API publique de Twitter, et est donc limitée au
+    3200 premiers tweets (RT compris) d'un compte.
+    
+    Cette méthode ne recanne pas les tweets déjà scannés.
+    En effet, elle commence sont analyse à la date du dernier scan.
+    Si le compte n'a pas déjà été scanné, tous ses tweets le seront.
+    
+    @param account_name Le nom d'utilisateur du compte à scanner
+                        Attention : Le nom d'utilisateur est ce qu'il y a après
+                        le @ ! Par exemple : Si on veut scanner @jack, il faut
+                        entrer dans cette fonction la chaine "jack".
+    @return True si tout s'est bien passé
+            False si le compte est introuvable
+    """
+    def index_or_update_with_TwitterAPI( self, account_name : str ) -> bool :
+        account_id = self.twitter.get_account_id( account_name )
+        if account_id == None :
+            print( "Compte @" + account_name + " introuvable !" )
+            return False
+        
+        print( "Indexation / scan des Tweets de @" + account_name + "." )
+        
+        since_tweet_id = self.bdd.get_account_last_scan_with_TwitterAPI( account_id )
+        
+        last_tweet_id = None
+        
+        for tweet in self.twitter.get_account_tweets( account_id, since_tweet_id ) :
+            print( "Indexation tweet %s." % ( tweet.id ) )
+            
+            # Le premier tweet est forcément le plus récent
+            if last_tweet_id == None :
+                last_tweet_id = tweet.id
+            
+            # Tester avant d'indexer si le tweet n'est pas déjà dans la BDD
+            if self.bdd.is_tweet_indexed( tweet.id ) :
+                print( "Tweet déjà indexé !" )
+                continue
+            
+            try :
+                tweet.retweeted_status
+            except AttributeError : # Le Tweet n'est pas un RT
+                pass
+            else : # Le Tweet est un RT
+                continue
+            
+            self.index_tweet( 0, tweepy_Status_object = tweet )
+        
+        self.bdd.set_account_last_scan_with_TwitterAPI( account_id, last_tweet_id )
+        
+        return True
 
 
 """
