@@ -6,7 +6,7 @@ L'API de recherche utilisée par GetOldTweet ne retourne les Tweets marqués com
 
 J'ai donc fais les deux améliorations suivantes :
 - Modifier un peu la librairie GOT3 pour qu'on puisse s'y connecter avec un utilisateur Twitter (Via le Cookie `auth_token`),
-- Et ajouter `-filter:safe` à ma recherche.
+- Et ajouter `(filter:safe OR -filter:safe)` à ma recherche.
 Ces deux améliorations (Ensemble, l'une ou l'autre seule ne sert à rien) font que l'API peut retourner en plus les Tweets avec médias qui ne sont pas marqués sensibles des comptes marqués comme sensibles... Mais toujours pas les Tweets avec médias marqués sensibles !
 
 Notre système est donc innefficace pour toute illustration que Twitter détecte comme sensible... Et des fois c'est juste des dunes de sable.
@@ -61,3 +61,8 @@ Maximum du gratuit : 50 requêtes de 100 Tweets par mois. Donc 5 000 Tweets par 
 https://developer.twitter.com/en/pricing/search-fullarchive
 
 La meilleure solution est donc GetOldTweets3... Ou un autre service comme Google Images ou 
+
+___
+
+Voir la méthode `get_GOT3_list()` de la classe `CBIR_Engine_with_Database` pour
+l'utilisation de la désactivation du filtre "safe" la plus optimisée.'

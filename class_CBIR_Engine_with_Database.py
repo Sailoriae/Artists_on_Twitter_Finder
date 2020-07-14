@@ -162,15 +162,56 @@ class CBIR_Engine_with_Database :
         
         since_date = self.bdd.get_account_last_scan( account_id )
         
-        tweetCriteria = GetOldTweets3.manager.TweetCriteria()\
-            .setQuerySearch( "from:" + account_name + " filter:media -filter:retweets -filter:safe" )
+        # Note importante : GOT3 ne peut pas voir les Tweets marqués comme
+        # sensibles... Mais il peut voir les tweets non-sensibles de comptes
+        # sensibles en désactivant le filtre "safe" et en étant connecté
+        # à une session !
+        # Cependant, désactiver le filtre "safe" masque les tweets de comptes
+        # non-sensibles, il faut donc faire avec et sans !
         
+        # On fait d'abord avec le filtre "safe"
+        tweetCriteria = GetOldTweets3.manager.TweetCriteria()\
+            .setQuerySearch( "from:" + account_name + " filter:media -filter:retweets (filter:safe OR -filter:safe)" )
         if since_date != None :
             tweetCriteria.setSince( since_date )
         
-        return ( GetOldTweets3.manager.TweetManager.getTweets(tweetCriteria,
-                                                              auth_token=param.TWITTER_AUTH_TOKEN),
-                 account_id )
+        to_return = GetOldTweets3.manager.TweetManager.getTweets( tweetCriteria,
+                                                                  auth_token=param.TWITTER_AUTH_TOKEN )
+        
+        # Si la liste est vide, c'est peut-être que le compte à scanner est
+        # marqué comme sensible. Donc il faut refaire, mais en désactivant
+        # complètement le filtre "safe"
+        if to_return == [] :
+            tweetCriteria = GetOldTweets3.manager.TweetCriteria()\
+                .setQuerySearch( "from:" + account_name + " filter:media -filter:retweets -filter:safe" )
+            if since_date != None :
+                tweetCriteria.setSince( since_date )
+            
+            to_return = GetOldTweets3.manager.TweetManager.getTweets( tweetCriteria,
+                                                                       auth_token=param.TWITTER_AUTH_TOKEN )
+        
+        # Note : Le filtre "safe" filtre aussi les "gros-mots", par exemple :
+        # "putain".
+        # Ainsi, "(filter:safe OR -filter:safe)" permet de voir ces tweets,
+        # mais pas les tweets de comptes marqués sensibles.
+        # C'est pour cela qu'il y a le "if" avec une deuxième passe.
+        #
+        # Exemple de compte marqué sensible : "@rikatantan2nd"
+        # (Compte pris au hasard pour tester, désolé)
+        
+        # Note 2 : J'y comprend plus rien, j'ai réussi à scanner les tweets de
+        # "@Lewdlestia", qui est pourtant un compte marqué comme sensible, et
+        # qui tweet que des médias sensibles (Complètement NSFW, ne pas aller
+        # voir).
+        # GOT3 en retourne 12 000 sur les 16 000 actuels. Normal que tous ne
+        # soient pas indexés car c'est un bot qui Tweet toutes les heures.
+        
+        # Le problème c'est que Twitter sont très flous sur le sujet des
+        # comptes et des tweets marqués sensibles...
+        
+        # Bref, ce système fonctionne.
+        
+        return ( to_return, account_id )
     
     """
     Scanner tous les tweets d'un compte (Les retweets ne comptent pas).
