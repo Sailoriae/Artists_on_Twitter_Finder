@@ -3,6 +3,7 @@
 
 import sqlite3
 from typing import List
+from datetime import datetime
 
 try :
     from class_SQLite_Image_Features_Iterator import SQLite_Image_Features_Iterator
@@ -25,7 +26,7 @@ class SQLite :
         
         c = self.conn.cursor()
         c.execute( "CREATE TABLE IF NOT EXISTS tweets ( account_id INTEGER, tweet_id INTEGER PRIMARY KEY, image_1_features TEXT, image_2_features TEXT, image_3_features TEXT, image_4_features TEXT, hashtags TEXT )" )
-        c.execute( "CREATE TABLE IF NOT EXISTS accounts ( account_id INTEGER PRIMARY KEY, last_scan STRING )" )
+        c.execute( "CREATE TABLE IF NOT EXISTS accounts ( account_id INTEGER PRIMARY KEY, last_GOT3_indexing_api_date STRING, last_GOT3_indexing_local_date TIMESTAMP )" )
         self.conn.commit()
     
     """
@@ -119,10 +120,11 @@ class SQLite :
     @param last_scan Date du dernier scan, au format YYYY-MM-DD
     """
     def set_account_last_scan( self, account_id : int, last_update : str ) :
+        now = datetime.now()
         c = self.conn.cursor()
-        c.execute( """INSERT INTO accounts VALUES ( ?, ? )
-                      ON CONFLICT ( account_id ) DO UPDATE SET last_scan = ?""",
-                   ( account_id, last_update, last_update, ) )
+        c.execute( """INSERT INTO accounts VALUES ( ?, ?, ? )
+                      ON CONFLICT ( account_id ) DO UPDATE SET last_GOT3_indexing_api_date = ?, last_GOT3_indexing_local_date = ?""",
+                   ( account_id, last_update, now, last_update, now ) )
         self.conn.commit()
     
     """
@@ -133,7 +135,7 @@ class SQLite :
     """
     def get_account_last_scan( self, account_id : int ) -> str :
         c = self.conn.cursor()
-        c.execute( "SELECT last_scan FROM accounts WHERE account_id = ?",
+        c.execute( "SELECT last_GOT3_indexing_api_date FROM accounts WHERE account_id = ?",
                    ( account_id, ) )
         last_scan = c.fetchone()
         if last_scan != None :
