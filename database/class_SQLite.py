@@ -24,7 +24,7 @@ class SQLite :
         self.conn = sqlite3.connect( database_name )
         
         c = self.conn.cursor()
-        c.execute( "CREATE TABLE IF NOT EXISTS tweets ( account_id INTEGER, tweet_id INTEGER PRIMARY KEY, image_1_features TEXT, image_2_features TEXT, image_3_features TEXT, image_4_features TEXT )" )
+        c.execute( "CREATE TABLE IF NOT EXISTS tweets ( account_id INTEGER, tweet_id INTEGER PRIMARY KEY, image_1_features TEXT, image_2_features TEXT, image_3_features TEXT, image_4_features TEXT, hashtags TEXT )" )
         c.execute( "CREATE TABLE IF NOT EXISTS accounts ( account_id INTEGER PRIMARY KEY, last_scan STRING )" )
         self.conn.commit()
     
@@ -49,12 +49,14 @@ class SQLite :
     @param cbir_features_4 La liste des caractéristiques issues de l'analyse
                            CBIR pour la quatrième image du Tweet
                            (OPTIONNEL)
+    @param hashtags La liste des hashtags du Tweet (OPTIONNEL)
     """
     def insert_tweet( self, account_id : int, tweet_id : int,
                       cbir_features_1 : List[float],
                       cbir_features_2 : List[float] = None,
                       cbir_features_3 : List[float] = None,
-                      cbir_features_4 : List[float] = None ) :
+                      cbir_features_4 : List[float] = None,
+                      hashtags : List[str] = None ) :
         c = self.conn.cursor()
         
         cbir_features_1_str = ";".join( [ str( value ) for value in cbir_features_1 ] )
@@ -74,14 +76,20 @@ class SQLite :
         else :
             cbir_features_4_str = None
         
-        c.execute( """INSERT INTO tweets VALUES ( ?, ?, ?, ?, ?, ? )
+        if hashtags != None and hashtags != [] :
+            hashtags_str = ";".join( [ hashtag for hashtag in hashtags ] )
+        else :
+            hashtags_str = None
+        
+        c.execute( """INSERT INTO tweets VALUES ( ?, ?, ?, ?, ?, ?, ? )
                       ON CONFLICT ( tweet_id ) DO NOTHING """, # Si le tweet est déjà stocké, on ne fait rien
                    ( account_id,
                      tweet_id,
                      cbir_features_1_str,
                      cbir_features_2_str,
                      cbir_features_3_str,
-                     cbir_features_4_str,) )
+                     cbir_features_4_str,
+                     hashtags_str,) )
         self.conn.commit()
     
     """

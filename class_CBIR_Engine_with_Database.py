@@ -131,6 +131,18 @@ class CBIR_Engine_with_Database :
             print( error )
             return False
         
+        # Prendre les hashtags
+        try :
+            hashtags = []
+            for hashtag in tweet._json["entities"]["hashtags"] :
+                # On ajoute le "#" car GOT3 le laisse, et l'API Twitter l'enlève
+                # Donc on fait comme GOT3
+                hashtags.append( "#" + hashtag["text"] )
+        except KeyError as error :
+             print( "Erreur en récupérant les hashtags." )
+             print( error )
+             hashtags = None
+        
         # Stockage des résultats
         self.bdd.insert_tweet(
             tweet._json["user"]["id"],
@@ -139,6 +151,7 @@ class CBIR_Engine_with_Database :
             image_2,
             image_3,
             image_4,
+            hashtags
         )
         
         return True
@@ -310,6 +323,11 @@ class CBIR_Engine_with_Database :
                 print( error )
                 continue
             
+            # Prendre les hashtags du Tweet
+            # Fonctionne avec n'importe quel Tweet, même ceux entre 160 et 280
+            # caractères (GOT3 les voit en entier)
+            hashtags = tweets_to_scan[i].hashtags.split(" ")
+            
             # Stockage des résultats
             self.bdd.insert_tweet(
                 tweets_to_scan[i].author_id,
@@ -318,6 +336,7 @@ class CBIR_Engine_with_Database :
                 image_2,
                 image_3,
                 image_4,
+                hashtags
             )
         
         # On met à jour la date du dernier scan dans la base de données
