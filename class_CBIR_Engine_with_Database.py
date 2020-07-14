@@ -77,6 +77,11 @@ class CBIR_Engine_with_Database :
         
         print( "Scan tweet " + str( tweet_id ) + "." )
         
+        # Tester avant d'indexer si le tweet n'est pas déjà dans la BDD
+        if self.bdd.is_tweet_indexed( tweet_id ) :
+            print( "Tweet déjà indexé !" )
+            return True
+        
         # Liste des URLs des images dans ce tweet
         tweet_images_url : List[str] = []
         
@@ -279,6 +284,11 @@ class CBIR_Engine_with_Database :
         
         for i in range( length ) :
             print( "Indexation tweet %s (%d/%d)." % ( tweets_to_scan[i].id, i+1, length) )
+            
+            # Tester avant d'indexer si le tweet n'est pas déjà dans la BDD
+            if self.bdd.is_tweet_indexed( tweets_to_scan[i].id ) :
+                print( "Tweet déjà indexé !" )
+                continue
             
             image_1 = None
             image_2 = None

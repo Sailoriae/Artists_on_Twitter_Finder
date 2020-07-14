@@ -154,6 +154,16 @@ class SQLite :
         c.execute( "SELECT COUNT( * ) FROM accounts" )
         count_accounts = c.fetchone()[0]
         return [ count_tweets, count_accounts ]
+    
+    """
+    Savoir si un Tweet est déjà indexé ou non
+    @param tweet_id L'ID du tweet
+    @return True ou False
+    """
+    def is_tweet_indexed( self, tweet_id : int ) -> bool :
+        c = self.conn.cursor()
+        c.execute( "SELECT * FROM tweets WHERE tweet_id = ?", ( tweet_id, ) )
+        return c.fetchone() != None
 
 
 """
