@@ -3,11 +3,21 @@
 
 import re
 
-from link_finder import DeviantArt
-from link_finder import Pixiv
-from link_finder import Danbooru
+try :
+    from supported_websites import DeviantArt
+    from supported_websites import Pixiv
+    from supported_websites import Danbooru
+    from supported_websites.utils import filter_twitter_accounts_list
+except ModuleNotFoundError : # Si on a été exécuté en temps que module
+    from .supported_websites import DeviantArt
+    from .supported_websites import Pixiv
+    from .supported_websites import Danbooru
+    from .supported_websites.utils import filter_twitter_accounts_list
 
-from link_finder.utils import filter_twitter_accounts_list
+# Ajouter le répertoire parent au PATH pour pouvoir importer les paramètres
+from sys import path as sys_path
+from os import path as os_path
+sys_path.append(os_path.dirname(os_path.dirname(os_path.abspath(__file__))))
 import parameters as param
 
 

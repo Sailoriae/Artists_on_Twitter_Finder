@@ -1,3 +1,3 @@
 # Vendored files and directories are excluded from language stats on Github.
 
-lib_GetOldTweets3/* linguist-vendored
+link_finder/lib_GetOldTweets3/* linguist-vendored

@@ -2,14 +2,25 @@
 # coding: utf-8
 
 from cv2 import error as ErrorOpenCV
-
-import lib_GetOldTweets3 as GetOldTweets3
-
-from cbir_engine import CBIR_Engine
-from database import SQLite
-from twitter import TweepyAbtraction
-from utils import url_to_cv2_image
 from typing import List
+
+try :
+    from lib_GetOldTweets3 import manager as GetOldTweets3_manager
+    from cbir_engine import CBIR_Engine
+    from database import SQLite
+    from twitter import TweepyAbtraction
+    from utils import url_to_cv2_image
+except ModuleNotFoundError : # Si on a été exécuté en temps que module
+    from .lib_GetOldTweets3 import manager as GetOldTweets3_manager
+    from .cbir_engine import CBIR_Engine
+    from .database import SQLite
+    from .twitter import TweepyAbtraction
+    from .utils import url_to_cv2_image
+
+# Ajouter le répertoire parent au PATH pour pouvoir importer les paramètres
+from sys import path as sys_path
+from os import path as os_path
+sys_path.append(os_path.dirname(os_path.dirname(os_path.abspath(__file__))))
 import parameters as param
 
 # On peut télécharger les images des tweets donnés par GetOldTweets3 en
@@ -198,24 +209,24 @@ class CBIR_Engine_with_Database :
         # non-sensibles, il faut donc faire avec et sans !
         
         # On fait d'abord avec le filtre "safe"
-        tweetCriteria = GetOldTweets3.manager.TweetCriteria()\
+        tweetCriteria = GetOldTweets3_manager.TweetCriteria()\
             .setQuerySearch( "from:" + account_name + " filter:media -filter:retweets (filter:safe OR -filter:safe)" )
         if since_date != None :
             tweetCriteria.setSince( since_date )
         
-        to_return = GetOldTweets3.manager.TweetManager.getTweets( tweetCriteria,
+        to_return = GetOldTweets3_manager.TweetManager.getTweets( tweetCriteria,
                                                                   auth_token=param.TWITTER_AUTH_TOKEN )
         
         # Si la liste est vide, c'est peut-être que le compte à scanner est
         # marqué comme sensible. Donc il faut refaire, mais en désactivant
         # complètement le filtre "safe"
         if to_return == [] :
-            tweetCriteria = GetOldTweets3.manager.TweetCriteria()\
+            tweetCriteria = GetOldTweets3_manager.TweetCriteria()\
                 .setQuerySearch( "from:" + account_name + " filter:media -filter:retweets -filter:safe" )
             if since_date != None :
                 tweetCriteria.setSince( since_date )
             
-            to_return = GetOldTweets3.manager.TweetManager.getTweets( tweetCriteria,
+            to_return = GetOldTweets3_manager.TweetManager.getTweets( tweetCriteria,
                                                                        auth_token=param.TWITTER_AUTH_TOKEN )
         
         # Note : Le filtre "safe" filtre aussi les "gros-mots", par exemple :

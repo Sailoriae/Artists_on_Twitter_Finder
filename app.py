@@ -15,12 +15,12 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from socketserver import ThreadingMixIn
 from urllib.parse import parse_qs, urlsplit
 
-from class_CBIR_Engine_with_Database import CBIR_Engine_with_Database
-from class_Link_Finder import Link_Finder
+from tweet_finder import CBIR_Engine_with_Database
+from link_finder import Link_Finder
 import parameters as param
 
-from database import SQLite
-from twitter import TweepyAbtraction
+from tweet_finder.database import SQLite
+from tweet_finder.twitter import TweepyAbtraction
 
 
 # TODO : Thread de vidage de la liste des requêtes lorsqu'elles sont au niveau
