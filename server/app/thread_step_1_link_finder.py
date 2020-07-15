@@ -18,7 +18,7 @@ from tweet_finder.twitter import TweepyAbtraction
 ETAPE 1 du traitement d'une requête.
 Thread de Link Finder.
 """
-def link_finder_thread_main( thread_id : int, pipeline ) :
+def thread_step_1_link_finder( thread_id : int, pipeline ) :
     # Initialisation de notre moteur de recherche des comptes Twitter
     finder_engine = Link_Finder()
     
@@ -33,18 +33,17 @@ def link_finder_thread_main( thread_id : int, pipeline ) :
         
         # On tente de sortir une requête de la file d'attente
         try :
-            request = pipeline.link_finder_queue.get( block = False )
+            request = pipeline.step_1_link_finder_queue.get( block = False )
         # Si la queue est vide, on attend une seconde et on réessaye
         except queue.Empty :
             sleep( 1 )
             continue
         
-        # On passe le status de la requête à "En cours de traitement par un
-        # thread de Link Finder"
-        request.set_status_link_finder()
+        # On passe la requête à l'étape suivante, c'est à dire notre étape
+        pipeline.set_request_to_next_step( request )
         
-        print( "[link_finder_th" + str(thread_id) + "] Link Finder pour :\n" +
-               "[link_finder_th" + str(thread_id) + "] " + request.input_url )
+        print( "[step_1_th" + str(thread_id) + "] Link Finder pour :\n" +
+               "[step_1_th" + str(thread_id) + "] " + request.input_url )
         
         # On lance la recherche des comptes Twitter de l'artiste
         twitter_accounts = finder_engine.get_twitter_accounts( request.input_url )
@@ -55,7 +54,7 @@ def link_finder_thread_main( thread_id : int, pipeline ) :
             request.problem = "INVALID_URL"
             request.set_status_done()
             
-            print( "[link_finder_th" + str(thread_id) + "] URL invalide ! Elle ne mène pas à une illustration." )
+            print( "[step_1_th" + str(thread_id) + "] URL invalide ! Elle ne mène pas à une illustration." )
             continue
         
         # Si jamais le site n'est pas supporté, on ne va pas plus loin avec
@@ -64,7 +63,7 @@ def link_finder_thread_main( thread_id : int, pipeline ) :
             request.problem = "UNSUPPORTED_WEBSITE"
             request.set_status_done()
             
-            print( "[link_finder_th" + str(thread_id) + "] Site non supporté !" )
+            print( "[step_1_th" + str(thread_id) + "] Site non supporté !" )
             continue
         
         # Si jamais aucun compte Twitter n'a été trouvé, on ne va pas plus loin
@@ -73,7 +72,7 @@ def link_finder_thread_main( thread_id : int, pipeline ) :
             request.problem = "NO_TWITTER_ACCOUNT_FOR_THIS_ARTIST"
             request.set_status_done()
             
-            print( "[link_finder_th" + str(thread_id) + "] Aucun compte Twitter trouvé pour l'artiste de cette illustration !" )
+            print( "[step_1_th" + str(thread_id) + "] Aucun compte Twitter trouvé pour l'artiste de cette illustration !" )
             continue
         
         # Stocker les comptes Twitter trouvés
@@ -92,28 +91,22 @@ def link_finder_thread_main( thread_id : int, pipeline ) :
             request.problem = "NO_VALID_TWITTER_ACCOUNT_FOR_THIS_ARTIST"
             request.set_status_done()
             
-            print( "[link_finder_th" + str(thread_id) + "] Aucun compte Twitter valide trouvé pour l'artiste de cette illustration !" )
+            print( "[step_1_th" + str(thread_id) + "] Aucun compte Twitter valide trouvé pour l'artiste de cette illustration !" )
             continue
         
-        print( "[link_finder_th" + str(thread_id) + "] Comptes Twitter trouvés pour cet artiste :\n" +
-               "[link_finder_th" + str(thread_id) + "] " + str( twitter_accounts ) )
+        print( "[step_1_th" + str(thread_id) + "] Comptes Twitter trouvés pour cet artiste :\n" +
+               "[step_1_th" + str(thread_id) + "] " + str( twitter_accounts ) )
         
         # Théoriquement, on a déjà vérifié que l'URL existe, donc on devrait
         # forcément trouver une image pour cette requête
         request.image_url = finder_engine.get_image_url( request.input_url )
         
-        print( "[link_finder_th" + str(thread_id) + "] URL de l'image trouvée :\n" +
-               "[link_finder_th" + str(thread_id) + "] " + request.image_url )
+        print( "[step_1_th" + str(thread_id) + "] URL de l'image trouvée :\n" +
+               "[step_1_th" + str(thread_id) + "] " + request.image_url )
         
-        # On passe le status de la requête à "En attente de traitement par un
-        # thread de listage des tweets d'un compte Twitter"
-        request.set_status_wait_list_account_tweets()
-        
-        # On met la requête dans la file d'attente de listage des tweets d'un
-        # compte Twitter
-        # Si on est dans le cas d'une procédure complète
-        if request.full_pipeline :
-            pipeline.list_account_tweets_queue.put( request )
+        # On passe la requête à l'étape suivante
+        # C'est la procédure pipeline.set_request_to_next_step qui vérifie si elle peut
+        pipeline.set_request_to_next_step( request )
     
-    print( "[link_finder_th" + str(thread_id) + "] Arrêté !" )
+    print( "[step_1_th" + str(thread_id) + "] Arrêté !" )
     return

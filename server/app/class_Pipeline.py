@@ -17,49 +17,59 @@ Classe contenant l'ensemble des requêtes dans le système.
 A INITIALISER UNE SEULE FOIS !
 
 Les objets sont passés par adresse en Python.
-Donc ils peuvent être en même temps dans dans la liste "requests" en en même temps
-dans les différentes files d'attente (Objets queue.Queue) !
+Donc ils peuvent être en même temps dans dans la liste "requests" en en même
+temps dans les différentes files d'attente (Objets queue.Queue) !
 
 De plus, l'objet queue.Queue() est safe pour le multi-threads.
 """
 class Pipeline :
     def __init__ ( self ) :
-        # Variable pour éteindre le service
+        # Variable pour éteindre tout le système
         self.keep_service_alive = True
         
-        # Liste des requêtes effectuées sur notre système
+        # Liste des requêtes qui vont passer par toute la procédure
+        # C'est à dire les requêtes données par via l'API web ou la commande
+        # "request" de la CLI.
         self.requests = []
         
         # Sémaphore pour l'accès à la liste request
         self.requests_sem = threading.Semaphore()
         
+        
         # ETAPE 1, code de status de la requête : 1
         # File d'attente de Link Finder
-        self.link_finder_queue = queue.Queue()
+        # Code de status de la requête : 0
+        self.step_1_link_finder_queue = queue.Queue()
         
-        # ETAPE 2, PARTIE 1/2, code de status de la requête : 3
+        # ETAPE 2, code de status de la requête : 3
         # File d'attente de listage des tweets d'un compte Twitter
-        self.list_account_tweets_queue = queue.Queue()
+        # Code de status de la requête : 2
+        # Pour l'indexation GetOldTweets3
+        self.step_2_GOT3_list_account_tweets_queue = queue.Queue()
         
-        # ETAPE 2, PARTIE 2/2, code de status de la requête : 5
+        # ETAPE 3, code de status de la requête : 5
         # File d'attente d'indexation des tweets d'un compte Twitter
-        self.index_twitter_account_queue = queue.Queue()
+        # Code de status de la requête : 4
+        # Avec GetOldTweets3
+        self.step_3_GOT3_index_account_tweets_queue = queue.Queue()
         
-        # ETAPE 3, code de status de la requête : 7
+        # ETAPE 4, code de status de la requête : 7
+        # File d'attente d'indexation des tweets d'un compte Twitter
+        # Code de status de la requête : 6
+        # Avec l'API Twitter publique
+        self.step_4_TwitterAPI_index_account_tweets_queue = queue.Queue()
+        
+        # ETAPE 5, code de status de la requête : 9
         # File d'attente de la recherche d'image inversée
-        self.reverse_search_queue = queue.Queue()
-        
-        
-        # Liste des ID de comptes Twitter en cours de listage
-        # Dans un thread list_account_tweets_thread_main()
-        self.currently_listing = []
-        
-        # Sémaphore d'accès à la liste précédente
-        self.currently_listing_sem = threading.Semaphore()
+        # Code de status de la requête : 8
+        self.step_5_reverse_search_queue = queue.Queue()
         
         
         # Liste des ID de comptes Twitter en cours d'indexation
-        # Dans un thread index_twitter_account_thread_main()
+        # Dans l'un des 3 threads de l'indexation :
+        # - thread_step_2_GOT3_list_account_tweets
+        # - thread_step_3_GOT3_index_account_tweets
+        # - thread_step_4_TwitterAPI_index_account_tweets
         self.currently_indexing = []
         
         # Sémaphore d'accès à la liste précédente
@@ -78,14 +88,38 @@ class Pipeline :
                 self.requests_sem.release()
                 return
         
-        request = Request( illust_url, full_pipeline = True )
+        request = Request( illust_url, do_link_finder = True,
+                                       do_indexing = True,
+                                       do_reverse_search = True )
         self.requests.append( request ) # Passé par adresse car c'est un objet
         
         self.requests_sem.release() # Seulement ici !
         
-        self.link_finder_queue.put( request ) # Passé par addresse car c'est un objet
+        self.step_1_link_finder_queue.put( request ) # Passé par addresse car c'est un objet
         
         return request
+    
+    """
+    Passer la requête à l'étape suivante.
+    """
+    def set_request_to_next_step ( self, request : Request ) :
+        if request.status < 10 :
+            request.status += 1
+        
+        if request.status == 0 and request.do_link_finder :
+            self.step_1_link_finder_queue.put( request )
+        
+        if request.status == 2 and request.do_indexing :
+            self.step_2_GOT3_list_account_tweets_queue.put( request )
+        
+        if request.status == 4 and request.do_indexing :
+            self.step_3_GOT3_index_account_tweets_queue.put( request )
+        
+        if request.status == 6 and request.do_indexing :
+            self.step_4_TwitterAPI_index_account_tweets_queue.put( request )
+        
+        if request.status == 8 and request.do_reverse_search :
+            self.step_5_reverse_search_queue.put( request )
     
     """
     Obtenir l'objet d'une requête.
@@ -102,33 +136,6 @@ class Pipeline :
         self.requests_sem.release()
         
         return None
-    
-    """
-    Dire qu'on est en train de lister les tweets de ces IDs de comptes Twitter.
-    
-    @param twitter_account_IDs Liste d'IDs de comptes Twitter
-    @return False si aucun des IDs de la liste était en cours de listage.
-            True si au moins un ID était déjà en cours de listage ! Les autres
-            IDs n'ont pas étés marqués comme en cours de listage, il ne faut
-            pas continuer avec cette liste !
-    """
-    def is_listing ( self, twitter_account_IDs : List[int] ) -> bool :
-        self.currently_listing_sem.acquire()
-        
-        IDs_to_add = []
-        
-        for account_id in twitter_account_IDs :
-            # Vérifier que l'ID n'est pas déjà dans la liste
-            if account_id in self.currently_listing :
-                self.currently_listing_sem.release()
-                return True
-            else :
-                IDs_to_add.append( account_id )
-        
-        self.currently_listing += IDs_to_add
-        self.currently_listing_sem.release()
-        
-        return False
     
     """
     Dire qu'on est en train d'indexer les tweets de ces IDs de comptes Twitter.
@@ -156,20 +163,6 @@ class Pipeline :
         self.currently_indexing_sem.release()
         
         return False
-    
-    """
-    Dire qu'on a fini de lister les tweets de ces IDs de compte Twitter.
-    
-    @param twitter_account_IDs Liste d'IDs de comptes Twitter
-    """
-    def listing_done ( self, twitter_account_IDs : List[int] ) :
-        self.currently_listing_sem.acquire()
-        new_list = []
-        for account_id in self.currently_listing :
-            if not account_id in twitter_account_IDs :
-                new_list.append( account_id )
-        self.currently_listing = new_list
-        self.currently_listing_sem.release()
     
     """
     Dire qu'on a fini d'indexer les tweets de ces IDs de compte Twitter.

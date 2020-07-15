@@ -9,15 +9,26 @@ Cet objet est le même durant tout le processus de traitement.
 class Request :
     """
     @param input_url URL de l'illustration de requête.
-    @param full_pipeline Est ce que la requête a été mise dans la liste
-                         `requests`... C'est à dire : Doit elle faire toute la
-                         procédure de traitement / tout le pipeline ?
-                         (OPTIONNEL, non par défaut)
-                         Seule la fonction launch_process() doit être utilisée
-                         pour lancer une procédure complète.
     """
-    def __init__ ( self, input_url, full_pipeline = False ) :
-        self.full_pipeline = full_pipeline
+    def __init__ ( self, input_url,
+                         do_link_finder = False,
+                         do_indexing = False,
+                         do_reverse_search = False ) :
+        # Est ce que la requête doit faire l'étape 1, c'est à dire passer dans
+        # le "thread_step_1_link_finder"
+        self.do_link_finder = do_link_finder
+        
+        # Est ce que cette requête doit faire les étapes 2, 3 et 4, c'est à
+        # dire passer dans les 3 threads suivants :
+        # - "thread_step_2_GOT3_list_account_tweets"
+        # - "thread_step_3_GOT3_index_account_tweets"
+        # - "thread_step_4_TwitterAPI_index_account_tweets"
+        self.do_indexing = do_indexing
+        
+        # Est ce que cette requête doit faire l'étape 5, c'est à dire passer
+        # dans le thread "thread_step_5_reverse_search"
+        self.do_reverse_search = do_reverse_search
+        
         
         # Une requête est identifiée par son URL de requête, c'est à dire l'URL
         # de l'illustration demandée
@@ -45,46 +56,46 @@ class Request :
         # Est une liste d'objets Image_in_DB
         self.founded_tweets = []
         
+        
         # Status du traitement de cette requête :
         # 0 = En attente de traitement par un thread de Link Finder
         # 1 = En cours de traitement par un thread de Link Finder
-        #     link_finder_thread_main()
+        #     thread_step_1_link_finder()
+        #
         # 2 = En attente de traitement par un thread de listage des tweet
-        #     d'un compte Twitter
+        #     d'un compte Twitter avec GetOldTweets3
         # 3 = En cours de traitement par un thread de listage des tweets d'un
-        #     compte Twitter
-        #     list_account_tweets_thread_main()
+        #     compte Twitter avec GetOldTweets3
+        #     thread_step_2_GOT3_list_account_tweets()
+        #
         # 4 = En attente de traitement par un thread d'indexation des tweet
-        #     d'un compte Twitter
+        #     d'un compte Twitter avec GetOldTweets3
         # 5 = En cours de traitement par un thread d'indexation des tweets d'un
-        #     compte Twitter
-        #     index_twitter_account_thread_main()
-        # 6 = En attente de traitement par un thread de recherche d'image inversée
-        # 7 = En cours de traitement par un thread de recherche d'image inversée
-        #     reverse_search_thread_main()
-        # 8 = Fin de traitement
-        self.status = 0
+        #     compte Twitter avec GetOldTweets3
+        #     thread_step_3_GOT3_index_account_tweets()
+        #
+        # 6 = En attente de traitement par un thread d'indexation des tweet
+        #     d'un compte Twitter avec l'API Twitter publique
+        # 7 = En cours de traitement par un thread d'indexation des tweets d'un
+        #     compte Twitter avec l'API Twitter publique
+        #     thread_step_4_TwitterAPI_index_account_tweets()
+        #
+        # 8 = En attente de traitement par un thread de recherche d'image inversée
+        # 9 = En cours de traitement par un thread de recherche d'image inversée
+        #     thread_step_5_reverse_search()
+        #
+        # 10 = Fin de traitement
+        if do_link_finder :
+            self.status = 0
+        elif do_indexing :
+            self.status = 3
+        elif do_reverse_search :
+            self.status = 9
     
-    def set_status_wait_link_finder( self ):
-        self.status = 0
-    def set_status_link_finder( self ):
-        self.status = 1
-    def set_status_wait_list_account_tweets( self ):
-        self.status = 2
-    def set_status_list_account_tweets( self ):
-        self.status = 3
-    def set_status_wait_index_twitter_account( self ):
-        self.status = 4
-    def set_status_index_twitter_account( self ):
-        self.status = 5
-    def set_status_wait_reverse_search_thread( self ):
-        self.status = 6
-    def set_status_reverse_search_thread( self ):
-        self.status = 7
-    def set_status_done( self ):
-        self.status = 8
+    def set_status_done( self ) :
+        self.status = 10
     
-    def get_status_string( self ):
+    def get_status_string( self ) :
         if self.status == 0 :
             return "WAIT_LINK_FINDER"
         if self.status == 1 :
@@ -98,8 +109,12 @@ class Request :
         if self.status == 5 :
             return "INDEX_ACCOUNT_TWEETS"
         if self.status == 6 :
-            return "WAIT_IMAGE_REVERSE_SEARCH"
+            return "WAIT_SECOND_INDEX_ACCOUNT_TWEETS"
         if self.status == 7 :
-            return "IMAGE_REVERSE_SEARCH"
+            return "SECOND_INDEX_ACCOUNT_TWEETS"
         if self.status == 8 :
+            return "WAIT_IMAGE_REVERSE_SEARCH"
+        if self.status == 9 :
+            return "IMAGE_REVERSE_SEARCH"
+        if self.status == 10 :
             return "END"

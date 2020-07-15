@@ -19,11 +19,12 @@ import parameters as param
 """
 Thread du serveur HTTP.
 """
-def http_server_thread_main( thread_id : int, pipeline ) :
+def thread_http_server( thread_id : int, pipeline ) :
     http_server = Threaded_HTTP_Server( ("", param.HTTP_SERVER_PORT ), HTTP_Server )
+    
     while pipeline.keep_service_alive :
         http_server.handle_request()
     http_server.server_close()
     
-    print( "[http_server_th" + str(thread_id) + "] Arrêté !" )
+    print( "[HTTP Server Th" + str(thread_id) + "] Arrêté !" )
     return

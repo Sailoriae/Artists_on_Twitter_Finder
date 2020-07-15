@@ -80,8 +80,15 @@ class TweepyAbtraction :
     @return Un liste d'objets Status (= Tweet de la librairie Tweepy)
     """
     def get_account_tweets ( self, account_id : int, since_tweet_id : int = None ) :
-        return tweepy.Cursor( self.api.user_timeline,
-                              id = account_id,
-                              since_id = since_tweet_id,
-                              tweet_mode = "extended"
-                             ).items()
+        # tweepy.Cursor gère les Rate Limits
+        if since_tweet_id == None :
+            return tweepy.Cursor( self.api.user_timeline,
+                                  id = account_id,
+                                  tweet_mode = "extended"
+                                 ).items()
+        else :
+            return tweepy.Cursor( self.api.user_timeline,
+                                  id = account_id,
+                                  since_id = since_tweet_id,
+                                  tweet_mode = "extended"
+                                 ).items()

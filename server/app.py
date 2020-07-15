@@ -46,45 +46,53 @@ def get_stats() :
 """
 Démarrage des threads.
 """
-link_finder_threads = []
+threads_step_1_link_finder = []
 for i in range( param.NUMBER_OF_LINK_FINDER_THREADS ) :
-    link_finder_thread = threading.Thread( name = "link_finder_" + str(i+1),
-                                           target = link_finder_thread_main,
-                                           args = ( i+1, pipeline, ) )
-    link_finder_thread.start()
-    link_finder_threads.append( link_finder_thread )
+    thread = threading.Thread( name = "step_1_link_finder_th" + str(i+1),
+                               target = thread_step_1_link_finder,
+                               args = ( i+1, pipeline, ) )
+    thread.start()
+    threads_step_1_link_finder.append( thread )
 
-list_account_tweets_threads = []
+threads_step_2_GOT3_list_account_tweets = []
 for i in range( param.NUMBER_OF_LIST_ACCOUNT_TWEETS_THREADS ) :
-    list_account_tweets_thread = threading.Thread( name = "list_account_tweets_" + str(i+1),
-                                                     target = list_account_tweets_thread_main,
-                                                     args = ( i+1, pipeline, ) )
-    list_account_tweets_thread.start()
-    list_account_tweets_threads.append( list_account_tweets_thread )
+    thread = threading.Thread( name = "step_2_GOT3_list_account_tweets_th" + str(i+1),
+                               target = thread_step_2_GOT3_list_account_tweets,
+                               args = ( i+1, pipeline, ) )
+    thread.start()
+    threads_step_2_GOT3_list_account_tweets.append( thread )
 
-index_twitter_account_threads = []
+threads_step_3_GOT3_index_account_tweets = []
 for i in range( param.NUMBER_OF_INDEX_TWITTER_ACCOUNT_THREADS ) :
-    index_twitter_account_thread = threading.Thread( name = "index_twitter_account_" + str(i+1),
-                                                     target = index_twitter_account_thread_main,
-                                                     args = ( i+1, pipeline, ) )
-    index_twitter_account_thread.start()
-    index_twitter_account_threads.append( index_twitter_account_thread )
+    thread = threading.Thread( name = "step_3_GOT3_index_account_tweets_th" + str(i+1),
+                               target = thread_step_3_GOT3_index_account_tweets,
+                               args = ( i+1, pipeline, ) )
+    thread.start()
+    threads_step_3_GOT3_index_account_tweets.append( thread )
 
-reverse_search_threads = []
+threads_step_4_TwitterAPI_index_account_tweets = []
+for i in range( param.NUMBER_OF_INDEX_TWITTER_ACCOUNT_THREADS ) :
+    thread = threading.Thread( name = "step_4_TwitterAPI_index_account_tweets_th" + str(i+1),
+                               target = thread_step_4_TwitterAPI_index_account_tweets,
+                               args = ( i+1, pipeline, ) )
+    thread.start()
+    threads_step_4_TwitterAPI_index_account_tweets.append( thread )
+
+threads_step_5_reverse_search = []
 for i in range( param.NUMBER_OF_REVERSE_SEARCH_THREADS ) :
-    reverse_search_thread = threading.Thread( name = "reverse_search_" + str(i+1),
-                                              target = reverse_search_thread_main,
-                                              args = ( i+1, pipeline, ) )
-    reverse_search_thread.start()
-    reverse_search_threads.append( reverse_search_thread )
+    thread = threading.Thread( name = "step_5_reverse_search_th" + str(i+1),
+                               target = thread_step_5_reverse_search,
+                               args = ( i+1, pipeline, ) )
+    thread.start()
+    threads_step_5_reverse_search.append( thread )
 
-http_server_threads = []
+threads_http_server = []
 for i in range( param.NUMBER_OF_HTTP_SERVER_THREADS ) :
-    http_server_thread = threading.Thread( name = "http_server_thread_" + str(i+1),
-                                           target = http_server_thread_main,
-                                           args = ( i+1, pipeline, ) )
-    http_server_thread.start()
-    http_server_threads.append( http_server_thread )
+    thread = threading.Thread( name = "http_server_th" + str(i+1),
+                               target = thread_http_server,
+                               args = ( i+1, pipeline, ) )
+    thread.start()
+    threads_http_server.append( thread )
 
 
 """
@@ -131,11 +139,11 @@ while True :
                 print( "Demande de scan / d'indexation du compte @" + args[1] + "." )
                 
                 # Fabrication de l'objet Request
-                request = Request( None )
+                request = Request( None, do_indexing = True )
                 request.twitter_accounts = [ args[1] ]
                 
                 # Lancement du scan
-                pipeline.index_account_tweets_queue.put( request )
+                pipeline.step_2_GOT3_list_account_tweets_queue.put( request )
             else :
                 print( "Nom de compte Twitter impossible !" )
         else :
@@ -144,7 +152,7 @@ while True :
     elif args[0] == "search" :
         if len(args) in [ 2, 3 ] :
             # Fabrication de l'objet Request
-            request = Request( args[1] )
+            request = Request( None, do_reverse_search = True )
             request.image_url = args[1]
             
             if len(args) == 3 :
@@ -153,13 +161,13 @@ while True :
                     print( "Recherche sur le compte @" + args[2] + "." )
                     request.twitter_accounts = [ args[2] ]
                     # Lancement de la recherche
-                    pipeline.reverse_search_queue.put( request )
+                    pipeline.step_5_reverse_search_queue.put( request )
                 else :
                     print( "Nom de compte Twitter impossible !" )
             else :
                 print( "Recherche dans toute la base de données !" )
                 # Lancement de la recherche
-                pipeline.reverse_search_queue.put( request )
+                pipeline.step_5_reverse_search_queue.put( request )
         else :
             print( "Utilisation : search [URL de l'image à chercher] [Nom du compte Twitter (OPTIONNEL)]" )
     
@@ -206,13 +214,15 @@ while True :
 Arrêt du système.
 """
 # Attendre que les threads aient fini
-for thread in link_finder_threads :
+for thread in threads_step_1_link_finder :
     thread.join()
-for thread in list_account_tweets_threads :
+for thread in threads_step_2_GOT3_list_account_tweets :
     thread.join()
-for thread in index_twitter_account_threads :
+for thread in threads_step_3_GOT3_index_account_tweets :
     thread.join()
-for thread in reverse_search_threads :
+for thread in threads_step_4_TwitterAPI_index_account_tweets :
     thread.join()
-for thread in http_server_threads :
+for thread in threads_step_5_reverse_search :
+    thread.join()
+for thread in threads_http_server :
     thread.join()
