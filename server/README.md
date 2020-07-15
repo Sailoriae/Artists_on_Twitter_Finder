@@ -30,5 +30,5 @@ Script `app.py` : Script central, crée et gère les threads de traitement, la l
   - Librairie `GetOldTweets3` : Permet d'obtenir les tweets d'un compte. Incluse car elle a été modifiée.
 
 * Module `link_finder`, classe `Link_Finder` : Classe centrale de la partie Link Finder. Permet de trouver les URL des images et les noms des comptes Twitter des artistes.
-  - Module `link_finder` : Contient une classe pour chaque site supporté. Voir le `README.md` de ce module pour plus de détails.
-    - Module `link_finder\utils` : Contient des outils pour les classes ci-dessus.
+  - Module `supported_websites` : Contient une classe pour chaque site supporté. Voir le `README.md` de ce module pour plus de détails.
+    - Module `utils` : Contient des outils pour les classes ci-dessus.

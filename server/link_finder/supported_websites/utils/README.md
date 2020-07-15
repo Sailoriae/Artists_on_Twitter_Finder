@@ -1,4 +1,4 @@
-# Module Outils pour le Link Finder
+# Module des outils pour les sites supportés par le Link Finder
 
 Ce module contient des outils pour les classes du Link Finder :
 

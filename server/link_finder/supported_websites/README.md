@@ -1,4 +1,4 @@
-# Module Link Finder
+# Module des sites supportés par le Link Finder
 
 Ce module contient une classe par site supporté. Ces classes permettent de chercher sur ces sites les liens vers les image sources, ainsi que le ou les comptes Twitter des artistes.
 
