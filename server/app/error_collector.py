@@ -31,9 +31,10 @@ def error_collector( thread_procedure, thread_id : int, pipeline ) :
                     error_name += "URL de requête : " + str(request.input_url) + "\n"
             
             # Enregistrer dans un fichier
-            file = open( thread_procedure.__name__ + "_number" + str(thread_id) + "_error" + str(error_count) + ".log", "w" )
-            file.write( error_name )
-            traceback.print_exc( file = file )
+            if error_count < 100 : # Ne pas créer trop de fichiers, s'il y a autant d'erreurs, c'est que c'est la même
+                file = open( thread_procedure.__name__ + "_number" + str(thread_id) + "_error" + str(error_count) + ".log", "w" )
+                file.write( error_name )
+                traceback.print_exc( file = file )
             
             # Afficher dans le terminal
             print( error_name )
