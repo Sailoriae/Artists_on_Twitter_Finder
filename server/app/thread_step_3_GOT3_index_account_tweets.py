@@ -14,7 +14,7 @@ from tweet_finder import CBIR_Engine_with_Database
 
 
 """
-ETAPE 4 du traitement d'une requête.
+ETAPE 3 du traitement d'une requête.
 Thread d'indexation des tweets d'un compte Twitter, avec la librairie
 GetOldTweets3.
 """

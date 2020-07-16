@@ -5,6 +5,9 @@
 """
 Classe représentant une requête dans notre système.
 Cet objet est le même durant tout le processus de traitement.
+
+SEUL L'OBJET PIPELINE DOIT POUVOIR INSTANCIER CETTE CLASSE !
+Car c'est elle qui gère toutes les requêtes.
 """
 class Request :
     """

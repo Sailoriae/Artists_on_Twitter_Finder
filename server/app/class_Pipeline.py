@@ -40,7 +40,7 @@ class Pipeline :
         # "request" de la CLI.
         self.requests = []
         
-        # Sémaphore pour l'accès à la liste request
+        # Sémaphore pour l'accès à la liste "request"
         self.requests_sem = threading.Semaphore()
         
         
@@ -86,6 +86,11 @@ class Pipeline :
         # - thread_step_2_GOT3_list_account_tweets
         # - thread_step_3_GOT3_index_account_tweets
         # - thread_step_4_TwitterAPI_index_account_tweets
+        #
+        # C'est un thread "thread_step_2_GOT3_list_account_tweets"
+        # qui met l'ID dans cette liste, et un thread
+        # "thread_step_4_TwitterAPI_index_account_tweets" qui le
+        # retire
         self.currently_indexing = []
         
         # Sémaphore d'accès à la liste précédente
