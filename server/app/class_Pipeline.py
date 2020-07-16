@@ -36,6 +36,14 @@ class Pipeline :
         self.requests_sem = threading.Semaphore()
         
         
+        # Dictionnaire où les threads mettent leur requête en cours de
+        # traitement, afin que leurs collecteurs d'erreurs mettent ces
+        # requêtes en échec lors d'un plantage
+        # Les threads sont identifiés par la chaine suivante :
+        # procédure_du_thread.__name__ + "_number" + str(thread_id)
+        self.requests_in_thread = {}
+        
+        
         # ETAPE 1, code de status de la requête : 1
         # File d'attente de Link Finder
         # Code de status de la requête : 0

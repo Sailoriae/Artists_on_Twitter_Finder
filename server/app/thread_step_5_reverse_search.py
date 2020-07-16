@@ -33,6 +33,9 @@ def thread_step_5_reverse_search( thread_id : int, pipeline ) :
             sleep( 1 )
             continue
         
+        # Dire qu'on est en train de traiter cette requête
+        pipeline.requests_in_thread[ "thread_step_5_reverse_search_number" + str(thread_id) ] = request
+        
         # On passe la requête à l'étape suivante, c'est à dire notre étape
         pipeline.set_request_to_next_step( request )
         
@@ -69,6 +72,9 @@ def thread_step_5_reverse_search( thread_id : int, pipeline ) :
         
         print( "[step_5_th" + str(thread_id) + "] Tweets trouvés (Du plus au moins proche) :\n" +
                "[step_5_th" + str(thread_id) + "] " + str( [ data.tweet_id for data in request.founded_tweets ] ) )
+        
+        # Dire qu'on n'est plus en train de traiter cette requête
+        pipeline.requests_in_thread[ "thread_step_5_reverse_search_number" + str(thread_id) ] = None
         
         # On passe le status de la requête à "Fin de traitement"
         request.set_status_done()

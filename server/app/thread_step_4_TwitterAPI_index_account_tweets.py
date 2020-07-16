@@ -32,6 +32,9 @@ def thread_step_4_TwitterAPI_index_account_tweets( thread_id : int, pipeline ) :
             sleep( 1 )
             continue
         
+        # Dire qu'on est en train de traiter cette requête
+        pipeline.requests_in_thread[ "thread_step_4_TwitterAPI_index_account_tweets_number" + str(thread_id) ] = request
+        
         # On passe la requête à l'étape suivante, c'est à dire notre étape
         pipeline.set_request_to_next_step( request )
         
@@ -41,11 +44,15 @@ def thread_step_4_TwitterAPI_index_account_tweets( thread_id : int, pipeline ) :
             
             cbir_engine.index_or_update_with_TwitterAPI( twitter_account[0] )
         
+        # Dire qu'on n'est plus en train de traiter cette requête
+        pipeline.requests_in_thread[ "thread_step_4_TwitterAPI_index_account_tweets_number" + str(thread_id) ] = None
+        
         # On passe la requête à l'étape suivante
         # C'est la procédure pipeline.set_request_to_next_step qui vérifie si elle peut
         pipeline.set_request_to_next_step( request )
         
         # On dit qu'on a fini l'indexation pour les comptes de cette requête
+        # On désactiver alors le bloquage mis lors de l'étape 2
         pipeline.indexing_done(
             [ data[1] for data in request.twitter_accounts_with_id ] )
     

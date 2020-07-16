@@ -34,13 +34,22 @@ def thread_step_2_GOT3_list_account_tweets( thread_id : int, pipeline ) :
             sleep( 1 )
             continue
         
+        # Dire qu'on est en train de traiter cette requête
+        pipeline.requests_in_thread[ "thread_step_2_GOT3_list_account_tweets_number" + str(thread_id) ] = request
+        
         # Si un un des ID des comptes Twitter de la requête est indiqué comme
         # en cours d'indexation, on remet cette requête en haut de la file
         # d'attente, nous permettant de traiter d'autres requêtes
         #
         # Ceci est possible si deux requêtes différentes ont le même compte
         # Twitter
+        #
+        # C'EST le THREAD DE L'ETAPE 4 QUI DESACTIVERA CE BLOQUAGE
         if pipeline.is_indexing( [ data[1] for data in request.twitter_accounts_with_id ] ) :
+            # Dire qu'on n'est plus en train de traiter cette requête
+            pipeline.requests_in_thread[ "thread_step_2_GOT3_list_account_tweets_number" + str(thread_id) ] = None
+            
+            # Remettre la requête dans la file d'attente
             pipeline.step_2_GOT3_list_account_tweets_queue.put( request )
             sleep( 1 )
             continue
@@ -64,11 +73,17 @@ def thread_step_2_GOT3_list_account_tweets( thread_id : int, pipeline ) :
         # Si la liste des tweets trouvés par GetOldTweets3 et par l'API Twitter
         # sont vides, ça ne sert à rien de continuer !
         if request.get_GOT3_list_result == [] and request.get_TwitterAPI_list_result == [] :
+            # Dire qu'on n'est plus en train de traiter cette requête
+            pipeline.requests_in_thread[ "thread_step_2_GOT3_list_account_tweets_number" + str(thread_id) ] = None
+            
             request.problem = "NO_TWITTER_ACCOUNT_FOR_THIS_ARTIST"
             request.set_status_done()
             
             print( "[step_2_th" + str(thread_id) + "] Aucun compte Twitter valide !" )
             continue # On arrête là
+        
+        # Dire qu'on n'est plus en train de traiter cette requête
+        pipeline.requests_in_thread[ "thread_step_2_GOT3_list_account_tweets_number" + str(thread_id) ] = None
         
         # On passe la requête à l'étape suivante
         # C'est la procédure pipeline.set_request_to_next_step qui vérifie si elle peut

@@ -50,6 +50,7 @@ Liste des erreurs possibles :
 - `NO_TWITTER_ACCOUNT_FOR_THIS_ARTIST` : Aucun compte Twitter trouvé pour l'artiste de l'illustration.
 - `NO_VALID_TWITTER_ACCOUNT_FOR_THIS_ARTIST` : Des comptes Twitter ont étés trouvés, mais ils sont invalides.
 - `ERROR_DURING_REVERSE_SEARCH` : Erreur durant la recherche d'image inversée. Est ce que l'illustration n'a pas un format à la noix ? Par exemple GIF animé ?
+- `PROCESSING_ERROR` : Un thread de traitement a planté durant son traitement de cette requête. Il est donc impossible de terminer cette requête !
 
 La liste `results` peut être vide, ou comporter plusieurs résultats. Ils sont alors classés par ordre croissant de distance avec l'illustration de requête.
 

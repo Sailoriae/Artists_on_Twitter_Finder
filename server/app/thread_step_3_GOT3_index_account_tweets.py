@@ -32,6 +32,9 @@ def thread_step_3_GOT3_index_account_tweets( thread_id : int, pipeline ) :
             sleep( 1 )
             continue
         
+        # Dire qu'on est en train de traiter cette requête
+        pipeline.requests_in_thread[ "thread_step_3_GOT3_index_account_tweets_number" + str(thread_id) ] = request
+        
         # On passe la requête à l'étape suivante, c'est à dire notre étape
         pipeline.set_request_to_next_step( request )
         
@@ -44,6 +47,9 @@ def thread_step_3_GOT3_index_account_tweets( thread_id : int, pipeline ) :
         # Vider la liste get_GOT3_list_result parce que c'est lourd et qu'on
         # en n'aura plus besoin
         request.get_GOT3_list_result = []
+        
+        # Dire qu'on n'est plus en train de traiter cette requête
+        pipeline.requests_in_thread[ "thread_step_3_GOT3_index_account_tweets_number" + str(thread_id) ] = None
         
         # On passe la requête à l'étape suivante
         # C'est la procédure pipeline.set_request_to_next_step qui vérifie si elle peut

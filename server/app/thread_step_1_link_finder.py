@@ -39,6 +39,9 @@ def thread_step_1_link_finder( thread_id : int, pipeline ) :
             sleep( 1 )
             continue
         
+        # Dire qu'on est en train de traiter cette requête
+        pipeline.requests_in_thread[ "thread_step_1_link_finder_number" + str(thread_id) ] = request
+        
         # On passe la requête à l'étape suivante, c'est à dire notre étape
         pipeline.set_request_to_next_step( request )
         
@@ -51,6 +54,9 @@ def thread_step_1_link_finder( thread_id : int, pipeline ) :
         # Si jamais l'URL de la requête est invalide, on ne va pas plus loin
         # avec elle (On passe donc son status à "Fin de traitement")
         if twitter_accounts == None :
+            # Dire qu'on n'est plus en train de traiter cette requête
+            pipeline.requests_in_thread[ "thread_step_1_link_finder_number" + str(thread_id) ] = None
+            
             request.problem = "INVALID_URL"
             request.set_status_done()
             
@@ -60,6 +66,9 @@ def thread_step_1_link_finder( thread_id : int, pipeline ) :
         # Si jamais le site n'est pas supporté, on ne va pas plus loin avec
         # cette requête (On passe donc son status à "Fin de traitement")
         elif twitter_accounts == False :
+            # Dire qu'on n'est plus en train de traiter cette requête
+            pipeline.requests_in_thread[ "thread_step_1_link_finder_number" + str(thread_id) ] = None
+            
             request.problem = "UNSUPPORTED_WEBSITE"
             request.set_status_done()
             
@@ -69,6 +78,9 @@ def thread_step_1_link_finder( thread_id : int, pipeline ) :
         # Si jamais aucun compte Twitter n'a été trouvé, on ne va pas plus loin
         # avec la requête (On passe donc son status à "Fin de traitement")
         elif twitter_accounts == []:
+            # Dire qu'on n'est plus en train de traiter cette requête
+            pipeline.requests_in_thread[ "thread_step_1_link_finder_number" + str(thread_id) ] = None
+            
             request.problem = "NO_TWITTER_ACCOUNT_FOR_THIS_ARTIST"
             request.set_status_done()
             
@@ -88,6 +100,9 @@ def thread_step_1_link_finder( thread_id : int, pipeline ) :
         # plus loin avec la requête (On passe donc son status à "Fin de
         # traitement")
         if twitter_accounts == []:
+            # Dire qu'on n'est plus en train de traiter cette requête
+            pipeline.requests_in_thread[ "thread_step_1_link_finder_number" + str(thread_id) ] = None
+            
             request.problem = "NO_VALID_TWITTER_ACCOUNT_FOR_THIS_ARTIST"
             request.set_status_done()
             
@@ -103,6 +118,9 @@ def thread_step_1_link_finder( thread_id : int, pipeline ) :
         
         print( "[step_1_th" + str(thread_id) + "] URL de l'image trouvée :\n" +
                "[step_1_th" + str(thread_id) + "] " + request.image_url )
+        
+        # Dire qu'on n'est plus en train de traiter cette requête
+        pipeline.requests_in_thread[ "thread_step_1_link_finder_number" + str(thread_id) ] = None
         
         # On passe la requête à l'étape suivante
         # C'est la procédure pipeline.set_request_to_next_step qui vérifie si elle peut
