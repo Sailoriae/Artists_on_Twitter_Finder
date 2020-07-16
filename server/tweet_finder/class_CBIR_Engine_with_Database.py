@@ -90,17 +90,20 @@ class CBIR_Engine_with_Database :
             tweet = self.twitter.get_tweet( tweet_id )
             
             if tweet == None :
-                print( "Impossible d'indexer le Tweet " + str( tweet_id ) + "." )
+                if self.DEBUG :
+                    print( "Impossible d'indexer le Tweet " + str( tweet_id ) + "." )
                 return False
         else :
             tweet = tweepy_Status_object
             tweet_id = tweet.id
         
-        print( "Scan tweet " + str( tweet_id ) + "." )
+        if self.DEBUG :
+            print( "Scan tweet " + str( tweet_id ) + "." )
         
         # Tester avant d'indexer si le tweet n'est pas déjà dans la BDD
         if self.bdd.is_tweet_indexed( tweet_id ) :
-            print( "Tweet déjà indexé !" )
+            if self.DEBUG :
+                print( "Tweet déjà indexé !" )
             return True
         
         # Liste des URLs des images dans ce tweet
@@ -114,10 +117,11 @@ class CBIR_Engine_with_Database :
             if self.DEBUG :
                 print( "Ce tweet n'a pas de médias." )
                 print( error )
-                return False
+            return False
         
         if len( tweet_images_url ) == 0 :
-            print( "Ce tweet n'a pas de médias." )
+            if self.DEBUG :
+                print( "Ce tweet n'a pas de médias." )
             return False
         
         if self.DEBUG :
@@ -132,7 +136,8 @@ class CBIR_Engine_with_Database :
         length = len( tweet_images_url )
         
         if length == 0 :
-            print( "Tweet sans image, on le passe !" )
+            if self.DEBUG :
+                print( "Tweet sans image, on le passe !" )
             return False
         
         # Traitement des images du Tweet
@@ -165,9 +170,10 @@ class CBIR_Engine_with_Database :
                 # Donc on fait comme GOT3
                 hashtags.append( "#" + hashtag["text"] )
         except KeyError as error :
-             print( "Erreur en récupérant les hashtags." )
-             print( error )
-             hashtags = None
+            if self.DEBUG :
+                print( "Erreur en récupérant les hashtags." )
+                print( error )
+            hashtags = None
         
         # Stockage des résultats
         self.bdd.insert_tweet(
@@ -304,11 +310,13 @@ class CBIR_Engine_with_Database :
         print( str(length) + " Tweets à indexer." )
         
         for i in range( length ) :
-            print( "Indexation tweet %s (%d/%d)." % ( tweets_to_scan[i].id, i+1, length) )
+            if self.DEBUG :
+                print( "Indexation tweet %s (%d/%d)." % ( tweets_to_scan[i].id, i+1, length) )
             
             # Tester avant d'indexer si le tweet n'est pas déjà dans la BDD
             if self.bdd.is_tweet_indexed( tweets_to_scan[i].id ) :
-                print( "Tweet déjà indexé !" )
+                if self.DEBUG :
+                    print( "Tweet déjà indexé !" )
                 continue
             
             image_1 = None
@@ -319,7 +327,8 @@ class CBIR_Engine_with_Database :
             tweets_to_scan_length = len( tweets_to_scan[i].images )
             
             if tweets_to_scan_length == 0 :
-                print( "Tweet sans image, on le passe !" )
+                if self.DEBUG :
+                    print( "Tweet sans image, on le passe !" )
                 continue
             
             # Traitement des images du Tweet
@@ -456,16 +465,15 @@ class CBIR_Engine_with_Database :
         last_tweet_id = None
         
         for tweet in self.twitter.get_account_tweets( account_id, since_tweet_id ) :
-            print( "Indexation tweet %s." % ( tweet.id ) )
+            if self.DEBUG :
+                print( "Indexation tweet %s." % ( tweet.id ) )
             
             # Le premier tweet est forcément le plus récent
             if last_tweet_id == None :
                 last_tweet_id = tweet.id
             
-            # Tester avant d'indexer si le tweet n'est pas déjà dans la BDD
-            if self.bdd.is_tweet_indexed( tweet.id ) :
-                print( "Tweet déjà indexé !" )
-                continue
+            # Cela ne sert à rien ester avant d'indexer si le tweet n'est pas
+            # déjà dans la BDD car la fonction index_tweet() le fait
             
             try :
                 tweet.retweeted_status

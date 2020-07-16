@@ -9,6 +9,7 @@ from sys import path as sys_path
 from os import path as os_path
 sys_path.append(os_path.dirname(os_path.dirname(os_path.abspath(__file__))))
 
+import parameters as param
 from tweet_finder import CBIR_Engine_with_Database
 
 
@@ -19,7 +20,7 @@ GetOldTweets3.
 """
 def thread_step_3_GOT3_index_account_tweets( thread_id : int, pipeline ) :
     # Initialisation de notre moteur de recherche d'image par le contenu
-    cbir_engine = CBIR_Engine_with_Database()
+    cbir_engine = CBIR_Engine_with_Database( DEBUG = param.DEBUG )
     
     # Tant que on ne nous dit pas de nous arrêter
     while pipeline.keep_service_alive :
