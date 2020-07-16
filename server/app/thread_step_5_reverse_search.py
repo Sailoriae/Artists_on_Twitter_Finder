@@ -39,8 +39,12 @@ def thread_step_5_reverse_search( thread_id : int, pipeline ) :
         # On passe la requête à l'étape suivante, c'est à dire notre étape
         pipeline.set_request_to_next_step( request )
         
-        print( "[step_5_th" + str(thread_id) + "] Recherche de l'image suivante :\n" +
-               "[step_5_th" + str(thread_id) + "] " + request.input_url )
+        if request.input_url != None :
+            print( "[step_5_th" + str(thread_id) + "] Recherche de l'image suivante :\n" +
+                   "[step_5_th" + str(thread_id) + "] " + request.input_url )
+        else :
+            print( "[step_5_th" + str(thread_id) + "] Recherche de l'image suivante :\n" +
+                   "[step_5_th" + str(thread_id) + "] " + request.image_url )
         
         # On recherche les Tweets contenant l'image de requête
         # Et on les stocke dans l'objet de requête
