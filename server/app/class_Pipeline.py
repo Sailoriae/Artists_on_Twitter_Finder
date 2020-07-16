@@ -219,6 +219,22 @@ class Pipeline :
         return False
     
     """
+    Vérifier qu'un compte Twitter est en cours d'indexation ou non.
+    @param twitter_account_ID L'ID du compte twitter.
+    @return True ou False
+    """
+    def check_is_indexing ( self, twitter_account_ID : int ) -> bool :
+        self.currently_indexing_sem.acquire()
+        
+        for account_id in self.currently_indexing :
+            if account_id == twitter_account_ID :
+                self.currently_indexing_sem.release()
+                return True
+        
+        self.currently_indexing_sem.release()
+        return False
+    
+    """
     Dire qu'on a fini d'indexer les tweets de ces IDs de compte Twitter.
     
     @param twitter_account_IDs Liste d'IDs de comptes Twitter

@@ -40,6 +40,15 @@ def thread_auto_update_accounts( thread_id : int, pipeline ) :
                     break
             continue
         
+        # Vérifier que le compte n'est pas déjà en cours d'indexation
+        if pipeline.check_is_indexing( oldest_updated_account[0] ) :
+            # On reprend dans 5 minutes (200*3 = 600)
+            for i in range( 200 ) :
+                sleep( 3 )
+                if not pipeline.keep_service_alive :
+                    break
+            continue
+        
         # Prendre la date actuelle
         now = datetime.datetime.now()
         
