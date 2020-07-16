@@ -33,6 +33,12 @@ TWITTER_AUTH_TOKEN = ""
 """
 Paramètres pour l'accès à l'API Pixiv.
 Il est très recommandé de ne pas utiliser un compte personnel !
+
+Ce compte doit pouvoir voir les illustrations sensibles !
+Aller dans les Paramètres Pixiv, et mettre sur "Show" les champs "Explicit
+content (R-18)" et "Ero-guro content (R-18G)".
+Sinon, le serveur renvera l'erreur "NO_TWITTER_ACCOUNT_FOR_THIS_ARTIST" pour
+ce genre d'illustrations.
 """
 PIXIV_USERNAME = ""
 PIXIV_PASSWORD = ""
