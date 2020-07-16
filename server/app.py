@@ -49,7 +49,7 @@ Ce ne sont pas les procédures qui sont exécutées directement, mais le
 collecteur d'erreurs qui exécute la procédure.
 """
 threads_step_1_link_finder = []
-for i in range( param.NUMBER_OF_LINK_FINDER_THREADS ) :
+for i in range( param.NUMBER_OF_STEP_1_LINK_FINDER_THREADS ) :
     thread = threading.Thread( name = "step_1_link_finder_th" + str(i+1),
                                target = error_collector,
                                args = ( thread_step_1_link_finder, i+1, pipeline, ) )
@@ -57,7 +57,7 @@ for i in range( param.NUMBER_OF_LINK_FINDER_THREADS ) :
     threads_step_1_link_finder.append( thread )
 
 threads_step_2_GOT3_list_account_tweets = []
-for i in range( param.NUMBER_OF_LIST_ACCOUNT_TWEETS_THREADS ) :
+for i in range( param.NUMBER_OF_STEP_2_GOT3_LIST_ACCOUNT_TWEETS_THREADS ) :
     thread = threading.Thread( name = "step_2_GOT3_list_account_tweets_th" + str(i+1),
                                target = error_collector,
                                args = ( thread_step_2_GOT3_list_account_tweets, i+1, pipeline, ) )
@@ -65,7 +65,7 @@ for i in range( param.NUMBER_OF_LIST_ACCOUNT_TWEETS_THREADS ) :
     threads_step_2_GOT3_list_account_tweets.append( thread )
 
 threads_step_3_GOT3_index_account_tweets = []
-for i in range( param.NUMBER_OF_INDEX_TWITTER_ACCOUNT_THREADS ) :
+for i in range( param.NUMBER_OF_STEP_3_GOT3_INDEX_ACCOUNT_TWEETS ) :
     thread = threading.Thread( name = "step_3_GOT3_index_account_tweets_th" + str(i+1),
                                target = error_collector,
                                args = ( thread_step_3_GOT3_index_account_tweets, i+1, pipeline, ) )
@@ -73,7 +73,7 @@ for i in range( param.NUMBER_OF_INDEX_TWITTER_ACCOUNT_THREADS ) :
     threads_step_3_GOT3_index_account_tweets.append( thread )
 
 threads_step_4_TwitterAPI_index_account_tweets = []
-for i in range( param.NUMBER_OF_INDEX_TWITTER_ACCOUNT_THREADS ) :
+for i in range( param.NUMBER_OF_STEP_4_TWITTERAPI_INDEX_ACCOUNT_TWEETS ) :
     thread = threading.Thread( name = "step_4_TwitterAPI_index_account_tweets_th" + str(i+1),
                                target = error_collector,
                                args = ( thread_step_4_TwitterAPI_index_account_tweets, i+1, pipeline, ) )
@@ -81,7 +81,7 @@ for i in range( param.NUMBER_OF_INDEX_TWITTER_ACCOUNT_THREADS ) :
     threads_step_4_TwitterAPI_index_account_tweets.append( thread )
 
 threads_step_5_reverse_search = []
-for i in range( param.NUMBER_OF_REVERSE_SEARCH_THREADS ) :
+for i in range( param.NUMBER_OF_STEP_5_REVERSE_SEARCH_THREADS ) :
     thread = threading.Thread( name = "step_5_reverse_search_th" + str(i+1),
                                target = error_collector,
                                args = ( thread_step_5_reverse_search, i+1, pipeline, ) )
