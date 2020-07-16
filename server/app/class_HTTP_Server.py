@@ -1,5 +1,15 @@
+#!/usr/bin/python3
+# coding: utf-8
+
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import parse_qs, urlsplit
+
+# Ajouter le répertoire parent au PATH pour pouvoir importer
+from sys import path as sys_path
+from os import path as os_path
+sys_path.append(os_path.dirname(os_path.dirname(os_path.abspath(__file__))))
+
+from tweet_finder.database import SQLite
 
 
 """

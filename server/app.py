@@ -213,6 +213,14 @@ while True :
 """
 Arrêt du système.
 """
+# Même si keep_service_alice a été mis à False, il faut envoyer des requêtes au
+# serveur HTTP pour qu'il sorte de sa boucle
+# Car http_server.handle_request() est bloquant tant qu'il n'y a pas eu de
+# requête
+import requests
+for i in range( len( threads_http_server ) ) :
+    requests.get( "http://localhost:" + str( param.HTTP_SERVER_PORT ) )
+
 # Attendre que les threads aient fini
 for thread in threads_step_1_link_finder :
     thread.join()

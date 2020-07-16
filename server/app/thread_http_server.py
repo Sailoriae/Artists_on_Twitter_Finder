@@ -26,5 +26,5 @@ def thread_http_server( thread_id : int, pipeline ) :
         http_server.handle_request()
     http_server.server_close()
     
-    print( "[HTTP Server Th" + str(thread_id) + "] Arrêté !" )
+    print( "[http_server_th" + str(thread_id) + "] Arrêté !" )
     return

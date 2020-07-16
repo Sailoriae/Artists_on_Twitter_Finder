@@ -81,14 +81,20 @@ class TweepyAbtraction :
     """
     def get_account_tweets ( self, account_id : int, since_tweet_id : int = None ) :
         # tweepy.Cursor gère les Rate Limits
+        # Attention ! Ne pas supprimer les réponses, des illustrations peuvent
+        # être dans des réponses !
         if since_tweet_id == None :
             return tweepy.Cursor( self.api.user_timeline,
                                   id = account_id,
-                                  tweet_mode = "extended"
+                                  tweet_mode = "extended",
+                                  include_rts = False,
+                                  trim_user = True # Supprimer les infos sur l'utilisateur, on en n'a pas besoin
                                  ).items()
         else :
             return tweepy.Cursor( self.api.user_timeline,
                                   id = account_id,
                                   since_id = since_tweet_id,
-                                  tweet_mode = "extended"
+                                  tweet_mode = "extended",
+                                  include_rts = False,
+                                  trim_user = True # Supprimer les infos sur l'utilisateur, on en n'a pas besoin
                                  ).items()

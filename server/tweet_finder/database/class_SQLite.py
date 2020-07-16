@@ -167,7 +167,7 @@ class SQLite :
     @param account_id ID du compte Twitter
     @return Tuple :
             - ID du dernier Tweet scanné
-            - 
+            - Date locale de l'enregistrement de cette valeur
             Ou None si le compte est inconnu
     """
     def get_account_last_scan_with_TwitterAPI( self, account_id : int ) -> str :
