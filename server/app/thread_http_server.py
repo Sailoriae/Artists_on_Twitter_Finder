@@ -3,10 +3,10 @@
 
 try :
     from class_Threaded_HTTP_Server import Threaded_HTTP_Server
-    from class_HTTP_Server import HTTP_Server
+    from class_HTTP_Server import http_server_container
 except ModuleNotFoundError :
     from .class_Threaded_HTTP_Server import Threaded_HTTP_Server
-    from .class_HTTP_Server import HTTP_Server
+    from .class_HTTP_Server import http_server_container
 
 # Ajouter le répertoire parent au PATH pour pouvoir importer
 from sys import path as sys_path
@@ -20,6 +20,8 @@ import parameters as param
 Thread du serveur HTTP.
 """
 def thread_http_server( thread_id : int, pipeline ) :
+    HTTP_Server = http_server_container( pipeline )
+    
     http_server = Threaded_HTTP_Server( ("", param.HTTP_SERVER_PORT ), HTTP_Server )
     
     while pipeline.keep_service_alive :
