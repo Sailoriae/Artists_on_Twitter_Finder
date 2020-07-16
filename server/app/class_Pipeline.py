@@ -10,6 +10,14 @@ try :
 except ModuleNotFoundError :
     from .class_Request import Request
 
+# Ajouter le répertoire parent au PATH pour pouvoir importer
+from sys import path as sys_path
+from os import path as os_path
+sys_path.append(os_path.dirname(os_path.dirname(os_path.abspath(__file__))))
+
+import parameters as param
+from tweet_finder.twitter import TweepyAbtraction
+
 
 """
 MEMOIRE PARTAGEE ENTRE TOUS LES THEADS.
@@ -82,6 +90,13 @@ class Pipeline :
         
         # Sémaphore d'accès à la liste précédente
         self.currently_indexing_sem = threading.Semaphore()
+        
+        
+        # Initialisation de notre couche d'abstraction à l'API Twitter
+        self.twitter = TweepyAbtraction( param.API_KEY,
+                                         param.API_SECRET,
+                                         param.OAUTH_TOKEN,
+                                         param.OAUTH_TOKEN_SECRET )
     
     """
     Lancement de la procédure complète pour une URL d'illustration.
@@ -106,6 +121,37 @@ class Pipeline :
         self.step_1_link_finder_queue.put( request ) # Passé par addresse car c'est un objet
         
         return request
+    
+    """
+    Lancer uniquement l'étape de scan d'un compte Twitter.
+    Fait les 3 threads suivants :
+    - "thread_step_2_GOT3_list_account_tweets"
+    - "thread_step_3_GOT3_index_account_tweets"
+    - "thread_step_4_TwitterAPI_index_account_tweets"
+    
+    @return True si le compte Twitter existe.
+            False si le compte est inexistant.
+    """
+    def launch_index_or_update_only ( self, account_name = None, account_id = None ) :
+        if account_id == None :
+            account_id = self.twitter.get_account_id( account_name )
+        elif account_name == None :
+            account_name = self.twitter.get_account_id( account_id, invert_mode = True )
+        
+        # Si le compte est invalide
+        if account_id == None or account_name == None :
+            return False
+        
+        # On crée une requête de MàJ avec ce compte Twitter
+        request = Request( None, do_indexing = True )
+        
+        # On ajoute le compte Twitter
+        request.twitter_accounts.append( account_name )
+        request.twitter_accounts_with_id.append( (account_name, account_id) ) 
+        
+        # On met le compte Twitter dans la file d'attente du premier thread
+        # de scan
+        self.step_2_GOT3_list_account_tweets_queue.put( request )
     
     """
     Passer la requête à l'étape suivante.

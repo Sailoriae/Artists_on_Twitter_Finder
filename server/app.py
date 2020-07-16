@@ -96,6 +96,12 @@ for i in range( param.NUMBER_OF_HTTP_SERVER_THREADS ) :
     thread.start()
     threads_http_server.append( thread )
 
+# On ne crée qu'un seul thread de mise à jour automatique
+thread_auto_update_accounts = threading.Thread( name = "http_server_th1",
+                                                target = error_collector,
+                                                args = ( thread_auto_update_accounts, 1, pipeline, ) )
+thread_auto_update_accounts.start()
+
 
 """
 Entrée en ligne de commande (CLI).
@@ -139,13 +145,10 @@ while True :
             # Vérification que le nom d'utilisateur Twitter est possible
             if re.compile("^@?(\w){1,15}$").match(args[1]) :
                 print( "Demande de scan / d'indexation du compte @" + args[1] + "." )
+                result = pipeline.launch_index_or_update_only( account_name = args[1] )
                 
-                # Fabrication de l'objet Request
-                request = Request( None, do_indexing = True )
-                request.twitter_accounts = [ args[1] ]
-                
-                # Lancement du scan
-                pipeline.step_2_GOT3_list_account_tweets_queue.put( request )
+                if result == False :
+                    print( "Compte @" + args[1] + " inexistant !" )
             else :
                 print( "Nom de compte Twitter impossible !" )
         else :
@@ -236,3 +239,4 @@ for thread in threads_step_5_reverse_search :
     thread.join()
 for thread in threads_http_server :
     thread.join()
+thread_auto_update_accounts.join()

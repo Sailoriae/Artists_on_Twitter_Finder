@@ -22,7 +22,7 @@ def http_server_container ( pipeline_arg ) :
         pipeline = pipeline_arg # Attribut de classe
         
         def __init__( self, *args, **kwargs ) :
-            # Accès direct à la base de données pour le processus principal
+            # Accès direct à la base de données
             # N'UTILISER QUE DES METHODES QUI FONT SEULEMENT DES SELECT !
             self.bdd_direct_access = SQLite( param.SQLITE_DATABASE_NAME )
             

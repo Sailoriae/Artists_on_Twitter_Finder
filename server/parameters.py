@@ -78,3 +78,10 @@ NUMBER_OF_HTTP_SERVER_THREADS = 1
 Faire plus de print().
 """
 DEBUG = False
+
+"""
+MàJ automatique des comptes dans la BDD.
+Nombre de jours sans scan du compte Twitter pour le mettre à jour
+automatiquement.
+"""
+DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE = 10

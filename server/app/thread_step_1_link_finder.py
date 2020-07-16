@@ -99,7 +99,7 @@ def thread_step_1_link_finder( thread_id : int, pipeline ) :
         # Si jamais aucun compte Twitter valide n'a été trouvé, on ne va pas
         # plus loin avec la requête (On passe donc son status à "Fin de
         # traitement")
-        if twitter_accounts == []:
+        if request.twitter_accounts_with_id == []:
             # Dire qu'on n'est plus en train de traiter cette requête
             pipeline.requests_in_thread[ "thread_step_1_link_finder_number" + str(thread_id) ] = None
             

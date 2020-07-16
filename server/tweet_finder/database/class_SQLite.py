@@ -22,7 +22,11 @@ class SQLite :
     Constructeur
     """
     def __init__( self, database_name : str ) :
-        self.conn = sqlite3.connect( database_name )
+        self.conn = sqlite3.connect(
+            database_name,
+            detect_types=sqlite3.PARSE_DECLTYPES # Permet d'extraire les données avec les bons types
+                                                 # Par exemple : TIMESTAMP -> datetime.datetime
+        )
         
         c = self.conn.cursor()
         c.execute( "CREATE TABLE IF NOT EXISTS tweets ( account_id INTEGER, tweet_id INTEGER PRIMARY KEY, image_1_features TEXT, image_2_features TEXT, image_3_features TEXT, image_4_features TEXT, hashtags TEXT )" )
@@ -165,18 +169,16 @@ class SQLite :
     date locale de ce dernier scan.
     
     @param account_id ID du compte Twitter
-    @return Tuple :
-            - ID du dernier Tweet scanné
-            - Date locale de l'enregistrement de cette valeur
+    @return L'ID du dernier Tweet scanné
             Ou None si le compte est inconnu
     """
-    def get_account_last_scan_with_TwitterAPI( self, account_id : int ) -> str :
+    def get_account_last_scan_with_TwitterAPI( self, account_id : int ) -> int :
         c = self.conn.cursor()
-        c.execute( "SELECT last_TwitterAPI_indexing_tweet_id, last_TwitterAPI_indexing_local_date FROM accounts WHERE account_id = ?",
+        c.execute( "SELECT last_TwitterAPI_indexing_tweet_id FROM accounts WHERE account_id = ?",
                    ( account_id, ) )
         last_scan = c.fetchone()
         if last_scan != None :
-            return last_scan[0], last_scan[1]
+            return last_scan[0]
         else :
             return None
     
@@ -203,6 +205,27 @@ class SQLite :
         c = self.conn.cursor()
         c.execute( "SELECT * FROM tweets WHERE tweet_id = ?", ( tweet_id, ) )
         return c.fetchone() != None
+    
+    """
+    Retourner l'ID du compte Twitter dont la mise à jour est la plus vielle.
+    La date de mise à jour la plus vielle est calculée avec la valeur minimum
+    de la date du dernier scan avec GetOldTweets3 et du dernier scan avec l'API
+    Twitter publique.
+    
+    @return Un triplet contenant :
+            - L'ID du compte Twitter,
+            - Sa date de dernière MàJ avec GetOldTweets3,
+            - Et sa date dernière MàJ avec l'API Twitter publique.
+            Ou None s'il n'y a aucun compte enregistré dans la base de données.
+    """
+    def get_oldest_updated_account( self ) -> int :
+        c = self.conn.cursor()
+        c.execute( """SELECT account_id, last_GOT3_indexing_local_date, last_TwitterAPI_indexing_local_date
+                      FROM accounts
+                      ORDER BY MIN( last_GOT3_indexing_local_date,
+                                    last_TwitterAPI_indexing_local_date ) ASC
+                      LIMIT 1""" )
+        return c.fetchone()
 
 
 """

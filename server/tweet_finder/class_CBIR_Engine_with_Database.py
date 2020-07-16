@@ -455,12 +455,6 @@ class CBIR_Engine_with_Database :
         print( "Indexation / scan des Tweets de @" + account_name + "." )
         
         since_tweet_id = self.bdd.get_account_last_scan_with_TwitterAPI( account_id )
-        if since_tweet_id == None :
-            since_tweet_id = None
-        elif since_tweet_id[0] == None :
-            since_tweet_id = None
-        else :
-            since_tweet_id = since_tweet_id[0]
         
         last_tweet_id = None
         

@@ -49,24 +49,35 @@ class TweepyAbtraction :
                         Attention : Le nom d'utilisateur est ce qu'il y a après
                         le @ ! Par exemple : Si on veut scanner @jack, il faut
                         entrer dans cette fonction la chaine "jack".
+    @param invert_mode Inverser cette fonction, retourne le nom d'utilisateur
+                       à partir de l'ID du compte.
     @return L'ID du compte
             Ou None si le compte est introuvable
     """
-    def get_account_id ( self, account_name : str ) -> int :
+    def get_account_id ( self, account_name : str, invert_mode = False ) -> int :
         retry = True
         while retry :
             retry = False
             try :
-                return self.api.get_user( account_name ).id
+                if invert_mode :
+                    return self.api.get_user( account_name ).screen_name
+                else :
+                    return self.api.get_user( account_name ).id
             except tweepy.error.RateLimitError as error :
-                print( "Limite atteinte en récupérant l'ID du compte @" + str(account_name) + "." )
+                if invert_mode :
+                    print( "Limite atteinte en récupérant le nom du compte " + str(account_name) + "." )
+                else :
+                    print( "Limite atteinte en récupérant l'ID du compte @" + str(account_name) + "." )
                 print( error.reason )
                 print( "On va réessayer dans 60 secondes... ", end='' )
                 time.sleep( 60 )
                 print( "On réessaye !" )
                 retry = True
             except tweepy.TweepError as error :
-                print( "Erreur en récupérant l'ID du compte @" + str(account_name) + "." )
+                if invert_mode :
+                    print( "Erreur en récupérant le nom du compte" + str(account_name) + "." )
+                else :
+                    print( "Erreur en récupérant l'ID du compte @" + str(account_name) + "." )
                 print( error.reason )
                 return None
     

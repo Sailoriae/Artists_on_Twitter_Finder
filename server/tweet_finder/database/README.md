@@ -26,6 +26,6 @@ Stocke les comptes Twitter analysés.
 Contient les attributs suivants :
 * `account_id INTEGER PRIMARY KEY` : L'ID du compte Twitter,
 * `last_GOT3_indexing_api_date STRING` : La date du dernier scan avec GetOldTweets3 de ce compte, au format YYYY-MM-DD (A donner au prochain scan pour éviter de rescanner tous les Tweets du compte),
-* `last_GOT3_indexing_local_date TIMESTAMP` : Le timestamp de la dernière modification de l'attribut précédent,
+* `last_GOT3_indexing_local_date TIMESTAMP` : Le timestamp de la dernière modification de l'attribut précédent, utilisé uniquement par le thread de mise à jour automatique,
 * `last_TwitterAPI_indexing_tweet_id INTEGER` : L'ID du tweet le plus récent de ce compte scanné avec Tweepy (A donner au prochain scan pour éviter de rescanner tous les Tweets du compte),
-* `last_TwitterAPI_indexing_local_date TIMESTAMP` : Le timestamp de la dernière modification de l'attribut précédent.
+* `last_TwitterAPI_indexing_local_date TIMESTAMP` : Le timestamp de la dernière modification de l'attribut précédent, utilisé uniquement par le thread de mise à jour automatique.
