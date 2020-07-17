@@ -223,17 +223,16 @@ class CBIR_Engine_with_Database :
         to_return = GetOldTweets3_manager.TweetManager.getTweets( tweetCriteria,
                                                                   auth_token=param.TWITTER_AUTH_TOKEN )
         
-        # Si la liste est vide, c'est peut-être que le compte à scanner est
-        # marqué comme sensible. Donc il faut refaire, mais en désactivant
-        # complètement le filtre "safe"
-        if to_return == [] :
-            tweetCriteria = GetOldTweets3_manager.TweetCriteria()\
-                .setQuerySearch( "from:" + account_name + " filter:media -filter:retweets -filter:safe" )
-            if since_date != None :
-                tweetCriteria.setSince( since_date )
+        # Second scan en désactivant complètement le filtre "safe"
+        # Ce n'est pas grave si on scan deux fois, mais il vaut mieux le faire
+        # Twitter sont beaucoup trop flou pour qu'on puisse faire des "if"
+        tweetCriteria = GetOldTweets3_manager.TweetCriteria()\
+            .setQuerySearch( "from:" + account_name + " filter:media -filter:retweets -filter:safe" )
+        if since_date != None :
+            tweetCriteria.setSince( since_date )
             
-            to_return = GetOldTweets3_manager.TweetManager.getTweets( tweetCriteria,
-                                                                       auth_token=param.TWITTER_AUTH_TOKEN )
+        to_return = GetOldTweets3_manager.TweetManager.getTweets( tweetCriteria,
+                                                                   auth_token=param.TWITTER_AUTH_TOKEN )
         
         # Note : Le filtre "safe" filtre aussi les "gros-mots", par exemple :
         # "putain".

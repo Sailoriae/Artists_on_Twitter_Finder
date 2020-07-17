@@ -22,7 +22,7 @@ Le serveur répond par un JSON qui contient toujours les mêmes champs :
 
 La liste `twitter_accounts` contient les comptes Twitter identifiés comme étant ceux de l'artiste de l'illustration de requête.
 
-La liste `results` contient les images trouvées, triées par distance de l'illustration de requête. Le premier élément de cette liste est donc l'image la plus proche.
+La liste `results` contient les Tweets avec images trouvés, triées par distance de l'illustration de requête. Le premier élément de cette liste est donc le Tweet contenant l'image la plus proche.
 
 Liste des attributs d'un résultat dans la liste `results` :
 - `tweet_id` : L'ID du Tweet.
