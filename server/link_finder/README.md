@@ -1,6 +1,6 @@
 # Module Link Finder
 
-Le Link Finder est l'une des deux grandes parties de ce projet, avec le Tweet Finder.
+Le Link Finder est l'une des deux grandes parties du serveur "Artist on Twitter Finder", avec le Tweet Finder.
 
 La classe `Link_Finder` permet d'appeler la classe du site supporté en fonction de l'URL de requête. Les classes de chaque site supporté sont dans le module `supported_websites`.
 Elle contient deux fonctions :
@@ -26,4 +26,4 @@ Elle mène bien à une page web contenant l'image, et non à l'image directement
 
 L'URL de l'illustration est l'entrée utilisateur de l'API ou de la CLI, traités dans `app.py`.
 
-La classe `Link_Finder` (Dans le répertoire parent à celui-ci), permet de savoir quel site supporté utiliser, et donc quelle classe choisir.
+La classe `Link_Finder`, permet de savoir quel site supporté utiliser, et donc quelle classe choisir.

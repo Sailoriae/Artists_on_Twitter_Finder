@@ -1,6 +1,6 @@
 # Module des dépendances du script `app.py`
 
-Le script `app.py` (Présent dans le répertoire parent à celui-ci), est le script scentral de la partie serveur.
+Le script `app.py` (Présent dans le répertoire parent à celui-ci), est le script central de la partie serveur.
 Il crée et gère les threads de traitement, la ligne de commande, les files d'attentes des requêtes, et le serveur HTTP.
 
 Mais comme tout ceci faisait un script beaucoup trop long, il a été séparé en plusieurs fichiers, ici, dans le module `app`.

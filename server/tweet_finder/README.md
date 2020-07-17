@@ -1,6 +1,6 @@
 # Module Tweet Finder
 
-Le Tweet Finder est l'une des deux grandes parties de ce projet, avec le Link Finder.
+Le Tweet Finder est l'une des deux grandes parties du serveur "Artist on Twitter Finder", avec le Link Finder.
 
 La classe `CBIR_Engine_with_Database` permet de faire :
 * L'indexation des Tweets d'un compte Twitter (Seulement ceux qui n'ont pas déjà été indexés) :
@@ -15,6 +15,7 @@ La classe `CBIR_Engine_with_Database` permet de faire :
   - Obtient l'itérateur sur la base de données, module `database`,
   - Calcul la distance entre l'image de requête et chaque image de l'itérateur, module `cbir_engine`,
   - Retourne le ou les Tweets correspondant.
+
 
 ## Sous-modules
 

@@ -231,7 +231,7 @@ class CBIR_Engine_with_Database :
         if since_date != None :
             tweetCriteria.setSince( since_date )
             
-        to_return = GetOldTweets3_manager.TweetManager.getTweets( tweetCriteria,
+        to_return += GetOldTweets3_manager.TweetManager.getTweets( tweetCriteria,
                                                                    auth_token=param.TWITTER_AUTH_TOKEN )
         
         # Note : Le filtre "safe" filtre aussi les "gros-mots", par exemple :

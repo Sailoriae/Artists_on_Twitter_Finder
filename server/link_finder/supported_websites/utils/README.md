@@ -12,6 +12,6 @@ Ce module contient des outils pour les classes du Link Finder :
 * Fonction `validate_pixiv_account_url` : Vérifie qu'une URL est bien une URL d'un compte Pixiv, et retourne l'ID de ce compte.
   Utilisée par la classe `Danbooru`.
 
-Il contient aussi des outils non-utilisés dans ce projet, mais conservés au cas où :
+Il contient aussi des outils actuellement non-utilisés, mais conservés au cas où :
 
 * Fonction `validate_deviantart_account_url` : Vérifie qu'une URL est bien une URL d'un compte DeviantArt, et retourne le nom de ce compte (Ou "DeviantID").

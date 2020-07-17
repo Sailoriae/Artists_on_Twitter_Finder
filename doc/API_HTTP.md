@@ -1,8 +1,8 @@
 # Utilisation de l'API
 
-Le serveur est utilisable via un serveur HTTP, depuis le même serveur, ou l'extérieur, en faisant un proxy sur Apache ou Nginx. Ne pas ouvrir le port du serveur !
+Le serveur est utilisable via son serveur HTTP, depuis la même machine, ou l'extérieur, en faisant un proxy depuis Apache ou Nginx. Ne pas ouvrir le port du serveur !
 
-Les requêtes sont indentifiées par leur URL. La méthode pour lancer une procédure ou obtenir le résultat est la même : `GET /url=[URL de l'illustration de requête]`
+Les requêtes sont indentifiées par leur URL (C'est à dire l'URL de l'illustration sur un des sites supportés). La méthode pour lancer une procédure ou obtenir le résultat est la même : `GET /url=[URL de l'illustration de requête]`
 
 Par exemple : `GET /?url=https://www.deviantart.com/serafleur/art/Sailor-Moon-604185347`
 

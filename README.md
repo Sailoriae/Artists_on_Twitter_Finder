@@ -26,6 +26,15 @@ https://twitter.com/DarkerEve/status/1237323900410789899
 Grace à l'API HTTP, envoyer une requête au serveur et recevoir sa réponse peut être fait de manière automatique. Ainsi, "Artist on Twitter Finder" peut être très intéressant pour des robots postant des illustrations sur Twitter, afin de pouvoir Retweeter l'artiste au lieu de reposter son illustration.
 
 
-## Installation du serveur
+## Sites actuellement supportés
 
-Voir `server/README.md`.
+Lorsqu'on parle d'un "site supporté" par le serveur, on parle de l'un des sites suivants :
+
+* DeviantArt : https://www.deviantart.com/
+* Pixiv : https://www.pixiv.net/en/
+* Danbooru : https://danbooru.donmai.us/ (Attention, peut contenir du NSFW directement sur la page d'acceuil)
+
+
+## Installation et utilisation du serveur
+
+Voir le fichier `server/README.md`.

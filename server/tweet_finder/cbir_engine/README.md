@@ -6,12 +6,13 @@ Comme le but de ce projet est plus grand que le moteur de CBIR, je me suis basé
 
 https://www.pyimagesearch.com/2014/12/01/complete-guide-building-image-search-engine-python-opencv/
 
+
 ## Utilisation indépendante de ce module
 
 Il est possible d'utiliser ce module indépendemment du reste du projet.
 
 **Attention : Ce module ne gère pas de base de données !**
-Dans ce projet, c'est la classe `CBIR_Engine_with_Database`.
+C'est la classe `CBIR_Engine_with_Database` qui fait le lien entre le moteur CBIR et la base de données.
 
 ### Importation et initialisation
 
@@ -52,5 +53,5 @@ Avec :
 
 Cette fonction retourne alors une liste d'identifiants d'images.
 
-Dans ce projet, c'est la classe `Image_in_DB` du module `database` qui représente une image indexée.
+C'est la classe `Image_in_DB` du module `database` qui représente une image indexée.
 De plus, il y a dans ce module `database` un exemple d'itérateur.

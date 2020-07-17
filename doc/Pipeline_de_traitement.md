@@ -1,10 +1,10 @@
 # Pipeline de traitement dans `app.py`
 
-Une requête est représentée par un objet `Request`.
+Une requête est représentée par un objet `Request`, et est identifiée par son URL de requête, c'est à dire l'URL de l'illustration sur un site supporté.
 
-Une requête est identifiée par son URL de requête.
+La classe `Pipeline` doit être instanciée une seule fois : C'est la mémoire partagée entre les classes. Elle contient notamment les files d'attentes et la liste `requests`.
 
-Toutes les requêtes qui font le parcours complet sont dans la liste `requests`. Comme les objets Python sont passés par addresse, ils sont en même dans dans une des queue si ils sont en cours de traitement.
+Toutes les requêtes qui font le parcours complet sont dans la liste `requests` de l'objet `Pipeline`, et seulement ces requêtes. Comme les objets Python sont passés par addresse, ils sont en même dans dans une des queue si ils sont en cours de traitement.
 
 Voici les 5 étapes de traitement d'une requête :
 
@@ -46,4 +46,4 @@ Lorsque la procédure est terminée, on peut aussi voir son résultat.
 
 Voir `API_HTTP.md` pour plus d'informations.
 
-Il est possible que des requêtes soient indépendantes, afin d'effectuer une action précise. Elles ne sont disponibles que depuis la CLI, et ne sont pas indexées dans la liste `requests`.
+Il est possible que des requêtes soient indépendantes, afin d'effectuer une action précise, comme le scan d'un compte Twitter (Lancé par le thread de mise à jour automatique), ou la recherche d'image inversé dans toute la base de données. Elles ne sont disponibles que depuis la CLI, et ne sont pas indexées dans la liste `requests`.
