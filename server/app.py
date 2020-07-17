@@ -97,10 +97,16 @@ for i in range( param.NUMBER_OF_HTTP_SERVER_THREADS ) :
     threads_http_server.append( thread )
 
 # On ne crée qu'un seul thread de mise à jour automatique
-thread_auto_update_accounts = threading.Thread( name = "http_server_th1",
+thread_auto_update_accounts = threading.Thread( name = "auto_update_accounts_th1",
                                                 target = error_collector,
                                                 args = ( thread_auto_update_accounts, 1, pipeline, ) )
 thread_auto_update_accounts.start()
+
+# On ne crée qu'un seul thread de délestage de la liste des requêtes
+thread_remove_finished_requests = threading.Thread( name = "remove_finished_requests_th1",
+                                                target = error_collector,
+                                                args = ( thread_remove_finished_requests, 1, pipeline, ) )
+thread_remove_finished_requests.start()
 
 
 """
@@ -240,3 +246,4 @@ for thread in threads_step_5_reverse_search :
 for thread in threads_http_server :
     thread.join()
 thread_auto_update_accounts.join()
+thread_remove_finished_requests.join()

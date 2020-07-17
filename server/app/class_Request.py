@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 # coding: utf-8
 
+from datetime import datetime
+
 
 """
 Classe représentant une requête dans notre système.
@@ -94,9 +96,15 @@ class Request :
             self.status = 3
         elif do_reverse_search :
             self.status = 9
+        
+        
+        # Date de fin de la procédure, c'est à dire d'appel de la méthode
+        # set_status_done
+        self.finished_date = None
     
     def set_status_done( self ) :
         self.status = 10
+        self.finished_date = datetime.now()
     
     def get_status_string( self ) :
         if self.status == 0 :
