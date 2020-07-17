@@ -28,6 +28,7 @@ def error_collector( thread_procedure, thread_id : int, pipeline ) :
             else :
                 if request != None :
                     request.problem = "PROCESSING_ERROR"
+                    request.set_status_done()
                     error_name += "URL de requête : " + str(request.input_url) + "\n"
             
             # Enregistrer dans un fichier
