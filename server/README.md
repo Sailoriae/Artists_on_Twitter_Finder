@@ -19,6 +19,29 @@ Lorsqu'il est démarré, il affiche une interface en ligne de commande. Tapez `h
 Ceci lance le serveur et vous met en ligne de commande. Si vous souhaitez quitter la fenêtre en laissant le serveur tourner, faites `Crtl + A + D`.
 
 
+## Fonctionnalités
+
+* Base de données stockant les comptes et les Tweets.
+* Moteur de calcul de caractéristiques d'une image (Moteur CBIR).
+* Traitement des requêtes en 5 étapes :
+  - Link Finder : Recherche des comptes Twitter de l'artiste, et recherche du fichier de l'illustration. Classe principale : `Link_Finder`, dans le module `link_finder`.
+  - Tweet Finder : Classe principale : `CBIR_Engine_with_Database`, dans le module `tweet_finder`.
+    - GetOldTweets3 : Listage des Tweets des comptes Twitter trouvés.
+    - GetOldTweets3 : Analyse et indexation des Tweets trouvés. L'analyse consiste au calcul des caractéristiques de l'image avec le moteur CBIR.
+    - API Twitter publique via Tweepy : Analyse et indexation des Tweets des comptes Twitter trouvés.
+      Voir pourquoi il y a deux systèmes d'indexation dans `doc/Limites_de_scan_des_comptes_Twitter.md`.
+    - Recherche inversée d'image.
+* Serveur web pour l'API HTTP qui renvoit les status des requêtes, avec les éventuels résultats, ou une erreur s'il y a un problème. Voir `doc/API_HTTP.md`.
+* Parallélisme : Chaqune des 5 étapes se fait dans un thread séparés, avec une files d'attente.
+  - Possibilité de créer plusieurs threads pour chaque étape,
+  - Et possibilité aussi de créer plusieurs threads pour le serveur HTTP.
+* Mémoire partagée entre tous les threads dans l'objet `Pipeline`.
+* Limite du nombre de requête en cours de traitement par
+* Thread de délestage automatique des anciennes requêtes terminées.
+* Thread de lancement de mises à jour automatiques des comptes Twitter dans la base de données.
+* Collecteur d'erreurs : Tous les threads sont éxécuté dans une instance du collecteur d'erreurs. Stocke l'erreur dans un fichier, met l'éventuelle requête en cours de traitement en situation d'erreur / échec, et redémaerre le thread.
+
+
 ## Architecture du code
 
 Script `app.py` : Script central, crée et gère les threads de traitement, la ligne de commande, les files d'attentes des requêtes, et le serveur HTTP.
