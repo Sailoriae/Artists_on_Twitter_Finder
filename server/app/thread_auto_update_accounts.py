@@ -64,8 +64,8 @@ def thread_auto_update_accounts( thread_id : int, pipeline ) :
         # param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE jours d'aujourd'hui, ça ne
         # sert à rien de MàJ
         if now - min_date < datetime.timedelta( days = param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE ) :
-            # Retest dans une heure (1200*3 = 3600)
-            for i in range( 1200 ) :
+            # Retest dans (now - min_date) en secondes
+            for i in range( int( (now - min_date).total_seconds() / 3 ) ) :
                 sleep( 3 )
                 if not pipeline.keep_service_alive :
                     break
