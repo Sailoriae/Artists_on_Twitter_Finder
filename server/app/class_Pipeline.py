@@ -102,23 +102,45 @@ class Pipeline :
                                          param.API_SECRET,
                                          param.OAUTH_TOKEN,
                                          param.OAUTH_TOKEN_SECRET )
+        
+        
+        # Dictionnaire contenant le nombre de requêtes en cours de traitement
+        # par addresse IP
+        self.dict_of_ip_addresses = {}
+        
+        # Sémaphore d'accès au dictionnaire précédente
+        self.dict_of_ip_addresses_sem = threading.Semaphore()
     
     """
     Lancement de la procédure complète pour une URL d'illustration.
+    Les requêtes sont idendifiées par l'URL de l'illustration d'entrée.
+    
     @param illust_url L'illustration d'entrée.
+    @param ip_address L'addresse IP qui a demandé cette requête à enregistrer.
+                      Enregistrée avec la requête uniquement dans le cas de
+                      création d'une nouvelle requête.
+                      (OPTIONNEL)
     @return L'objet Request créé.
+            Ou l'objet Request déjà existant.
+            Ou None si l'addresse IP passée en paramètre a atteint son nombre
+            maximum de requêtes en cours de traitement.
     """
-    def launch_full_process ( self, illust_url : str ) :
+    def launch_full_process ( self, illust_url : str, ip_address : str = None ) :
         # Vérifier d'abord qu'on n'est pas déjà en train de traiter cette illustration
         self.requests_sem.acquire()
         for request in self.requests :
             if request.input_url == illust_url :
                 self.requests_sem.release()
-                return
+                return request
         
-        request = Request( illust_url, do_link_finder = True,
-                                       do_indexing = True,
-                                       do_reverse_search = True )
+        if not self.add_ip_address( ip_address ) :
+            self.requests_sem.release()
+            return None
+        
+        request = Request( illust_url, self, do_link_finder = True,
+                                             do_indexing = True,
+                                             do_reverse_search = True,
+                                             ip_address = ip_address )
         self.requests.append( request ) # Passé par adresse car c'est un objet
         
         self.requests_sem.release() # Seulement ici !
@@ -148,7 +170,7 @@ class Pipeline :
             return False
         
         # On crée une requête de MàJ avec ce compte Twitter
-        request = Request( None, do_indexing = True )
+        request = Request( None, self, do_indexing = True )
         
         # On ajoute le compte Twitter
         request.twitter_accounts.append( account_name )
@@ -252,3 +274,50 @@ class Pipeline :
                 new_list.append( account_id )
         self.currently_indexing = new_list
         self.currently_indexing_sem.release()
+    
+    """
+    Ajouter +1 au nombre de requête en cours de traitement pour une addresse IP.
+    
+    @param ip_address L'addresse IP à ajouter
+    @return True si on a pu faire +1
+            False si l'addresse IP a atteint son nombre maximum de requêtes en
+            cours de traitement.
+    """
+    def add_ip_address ( self, ip_address : str ) -> bool :
+        if ip_address in param.UNLIMITED_IP_ADDRESSES :
+            return True
+        
+        self.dict_of_ip_addresses_sem.acquire()
+        try :
+            current_count = self.dict_of_ip_addresses[ ip_address ]
+        except KeyError :
+            self.dict_of_ip_addresses[ ip_address ] = 1
+            self.dict_of_ip_addresses_sem.release()
+            return True
+        
+        else :
+            if current_count < param.MAX_PENDING_REQUESTS_PER_IP_ADDRESS :
+                self.dict_of_ip_addresses[ ip_address ] = current_count + 1
+                self.dict_of_ip_addresses_sem.release()
+                return True
+            else :
+                self.dict_of_ip_addresses_sem.release()
+                return False
+    
+    """
+    Supprimer une addresse IP à la liste des addresses IP qui ont une requête
+    en cours de traitement.
+    Si l'addresse est en plusieurs exemplaire, elle sera supprimée qu'une seule
+    fois.
+    
+    @param ip_address L'addresse IP à supprimer
+    """
+    def remove_ip_address ( self, ip_address : str ) :
+        self.dict_of_ip_addresses_sem.acquire()
+        try :
+            current_count = self.dict_of_ip_addresses[ ip_address ]
+        except KeyError :
+            pass
+        else :
+            self.dict_of_ip_addresses[ ip_address ] = current_count - 1
+        self.dict_of_ip_addresses_sem.release()

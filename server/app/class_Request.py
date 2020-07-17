@@ -14,11 +14,14 @@ Car c'est elle qui gère toutes les requêtes.
 class Request :
     """
     @param input_url URL de l'illustration de requête.
+    @param pipeline L'objet Pipeline, mémoire partagée.
     """
     def __init__ ( self, input_url,
+                         pipeline,
                          do_link_finder = False,
                          do_indexing = False,
-                         do_reverse_search = False ) :
+                         do_reverse_search = False,
+                         ip_address = None ) :
         # Est ce que la requête doit faire l'étape 1, c'est à dire passer dans
         # le "thread_step_1_link_finder"
         self.do_link_finder = do_link_finder
@@ -33,6 +36,13 @@ class Request :
         # Est ce que cette requête doit faire l'étape 5, c'est à dire passer
         # dans le thread "thread_step_5_reverse_search"
         self.do_reverse_search = do_reverse_search
+        
+        
+        # Addresse IP qui a lancé la requête
+        self.ip_address = ip_address
+        
+        # Objet de mémoire partagée
+        self.pipeline = pipeline
         
         
         # Une requête est identifiée par son URL de requête, c'est à dire l'URL
@@ -105,6 +115,8 @@ class Request :
     def set_status_done( self ) :
         self.status = 10
         self.finished_date = datetime.now()
+        if self.ip_address != None :
+            self.pipeline.remove_ip_address( self.ip_address )
     
     def get_status_string( self ) :
         if self.status == 0 :

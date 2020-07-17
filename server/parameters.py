@@ -85,3 +85,13 @@ Nombre de jours sans scan du compte Twitter pour le mettre à jour
 automatiquement.
 """
 DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE = 10
+
+"""
+Limitation du nombre de requêtes (Via l'API HTTP) par addresse IP.
+"""
+MAX_PENDING_REQUESTS_PER_IP_ADDRESS = 10
+
+"""
+Liste des addresses IP non-soumises à la limitation.
+"""
+UNLIMITED_IP_ADDRESSES = [ "127.0.0.1" ]

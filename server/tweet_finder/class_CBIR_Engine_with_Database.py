@@ -493,7 +493,7 @@ class CBIR_Engine_with_Database :
         else :
             self.bdd.set_account_last_scan_with_TwitterAPI(
                 account_id,
-                self.bbd.get_account_last_scan_with_TwitterAPI( account_id ) )
+                self.bdd.get_account_last_scan_with_TwitterAPI( account_id ) )
         
         return True
 

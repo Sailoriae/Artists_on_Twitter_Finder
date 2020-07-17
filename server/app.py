@@ -163,7 +163,7 @@ while True :
     elif args[0] == "search" :
         if len(args) in [ 2, 3 ] :
             # Fabrication de l'objet Request
-            request = Request( None, do_reverse_search = True )
+            request = Request( None, pipeline, do_reverse_search = True )
             request.image_url = args[1]
             
             if len(args) == 3 :

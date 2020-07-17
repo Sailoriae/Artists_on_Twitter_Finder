@@ -54,42 +54,50 @@ def http_server_container ( pipeline_arg ) :
                     response += ", \"results\" : [ ]"
                     response += ", \"error\" : \"NO_URL_FIELD\""
                 else :
-                    request = self.pipeline.get_request( illust_url )
+                    # Lance une nouvelle requête, ou donne la requête déjà existante
+                    request = self.pipeline.launch_full_process( illust_url,
+                                                                 ip_address = self.client_address[0] )
                     
-                    # Si la requête n'a pas encore été faite, on lance la procédure et
-                    # on affiche son status à 0
+                    # Si request == None, c'est qu'on ne peut pas lancer une
+                    # nouvelle requête car l'addresse IP a trop de requêtes en
+                    # cours de traitement, donc on renvoit l'erreur
+                    # YOUR_IP_HAS_MAX_PENDING_REQUESTS
                     if request == None :
-                        request = self.pipeline.launch_full_process( illust_url )
+                        response += "\"status\" : \"END\""
+                        response += ", \"twitter_accounts\" : [ ]"
+                        response += ", \"results\" : [ ]"
+                        response += ", \"error\" : \"YOUR_IP_HAS_MAX_PENDING_REQUESTS\""
                     
-                    # On envoit les informations sur la requête
-                    response += "\"status\" : \"" + request.get_status_string() + "\""
-                    
-                    response += ", \"twitter_accounts\" : ["
-                    for account in request.twitter_accounts_with_id :
-                        response += " { "
-                        response += "\"account_name\" : \"" + str(account[0]) + "\", "
-                        response += "\"account_id\" : \"" + str(account[1]) + "\""  # Envoyer en string et non en int
-                        response += " },"
-                    if response[-1] == "," : # Supprimer la dernière virgule
-                        response = response[:-1]
-                    response += " ]"
-                    
-                    response += ", \"results\" : ["
-                    for result in request.founded_tweets :
-                        response += " { "
-                        response += "\"tweet_id\" : \"" + str(result.tweet_id) + "\", " # Envoyer en string et non en int
-                        response += "\"account_id\" : \"" + str(result.account_id) + "\", " # Envoyer en string et non en int
-                        response += "\"image_position\" : " + str(result.image_position) + ", "
-                        response += "\"distance\" : " + str(result.distance)
-                        response += " },"
-                    if response[-1] == "," : # Supprimer la dernière virgule
-                        response = response[:-1]
-                    response += " ]"
-                    
-                    if request.problem != None :
-                        response += ", \"error\" : \"" + request.problem + "\""
+                    # Sinon, on envoit les informations sur la requête
                     else :
-                        response += ", \"error\" : \"\""
+                        response += "\"status\" : \"" + request.get_status_string() + "\""
+                        
+                        response += ", \"twitter_accounts\" : ["
+                        for account in request.twitter_accounts_with_id :
+                            response += " { "
+                            response += "\"account_name\" : \"" + str(account[0]) + "\", "
+                            response += "\"account_id\" : \"" + str(account[1]) + "\""  # Envoyer en string et non en int
+                            response += " },"
+                        if response[-1] == "," : # Supprimer la dernière virgule
+                            response = response[:-1]
+                        response += " ]"
+                        
+                        response += ", \"results\" : ["
+                        for result in request.founded_tweets :
+                            response += " { "
+                            response += "\"tweet_id\" : \"" + str(result.tweet_id) + "\", " # Envoyer en string et non en int
+                            response += "\"account_id\" : \"" + str(result.account_id) + "\", " # Envoyer en string et non en int
+                            response += "\"image_position\" : " + str(result.image_position) + ", "
+                            response += "\"distance\" : " + str(result.distance)
+                            response += " },"
+                        if response[-1] == "," : # Supprimer la dernière virgule
+                            response = response[:-1]
+                        response += " ]"
+                        
+                        if request.problem != None :
+                            response += ", \"error\" : \"" + request.problem + "\""
+                        else :
+                            response += ", \"error\" : \"\""
                     
                 response += "}\n"
                 
