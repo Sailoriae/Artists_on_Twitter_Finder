@@ -83,8 +83,9 @@ class TweepyAbtraction :
     
     """
     Obtenir les Tweets d'un utilisateur.
-    ATTENTION ! Contient tous les Tweets, même les RT.
-    ATTENTION ! Est forcément limité à 3 200 Tweets maximum !
+    ATTENTION ! Contient tous les Tweets sauf les RT
+    ATTENTION ! Est forcément limité à 3 200 Tweets maximum ! RT compris,
+    même si l'API ne nous les envoie pas.
     
     @param account_id L'ID du compte Twitter (Ou son nom d'utilisateur)
     @param since_tweet_id L'ID du tweet depuis lequel scanner (OPTIONNEL)
@@ -93,7 +94,7 @@ class TweepyAbtraction :
     def get_account_tweets ( self, account_id : int, since_tweet_id : int = None ) :
         # tweepy.Cursor gère les Rate Limits
         # Attention ! Ne pas supprimer les réponses, des illustrations peuvent
-        # être dans des réponses !
+        # être dans des réponses ! Laisser le code tel qu'il est.
         if since_tweet_id == None :
             return tweepy.Cursor( self.api.user_timeline,
                                   id = account_id,

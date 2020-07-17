@@ -15,10 +15,6 @@ from app import *
 import parameters as param
 
 
-# TODO : Thread de vidage de la liste des requêtes lorsqu'elles sont au niveau
-# de traitement 8 (= Fin de traitement)
-
-
 """
 MEMOIRE PARTAGEE ENTRE LES THREADS.
 Variable globale, partagées entre les threads.
