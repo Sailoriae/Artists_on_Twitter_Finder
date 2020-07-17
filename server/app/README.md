@@ -17,6 +17,7 @@ Voici la liste des procédure principales pour chaque thread (Ou plutôt "type d
 
 - `thread_http_server` : Thread de serveur HTTP.
 - `thread_auto_update_accounts` : Thread de mise à jour automatique des comptes dans la base de données.
+- `thread_remove_finished_requests` : Thread de délestage des requêtes terminées. Elles sont conservées 24h.
 
 - `error_collector` : Procédure conteneuse de chaque thread du serveur (Exécute les procédures ci-dessus). Permet de collecter les erreurs, de les enregistrer dans des fichiers, et de redémarrer le thread. Elle met aussi la requête en échec si le thread était en train de traiter une requête.
 
