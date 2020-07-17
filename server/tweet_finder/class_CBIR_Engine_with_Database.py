@@ -383,6 +383,13 @@ class CBIR_Engine_with_Database :
         if scan_date != None :
             self.bdd.set_account_last_scan( account_id, scan_date )
         
+        # On force la MàJ de la date local de scan pour que le thread de
+        # MàJ automatique ne repasse pas de si tôt dessus
+        else :
+            self.bdd.set_account_last_scan(
+                account_id,
+                self.bbd.get_account_last_scan( account_id ) )
+        
         return True
     
     """
@@ -481,6 +488,13 @@ class CBIR_Engine_with_Database :
         # On met à jour la date du dernier scan dans la base de données
         if last_tweet_id != None :
             self.bdd.set_account_last_scan_with_TwitterAPI( account_id, last_tweet_id )
+        
+        # On force la MàJ de la date local de scan pour que le thread de
+        # MàJ automatique ne repasse pas de si tôt dessus
+        else :
+            self.bdd.set_account_last_scan_with_TwitterAPI(
+                account_id,
+                self.bbd.get_account_last_scan_with_TwitterAPI( account_id ) )
         
         return True
 
