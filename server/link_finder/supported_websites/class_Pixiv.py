@@ -4,6 +4,8 @@
 import pixivpy3
 from typing import List
 import re
+from time import sleep
+from random import randrange
 
 try :
     from utils import validate_twitter_account_url
@@ -75,7 +77,18 @@ class Pixiv :
     def cache_or_get ( self, illust_url : int ) -> bool :
         if illust_url != self.cache_illust_url :
             illust_id = self.artwork_url_to_id( illust_url )
-            json = self.api.illust_detail( illust_id )
+            
+            retry_count = 0
+            while True : # Solution très bourrin pour gèrer les Rate limits de l'API Pixiv
+                try :
+                    json = self.api.illust_detail( illust_id )
+                    break
+                except pixivpy3.utils.PixivError as error :
+                    print( error )
+                    sleep( randrange( 5, 15 ) )
+                    retry_count += 1
+                    if retry_count > 20 :
+                        raise error # Sera récupérée par le collecteur d'erreurs
             
             try :
                 json["error"]
@@ -142,7 +155,17 @@ class Pixiv :
                 return None
             user_id = self.cache_illust_url_json["illust"]["user"]["id"]
         
-        user_id_json = self.api.user_detail( user_id )
+        retry_count = 0
+        while True : # Solution très bourrin pour gèrer les Rate limits de l'API Pixiv
+            try :
+                user_id_json = self.api.user_detail( user_id )
+                break
+            except pixivpy3.utils.PixivError as error :
+                print( error )
+                sleep( randrange( 5, 15 ) )
+                retry_count += 1
+                if retry_count > 20 :
+                    raise error # Sera récupérée par le collecteur d'erreurs
         
         twitter_accounts = []
         
