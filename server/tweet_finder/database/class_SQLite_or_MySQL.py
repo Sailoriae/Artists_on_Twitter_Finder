@@ -32,7 +32,7 @@ class SQLite_or_MySQL :
     """
     Constructeur
     """
-    def __init__( self, sqlite_database_name : str ) :
+    def __init__( self ) :
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
             self.conn = mysql.connector.connect(
                 host = param.MYSQL_ADDRESS,
@@ -43,7 +43,7 @@ class SQLite_or_MySQL :
             )
         else :
             self.conn = sqlite3.connect(
-                sqlite_database_name,
+                param.SQLITE_DATABASE_NAME,
             )
         
         c = self.conn.cursor()
@@ -144,7 +144,7 @@ class SQLite_or_MySQL :
             
             c.execute( request )
         
-        return SQLite_Image_Features_Iterator( c )
+        return Image_Features_Iterator( c )
     
     """
     Stocker la date du dernier scan d'un compte Twitter
@@ -296,7 +296,15 @@ class SQLite_or_MySQL :
                                         last_TwitterAPI_indexing_local_date ) ASC
                           LIMIT 1""" )
         triplet = c.fetchone()
-        return ( triplet[0], datetime.strptime( triplet[1], '%Y-%m-%d %H:%M:%S' ), datetime.strptime( triplet[2], '%Y-%m-%d %H:%M:%S' ) )
+        if triplet == None :
+            return None
+        last_GOT3_indexing_local_date = triplet[1]
+        last_TwitterAPI_indexing_local_date = triplet[2]
+        if last_GOT3_indexing_local_date != None :
+            last_GOT3_indexing_local_date = datetime.strptime( last_GOT3_indexing_local_date, '%Y-%m-%d %H:%M:%S' )
+        if last_TwitterAPI_indexing_local_date != None :
+            last_TwitterAPI_indexing_local_date = datetime.strptime( last_TwitterAPI_indexing_local_date, '%Y-%m-%d %H:%M:%S' )
+        return ( triplet[0], last_GOT3_indexing_local_date, last_TwitterAPI_indexing_local_date )
 
 
 """
