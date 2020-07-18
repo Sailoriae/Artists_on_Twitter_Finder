@@ -7,13 +7,13 @@ from typing import List
 try :
     from lib_GetOldTweets3 import manager as GetOldTweets3_manager
     from cbir_engine import CBIR_Engine
-    from database import SQLite
+    from database import SQLite_or_MySQL
     from twitter import TweepyAbtraction
     from utils import url_to_cv2_image
 except ModuleNotFoundError : # Si on a été exécuté en temps que module
     from .lib_GetOldTweets3 import manager as GetOldTweets3_manager
     from .cbir_engine import CBIR_Engine
-    from .database import SQLite
+    from .database import SQLite_or_MySQL
     from .twitter import TweepyAbtraction
     from .utils import url_to_cv2_image
 
@@ -68,7 +68,7 @@ class CBIR_Engine_with_Database :
     def __init__( self, DEBUG : bool = False ) :
         self.DEBUG = DEBUG
         self.cbir_engine = CBIR_Engine()
-        self.bdd = SQLite( param.SQLITE_DATABASE_NAME )
+        self.bdd = SQLite_or_MySQL()
         self.twitter = TweepyAbtraction( param.API_KEY,
                                          param.API_SECRET,
                                          param.OAUTH_TOKEN,

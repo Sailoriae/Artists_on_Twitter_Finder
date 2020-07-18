@@ -15,7 +15,7 @@ from os import path as os_path
 sys_path.append(os_path.dirname(os_path.dirname(os_path.abspath(__file__))))
 
 import parameters as param
-from tweet_finder.database import SQLite
+from tweet_finder.database import SQLite_or_MySQL
 
 
 """
@@ -24,7 +24,7 @@ Permet de gagner du temps lors d'une requête.
 """
 def thread_auto_update_accounts( thread_id : int, pipeline ) :
     # Accès direct à la base de données
-    bdd_direct_access = SQLite( param.SQLITE_DATABASE_NAME )
+    bdd_direct_access = SQLite_or_MySQL()
     
     # Tant que on ne nous dit pas de nous arrêter
     while pipeline.keep_service_alive :

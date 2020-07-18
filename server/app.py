@@ -43,10 +43,10 @@ Utilisé par la CLI.
         - Le nombre de tweets indexés,
         - Et nombre de comptes indexés.
 """
-from tweet_finder.database import SQLite
+from tweet_finder.database import SQLite_or_MySQL
 # Accès direct à la base de données pour le processus principal
 # N'UTILISER QUE DES METHODES QUI FONT SEULEMENT DES SELECT !
-bdd_direct_access = SQLite( param.SQLITE_DATABASE_NAME )
+bdd_direct_access = SQLite_or_MySQL()
 def get_stats() :
     return bdd_direct_access.get_stats()
 

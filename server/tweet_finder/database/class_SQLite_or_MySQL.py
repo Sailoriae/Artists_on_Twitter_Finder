@@ -5,9 +5,9 @@ from typing import List
 from datetime import datetime
 
 try :
-    from class_SQLite_Image_Features_Iterator import SQLite_Image_Features_Iterator
+    from class_Image_Features_Iterator import Image_Features_Iterator
 except ModuleNotFoundError : # Si on a été exécuté en temps que module
-    from .class_SQLite_Image_Features_Iterator import SQLite_Image_Features_Iterator
+    from .class_Image_Features_Iterator import Image_Features_Iterator
 
 # Ajouter le répertoire parent du parent au PATH pour pouvoir importer
 from sys import path as sys_path
@@ -28,7 +28,7 @@ Couche d'abstraction à la base de données SQLite.
 Une liste est stockée sous forme d'une chaine de caractéres.
 Le séparateur des élément est le caractère ';'.
 """
-class SQLite :
+class SQLite_or_MySQL :
     """
     Constructeur
     """

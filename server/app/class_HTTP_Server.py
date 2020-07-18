@@ -9,8 +9,7 @@ from sys import path as sys_path
 from os import path as os_path
 sys_path.append(os_path.dirname(os_path.dirname(os_path.abspath(__file__))))
 
-import parameters as param
-from tweet_finder.database import SQLite
+from tweet_finder.database import SQLite_or_MySQL
 
 
 """
@@ -24,7 +23,7 @@ def http_server_container ( pipeline_arg ) :
         def __init__( self, *args, **kwargs ) :
             # Accès direct à la base de données
             # N'UTILISER QUE DES METHODES QUI FONT SEULEMENT DES SELECT !
-            self.bdd_direct_access = SQLite( param.SQLITE_DATABASE_NAME )
+            self.bdd_direct_access = SQLite_or_MySQL()
             
             super(BaseHTTPRequestHandler, self).__init__(*args, **kwargs)
         

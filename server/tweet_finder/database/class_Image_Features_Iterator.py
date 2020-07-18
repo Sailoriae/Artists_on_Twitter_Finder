@@ -1,8 +1,6 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-import sqlite3
-
 try :
     from class_Image_in_DB import Image_in_DB
 except ModuleNotFoundError : # Si on a été exécuté en temps que module
@@ -13,12 +11,12 @@ except ModuleNotFoundError : # Si on a été exécuté en temps que module
 Itérateur sur les images de Tweets contenues dans la base de données.
 
 Cet objet doit uniquement être instancié par la méthode
-"get_images_in_db_iterator()" de la classe "SQLite" contenue dans le fichier
-"class_SQLite.py".
+"get_images_in_db_iterator()" de la classe "SQLite_or_MySQL" contenue dans le
+fichier "class_SQLite_or_MySQL.py".
 """
-class SQLite_Image_Features_Iterator :
-    def __init__( self, cursor : sqlite3.Cursor ) :
-        self.cursor : sqlite3.Cursor = cursor
+class Image_Features_Iterator :
+    def __init__( self, cursor ) :
+        self.cursor = cursor
         
         # Ligne dans la base de données en cours de lecture
         self.current_line = self.cursor.fetchone()
