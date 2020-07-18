@@ -99,7 +99,7 @@ class SQLite_or_MySQL :
         else :
             cbir_features_4_str = None
         
-        if hashtags != None and hashtags != [] :
+        if hashtags != None and hashtags != [] and hashtags != [""] :
             hashtags_str = ";".join( [ hashtag for hashtag in hashtags ] )
         else :
             hashtags_str = None
@@ -284,6 +284,9 @@ class SQLite_or_MySQL :
     def get_oldest_updated_account( self ) -> int :
         c = self.conn.cursor()
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
+            # Le "ORDER BY LEAST()" considère bien la valeur NULL comme
+            # inférieure à toutes les autres valeurs, et la place en tête.
+            # C'est parfait pour nous !
             c.execute( """SELECT account_id, last_GOT3_indexing_local_date, last_TwitterAPI_indexing_local_date
                           FROM accounts
                           ORDER BY LEAST( last_GOT3_indexing_local_date,
