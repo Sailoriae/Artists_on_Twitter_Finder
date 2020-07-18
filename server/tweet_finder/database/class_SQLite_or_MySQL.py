@@ -301,9 +301,11 @@ class SQLite_or_MySQL :
         last_GOT3_indexing_local_date = triplet[1]
         last_TwitterAPI_indexing_local_date = triplet[2]
         if last_GOT3_indexing_local_date != None :
-            last_GOT3_indexing_local_date = datetime.strptime( last_GOT3_indexing_local_date, '%Y-%m-%d %H:%M:%S' )
+            if not param.USE_MYSQL_INSTEAD_OF_SQLITE :
+                last_GOT3_indexing_local_date = datetime.strptime( last_GOT3_indexing_local_date, '%Y-%m-%d %H:%M:%S' )
         if last_TwitterAPI_indexing_local_date != None :
-            last_TwitterAPI_indexing_local_date = datetime.strptime( last_TwitterAPI_indexing_local_date, '%Y-%m-%d %H:%M:%S' )
+            if not param.USE_MYSQL_INSTEAD_OF_SQLITE :
+                last_TwitterAPI_indexing_local_date = datetime.strptime( last_TwitterAPI_indexing_local_date, '%Y-%m-%d %H:%M:%S' )
         return ( triplet[0], last_GOT3_indexing_local_date, last_TwitterAPI_indexing_local_date )
 
 
