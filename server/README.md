@@ -69,3 +69,5 @@ Script `app.py` : Script central, crée et gère les threads de traitement, la l
   Exemple :
   - Ceci est une URL d'illustration, elle peut être traitée par le serveur : https://danbooru.donmai.us/posts/3991989
   - Ceci est une URL menant directement à l'image, elle sera rejetée par serveur : https://danbooru.donmai.us/data/__hatsune_miku_vocaloid_drawn_by_bibboss39__cac99a60fa84a778d5b048daec05e7b1.jpg
+
+* La date de dernière mise à jour d'un compte Twitter est mise dans la base de données à la fin des 3 étapes d'indexation (Listage des Tweets avec GOT3, indexation GOT3, indexation Twitter API). Si l'un des threads de traitement plante, la requête est mise en erreur, et aucune date n'est enregistrée. Ainsi, l'intégralité des Tweets qu'il est possible de récupérer ont étés analysés et ceux avec une ou plusieurs image sont dans la base de données.
