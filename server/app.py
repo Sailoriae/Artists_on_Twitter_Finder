@@ -16,6 +16,14 @@ import parameters as param
 
 
 """
+Vérification des paramètres.
+"""
+if not check_parameters() :
+    import sys
+    sys.exit(0)
+
+
+"""
 MEMOIRE PARTAGEE ENTRE LES THREADS.
 Variable globale, partagées entre les threads.
 Cet objet est passé en paramètre aux threads. Car en Python, les objets sont

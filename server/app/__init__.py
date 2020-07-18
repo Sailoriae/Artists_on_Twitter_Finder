@@ -5,6 +5,8 @@
 from .class_Pipeline import Pipeline
 from .class_Request import Request
 
+from .check_parameters import check_parameters
+
 from .error_collector import error_collector
 
 from .thread_auto_update_accounts import thread_auto_update_accounts
