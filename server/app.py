@@ -1,6 +1,10 @@
 #!/usr/bin/python3
 # coding: utf-8
 
+import os
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+
 """
 Script principal. NE PAS LE LANCER PLUSIEURS FOIS !
 
@@ -92,13 +96,13 @@ for i in range( param.NUMBER_OF_STEP_5_REVERSE_SEARCH_THREADS ) :
     thread.start()
     threads_step_5_reverse_search.append( thread )
 
-threads_http_server = []
-for i in range( param.NUMBER_OF_HTTP_SERVER_THREADS ) :
-    thread = threading.Thread( name = "http_server_th" + str(i+1),
-                               target = error_collector,
-                               args = ( thread_http_server, i+1, pipeline, ) )
-    thread.start()
-    threads_http_server.append( thread )
+# On ne crée qu'un seul thread du serveur HTTP
+# C'est lui qui va créer plusieurs threads grace à la classe :
+# http.server.ThreadingHTTPServer()
+thread_http_server = threading.Thread( name = "http_server_th1",
+                                       target = error_collector,
+                                       args = ( thread_http_server, 1, pipeline, ) )
+thread_http_server.start()
 
 # On ne crée qu'un seul thread de mise à jour automatique
 thread_auto_update_accounts = threading.Thread( name = "auto_update_accounts_th1",
@@ -233,8 +237,7 @@ Arrêt du système.
 # Car http_server.handle_request() est bloquant tant qu'il n'y a pas eu de
 # requête
 import requests
-for i in range( len( threads_http_server ) ) :
-    requests.get( "http://localhost:" + str( param.HTTP_SERVER_PORT ) )
+requests.get( "http://localhost:" + str( param.HTTP_SERVER_PORT ) )
 
 # Attendre que les threads aient fini
 for thread in threads_step_1_link_finder :
@@ -247,7 +250,6 @@ for thread in threads_step_4_TwitterAPI_index_account_tweets :
     thread.join()
 for thread in threads_step_5_reverse_search :
     thread.join()
-for thread in threads_http_server :
-    thread.join()
+thread_http_server.join()
 thread_auto_update_accounts.join()
 thread_remove_finished_requests.join()

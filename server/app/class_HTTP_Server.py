@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler
 from urllib.parse import parse_qs, urlsplit
 
 # Ajouter le répertoire parent au PATH pour pouvoir importer

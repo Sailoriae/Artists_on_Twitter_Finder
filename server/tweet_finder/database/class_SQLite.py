@@ -44,13 +44,11 @@ class SQLite :
         else :
             self.conn = sqlite3.connect(
                 sqlite_database_name,
-                detect_types=sqlite3.PARSE_DECLTYPES # Permet d'extraire les données avec les bons types
-                                                     # Par exemple : TIMESTAMP -> datetime.datetime
             )
         
         c = self.conn.cursor()
-        c.execute( "CREATE TABLE IF NOT EXISTS tweets ( account_id INTEGER, tweet_id INTEGER PRIMARY KEY, image_1_features TEXT, image_2_features TEXT, image_3_features TEXT, image_4_features TEXT, hashtags TEXT )" )
-        c.execute( "CREATE TABLE IF NOT EXISTS accounts ( account_id INTEGER PRIMARY KEY, last_GOT3_indexing_api_date CHAR, last_GOT3_indexing_local_date TIMESTAMP, last_TwitterAPI_indexing_tweet_id INTEGER, last_TwitterAPI_indexing_local_date TIMESTAMP )" )
+        c.execute( "CREATE TABLE IF NOT EXISTS tweets ( account_id BIGINT, tweet_id BIGINT PRIMARY KEY, image_1_features TEXT, image_2_features TEXT, image_3_features TEXT, image_4_features TEXT, hashtags TEXT )" )
+        c.execute( "CREATE TABLE IF NOT EXISTS accounts ( account_id BIGINT PRIMARY KEY, last_GOT3_indexing_api_date CHAR(10), last_GOT3_indexing_local_date DATETIME, last_TwitterAPI_indexing_tweet_id BIGINT, last_TwitterAPI_indexing_local_date DATETIME )" )
         self.conn.commit()
     
     """
@@ -106,8 +104,14 @@ class SQLite :
         else :
             hashtags_str = None
         
-        c.execute( """INSERT INTO tweets VALUES ( ?, ?, ?, ?, ?, ?, ? )
-                      ON CONFLICT ( tweet_id ) DO NOTHING """, # Si le tweet est déjà stocké, on ne fait rien
+        request = """INSERT INTO tweets VALUES ( ?, ?, ?, ?, ?, ?, ? )
+                     ON CONFLICT ( tweet_id ) DO NOTHING""" # Si le tweet est déjà stocké, on ne fait rien
+        
+        if param.USE_MYSQL_INSTEAD_OF_SQLITE :
+            request = request = """INSERT INTO tweets VALUES ( %s, %s, %s, %s, %s, %s, %s )
+                                   ON DUPLICATE KEY UPDATE tweets.tweet_id = tweets.tweet_id"""
+        
+        c.execute( request,
                    ( account_id,
                      tweet_id,
                      cbir_features_1_str,
@@ -128,10 +132,17 @@ class SQLite :
         c = self.conn.cursor()
         
         if account_id != 0 :
-            c.execute( "SELECT account_id, tweet_id, image_1_features, image_2_features, image_3_features, image_4_features FROM tweets WHERE account_id = ?",
+            request = "SELECT account_id, tweet_id, image_1_features, image_2_features, image_3_features, image_4_features FROM tweets WHERE account_id = ?"
+            
+            if param.USE_MYSQL_INSTEAD_OF_SQLITE :
+                request = request.replace( "?", "%s" )
+            
+            c.execute( request,
                        ( account_id, ) )
         else :
-            c.execute( "SELECT account_id, tweet_id, image_1_features, image_2_features, image_3_features, image_4_features FROM tweets" )
+            request = "SELECT account_id, tweet_id, image_1_features, image_2_features, image_3_features, image_4_features FROM tweets"
+            
+            c.execute( request )
         
         return SQLite_Image_Features_Iterator( c )
     
@@ -146,9 +157,16 @@ class SQLite :
     def set_account_last_scan( self, account_id : int, last_update : str ) :
         now = datetime.now()
         c = self.conn.cursor()
-        c.execute( """INSERT INTO accounts ( account_id, last_GOT3_indexing_api_date, last_GOT3_indexing_local_date ) VALUES ( ?, ?, ? )
-                      ON CONFLICT ( account_id ) DO UPDATE SET last_GOT3_indexing_api_date = ?, last_GOT3_indexing_local_date = ?""",
-                   ( account_id, last_update, now, last_update, now ) )
+        
+        request = """INSERT INTO accounts ( account_id, last_GOT3_indexing_api_date, last_GOT3_indexing_local_date ) VALUES ( ?, ?, ? )
+                     ON CONFLICT ( account_id ) DO UPDATE SET last_GOT3_indexing_api_date = ?, last_GOT3_indexing_local_date = ?"""
+        
+        if param.USE_MYSQL_INSTEAD_OF_SQLITE :
+            request = """INSERT INTO accounts ( account_id, last_GOT3_indexing_api_date, last_GOT3_indexing_local_date ) VALUES ( %s, %s, %s )
+                         ON DUPLICATE KEY UPDATE last_GOT3_indexing_api_date = %s, last_GOT3_indexing_local_date = %s"""
+        
+        c.execute( request,
+                   ( account_id, last_update, now.strftime('%Y-%m-%d %H:%M:%S'), last_update, now.strftime('%Y-%m-%d %H:%M:%S') ) )
         self.conn.commit()
     
     """
@@ -163,9 +181,16 @@ class SQLite :
     def set_account_last_scan_with_TwitterAPI( self, account_id : int, tweet_id : int ) :
         now = datetime.now()
         c = self.conn.cursor()
-        c.execute( """INSERT INTO accounts ( account_id, last_TwitterAPI_indexing_tweet_id, last_TwitterAPI_indexing_local_date ) VALUES ( ?, ?, ? )
-                      ON CONFLICT ( account_id ) DO UPDATE SET last_TwitterAPI_indexing_tweet_id = ?, last_TwitterAPI_indexing_local_date = ?""",
-                   ( account_id, tweet_id, now, tweet_id, now ) )
+        
+        request = """INSERT INTO accounts ( account_id, last_TwitterAPI_indexing_tweet_id, last_TwitterAPI_indexing_local_date ) VALUES ( ?, ?, ? )
+                     ON CONFLICT ( account_id ) DO UPDATE SET last_TwitterAPI_indexing_tweet_id = ?, last_TwitterAPI_indexing_local_date = ?"""
+        
+        if param.USE_MYSQL_INSTEAD_OF_SQLITE :
+            request = """INSERT INTO accounts ( account_id, last_TwitterAPI_indexing_tweet_id, last_TwitterAPI_indexing_local_date ) VALUES ( %s, %s, %s )
+                         ON DUPLICATE KEY UPDATE last_TwitterAPI_indexing_tweet_id = %s, last_TwitterAPI_indexing_local_date = %s"""
+        
+        c.execute( request,
+                   ( account_id, tweet_id, now.strftime('%Y-%m-%d %H:%M:%S'), tweet_id, now.strftime('%Y-%m-%d %H:%M:%S') ) )
         self.conn.commit()
     
     """
@@ -176,7 +201,13 @@ class SQLite :
     """
     def get_account_last_scan( self, account_id : int ) -> str :
         c = self.conn.cursor()
-        c.execute( "SELECT last_GOT3_indexing_api_date FROM accounts WHERE account_id = ?",
+        
+        request = "SELECT last_GOT3_indexing_api_date FROM accounts WHERE account_id = ?"
+        
+        if param.USE_MYSQL_INSTEAD_OF_SQLITE :
+            request = request.replace( "?", "%s" )
+        
+        c.execute( request,
                    ( account_id, ) )
         last_scan = c.fetchone()
         if last_scan != None :
@@ -194,7 +225,13 @@ class SQLite :
     """
     def get_account_last_scan_with_TwitterAPI( self, account_id : int ) -> int :
         c = self.conn.cursor()
-        c.execute( "SELECT last_TwitterAPI_indexing_tweet_id FROM accounts WHERE account_id = ?",
+        
+        request = "SELECT last_TwitterAPI_indexing_tweet_id FROM accounts WHERE account_id = ?"
+        
+        if param.USE_MYSQL_INSTEAD_OF_SQLITE :
+            request = request.replace( "?", "%s" )
+        
+        c.execute( request,
                    ( account_id, ) )
         last_scan = c.fetchone()
         if last_scan != None :
@@ -223,7 +260,13 @@ class SQLite :
     """
     def is_tweet_indexed( self, tweet_id : int ) -> bool :
         c = self.conn.cursor()
-        c.execute( "SELECT * FROM tweets WHERE tweet_id = ?", ( tweet_id, ) )
+        
+        request = "SELECT * FROM tweets WHERE tweet_id = ?"
+        
+        if param.USE_MYSQL_INSTEAD_OF_SQLITE :
+            request = request.replace( "?", "%s" )
+        
+        c.execute( request, ( tweet_id, ) )
         return c.fetchone() != None
     
     """
@@ -244,7 +287,7 @@ class SQLite :
             c.execute( """SELECT account_id, last_GOT3_indexing_local_date, last_TwitterAPI_indexing_local_date
                           FROM accounts
                           ORDER BY LEAST( last_GOT3_indexing_local_date,
-                                        last_TwitterAPI_indexing_local_date ) ASC
+                                          last_TwitterAPI_indexing_local_date ) ASC
                           LIMIT 1""" )
         else :
             c.execute( """SELECT account_id, last_GOT3_indexing_local_date, last_TwitterAPI_indexing_local_date
@@ -252,7 +295,8 @@ class SQLite :
                           ORDER BY MIN( last_GOT3_indexing_local_date,
                                         last_TwitterAPI_indexing_local_date ) ASC
                           LIMIT 1""" )
-        return c.fetchone()
+        triplet = c.fetchone()
+        return ( triplet[0], datetime.strptime( triplet[1], '%Y-%m-%d %H:%M:%S' ), datetime.strptime( triplet[2], '%Y-%m-%d %H:%M:%S' ) )
 
 
 """
