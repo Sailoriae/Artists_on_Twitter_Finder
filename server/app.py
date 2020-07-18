@@ -4,6 +4,22 @@
 import os
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
+# Problème étrange : Les tests de la classe CBIR_Engine_with_Database
+# fonctionnent avec MySQL... Mais lorsqu'on démarre l'app complète, l'erreur
+# suivant apparait au listage des Tweets par GOT3 : 
+# <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed:
+# unable to get local issuer certificate (_ssl.c:1108)>
+# Très très étrange.
+# Les lignes ci-dessous règles ces problèmes, mais désactivent la vérification
+# SSL, ce qui est pas mal dangereux !
+import ssl
+try:
+    _create_unverified_https_context = ssl._create_unverified_context
+except AttributeError:
+    pass
+else:
+    ssl._create_default_https_context = _create_unverified_https_context
+
 
 """
 Script principal. NE PAS LE LANCER PLUSIEURS FOIS !
