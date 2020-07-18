@@ -3,6 +3,7 @@
 
 from cv2 import error as ErrorOpenCV
 from typing import List
+import traceback
 
 try :
     from lib_GetOldTweets3 import manager as GetOldTweets3_manager
@@ -159,7 +160,13 @@ class CBIR_Engine_with_Database :
         # Exemple : https://twitter.com/apofissx/status/219051550696407040
         # Ce tweet est indiqué comme ayant une image, mais elle est en 404 !
         except Exception as error :
+            print( "Erreur avec le Tweet : " + str(tweet_id) + " !" )
             print( error )
+            file = open( "class_CBIR_Engine_with_Database_errors.log", "a" )
+            file.write( "Erreur avec le Tweet : " + str(tweet_id) + " !\n" )
+            traceback.print_exc( file = file )
+            file.write( "\n\n\n" )
+            file.close()
             return False
         
         # Prendre les hashtags
@@ -359,7 +366,13 @@ class CBIR_Engine_with_Database :
             #
             # Permet aussi de gérer les images avec des formats à la noix
             except Exception as error :
+                print( "Erreur avec le Tweet : " + str(tweets_to_scan[i].id) + " !" )
                 print( error )
+                file = open( "class_CBIR_Engine_with_Database_errors.log", "a" )
+                file.write( "Erreur avec le Tweet : " + str(tweets_to_scan[i].id) + " !\n" )
+                traceback.print_exc( file = file )
+                file.write( "\n\n\n" )
+                file.close()
                 continue
             
             # Prendre les hashtags du Tweet

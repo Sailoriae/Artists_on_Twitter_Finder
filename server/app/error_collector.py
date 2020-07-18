@@ -33,9 +33,11 @@ def error_collector( thread_procedure, thread_id : int, pipeline ) :
             
             # Enregistrer dans un fichier
             if error_count < 100 : # Ne pas créer trop de fichiers, s'il y a autant d'erreurs, c'est que c'est la même
-                file = open( thread_procedure.__name__ + "_number" + str(thread_id) + "_error" + str(error_count) + ".log", "w" )
+                file = open( thread_procedure.__name__ + "_number" + str(thread_id) + "_errors.log", "a" )
                 file.write( error_name )
                 traceback.print_exc( file = file )
+                file.write( "\n\n\n" )
+                file.close()
             
             # Afficher dans le terminal
             print( error_name )

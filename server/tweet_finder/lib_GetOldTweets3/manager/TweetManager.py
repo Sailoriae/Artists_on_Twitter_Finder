@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import time
+import traceback
 
 import json, re, datetime, sys, random, http.cookiejar
 import urllib.request, urllib.parse, urllib.error
@@ -401,9 +402,20 @@ class TweetManager:
                     time.sleep(60)
                     print("Retrying now !")
                     retry = True
+                else :
+                    print("An error occured during an HTTP request:", str(e))
+                    print("Try to open in browser: https://twitter.com/search?q=%s&src=typd" % urllib.parse.quote(urlGetData))
+                    file = open( "lib_GetOldTweets3_errors.log", "a" )
+                    traceback.print_exc( file = file )
+                    file.close()
+                    sys.exit()
             except Exception as e:
                 print("An error occured during an HTTP request:", str(e))
                 print("Try to open in browser: https://twitter.com/search?q=%s&src=typd" % urllib.parse.quote(urlGetData))
+                file = open( "lib_GetOldTweets3_errors.log", "a" )
+                traceback.print_exc( file = file )
+                file.write( "\n\n\n" )
+                file.close()
                 sys.exit()
 
         try:
