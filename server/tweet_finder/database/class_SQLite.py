@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-import sqlite3
 from typing import List
 from datetime import datetime
 
@@ -9,6 +8,18 @@ try :
     from class_SQLite_Image_Features_Iterator import SQLite_Image_Features_Iterator
 except ModuleNotFoundError : # Si on a été exécuté en temps que module
     from .class_SQLite_Image_Features_Iterator import SQLite_Image_Features_Iterator
+
+# Ajouter le répertoire parent du parent au PATH pour pouvoir importer
+from sys import path as sys_path
+from os import path as os_path
+sys_path.append(os_path.dirname(os_path.dirname(os_path.dirname(os_path.abspath(__file__)))))
+
+import parameters as param
+
+if param.USE_MYSQL_INSTEAD_OF_SQLITE :
+    import mysql.connector
+else :
+    import sqlite3
 
 
 """
@@ -21,16 +32,25 @@ class SQLite :
     """
     Constructeur
     """
-    def __init__( self, database_name : str ) :
-        self.conn = sqlite3.connect(
-            database_name,
-            detect_types=sqlite3.PARSE_DECLTYPES # Permet d'extraire les données avec les bons types
-                                                 # Par exemple : TIMESTAMP -> datetime.datetime
-        )
+    def __init__( self, sqlite_database_name : str ) :
+        if param.USE_MYSQL_INSTEAD_OF_SQLITE :
+            self.conn = mysql.connector.connect(
+                host = param.MYSQL_ADDRESS,
+                port = param.MYSQL_PORT,
+                user = param.MYSQL_USERNAME,
+                password = param.MYSQL_PASSWORD,
+                database = param.MYSQL_DATABASE_NAME
+            )
+        else :
+            self.conn = sqlite3.connect(
+                sqlite_database_name,
+                detect_types=sqlite3.PARSE_DECLTYPES # Permet d'extraire les données avec les bons types
+                                                     # Par exemple : TIMESTAMP -> datetime.datetime
+            )
         
         c = self.conn.cursor()
         c.execute( "CREATE TABLE IF NOT EXISTS tweets ( account_id INTEGER, tweet_id INTEGER PRIMARY KEY, image_1_features TEXT, image_2_features TEXT, image_3_features TEXT, image_4_features TEXT, hashtags TEXT )" )
-        c.execute( "CREATE TABLE IF NOT EXISTS accounts ( account_id INTEGER PRIMARY KEY, last_GOT3_indexing_api_date STRING, last_GOT3_indexing_local_date TIMESTAMP, last_TwitterAPI_indexing_tweet_id INTEGER, last_TwitterAPI_indexing_local_date TIMESTAMP )" )
+        c.execute( "CREATE TABLE IF NOT EXISTS accounts ( account_id INTEGER PRIMARY KEY, last_GOT3_indexing_api_date CHAR, last_GOT3_indexing_local_date TIMESTAMP, last_TwitterAPI_indexing_tweet_id INTEGER, last_TwitterAPI_indexing_local_date TIMESTAMP )" )
         self.conn.commit()
     
     """
@@ -220,11 +240,18 @@ class SQLite :
     """
     def get_oldest_updated_account( self ) -> int :
         c = self.conn.cursor()
-        c.execute( """SELECT account_id, last_GOT3_indexing_local_date, last_TwitterAPI_indexing_local_date
-                      FROM accounts
-                      ORDER BY MIN( last_GOT3_indexing_local_date,
-                                    last_TwitterAPI_indexing_local_date ) ASC
-                      LIMIT 1""" )
+        if param.USE_MYSQL_INSTEAD_OF_SQLITE :
+            c.execute( """SELECT account_id, last_GOT3_indexing_local_date, last_TwitterAPI_indexing_local_date
+                          FROM accounts
+                          ORDER BY LEAST( last_GOT3_indexing_local_date,
+                                        last_TwitterAPI_indexing_local_date ) ASC
+                          LIMIT 1""" )
+        else :
+            c.execute( """SELECT account_id, last_GOT3_indexing_local_date, last_TwitterAPI_indexing_local_date
+                          FROM accounts
+                          ORDER BY MIN( last_GOT3_indexing_local_date,
+                                        last_TwitterAPI_indexing_local_date ) ASC
+                          LIMIT 1""" )
         return c.fetchone()
 
 

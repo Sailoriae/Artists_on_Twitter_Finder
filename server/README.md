@@ -8,7 +8,8 @@ Lorsqu'il est démarré, il affiche une interface en ligne de commande. Tapez `h
 ## Installation
 
 1. Configurer le fichier `parametres.py` avec vos clés d'accès aux API.
-2. Installer les librairies nécessaires : `pip install -r requirements.txt`
+2. Sous Linux, installer D'ABORD les dépendances de la librairie OpenCV-Python : `sudo apt install libsm6 libxext6 libxrender-dev`
+3. Installer les librairies nécessaires : `pip install -r requirements.txt`
 
 
 ## Utilisation
