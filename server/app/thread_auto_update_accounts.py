@@ -92,6 +92,8 @@ def thread_auto_update_accounts( thread_id : int, pipeline ) :
             print( "[auto_update_th" + str(thread_id) + "] Mise à jour du compte Twitter avec l'ID " + str(oldest_updated_account[0]) + "." )
         
         # On reprend dans 5 minutes (200*3 = 600)
+        # On ne peut pas reprendre tout de suite car le compte n'a pas de
+        # nouvelle date dans la BDD, donc on va le ré-avoir
         for i in range( 200 ) :
             sleep( 3 )
             if not pipeline.keep_service_alive :
