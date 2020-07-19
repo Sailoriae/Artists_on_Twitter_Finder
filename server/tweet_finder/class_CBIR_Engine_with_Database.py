@@ -303,12 +303,17 @@ class CBIR_Engine_with_Database :
         
         tweets_to_scan, account_id = get_GOT3_list_result
         
-        print( "Indexation / scan des Tweets de @" + account_name + "." )
+        print( "Indexation / scan des Tweets de @" + account_name + " avec GetOldTweets3." )
         
         length = len( tweets_to_scan )
         
         # Si la liste est vide, c'est qu'il n'y a aucun Tweet à indexer
         if length == 0 :
+            # On force la MàJ de la date local de scan pour que le thread de
+            # MàJ automatique ne repasse pas de si tôt dessus
+            self.bdd.set_account_last_scan(
+                account_id,
+                self.bdd.get_account_last_scan( account_id ) )
             return True
         
         # Stocker la date du premier tweet que l'on va scanner, c'est à dire le
@@ -402,7 +407,7 @@ class CBIR_Engine_with_Database :
         else :
             self.bdd.set_account_last_scan(
                 account_id,
-                self.bbd.get_account_last_scan( account_id ) )
+                self.bdd.get_account_last_scan( account_id ) )
         
         return True
     
@@ -474,7 +479,7 @@ class CBIR_Engine_with_Database :
             print( "Compte @" + account_name + " introuvable !" )
             return False
         
-        print( "Indexation / scan des Tweets de @" + account_name + "." )
+        print( "Indexation / scan des Tweets de @" + account_name + " avec l'API Twitter." )
         
         since_tweet_id = self.bdd.get_account_last_scan_with_TwitterAPI( account_id )
         

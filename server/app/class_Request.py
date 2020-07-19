@@ -103,9 +103,9 @@ class Request :
         if do_link_finder :
             self.status = 0
         elif do_indexing :
-            self.status = 3
+            self.status = 2
         elif do_reverse_search :
-            self.status = 9
+            self.status = 8
         
         
         # Date de fin de la procédure, c'est à dire d'appel de la méthode

@@ -68,23 +68,8 @@ def thread_step_2_GOT3_list_account_tweets( thread_id : int, pipeline ) :
             
             GOT3_list = cbir_engine.get_GOT3_list( twitter_account )
             
-            if GOT3_list == None :
-                continue
-            
             request.get_GOT3_list_result.append( ( twitter_account,
                                                    GOT3_list ) )
-        
-        # Si la liste des tweets trouvés par GetOldTweets3 et par l'API Twitter
-        # sont vides, ça ne sert à rien de continuer !
-        if request.get_GOT3_list_result == [] and request.get_TwitterAPI_list_result == [] :
-            # Dire qu'on n'est plus en train de traiter cette requête
-            pipeline.requests_in_thread[ "thread_step_2_GOT3_list_account_tweets_number" + str(thread_id) ] = None
-            
-            request.problem = "NO_TWITTER_ACCOUNT_FOR_THIS_ARTIST"
-            request.set_status_done()
-            
-            print( "[step_2_th" + str(thread_id) + "] Aucun compte Twitter valide !" )
-            continue # On arrête là
         
         # Dire qu'on n'est plus en train de traiter cette requête
         pipeline.requests_in_thread[ "thread_step_2_GOT3_list_account_tweets_number" + str(thread_id) ] = None

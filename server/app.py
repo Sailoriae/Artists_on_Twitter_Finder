@@ -214,7 +214,10 @@ while True :
                 if value == None :
                     to_print += key + " : IDLE\n"
                 else :
-                    to_print += key + " : " + value.input_url + "\n"
+                    if value.input_url != None :
+                        to_print += key + " : " + value.input_url + "\n"
+                    else :
+                        to_print += key + " : Requête sans URL (Auto-update ?)\n"
             print( to_print )
         else :
             print( "Utilisation : threads")

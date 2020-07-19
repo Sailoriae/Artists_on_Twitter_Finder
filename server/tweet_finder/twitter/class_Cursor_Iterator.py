@@ -18,16 +18,12 @@ class Cursor_Iterator :
         return self
     
     def __next__( self ) :
-        retry_count = 0
         while True : # Solution très bourrin pour gèrer les 429
             try :
                 return self.tweepy_cursor.__next__()
             except tweepy.error.TweepError as error :
-                    if error.response.error != 503 and error.response.error != 429 :
+                    if error.response.status_code != 503 and error.response.status_code != 429 :
                         raise error
                     print( "Limite atteinte, on réessaye dans environ 60 secondes..." )
                     print( error )
                     time.sleep( randrange( 50, 70 ) )
-                    retry_count += 1
-                    if retry_count > 30 :
-                        raise error # Sera récupérée par le collecteur d'erreurs
