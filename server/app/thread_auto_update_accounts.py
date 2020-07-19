@@ -28,73 +28,69 @@ def thread_auto_update_accounts( thread_id : int, pipeline ) :
     
     # Tant que on ne nous dit pas de nous arrêter
     while pipeline.keep_service_alive :
-        # Prendre le compte avec la mise à jour la plus vielle
-        oldest_updated_account = bdd_direct_access.get_oldest_updated_account()
+        # Prendre l'itérateur sur les comptes dans la base de donnée, triés
+        # dans l'ordre du moins récemment mise à jour au plus récemment mis à jour
+        oldest_updated_account_iterator = bdd_direct_access.get_oldest_updated_account()
         
-        if oldest_updated_account == None :
-            print( "[auto_update_th" + str(thread_id) + "] La base de données n'a pas de comptes Twitter enregistrés !" )
-            # Retest dans une heure (1200*3 = 3600)
-            for i in range( 1200 ) :
-                sleep( 3 )
-                if not pipeline.keep_service_alive :
-                    break
-            continue
+        # Compteurs du nombre d'itération
+        count = 0
         
-        # Vérifier que le compte n'est pas déjà en cours d'indexation
-        if pipeline.check_is_indexing( oldest_updated_account[0] ) :
-            # On reprend dans 5 minutes (200*3 = 600)
-            for i in range( 200 ) :
-                sleep( 3 )
-                if not pipeline.keep_service_alive :
-                    break
-            continue
-        
-        # Prendre la date actuelle
-        now = datetime.datetime.now()
-        
-        # Si une des deux dates est à NULL, on force le scan
-        force_scan = False
-        if oldest_updated_account[1] == None or oldest_updated_account[2] == None :
-            force_scan = True
-        
-        # Sinon, on prendre la date minimale
-        else :
-            min_date = min( oldest_updated_account[1], oldest_updated_account[2] )
+        for oldest_updated_account in oldest_updated_account_iterator  :
+            count += 1
             
-            # Si cette mise à jour est à moins de
-            # param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE jours d'aujourd'hui, ça ne
-            # sert à rien de MàJ
-            if now - min_date < datetime.timedelta( days = param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE ) :
-                # Retest dans (now - min_date) en secondes
-                for i in range( int( (now - min_date).total_seconds() / 3 ) ) :
-                    sleep( 3 )
-                    if not pipeline.keep_service_alive :
-                        break
+            # Vérifier que le compte n'est pas déjà en cours d'indexation
+            if pipeline.check_is_indexing( oldest_updated_account[0] ) :
                 continue
-        
-        # On lance le scan pour ce compte
-        result = pipeline.launch_index_or_update_only( account_id = oldest_updated_account[0] )
-        
-        # Si l'ID du compte Twitter n'existe plus
-        if result == False :
-            print( "[auto_update_th" + str(thread_id) + "] L'ID de compte Twitter " + str(oldest_updated_account[0]) + " n'existe plus !" )
             
-            # On met la date locale de la dernière MàJ à aujourd'hui pour
-            # éviter de ré-avoir cet ID à la prochaine itération
-            # On peut faire ce INSERT INTO, pusiqu'il n'y a que ce thread qui
-            # utilise la date locale de dernière MàK
-            bdd_direct_access.set_account_last_scan( oldest_updated_account[0],
-                                                     bdd_direct_access.get_account_last_scan( oldest_updated_account[0] ) )
-            bdd_direct_access.set_account_last_scan_with_TwitterAPI( oldest_updated_account[0],
-                                                                     bdd_direct_access.get_account_last_scan_with_TwitterAPI( oldest_updated_account[0] ) )
+            # Prendre la date actuelle
+            now = datetime.datetime.now()
+            
+            # Si une des deux dates est à NULL, on force le scan
+            if oldest_updated_account[1] == None or oldest_updated_account[2] == None :
+               pass
+            
+            # Sinon, on prendre la date minimale
+            else :
+                min_date = min( oldest_updated_account[1], oldest_updated_account[2] )
+                
+                # Si cette mise à jour est à moins de
+                # param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE jours d'aujourd'hui,
+                # ça ne sert à rien de MàJ, ni de continuer l'itération, car
+                # après, les comptes seront moins vieux
+                # On peut donc arrêter l'itération !
+                if now - min_date < datetime.timedelta( days = param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE ) :
+                    # Retest dans (now - min_date) en secondes
+                    for i in range( int( (now - min_date).total_seconds() / 3 ) ) :
+                        sleep( 3 )
+                        if not pipeline.keep_service_alive :
+                            break
+                    break # Arrête de l'itération "for"
+            
+            # On lance le scan pour ce compte
+            result = pipeline.launch_index_or_update_only( account_id = oldest_updated_account[0] )
+            
+            # Si l'ID du compte Twitter n'existe plus
+            if result == False :
+                print( "[auto_update_th" + str(thread_id) + "] L'ID de compte Twitter " + str(oldest_updated_account[0]) + " n'existe plus !" )
+                
+                # On met la date locale de la dernière MàJ à aujourd'hui pour
+                # éviter de ré-avoir cet ID à la prochaine itération
+                # On peut faire ce INSERT INTO, pusiqu'il n'y a que ce thread qui
+                # utilise la date locale de dernière MàK
+                bdd_direct_access.set_account_last_scan( oldest_updated_account[0],
+                                                         bdd_direct_access.get_account_last_scan( oldest_updated_account[0] ) )
+                bdd_direct_access.set_account_last_scan_with_TwitterAPI( oldest_updated_account[0],
+                                                                         bdd_direct_access.get_account_last_scan_with_TwitterAPI( oldest_updated_account[0] ) )
+            
+            else :
+                print( "[auto_update_th" + str(thread_id) + "] Mise à jour du compte Twitter avec l'ID " + str(oldest_updated_account[0]) + "." )
         
-        else :
-            print( "[auto_update_th" + str(thread_id) + "] Mise à jour du compte Twitter avec l'ID " + str(oldest_updated_account[0]) + "." )
+        # Si il n'y avait aucun compte dans l'itérateur
+        if count == 0 :
+            print( "[auto_update_th" + str(thread_id) + "] La base de données n'a pas de comptes Twitter enregistrés !" )
         
-        # On reprend dans 5 minutes (200*3 = 600)
-        # On ne peut pas reprendre tout de suite car le compte n'a pas de
-        # nouvelle date dans la BDD, donc on va le ré-avoir
-        for i in range( 200 ) :
+        # Retest dans une heure (1200*3 = 3600)
+        for i in range( 1200 ) :
             sleep( 3 )
             if not pipeline.keep_service_alive :
                 break

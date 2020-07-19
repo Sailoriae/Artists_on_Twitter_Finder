@@ -6,8 +6,10 @@ from datetime import datetime
 
 try :
     from class_Image_Features_Iterator import Image_Features_Iterator
+    from class_Less_Recently_Updated_Accounts_Iterator import Less_Recently_Updated_Accounts_Iterator
 except ModuleNotFoundError : # Si on a été exécuté en temps que module
     from .class_Image_Features_Iterator import Image_Features_Iterator
+    from .class_Less_Recently_Updated_Accounts_Iterator import Less_Recently_Updated_Accounts_Iterator
 
 # Ajouter le répertoire parent du parent au PATH pour pouvoir importer
 from sys import path as sys_path
@@ -286,16 +288,15 @@ class SQLite_or_MySQL :
         return c.fetchone() != None
     
     """
-    Retourner l'ID du compte Twitter dont la mise à jour est la plus vielle.
+    Retourner un itérateur sur les IDs des comptes Twitter dans la base données,
+    triés dans l'ordre du moins récemment mise à jour au plus récemment mis à
+    jour.
     La date de mise à jour la plus vielle est calculée avec la valeur minimum
     de la date du dernier scan avec GetOldTweets3 et du dernier scan avec l'API
     Twitter publique.
     
-    @return Un triplet contenant :
-            - L'ID du compte Twitter,
-            - Sa date de dernière MàJ avec GetOldTweets3,
-            - Et sa date dernière MàJ avec l'API Twitter publique.
-            Ou None s'il n'y a aucun compte enregistré dans la base de données.
+    @return Un itérateur sur le résultat
+            Voir le fichier "class_Less_Recently_Updated_Accounts_Iterator.py"
     """
     def get_oldest_updated_account( self ) -> int :
         c = self.conn.cursor()
@@ -306,33 +307,19 @@ class SQLite_or_MySQL :
             c.execute( """SELECT account_id, last_GOT3_indexing_local_date, last_TwitterAPI_indexing_local_date
                           FROM accounts
                           ORDER BY LEAST( last_GOT3_indexing_local_date,
-                                          last_TwitterAPI_indexing_local_date ) ASC
-                          LIMIT 1""" )
+                                          last_TwitterAPI_indexing_local_date ) ASC""" )
         else :
             c.execute( """SELECT account_id, last_GOT3_indexing_local_date, last_TwitterAPI_indexing_local_date
                           FROM accounts
                           ORDER BY MIN( last_GOT3_indexing_local_date,
-                                        last_TwitterAPI_indexing_local_date ) ASC
-                          LIMIT 1""" )
-        triplet = c.fetchone()
-        if triplet == None :
-            return None
-        last_GOT3_indexing_local_date = triplet[1]
-        last_TwitterAPI_indexing_local_date = triplet[2]
-        if last_GOT3_indexing_local_date != None :
-            if not param.USE_MYSQL_INSTEAD_OF_SQLITE :
-                last_GOT3_indexing_local_date = datetime.strptime( last_GOT3_indexing_local_date, '%Y-%m-%d %H:%M:%S' )
-        if last_TwitterAPI_indexing_local_date != None :
-            if not param.USE_MYSQL_INSTEAD_OF_SQLITE :
-                last_TwitterAPI_indexing_local_date = datetime.strptime( last_TwitterAPI_indexing_local_date, '%Y-%m-%d %H:%M:%S' )
-        return ( triplet[0], last_GOT3_indexing_local_date, last_TwitterAPI_indexing_local_date )
-
+                                        last_TwitterAPI_indexing_local_date ) ASC""" )
+        return Less_Recently_Updated_Accounts_Iterator( c )
 
 """
 Test du bon fonctionnement de cette classe
 """
 if __name__ == '__main__' :
-    bdd = SQLite( "Test_SQLite_Database.db" )
+    bdd = SQLite_or_MySQL()
     bdd.insert_tweet( 12, 42, [0.0000000001, 1000000000] )
     bdd.insert_tweet( 12, 42, [10.01, 1.1] )
     bdd.get_images_in_db_iterator( 12 )
