@@ -180,12 +180,42 @@ class Pipeline :
         request = Request( None, self, do_indexing = True )
         
         # On ajoute le compte Twitter
-        request.twitter_accounts.append( account_name )
         request.twitter_accounts_with_id.append( (account_name, account_id) ) 
         
         # On met le compte Twitter dans la file d'attente du premier thread
         # de scan
         self.step_2_GOT3_list_account_tweets_queue.put( request )
+        
+        return True
+    
+    """
+    Lancer uniquement une recherche inversée d'image.
+    
+    @param image_url L'URL de l'image à chercher.
+    @param account_name Le nom du compte Twitter sur lequel chercher.
+    @return True si le compte Twitter existe.
+            False si le compte est inexistant.
+    """
+    def launch_reverse_search_only ( self, image_url : str, account_name : str = None ) :
+        if account_name != None :
+            account_id = self.twitter.get_account_id( account_name )
+        
+            # Si le compte est invalide
+            if account_id == None :
+                return False
+        
+        # Fabrication de l'objet Request
+        request = Request( None, self, do_reverse_search = True )
+        request.image_url = image_url
+        
+        # On ajoute l'éventuel compte Twitter
+        if account_name != None :
+            request.twitter_accounts_with_id.append( (account_name, account_id) )
+        
+        # On met la requête dans la file d'attente des threadsd de recherche inversée
+        self.step_5_reverse_search_queue.put( request )
+        
+        return True
     
     """
     Passer la requête à l'étape suivante.

@@ -61,13 +61,13 @@ class Request :
         # requête, on la met ici
         self.problem = None
         
-        # Résultats du Link Finder
-        self.twitter_accounts = []
+        # Résultat du Link Finder
+        # Image source de l'illustration
         self.image_url = None
         
         # Liste de tuples (str, int), avec le nom du compte Twitter, et son ID
-        # On est certain que ces comptes existent, contrairement au résultat
-        # Link Finder
+        # On est certain que ces comptes existent, c'est le thread de Link Finder
+        # qui vérifie
         self.twitter_accounts_with_id = []
         
         # Résultats de la fonction get_GOT3_list() dans la classe

@@ -90,9 +90,6 @@ def thread_step_1_link_finder( thread_id : int, pipeline ) :
             print( "[step_1_th" + str(thread_id) + "] Aucun compte Twitter trouvé pour l'artiste de cette illustration !" )
             continue
         
-        # Stocker les comptes Twitter trouvés
-        request.twitter_accounts = twitter_accounts
-        
         # On vérifie la liste des comptes Twitter
         for account in twitter_accounts :
             account_id = twitter.get_account_id( account )

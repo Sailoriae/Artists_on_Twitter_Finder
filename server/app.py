@@ -186,23 +186,16 @@ while True :
     
     elif args[0] == "search" :
         if len(args) in [ 2, 3 ] :
-            # Fabrication de l'objet Request
-            request = Request( None, pipeline, do_reverse_search = True )
-            request.image_url = args[1]
-            
             if len(args) == 3 :
                 # Vérification que le nom d'utilisateur Twitter est possible
                 if re.compile("^@?(\w){1,15}$").match(args[2]) :
                     print( "Recherche sur le compte @" + args[2] + "." )
-                    request.twitter_accounts = [ args[2] ]
-                    # Lancement de la recherche
-                    pipeline.step_5_reverse_search_queue.put( request )
+                    pipeline.launch_reverse_search_only( args[1], account_name = args[2] )
                 else :
                     print( "Nom de compte Twitter impossible !" )
             else :
                 print( "Recherche dans toute la base de données !" )
-                # Lancement de la recherche
-                pipeline.step_5_reverse_search_queue.put( request )
+                pipeline.launch_reverse_search_only( args[1] )
         else :
             print( "Utilisation : search [URL de l'image à chercher] [Nom du compte Twitter (OPTIONNEL)]" )
     

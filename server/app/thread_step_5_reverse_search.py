@@ -51,10 +51,10 @@ def thread_step_5_reverse_search( thread_id : int, pipeline ) :
         
         # On recherche les Tweets contenant l'image de requête
         # Et on les stocke dans l'objet de requête
-        for twitter_account in request.twitter_accounts :
-            print( "[step_5_th" + str(thread_id) + "] Recherche sur le compte Twitter @" + twitter_account + "." )
+        for twitter_account in request.twitter_accounts_with_id :
+            print( "[step_5_th" + str(thread_id) + "] Recherche sur le compte Twitter @" + twitter_account[0] + "." )
             
-            result = cbir_engine.search_tweet( request.image_url, twitter_account )
+            result = cbir_engine.search_tweet( request.image_url, twitter_account[0] )
             if result != None :
                 request.founded_tweets += result
             else :
@@ -62,7 +62,7 @@ def thread_step_5_reverse_search( thread_id : int, pipeline ) :
                 request.problem = "ERROR_DURING_REVERSE_SEARCH"
         
         # Si il n'y a pas de compte Twitter dans la requête
-        if request.twitter_accounts == []:
+        if request.twitter_accounts_with_id == []:
             print( "[step_5_th" + str(thread_id) + "] Recherche dans toute la base de données." )
             
             result = cbir_engine.search_tweet( request.image_url )
