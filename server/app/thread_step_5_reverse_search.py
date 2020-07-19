@@ -22,6 +22,9 @@ def thread_step_5_reverse_search( thread_id : int, pipeline ) :
     # Initialisation de notre moteur de recherche d'image par le contenu
     cbir_engine = CBIR_Engine_with_Database()
     
+    # Dire qu'on ne fait rien
+    pipeline.requests_in_thread[ "thread_step_5_reverse_search_number" + str(thread_id) ] = None
+    
     # Tant que on ne nous dit pas de nous arrêter
     while pipeline.keep_service_alive :
         

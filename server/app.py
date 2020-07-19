@@ -206,6 +206,19 @@ while True :
         else :
             print( "Utilisation : search [URL de l'image à chercher] [Nom du compte Twitter (OPTIONNEL)]" )
     
+    elif args[0] == "threads" :
+        if len(args) == 1 :
+            to_print = ""
+            for key in pipeline.requests_in_thread :
+                value = pipeline.requests_in_thread[key]
+                if value == None :
+                    to_print += key + " : IDLE\n"
+                else :
+                    to_print += key + " : " + value.input_url + "\n"
+            print( to_print )
+        else :
+            print( "Utilisation : threads")
+    
     elif args[0] == "stats" :
         if len(args) == 1 :
             stats = get_stats()
@@ -236,6 +249,7 @@ while True :
                    "Rechercher une image dans la base de données : search [URL de l'image] [Nom du compte Twitter (OPTIONNEL)]\n" +
                    "\n" +
                    "Afficher des statistiques de la base de données : stats\n" +
+                   "Afficher ce que font les threads de traitement : threads\n" +
                    "Arrêter le service : stop\n" +
                    "Afficher l'aide : help\n" )
         else :

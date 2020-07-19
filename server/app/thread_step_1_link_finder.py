@@ -28,6 +28,9 @@ def thread_step_1_link_finder( thread_id : int, pipeline ) :
                                 param.OAUTH_TOKEN,
                                 param.OAUTH_TOKEN_SECRET )
     
+    # Dire qu'on ne fait rien
+    pipeline.requests_in_thread[ "thread_step_1_link_finder_number" + str(thread_id) ] = None
+    
     # Tant que on ne nous dit pas de nous arrêter
     while pipeline.keep_service_alive :
         
