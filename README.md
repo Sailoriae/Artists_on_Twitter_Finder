@@ -38,3 +38,12 @@ Lorsqu'on parle d'un "site supporté" par le serveur, on parle de l'un des sites
 ## Installation et utilisation du serveur
 
 Voir le fichier `server/README.md`.
+
+
+## Note de fin
+
+Si vous souhaitez faire l'opération inverse, c'est à dire à partir d'un Tweet trouver l'image source, voici :
+* SauceNAO : Un moteur de recherche inversée d'images spécialisé dans les animes, supporte Pixiv et pleins d'autres sites : https://saucenao.com/
+* Twitter-SauceNAO : Un robot qui permet à partir d'un Tweet de retrouver sa source via SauceNAO.
+
+SauceNAO est l'inverse de "Artist on Twitter Finder", car il indexe les images sur les sites sources. Ici, on indexe les images sur Twitter.
