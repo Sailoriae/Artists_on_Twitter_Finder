@@ -52,24 +52,25 @@ def thread_auto_update_accounts( thread_id : int, pipeline ) :
         # Prendre la date actuelle
         now = datetime.datetime.now()
         
-        # Prendre la date minimale
-        if oldest_updated_account[1] == None :
-            min_date = oldest_updated_account[2]
-        elif oldest_updated_account[2] == None :
-            min_date = oldest_updated_account[1]
+        # Si une des deux dates est à NULL, on force le scan
+        force_scan = False
+        if oldest_updated_account[1] == None or oldest_updated_account[2] == None :
+            force_scan = True
+        
+        # Sinon, on prendre la date minimale
         else :
             min_date = min( oldest_updated_account[1], oldest_updated_account[2] )
-        
-        # Si cette mise à jour est à moins de
-        # param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE jours d'aujourd'hui, ça ne
-        # sert à rien de MàJ
-        if now - min_date < datetime.timedelta( days = param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE ) :
-            # Retest dans (now - min_date) en secondes
-            for i in range( int( (now - min_date).total_seconds() / 3 ) ) :
-                sleep( 3 )
-                if not pipeline.keep_service_alive :
-                    break
-            continue
+            
+            # Si cette mise à jour est à moins de
+            # param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE jours d'aujourd'hui, ça ne
+            # sert à rien de MàJ
+            if now - min_date < datetime.timedelta( days = param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE ) :
+                # Retest dans (now - min_date) en secondes
+                for i in range( int( (now - min_date).total_seconds() / 3 ) ) :
+                    sleep( 3 )
+                    if not pipeline.keep_service_alive :
+                        break
+                continue
         
         # On lance le scan pour ce compte
         result = pipeline.launch_index_or_update_only( account_id = oldest_updated_account[0] )
