@@ -8,26 +8,24 @@ Toutes les requêtes qui font le parcours complet sont dans la liste `requests` 
 
 Voici les 5 étapes de traitement d'une requête :
 
-1. Link Finder : Vérification de l'URL, recherche de l'image source, et recherche de comptes Twitter.
+1. Link Finder : Vérification de l'URL, recherche de l'image source, recherche de comptes Twitter, et validation de ces comptes Twitter (En cherchant leur ID). Les comptes désactivés, suspendus, ou privés, ne sont pas validés.
    * File d'attente : `step_1_link_finder_queue`
    * Procédure du thread de traitement : `thread_step_1_link_finder`
    * ID et nom du status : `1`, `LINK_FINDER`
 
-2. Listage des tweets d'un compte avec GetOldTweets3.
+2. Tweet Finder : Listage des tweets d'un compte avec GetOldTweets3. L'indexation par GOT3 est séparée en deux partie car ce n'est pas un itérateur. On peut donc fare d'abord le listage des Tweets, puis leur analyse et indexation.
    * File d'attente : `step_2_GOT3_list_account_tweets_queue`
    * Procédure du thread de traitement : `thread_step_2_GOT3_list_account_tweets`
    * ID et nom du status : `3`, `LIST_ACCOUNT_TWEETS`
    * Il ne peut y avoir qu'un seul thread pour cette étape !
 
-3. Indexation des tweets trouvés par GetOldTweets3 : Détection d'images, calcul de la liste des caractéristiques avec le moteur CBIR, stockage dans la base de données.
+3. Tweet Finder : Analyse et indexation des tweets trouvés par GetOldTweets3 : Détection d'images, calcul de la liste des caractéristiques avec le moteur CBIR, stockage dans la base de données.
    * File d'attente : `step_3_GOT3_index_account_tweets_queue`
    * Procédure du thread de traitement : `thread_step_3_GOT3_index_account_tweets`
    * ID et nom du status : `5`, `INDEX_ACCOUNT_TWEETS`
    * Il ne peut y avoir qu'un seul thread pour cette étape !
 
-L'indexation par GOT3 est séparée en deux partie car ce n'est pas un itérateur.
-
-4. Indexation des tweets avec l'API publique de Twitter : Détection d'images, calcul de la liste des caractéristiques avec le moteur CBIR, stockage dans la base de données.
+4. Listage, analyse et indexation des tweets avec l'API publique de Twitter : Détection d'images, calcul de la liste des caractéristiques avec le moteur CBIR, stockage dans la base de données.
    * File d'attente : `step_4_TwitterAPI_index_account_tweets_queue`
    * Procédure du thread de traitement : `thread_step_4_TwitterAPI_index_account_tweets`
    * ID et nom du status : `7`, `SECOND_INDEX_ACCOUNT_TWEETS`
