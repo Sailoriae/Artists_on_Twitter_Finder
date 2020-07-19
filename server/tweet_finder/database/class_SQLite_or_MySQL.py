@@ -270,6 +270,22 @@ class SQLite_or_MySQL :
         return c.fetchone() != None
     
     """
+    Savoir si un compte Twitter est dans la base de données ou non
+    @param account_id L'ID du compte Twitter
+    @return True ou False
+    """
+    def is_account_indexed( self, account_id : int ) -> bool :
+        c = self.conn.cursor()
+        
+        request = "SELECT * FROM accounts WHERE account_id = ?"
+        
+        if param.USE_MYSQL_INSTEAD_OF_SQLITE :
+            request = request.replace( "?", "%s" )
+        
+        c.execute( request, ( account_id, ) )
+        return c.fetchone() != None
+    
+    """
     Retourner l'ID du compte Twitter dont la mise à jour est la plus vielle.
     La date de mise à jour la plus vielle est calculée avec la valeur minimum
     de la date du dernier scan avec GetOldTweets3 et du dernier scan avec l'API

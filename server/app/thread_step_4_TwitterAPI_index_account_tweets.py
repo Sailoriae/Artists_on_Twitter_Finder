@@ -11,6 +11,7 @@ sys_path.append(os_path.dirname(os_path.dirname(os_path.abspath(__file__))))
 
 import parameters as param
 from tweet_finder import CBIR_Engine_with_Database
+from tweet_finder.database import SQLite_or_MySQL
 
 
 """
@@ -21,6 +22,10 @@ de Twitter, via la librairie Tweepy.
 def thread_step_4_TwitterAPI_index_account_tweets( thread_id : int, pipeline ) :
     # Initialisation de notre moteur de recherche d'image par le contenu
     cbir_engine = CBIR_Engine_with_Database( DEBUG = param.DEBUG )
+    
+    # Accès direct à la base de données
+    # N'UTILISER QUE DES METHODES QUI FONT SEULEMENT DES SELECT !
+    bdd_direct_access = SQLite_or_MySQL()
     
     # Dire qu'on ne fait rien
     pipeline.requests_in_thread[ "thread_step_4_TwitterAPI_index_account_tweets_number" + str(thread_id) ] = None
@@ -44,6 +49,12 @@ def thread_step_4_TwitterAPI_index_account_tweets( thread_id : int, pipeline ) :
         
         # On index / scan les comptes Twitter de la requête avec l'API Twitter
         for twitter_account in request.twitter_accounts_with_id :
+            # Possibilité de sauter l'indexation des comptes déjà dans la BDD
+            if request.intelligent_skip_indexing :
+                if bdd_direct_access.is_account_indexed( twitter_account[1] ) :
+                    print( "[step_4_th" + str(thread_id) + "] @" + twitter_account[0] + " est déjà dans la base de données." )
+                    continue
+            
             print( "[step_4_th" + str(thread_id) + "] Indexation / scan du compte Twitter @" + twitter_account[0] + " avec l'API Twitter." )
             
             cbir_engine.index_or_update_with_TwitterAPI( twitter_account[0] )

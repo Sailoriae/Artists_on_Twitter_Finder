@@ -21,7 +21,8 @@ class Request :
                          do_link_finder = False,
                          do_indexing = False,
                          do_reverse_search = False,
-                         ip_address = None ) :
+                         ip_address = None,
+                         intelligent_skip_indexing = False ) :
         # Est ce que la requête doit faire l'étape 1, c'est à dire passer dans
         # le "thread_step_1_link_finder"
         self.do_link_finder = do_link_finder
@@ -40,6 +41,13 @@ class Request :
         
         # Addresse IP qui a lancé la requête
         self.ip_address = ip_address
+        
+        # Sauter la phase d'indexation pour les comptes qui sont déjà dans la
+        # base de données
+        # Leur dernière mise à jour aura donc au maximum le nombre de jour
+        # du paramètre DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE
+        self.intelligent_skip_indexing = intelligent_skip_indexing
+        
         
         # Objet de mémoire partagée
         self.pipeline = pipeline

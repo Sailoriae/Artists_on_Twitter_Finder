@@ -120,12 +120,18 @@ class Pipeline :
                       Enregistrée avec la requête uniquement dans le cas de
                       création d'une nouvelle requête.
                       (OPTIONNEL)
+    @param intelligent_skip_indexing Sauter la phase d'indexation pour les
+                                     comptes qui sont déjà dans la base de
+                                     données.
+                                     Leur dernière mise à jour aura donc a
+                                     maximum le nombre de jour du paramètre
+                                     DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE.
     @return L'objet Request créé.
             Ou l'objet Request déjà existant.
             Ou None si l'addresse IP passée en paramètre a atteint son nombre
             maximum de requêtes en cours de traitement.
     """
-    def launch_full_process ( self, illust_url : str, ip_address : str = None ) :
+    def launch_full_process ( self, illust_url : str, ip_address : str = None, intelligent_skip_indexing = False ) :
         # Vérifier d'abord qu'on n'est pas déjà en train de traiter cette illustration
         self.requests_sem.acquire()
         for request in self.requests :
@@ -140,7 +146,8 @@ class Pipeline :
         request = Request( illust_url, self, do_link_finder = True,
                                              do_indexing = True,
                                              do_reverse_search = True,
-                                             ip_address = ip_address )
+                                             ip_address = ip_address,
+                                             intelligent_skip_indexing = intelligent_skip_indexing )
         self.requests.append( request ) # Passé par adresse car c'est un objet
         
         self.requests_sem.release() # Seulement ici !
