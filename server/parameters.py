@@ -53,7 +53,7 @@ Paramètres pour l'utilisation de MySQL.
 """
 USE_MYSQL_INSTEAD_OF_SQLITE = False
 MYSQL_ADDRESS = "localhost"
-MYSQL_PORT = "3306"
+MYSQL_PORT = 3306
 MYSQL_USERNAME = ""
 MYSQL_PASSWORD = ""
 MYSQL_DATABASE_NAME = ""
