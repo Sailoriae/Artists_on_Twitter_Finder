@@ -57,7 +57,11 @@ class TweepyAbtraction :
     @param invert_mode Inverser cette fonction, retourne le nom d'utilisateur
                        à partir de l'ID du compte.
     @return L'ID du compte
-            Ou None si le compte est introuvable
+            Ou None s'il y a eu un problème, c'est à dire soit :
+            - Le compte n'existe pas,
+            - Le compte est désactivé,
+            - Le compte est suspendu,
+            - Ou le compte est privé
     """
     def get_account_id ( self, account_name : str, invert_mode = False ) -> int :
         retry = True
@@ -65,9 +69,25 @@ class TweepyAbtraction :
             retry = False
             try :
                 if invert_mode :
-                    return self.api.get_user( account_name ).screen_name
+                    json = self.api.get_user( account_name )
+                    if json._json["protected"] == True :
+                        if invert_mode :
+                            print( "Erreur en récupérant le nom du compte" + str(account_name) + "." )
+                        else :
+                            print( "Erreur en récupérant l'ID du compte @" + str(account_name) + "." )
+                        print( "Le compte est en privé / est protégé." )
+                        return None
+                    return json.screen_name
                 else :
-                    return self.api.get_user( account_name ).id
+                    json = self.api.get_user( account_name )
+                    if json._json["protected"] == True :
+                        if invert_mode :
+                            print( "Erreur en récupérant le nom du compte" + str(account_name) + "." )
+                        else :
+                            print( "Erreur en récupérant l'ID du compte @" + str(account_name) + "." )
+                        print( "Le compte est en privé / est protégé." )
+                        return None
+                    return json.id
             except tweepy.error.RateLimitError as error :
                 if invert_mode :
                     print( "Limite atteinte en récupérant le nom du compte " + str(account_name) + "." )
@@ -94,7 +114,7 @@ class TweepyAbtraction :
     
     @param account_id L'ID du compte Twitter (Ou son nom d'utilisateur)
     @param since_tweet_id L'ID du tweet depuis lequel scanner (OPTIONNEL)
-    @return Un liste d'objets Status (= Tweet de la librairie Tweepy)
+    @return Un itérateur d'objets Status (= Tweet de la librairie Tweepy)
     """
     def get_account_tweets ( self, account_id : int, since_tweet_id : int = None ) :
         # Attention ! Ne pas supprimer les réponses, des illustrations peuvent

@@ -201,7 +201,8 @@ class CBIR_Engine_with_Database :
     @param account_name Le nom d'utilisateur du compte à scanner
     @return La liste des tweets du compte à partir de la date du dernier scan.
             Associée à l'ID du compte Twitter.
-            False si le nom du compte est introuvable.
+            False si le nom du compte est introuvable, ou est suspendu, ou est
+            désactivé, ou est privé.
     """
     def get_GOT3_list( self, account_name : str ) :
         # Prendre la date du dernier Tweet
@@ -289,7 +290,8 @@ class CBIR_Engine_with_Database :
                                 autre thread.
                                 (OPTIONNEL)
     @return True si tout s'est bien passé
-            False si le compte est introuvable
+            False si le compte est introuvable, ou est suspendu, ou est
+            désactivé, ou est privé
     """
     
     def index_or_update_all_account_tweets( self, account_name : str,
@@ -463,7 +465,8 @@ class CBIR_Engine_with_Database :
                         le @ ! Par exemple : Si on veut scanner @jack, il faut
                         entrer dans cette fonction la chaine "jack".
     @return True si tout s'est bien passé
-            False si le compte est introuvable
+            False si le compte est introuvable, ou est suspendu, ou est
+            désactivé, ou est privé
     """
     def index_or_update_with_TwitterAPI( self, account_name : str ) -> bool :
         account_id = self.twitter.get_account_id( account_name )

@@ -23,6 +23,8 @@ class Cursor_Iterator :
             try :
                 return self.tweepy_cursor.__next__()
             except tweepy.error.TweepError as error :
+                    if error.response.error != 503 and error.response.error != 429 :
+                        raise error
                     print( "Limite atteinte, on réessaye dans environ 60 secondes..." )
                     print( error )
                     time.sleep( randrange( 50, 70 ) )
