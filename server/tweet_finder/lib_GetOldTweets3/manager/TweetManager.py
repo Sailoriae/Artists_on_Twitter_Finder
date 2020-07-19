@@ -408,7 +408,7 @@ class TweetManager:
                     file = open( "lib_GetOldTweets3_errors.log", "a" )
                     traceback.print_exc( file = file )
                     file.close()
-                    sys.exit()
+                    raise e # Pour que le collecteur d'erreurs redémarre le thread
             except Exception as e:
                 print("An error occured during an HTTP request:", str(e))
                 print("Try to open in browser: https://twitter.com/search?q=%s&src=typd" % urllib.parse.quote(urlGetData))
@@ -416,7 +416,7 @@ class TweetManager:
                 traceback.print_exc( file = file )
                 file.write( "\n\n\n" )
                 file.close()
-                sys.exit()
+                raise e # Pour que le collecteur d'erreurs redémarre le thread
 
         try:
             s_json = jsonResponse.decode()
