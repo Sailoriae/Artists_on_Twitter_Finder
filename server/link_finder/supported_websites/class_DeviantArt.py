@@ -3,6 +3,9 @@
 
 import requests
 from typing import List
+from random import randrange
+from time import sleep
+import http
 
 try :
     from utils import Webpage_to_Twitter_Accounts
@@ -50,7 +53,19 @@ class DeviantArt :
     """
     def cache_or_get ( self, illust_url : str ) -> bool :
         if illust_url != self.cache_illust_url :
-            response = requests.get( "https://backend.deviantart.com/oembed?url=" + illust_url )
+            
+            retry_count = 0
+            while True : # Solution très bourrin pour gèrer les rate limits
+                try :
+                    response = requests.get( "https://backend.deviantart.com/oembed?url=" + illust_url )
+                    break
+                except http.client.RemoteDisconnected as error :
+                    print( error )
+                    sleep( randrange( 5, 15 ) )
+                    retry_count += 1
+                    if retry_count > 20 :
+                        raise error # Sera récupérée par le collecteur d'erreurs
+            
             if response.status_code == 404 :
                 return False
             json = response.json()
@@ -135,7 +150,8 @@ if __name__ == '__main__' :
         da.get_twitter_accounts(
             "https://www.deviantart.com/nopeys/art/Azula-847851539" ) )
     
-    if test == [['NOPEYS1']] :
+    if test == [['nopeys1', 'nopeys1']] : # Trouve deux fois, plus de filtre
         print( "Tests OK !" )
     else :
         print( "Tests échoués !" )
+        print( test )
