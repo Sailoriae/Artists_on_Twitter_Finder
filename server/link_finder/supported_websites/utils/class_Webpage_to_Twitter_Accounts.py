@@ -5,6 +5,9 @@ import requests
 import re
 from bs4 import BeautifulSoup
 from typing import List
+from random import randrange
+from time import sleep
+import http
 
 try :
     from validate_twitter_account_url import validate_twitter_account_url
@@ -42,7 +45,17 @@ class Webpage_to_Twitter_Accounts :
                    url : str,
                    USE_BS4 : bool = True ) :
         # Prendre le code HTML de la page
-        self.response = requests.get( url )
+        retry_count = 0
+        while True : # Solution très bourrin pour gèrer les rate limits
+            try :
+                self.response = requests.get( url )
+                break
+            except http.error.RemoteDisconnected as error :
+                print( error )
+                sleep( randrange( 5, 15 ) )
+                retry_count += 1
+                if retry_count > 20 :
+                    raise error # Sera récupérée par le collecteur d'erreurs
         
         # Initialiser BeautifulSoup si besoin
         if USE_BS4 :
@@ -139,7 +152,8 @@ if __name__ == '__main__' :
         USE_BS4 = False ) # Ce n'est pas recommandé d'utiliser Régex pour DA !
     test.append( scanner.scan() )
     
-    if test == [['NOPEYS1'], ['lumspark'], ['lumspark']] :
+    if test == [['nopeys1'], ['lumspark'], ['lumspark']] :
         print( "Tests OK !" )
     else :
         print( "Tests échoués !" )
+        print( test )
