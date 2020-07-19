@@ -4,6 +4,7 @@
 from cv2 import error as ErrorOpenCV
 from typing import List
 import traceback
+import urllib
 
 try :
     from lib_GetOldTweets3 import manager as GetOldTweets3_manager
@@ -160,6 +161,15 @@ class CBIR_Engine_with_Database :
         # Exemple : https://twitter.com/apofissx/status/219051550696407040
         # Ce tweet est indiqué comme ayant une image, mais elle est en 404 !
         except Exception as error :
+            # Elimination des 404, impossible à traiter après
+            try :
+                if error.code == 404 :
+                    print( "Erreur avec le Tweet : " + str(tweet_id) + " !" )
+                    print( error )
+                    return False
+            except Exception :
+                pass
+            
             print( "Erreur avec le Tweet : " + str(tweet_id) + " !" )
             print( error )
             file = open( "class_CBIR_Engine_with_Database_errors.log", "a" )
@@ -373,6 +383,15 @@ class CBIR_Engine_with_Database :
             #
             # Permet aussi de gérer les images avec des formats à la noix
             except Exception as error :
+                # Elimination des 404, impossible à traiter après
+                try :
+                    if error.code == 404 :
+                        print( "Erreur avec le Tweet : " + str(tweet_id) + " !" )
+                        print( error )
+                        continue
+                except Exception :
+                    pass
+                
                 print( "Erreur avec le Tweet : " + str(tweets_to_scan[i].id) + " !" )
                 print( error )
                 file = open( "class_CBIR_Engine_with_Database_errors.log", "a" )
