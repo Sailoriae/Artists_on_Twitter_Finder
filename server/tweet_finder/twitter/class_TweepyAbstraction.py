@@ -3,7 +3,11 @@
 
 import tweepy
 import time
-from random import randrange
+
+try :
+    from class_Cursor_Iterator import Cursor_Iterator
+except ModuleNotFoundError : # Si on a été exécuté en temps que module
+    from .class_Cursor_Iterator import Cursor_Iterator
 
 
 """
@@ -93,31 +97,22 @@ class TweepyAbtraction :
     @return Un liste d'objets Status (= Tweet de la librairie Tweepy)
     """
     def get_account_tweets ( self, account_id : int, since_tweet_id : int = None ) :
-        # tweepy.Cursor gère les Rate Limits (Sauf les 429 en fait)
         # Attention ! Ne pas supprimer les réponses, des illustrations peuvent
         # être dans des réponses ! Laisser le code tel qu'il est.
-        retry_count = 0
-        while True : # Solution très bourrin pour gèrer les 429
-            try :
-                if since_tweet_id == None :
-                    return tweepy.Cursor( self.api.user_timeline,
-                                          id = account_id,
-                                          tweet_mode = "extended",
-                                          include_rts = False,
-                                          trim_user = True # Supprimer les infos sur l'utilisateur, on en n'a pas besoin
-                                         ).items()
-                else :
-                    return tweepy.Cursor( self.api.user_timeline,
-                                          id = account_id,
-                                          since_id = since_tweet_id,
-                                          tweet_mode = "extended",
-                                          include_rts = False,
-                                          trim_user = True # Supprimer les infos sur l'utilisateur, on en n'a pas besoin
-                                         ).items()
-#                break # Ne sert à rien car il y a les "return"
-            except tweepy.error.TweepError as error :
-                print( error )
-                time.sleep( randrange( 5, 15 ) )
-                retry_count += 1
-                if retry_count > 20 :
-                    raise error # Sera récupérée par le collecteur d'erreurs
+        if since_tweet_id == None :
+            return Cursor_Iterator(
+                tweepy.Cursor( self.api.user_timeline,
+                               id = account_id,
+                               tweet_mode = "extended",
+                               include_rts = False,
+                               trim_user = True # Supprimer les infos sur l'utilisateur, on en n'a pas besoin
+                              ).items() )
+        else :
+            return Cursor_Iterator(
+                tweepy.Cursor( self.api.user_timeline,
+                               id = account_id,
+                               since_id = since_tweet_id,
+                               tweet_mode = "extended",
+                               include_rts = False,
+                               trim_user = True # Supprimer les infos sur l'utilisateur, on en n'a pas besoin
+                              ).items() )
