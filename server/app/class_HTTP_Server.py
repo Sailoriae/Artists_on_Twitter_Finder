@@ -9,6 +9,7 @@ from sys import path as sys_path
 from os import path as os_path
 sys_path.append(os_path.dirname(os_path.dirname(os_path.abspath(__file__))))
 
+import parameters as param
 from tweet_finder.database import SQLite_or_MySQL
 
 
@@ -55,7 +56,8 @@ def http_server_container ( pipeline_arg ) :
                 else :
                     # Lance une nouvelle requête, ou donne la requête déjà existante
                     request = self.pipeline.launch_full_process( illust_url,
-                                                                 ip_address = self.client_address[0] )
+                                                                 ip_address = self.client_address[0],
+                                                                 intelligent_skip_indexing = param.FORCE_INTELLIGENT_SKIP_INDEXING )
                     
                     # Si request == None, c'est qu'on ne peut pas lancer une
                     # nouvelle requête car l'addresse IP a trop de requêtes en

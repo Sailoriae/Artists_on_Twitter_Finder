@@ -2,6 +2,25 @@
 # coding: utf-8
 
 """
+Le Link Finder et la recherche inversée d'images sont très rapides à coté de
+l'indexation des Tweets, que ce soit avec GetOldTweets3 ou avec l'API Twitter.
+En effet, les "rate limits" des API Twitter empêche d'être efficace, et font
+que le traitement d'une image est extrêmement long.
+Pour une instance privée, ça peut aller, car il y a moins de requêtes. Pour une
+instance publique, c'est cauchemardesque.
+
+Ce paramètre (Lorsqu'il est sur "True") permet de ne pas mettre à jour
+l'indexation d'un compte lors d'une requête via l'API HTTP, mais uniquement de
+scanner les comptes Twitter inconnus de la base de données.
+Ainsi, seule la mise à jour automatique actualise l'indexation des Tweets des
+comptes dans la base de données.
+
+Ceci est intéressant uniquement quand la base de données est bien remplie, avec
+beaucoup de comptes.
+"""
+FORCE_INTELLIGENT_SKIP_INDEXING = False
+
+"""
 Paramètres pour l'accès à l'API Twitter.
 https://developer.twitter.com/en/apps
 Il est très recommandé de paramètrer l'app Twitter pour qu'elle un un accès en
