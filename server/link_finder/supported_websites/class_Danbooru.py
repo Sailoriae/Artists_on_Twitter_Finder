@@ -1,19 +1,17 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-import requests
 from typing import List
 import re
-from random import randrange
-from time import sleep
-import http
 
 try :
     from utils import Webpage_to_Twitter_Accounts
     from utils import validate_pixiv_account_url
+    from utils import get_with_rate_limits
 except ImportError : # Si on a été exécuté en temps que module
     from .utils import Webpage_to_Twitter_Accounts
     from .utils import validate_pixiv_account_url
+    from .utils import get_with_rate_limits
 
 
 # ^ = Début de la chaine
@@ -72,17 +70,7 @@ class Danbooru :
             if illust_id == None :
                 return False
             
-            retry_count = 0
-            while True : # Solution très bourrin pour gèrer les rate limits
-                try :
-                    response = requests.get( "https://danbooru.donmai.us/posts/" + illust_id + ".json" )
-                    break
-                except http.client.RemoteDisconnected as error :
-                    print( error )
-                    sleep( randrange( 5, 15 ) )
-                    retry_count += 1
-                    if retry_count > 20 :
-                        raise error # Sera récupérée par le collecteur d'erreurs
+            response = get_with_rate_limits( "https://danbooru.donmai.us/posts/" + illust_id + ".json" )
             
             json = response.json()
             

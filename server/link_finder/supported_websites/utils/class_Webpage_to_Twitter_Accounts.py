@@ -1,20 +1,18 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-import requests
 import re
 from bs4 import BeautifulSoup
 from typing import List
-from random import randrange
-from time import sleep
-import http
 
 try :
     from validate_twitter_account_url import validate_twitter_account_url
     from filter_twitter_accounts_list import filter_twitter_accounts_list
+    from get_with_rate_limits import get_with_rate_limits
 except ModuleNotFoundError : # Si on a été exécuté en temps que module
     from .validate_twitter_account_url import validate_twitter_account_url
     from .filter_twitter_accounts_list import filter_twitter_accounts_list
+    from .get_with_rate_limits import get_with_rate_limits
 
 
 """
@@ -45,17 +43,7 @@ class Webpage_to_Twitter_Accounts :
                    url : str,
                    USE_BS4 : bool = True ) :
         # Prendre le code HTML de la page
-        retry_count = 0
-        while True : # Solution très bourrin pour gèrer les rate limits
-            try :
-                self.response = requests.get( url )
-                break
-            except http.error.RemoteDisconnected as error :
-                print( error )
-                sleep( randrange( 5, 15 ) )
-                retry_count += 1
-                if retry_count > 20 :
-                    raise error # Sera récupérée par le collecteur d'erreurs
+        self.response = get_with_rate_limits( url )
         
         # Initialiser BeautifulSoup si besoin
         if USE_BS4 :
