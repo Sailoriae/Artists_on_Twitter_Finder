@@ -56,31 +56,57 @@ class SQLite_or_MySQL :
         
         c = self.conn.cursor()
         
-        tweets_table = """CREATE TABLE IF NOT EXISTS tweets (
-                              account_id UNSIGNED BIGINT,
-                              tweet_id UNSIGNED BIGINT PRIMARY KEY,
-                              hashtags VARCHAR,"""
+        if param.USE_MYSQL_INSTEAD_OF_SQLITE :
+            tweets_table = """CREATE TABLE IF NOT EXISTS tweets (
+                                  account_id BIGINT UNSIGNED,
+                                  tweet_id BIGINT UNSIGNED PRIMARY KEY,
+                                  hashtags TEXT,"""
+            
+            # On stocker les listes de caractéristiques sur plusieurs colonnes
+            # Cf. moteur CBIR, listes de 240 valeurs
+            # Comme le moteur CBIR renvoit des listes de numpy.float32, c'est à
+            # des floats sur 32 bits, on a besoin que de 4 octets pour les stocker,
+            # donc les FLOAT qui prennent 4 octets
+            for image_id in range(1, 5) : # 4 images max dans un Tweet, numérotées de 1 à 4
+                for feature_id in range( 0, CBIR_LIST_LENGHT ) : # 240 valeurs à stocker
+                    tweets_table += " image_" + str(image_id) + "_feature_" + str(feature_id) + " FLOAT UNSIGNED,"
         
-        # On stocker les listes de caractéristiques sur plusieurs colonnes
-        # Cf. moteur CBIR, listes de 240 valeurs
-        # Comme le moteur CBIR renvoit des listes de numpy.float32, c'est à
-        # des floats sur 32 bits, on a besoin que de 4 octets pour les stocker,
-        # donc les REAL qui prennent 4 octets
-        for image_id in range(1, 5) : # 4 images max dans un Tweet, numérotées de 1 à 4
-            for feature_id in range( 0, CBIR_LIST_LENGHT ) : # 240 valeurs à stocker
-                tweets_table += " image_" + str(image_id) + "_feature_" + str(feature_id) + " UNSIGNED REAL,"
+        else :
+            tweets_table = """CREATE TABLE IF NOT EXISTS tweets (
+                                  account_id UNSIGNED BIGINT,
+                                  tweet_id UNSIGNED BIGINT PRIMARY KEY,
+                                  hashtags TEXT,"""
+            
+            # On stocker les listes de caractéristiques sur plusieurs colonnes
+            # Cf. moteur CBIR, listes de 240 valeurs
+            # Comme le moteur CBIR renvoit des listes de numpy.float32, c'est à
+            # des floats sur 32 bits, on a besoin que de 4 octets pour les stocker,
+            # donc les REAL qui prennent 4 octets
+            for image_id in range(1, 5) : # 4 images max dans un Tweet, numérotées de 1 à 4
+                for feature_id in range( 0, CBIR_LIST_LENGHT ) : # 240 valeurs à stocker
+                    tweets_table += " image_" + str(image_id) + "_feature_" + str(feature_id) + " UNSIGNED REAL,"
         
         tweets_table = tweets_table[:-1] # Suppression de la virgule finale
         tweets_table += " )"
         
         c.execute( tweets_table )
         
-        account_table = """CREATE TABLE IF NOT EXISTS accounts (
-                               account_id UNSIGNED BIGINT PRIMARY KEY,
-                               last_GOT3_indexing_api_date CHAR(10),
-                               last_GOT3_indexing_local_date DATETIME,
-                               last_TwitterAPI_indexing_tweet_id UNSIGNED BIGINT,
-                               last_TwitterAPI_indexing_local_date DATETIME )"""
+        if param.USE_MYSQL_INSTEAD_OF_SQLITE :
+            account_table = """CREATE TABLE IF NOT EXISTS accounts (
+                                   account_id BIGINT UNSIGNED PRIMARY KEY,
+                                   last_GOT3_indexing_api_date CHAR(10),
+                                   last_GOT3_indexing_local_date DATETIME,
+                                   last_TwitterAPI_indexing_tweet_id BIGINT UNSIGNED,
+                                   last_TwitterAPI_indexing_local_date DATETIME )"""
+        
+        else :
+            account_table = """CREATE TABLE IF NOT EXISTS accounts (
+                                   account_id UNSIGNED BIGINT PRIMARY KEY,
+                                   last_GOT3_indexing_api_date CHAR(10),
+                                   last_GOT3_indexing_local_date DATETIME,
+                                   last_TwitterAPI_indexing_tweet_id UNSIGNED BIGINT,
+                                   last_TwitterAPI_indexing_local_date DATETIME )"""
+        
         c.execute( account_table )
         
         self.conn.commit()
