@@ -7,9 +7,11 @@ from datetime import datetime
 try :
     from class_Image_Features_Iterator import Image_Features_Iterator
     from class_Less_Recently_Updated_Accounts_Iterator import Less_Recently_Updated_Accounts_Iterator
+    from features_list_for_db import features_list_for_db
 except ModuleNotFoundError : # Si on a été exécuté en temps que module
     from .class_Image_Features_Iterator import Image_Features_Iterator
     from .class_Less_Recently_Updated_Accounts_Iterator import Less_Recently_Updated_Accounts_Iterator
+    from .features_list_for_db import features_list_for_db
 
 # Ajouter le répertoire parent du parent au PATH pour pouvoir importer
 from sys import path as sys_path
@@ -22,6 +24,10 @@ if param.USE_MYSQL_INSTEAD_OF_SQLITE :
     import mysql.connector
 else :
     import sqlite3
+
+# Nombre de valeurs dans la liste renvoyée par le moteur CBIR
+# SI CE PARAMETRE EST CHANGE, IL FAUT RESET LA BASE DE DONNEES !
+CBIR_LIST_LENGHT = 240
 
 
 """
@@ -49,8 +55,34 @@ class SQLite_or_MySQL :
             )
         
         c = self.conn.cursor()
-        c.execute( "CREATE TABLE IF NOT EXISTS tweets ( account_id BIGINT, tweet_id BIGINT PRIMARY KEY, image_1_features TEXT, image_2_features TEXT, image_3_features TEXT, image_4_features TEXT, hashtags TEXT )" )
-        c.execute( "CREATE TABLE IF NOT EXISTS accounts ( account_id BIGINT PRIMARY KEY, last_GOT3_indexing_api_date CHAR(10), last_GOT3_indexing_local_date DATETIME, last_TwitterAPI_indexing_tweet_id BIGINT, last_TwitterAPI_indexing_local_date DATETIME )" )
+        
+        tweets_table = """CREATE TABLE IF NOT EXISTS tweets (
+                              account_id UNSIGNED BIGINT,
+                              tweet_id UNSIGNED BIGINT PRIMARY KEY,
+                              hashtags VARCHAR,"""
+        
+        # On stocker les listes de caractéristiques sur plusieurs colonnes
+        # Cf. moteur CBIR, listes de 240 valeurs
+        # Comme le moteur CBIR renvoit des listes de numpy.float32, c'est à
+        # des floats sur 32 bits, on a besoin que de 4 octets pour les stocker,
+        # donc les REAL qui prennent 4 octets
+        for image_id in range(1, 5) : # 4 images max dans un Tweet, numérotées de 1 à 4
+            for feature_id in range( 0, CBIR_LIST_LENGHT ) : # 240 valeurs à stocker
+                tweets_table += " image_" + str(image_id) + "_feature_" + str(feature_id) + " UNSIGNED REAL,"
+        
+        tweets_table = tweets_table[:-1] # Suppression de la virgule finale
+        tweets_table += " )"
+        
+        c.execute( tweets_table )
+        
+        account_table = """CREATE TABLE IF NOT EXISTS accounts (
+                               account_id UNSIGNED BIGINT PRIMARY KEY,
+                               last_GOT3_indexing_api_date CHAR(10),
+                               last_GOT3_indexing_local_date DATETIME,
+                               last_TwitterAPI_indexing_tweet_id UNSIGNED BIGINT,
+                               last_TwitterAPI_indexing_local_date DATETIME )"""
+        c.execute( account_table )
+        
         self.conn.commit()
     
     """
@@ -65,15 +97,19 @@ class SQLite_or_MySQL :
     @param tweet_id L'ID du tweet à ajouter
     @param cbir_features_1 La liste des caractéristiques issues de l'analyse
                            CBIR pour la première image du Tweet
+                           240 VALEURS MAXIMUM
     @param cbir_features_2 La liste des caractéristiques issues de l'analyse
                            CBIR pour la seconde image du Tweet
+                           240 VALEURS MAXIMUM
                            (OPTIONNEL)
     @param cbir_features_3 La liste des caractéristiques issues de l'analyse
                            CBIR pour la troisième image du Tweet
+                           240 VALEURS MAXIMUM
                            (OPTIONNEL)
     @param cbir_features_4 La liste des caractéristiques issues de l'analyse
                            CBIR pour la quatrième image du Tweet
-                           (OPTIONNEL)
+                           240 VALEURS MAXIMUM
+                           (OPTIONNEL)                    
     @param hashtags La liste des hashtags du Tweet (OPTIONNEL)
     """
     def insert_tweet( self, account_id : int, tweet_id : int,
@@ -82,45 +118,51 @@ class SQLite_or_MySQL :
                       cbir_features_3 : List[float] = None,
                       cbir_features_4 : List[float] = None,
                       hashtags : List[str] = None ) :
+        if self.is_tweet_indexed( tweet_id ) :
+            return
+        
         c = self.conn.cursor()
         
-        cbir_features_1_str = ";".join( [ str( value ) for value in cbir_features_1 ] )
+        cbir_features_1_formatted = features_list_for_db( cbir_features_1 )
         
         if cbir_features_2 != None :
-            cbir_features_2_str = ";".join( [ str( value ) for value in cbir_features_2 ] )
+            cbir_features_2_formatted = features_list_for_db( cbir_features_2 )
         else :
-            cbir_features_2_str = None
+            cbir_features_2_formatted = features_list_for_db( [] )
         
         if cbir_features_3 != None :
-            cbir_features_3_str = ";".join( [ str( value ) for value in cbir_features_3 ] )
+            cbir_features_3_formatted = features_list_for_db( cbir_features_3 )
         else :
-            cbir_features_3_str = None
+            cbir_features_3_formatted = features_list_for_db( [] )
         
         if cbir_features_4 != None :
-            cbir_features_4_str = ";".join( [ str( value ) for value in cbir_features_4 ] )
+            cbir_features_4_formatted = features_list_for_db( cbir_features_4  )
         else :
-            cbir_features_4_str = None
+            cbir_features_4_formatted = features_list_for_db( [] )
         
         if hashtags != None and hashtags != [] and hashtags != [""] :
             hashtags_str = ";".join( [ hashtag for hashtag in hashtags ] )
         else :
             hashtags_str = None
         
-        request = """INSERT INTO tweets VALUES ( ?, ?, ?, ?, ?, ?, ? )
-                     ON CONFLICT ( tweet_id ) DO NOTHING""" # Si le tweet est déjà stocké, on ne fait rien
+        request = "INSERT INTO tweets VALUES ( ?, ?, ?," + " ?," * CBIR_LIST_LENGHT * 4
+        request = request[:-1] # Suppression de la virgule finale
         
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
-            request = request = """INSERT INTO tweets VALUES ( %s, %s, %s, %s, %s, %s, %s )
-                                   ON DUPLICATE KEY UPDATE tweets.tweet_id = tweets.tweet_id"""
+            request = request.replace( "?", "%s" )
+            request += " ) ON DUPLICATE KEY UPDATE tweets.tweet_id = tweets.tweet_id"
+        else :
+            request += " ) ON CONFLICT ( tweet_id ) DO NOTHING"
         
-        c.execute( request,
-                   ( account_id,
-                     tweet_id,
-                     cbir_features_1_str,
-                     cbir_features_2_str,
-                     cbir_features_3_str,
-                     cbir_features_4_str,
-                     hashtags_str,) )
+        to_insert = tuple( [ account_id,
+                            tweet_id,
+                            hashtags_str ]
+                           + cbir_features_1_formatted
+                           + cbir_features_2_formatted
+                           + cbir_features_3_formatted
+                           + cbir_features_4_formatted )
+        
+        c.execute( request, to_insert )
         self.conn.commit()
     
     """
@@ -134,7 +176,7 @@ class SQLite_or_MySQL :
         c = self.conn.cursor()
         
         if account_id != 0 :
-            request = "SELECT account_id, tweet_id, image_1_features, image_2_features, image_3_features, image_4_features FROM tweets WHERE account_id = ?"
+            request = "SELECT * FROM tweets WHERE account_id = ?"
             
             if param.USE_MYSQL_INSTEAD_OF_SQLITE :
                 request = request.replace( "?", "%s" )
@@ -142,7 +184,7 @@ class SQLite_or_MySQL :
             c.execute( request,
                        ( account_id, ) )
         else :
-            request = "SELECT account_id, tweet_id, image_1_features, image_2_features, image_3_features, image_4_features FROM tweets"
+            request = "SELECT * FROM tweets"
             
             c.execute( request )
         
@@ -263,7 +305,7 @@ class SQLite_or_MySQL :
     def is_tweet_indexed( self, tweet_id : int ) -> bool :
         c = self.conn.cursor()
         
-        request = "SELECT * FROM tweets WHERE tweet_id = ?"
+        request = "SELECT tweet_id FROM tweets WHERE tweet_id = ?"
         
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
             request = request.replace( "?", "%s" )
@@ -279,7 +321,7 @@ class SQLite_or_MySQL :
     def is_account_indexed( self, account_id : int ) -> bool :
         c = self.conn.cursor()
         
-        request = "SELECT * FROM accounts WHERE account_id = ?"
+        request = "SELECT account_id FROM accounts WHERE account_id = ?"
         
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
             request = request.replace( "?", "%s" )

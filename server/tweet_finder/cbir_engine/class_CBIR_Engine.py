@@ -29,7 +29,19 @@ class CBIR_Engine :
     """
     def __init__( self ) :
         # Initialiser le moteur d'extraction de caractéristiques d'une image
-        self.cd = ColorDescriptor( (8, 12, 3) )
+#        self.cd = ColorDescriptor( (8, 12, 3) ) # 5 * 288 valeurs = 1440 car 5 zones
+        self.cd = ColorDescriptor( (4, 6, 2) ) # 5* 48 valeurs = 240 car 5 zones
+        # 1440 / 240 = 6 donc l'espace pris est divisé par 6
+        
+        # SI CE PARAMETRE EST CHANGE, IL FAUT RESET LA BASE DE DONNEES !
+        # Changer aussi le calcul dans le stockage (Module database)
+        
+        # Valeur baissée pour les raisons suivantes :
+        # - Gros gain d'espace dans la base de données
+        # - Gain de temps et de mémoire vive lors des calculs
+        # - Pas besoin d'une grande précision car on réduit les tweets comparés
+        #   à ceux des comptes de l'artiste. On ne recherche jamais dans toute
+        #   la BDD, cela serait trop lent en plus
     
     """
     Extraction des caractéristiques d'une image

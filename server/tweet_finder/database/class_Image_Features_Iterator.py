@@ -6,6 +6,8 @@ try :
 except ModuleNotFoundError : # Si on a été exécuté en temps que module
     from .class_Image_in_DB import Image_in_DB
 
+CBIR_LIST_LENGHT = 240
+
 
 """
 Itérateur sur les images de Tweets contenues dans la base de données.
@@ -36,13 +38,13 @@ class Image_Features_Iterator :
             raise StopIteration
         
         # Si le curseur pointe vers une image non-vide
-        if self.current_line[ 2 +  self.image_cursor ] != None :
+        if self.current_line[ 3 + self.image_cursor * CBIR_LIST_LENGHT ] != None :
             # A retourner
             # On doit le faire avant car on modifie des valeurs juste après
             to_return = Image_in_DB(
                 self.current_line[0], # ID du compte Twitter
                 self.current_line[1], # ID du Tweet
-                [ float(value) for value in self.current_line[ 2 +  self.image_cursor ].split(';') ], # Features CBIR de l'image
+                self.current_line[ 3 + self.image_cursor * CBIR_LIST_LENGHT : 3 + self.image_cursor * CBIR_LIST_LENGHT + CBIR_LIST_LENGHT ], # Features CBIR de l'image
                 self.image_cursor + 1
             )
             
