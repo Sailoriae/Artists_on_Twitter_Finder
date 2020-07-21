@@ -88,14 +88,15 @@ HTTP_SERVER_PORT = 3301
 Paramètrage du nombre de threads.
 
 Les valeurs NUMBER_OF_STEP_2_GOT3_LIST_ACCOUNT_TWEETS_THREADS et
-NUMBER_OF_STEP_4_TWITTERAPI_INDEX_ACCOUNT_TWEETS car ces threads font beacoup
-d'appels aux API Twitter, et donc peuvent recevoir des erreurs HTTP 429 "Too
-Many Requests".
+NUMBER_OF_STEP_4_TWITTERAPI_INDEX_ACCOUNT_TWEETS doivent rester à 1
+En effet, ces threads font beaucoup d'appels aux API Twitter, et donc peuvent
+recevoir des erreurs HTTP 429 "Too Many Requests".
+Les créer une seule fois permet de limiter les erreur 429.
 """
 NUMBER_OF_STEP_1_LINK_FINDER_THREADS = 5
-NUMBER_OF_STEP_2_GOT3_LIST_ACCOUNT_TWEETS_THREADS = 3
+NUMBER_OF_STEP_2_GOT3_LIST_ACCOUNT_TWEETS_THREADS = 1 # Laisser à 1
 NUMBER_OF_STEP_3_GOT3_INDEX_ACCOUNT_TWEETS = 5
-NUMBER_OF_STEP_4_TWITTERAPI_INDEX_ACCOUNT_TWEETS = 3
+NUMBER_OF_STEP_4_TWITTERAPI_INDEX_ACCOUNT_TWEETS = 1 # Laisser à 1
 NUMBER_OF_STEP_5_REVERSE_SEARCH_THREADS = 5
 
 """
