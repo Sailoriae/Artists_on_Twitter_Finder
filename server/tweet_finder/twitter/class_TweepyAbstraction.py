@@ -72,7 +72,7 @@ class TweepyAbtraction :
                     json = self.api.get_user( account_name )
                     if json._json["protected"] == True :
                         if invert_mode :
-                            print( "Erreur en récupérant le nom du compte" + str(account_name) + "." )
+                            print( "Erreur en récupérant le nom du compte " + str(account_name) + "." )
                         else :
                             print( "Erreur en récupérant l'ID du compte @" + str(account_name) + "." )
                         print( "Le compte est en privé / est protégé." )
@@ -82,7 +82,7 @@ class TweepyAbtraction :
                     json = self.api.get_user( account_name )
                     if json._json["protected"] == True :
                         if invert_mode :
-                            print( "Erreur en récupérant le nom du compte" + str(account_name) + "." )
+                            print( "Erreur en récupérant le nom du compte " + str(account_name) + "." )
                         else :
                             print( "Erreur en récupérant l'ID du compte @" + str(account_name) + "." )
                         print( "Le compte est en privé / est protégé." )

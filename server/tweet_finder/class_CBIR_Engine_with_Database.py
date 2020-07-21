@@ -160,16 +160,22 @@ class CBIR_Engine_with_Database :
         # Oui, c'est possible, Twitter n'est pas parfait
         # Exemple : https://twitter.com/apofissx/status/219051550696407040
         # Ce tweet est indiqué comme ayant une image, mais elle est en 404 !
+        except urllib.error.HTTPError as error :
+            if error.code == 404 or error.code == 500 :
+                print( "Erreur avec le Tweet : " + str(tweet_id) + " !" )
+                print( error )
+                return False
+            else :
+                print( "Erreur avec le Tweet : " + str(tweet_id) + " !" )
+                print( error )
+                file = open( "class_CBIR_Engine_with_Database_errors.log", "a" )
+                file.write( "Erreur avec le Tweet : " + str(tweet_id) + " !\n" )
+                traceback.print_exc( file = file )
+                file.write( "\n\n\n" )
+                file.close()
+                return False
+        
         except Exception as error :
-            # Elimination des 404, impossible à traiter après
-            try :
-                if error.code == 404 :
-                    print( "Erreur avec le Tweet : " + str(tweet_id) + " !" )
-                    print( error )
-                    return False
-            except Exception :
-                pass
-            
             print( "Erreur avec le Tweet : " + str(tweet_id) + " !" )
             print( error )
             file = open( "class_CBIR_Engine_with_Database_errors.log", "a" )
@@ -382,16 +388,22 @@ class CBIR_Engine_with_Database :
             # Ce tweet est indiqué comme ayant une image, mais elle est en 404 !
             #
             # Permet aussi de gérer les images avec des formats à la noix
+            except urllib.error.HTTPError as error :
+                if error.code == 404 or error.code == 500 :
+                    print( "Erreur avec le Tweet : " + str(tweets_to_scan[i].id) + " !" )
+                    print( error )
+                    continue
+                else :
+                    print( "Erreur avec le Tweet : " + str(tweets_to_scan[i].id) + " !" )
+                    print( error )
+                    file = open( "class_CBIR_Engine_with_Database_errors.log", "a" )
+                    file.write( "Erreur avec le Tweet : " + str(tweets_to_scan[i].id) + " !\n" )
+                    traceback.print_exc( file = file )
+                    file.write( "\n\n\n" )
+                    file.close()
+                    continue
+            
             except Exception as error :
-                # Elimination des 404, impossible à traiter après
-                try :
-                    if error.code == 404 :
-                        print( "Erreur avec le Tweet : " + str(tweet_id) + " !" )
-                        print( error )
-                        continue
-                except Exception :
-                    pass
-                
                 print( "Erreur avec le Tweet : " + str(tweets_to_scan[i].id) + " !" )
                 print( error )
                 file = open( "class_CBIR_Engine_with_Database_errors.log", "a" )

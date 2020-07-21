@@ -17,6 +17,8 @@ import parameters as param
 
 
 """
+ATTENTION ! CE THREAD DOIT ETRE UNIQUE !
+
 Thread du serveur HTTP.
 """
 def thread_http_server( thread_id : int, pipeline ) :

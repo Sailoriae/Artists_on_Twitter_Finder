@@ -19,6 +19,8 @@ from tweet_finder.database import SQLite_or_MySQL
 
 
 """
+ATTENTION ! CE THREAD DOIT ETRE UNIQUE !
+
 Mise à jour automatique des comptes dans la base de données.
 Permet de gagner du temps lors d'une requête.
 """
@@ -71,12 +73,13 @@ def thread_auto_update_accounts( thread_id : int, pipeline ) :
             
             # Si l'ID du compte Twitter n'existe plus
             if result == False :
-                print( "[auto_update_th" + str(thread_id) + "] L'ID de compte Twitter " + str(oldest_updated_account[0]) + " n'existe plus !" )
+                print( "[auto_update_th" + str(thread_id) + "] L'ID de compte Twitter " + str(oldest_updated_account[0]) + " n'est plus accessible ou n'existe plus !" )
                 
                 # On met la date locale de la dernière MàJ à aujourd'hui pour
                 # éviter de ré-avoir cet ID à la prochaine itération
                 # On peut faire ce INSERT INTO, pusiqu'il n'y a que ce thread qui
-                # utilise la date locale de dernière MàK
+                # utilise la date locale de dernière MàJ, et que ce thread est
+                # unique
                 bdd_direct_access.set_account_last_scan( oldest_updated_account[0],
                                                          bdd_direct_access.get_account_last_scan( oldest_updated_account[0] ) )
                 bdd_direct_access.set_account_last_scan_with_TwitterAPI( oldest_updated_account[0],

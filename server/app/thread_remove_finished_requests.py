@@ -6,6 +6,8 @@ from time import sleep
 
 
 """
+ATTENTION ! CE THREAD DOIT ETRE UNIQUE !
+
 Suppression des anciennes requêtes terminées de l'objet Pipeline.
 """
 def thread_remove_finished_requests( thread_id : int, pipeline ) :
