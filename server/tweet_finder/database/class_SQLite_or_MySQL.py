@@ -110,6 +110,21 @@ class SQLite_or_MySQL :
         c.execute( account_table )
         
         self.conn.commit()
+        
+        
+        # Stocker les grosses commandes SQL des méthodes de cette classe afin
+        # de ne pas avoir à les recréer à chaque fois
+        
+        request = "INSERT INTO tweets VALUES ( ?, ?, ?," + " ?," * CBIR_LIST_LENGHT * 4
+        request = request[:-1] # Suppression de la virgule finale
+        
+        if param.USE_MYSQL_INSTEAD_OF_SQLITE :
+            request = request.replace( "?", "%s" )
+            request += " ) ON DUPLICATE KEY UPDATE tweets.tweet_id = tweets.tweet_id"
+        else :
+            request += " ) ON CONFLICT ( tweet_id ) DO NOTHING"
+        
+        self.insert_tweet_request = request
     
     """
     Destructeur
@@ -174,15 +189,6 @@ class SQLite_or_MySQL :
         else :
             hashtags_str = None
         
-        request = "INSERT INTO tweets VALUES ( ?, ?, ?," + " ?," * CBIR_LIST_LENGHT * 4
-        request = request[:-1] # Suppression de la virgule finale
-        
-        if param.USE_MYSQL_INSTEAD_OF_SQLITE :
-            request = request.replace( "?", "%s" )
-            request += " ) ON DUPLICATE KEY UPDATE tweets.tweet_id = tweets.tweet_id"
-        else :
-            request += " ) ON CONFLICT ( tweet_id ) DO NOTHING"
-        
         to_insert = tuple( [ account_id,
                             tweet_id,
                             hashtags_str ]
@@ -191,7 +197,7 @@ class SQLite_or_MySQL :
                            + cbir_features_3_formatted
                            + cbir_features_4_formatted )
         
-        c.execute( request, to_insert )
+        c.execute( self.insert_tweet_request, to_insert )
         self.conn.commit()
     
     """
@@ -205,10 +211,10 @@ class SQLite_or_MySQL :
         c = self.conn.cursor()
         
         if account_id != 0 :
-            request = "SELECT * FROM tweets WHERE account_id = ?"
-            
             if param.USE_MYSQL_INSTEAD_OF_SQLITE :
-                request = request.replace( "?", "%s" )
+                request = "SELECT * FROM tweets WHERE account_id = %s"
+            else :
+                request = "SELECT * FROM tweets WHERE account_id = ?"
             
             c.execute( request,
                        ( account_id, ) )
@@ -229,15 +235,15 @@ class SQLite_or_MySQL :
     """
     def set_account_last_scan( self, account_id : int, last_update : str ) :
         now = datetime.now()
-        c = self.conn.cursor()
-        
-        request = """INSERT INTO accounts ( account_id, last_GOT3_indexing_api_date, last_GOT3_indexing_local_date ) VALUES ( ?, ?, ? )
-                     ON CONFLICT ( account_id ) DO UPDATE SET last_GOT3_indexing_api_date = ?, last_GOT3_indexing_local_date = ?"""
         
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
             request = """INSERT INTO accounts ( account_id, last_GOT3_indexing_api_date, last_GOT3_indexing_local_date ) VALUES ( %s, %s, %s )
                          ON DUPLICATE KEY UPDATE last_GOT3_indexing_api_date = %s, last_GOT3_indexing_local_date = %s"""
+        else :
+            request = """INSERT INTO accounts ( account_id, last_GOT3_indexing_api_date, last_GOT3_indexing_local_date ) VALUES ( ?, ?, ? )
+                         ON CONFLICT ( account_id ) DO UPDATE SET last_GOT3_indexing_api_date = ?, last_GOT3_indexing_local_date = ?"""
         
+        c = self.conn.cursor()
         c.execute( request,
                    ( account_id, last_update, now.strftime('%Y-%m-%d %H:%M:%S'), last_update, now.strftime('%Y-%m-%d %H:%M:%S') ) )
         self.conn.commit()
@@ -255,12 +261,12 @@ class SQLite_or_MySQL :
         now = datetime.now()
         c = self.conn.cursor()
         
-        request = """INSERT INTO accounts ( account_id, last_TwitterAPI_indexing_tweet_id, last_TwitterAPI_indexing_local_date ) VALUES ( ?, ?, ? )
-                     ON CONFLICT ( account_id ) DO UPDATE SET last_TwitterAPI_indexing_tweet_id = ?, last_TwitterAPI_indexing_local_date = ?"""
-        
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
             request = """INSERT INTO accounts ( account_id, last_TwitterAPI_indexing_tweet_id, last_TwitterAPI_indexing_local_date ) VALUES ( %s, %s, %s )
                          ON DUPLICATE KEY UPDATE last_TwitterAPI_indexing_tweet_id = %s, last_TwitterAPI_indexing_local_date = %s"""
+        else :
+            request = """INSERT INTO accounts ( account_id, last_TwitterAPI_indexing_tweet_id, last_TwitterAPI_indexing_local_date ) VALUES ( ?, ?, ? )
+                         ON CONFLICT ( account_id ) DO UPDATE SET last_TwitterAPI_indexing_tweet_id = ?, last_TwitterAPI_indexing_local_date = ?"""
         
         c.execute( request,
                    ( account_id, tweet_id, now.strftime('%Y-%m-%d %H:%M:%S'), tweet_id, now.strftime('%Y-%m-%d %H:%M:%S') ) )
@@ -275,10 +281,10 @@ class SQLite_or_MySQL :
     def get_account_last_scan( self, account_id : int ) -> str :
         c = self.conn.cursor()
         
-        request = "SELECT last_GOT3_indexing_api_date FROM accounts WHERE account_id = ?"
-        
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
-            request = request.replace( "?", "%s" )
+            request = "SELECT last_GOT3_indexing_api_date FROM accounts WHERE account_id = %s"
+        else :
+            request = "SELECT last_GOT3_indexing_api_date FROM accounts WHERE account_id = ?"
         
         c.execute( request,
                    ( account_id, ) )
@@ -299,10 +305,10 @@ class SQLite_or_MySQL :
     def get_account_last_scan_with_TwitterAPI( self, account_id : int ) -> int :
         c = self.conn.cursor()
         
-        request = "SELECT last_TwitterAPI_indexing_tweet_id FROM accounts WHERE account_id = ?"
-        
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
-            request = request.replace( "?", "%s" )
+            request = "SELECT last_TwitterAPI_indexing_tweet_id FROM accounts WHERE account_id = %s"
+        else :
+            request = "SELECT last_TwitterAPI_indexing_tweet_id FROM accounts WHERE account_id = ?"
         
         c.execute( request,
                    ( account_id, ) )
@@ -334,10 +340,10 @@ class SQLite_or_MySQL :
     def is_tweet_indexed( self, tweet_id : int ) -> bool :
         c = self.conn.cursor()
         
-        request = "SELECT tweet_id FROM tweets WHERE tweet_id = ?"
-        
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
-            request = request.replace( "?", "%s" )
+            request = "SELECT tweet_id FROM tweets WHERE tweet_id = %s"
+        else :
+            request = "SELECT tweet_id FROM tweets WHERE tweet_id = ?"
         
         c.execute( request, ( tweet_id, ) )
         return c.fetchone() != None
@@ -350,10 +356,10 @@ class SQLite_or_MySQL :
     def is_account_indexed( self, account_id : int ) -> bool :
         c = self.conn.cursor()
         
-        request = "SELECT account_id FROM accounts WHERE account_id = ?"
-        
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
-            request = request.replace( "?", "%s" )
+            request = "SELECT account_id FROM accounts WHERE account_id = %s"
+        else :
+            request = "SELECT account_id FROM accounts WHERE account_id = ?"
         
         c.execute( request, ( account_id, ) )
         return c.fetchone() != None
