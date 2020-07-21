@@ -5,6 +5,17 @@ import requests
 from time import sleep
 
 
+class Server_Connection_Not_Initialised ( Exception ) :
+    def __init__ ( self ) :
+        self.message = "La connexion au serveur n'a pas été initialisée correctement."
+        super().__init__( self.message )
+
+class Max_Pending_Requests_On_Server ( Exception ) :
+    def __init__ ( self ) :
+        self.message = "Nombre maximum de requêtes en cours de traitement atteint sur ce serveur pour cet adresse IP."
+        super().__init__( self.message )
+
+
 """
 Classe de client à un serveur "Artist_on_Twitter_Finder". Permet d'utiliser
 son API.
@@ -60,9 +71,12 @@ class WebAPI_Client :
     def get_request ( self, illust_url : str ) -> dict :
         if not self.ready :
             print( "La connexion au serveur n'a pas été initialisée correctement." )
-            return None
+            raise Server_Connection_Not_Initialised
         try :
-            return requests.get( "http://localhost:3301/?url=" + illust_url ).json()
+            response = requests.get( "http://localhost:3301/?url=" + illust_url ).json()
+            if response["error"] == "YOUR_IP_HAS_MAX_PENDING_REQUESTS" :
+                raise Max_Pending_Requests_On_Server
+            return response
         except Exception :
             print( "Problème de connexion avec le serveur." )
             return None
