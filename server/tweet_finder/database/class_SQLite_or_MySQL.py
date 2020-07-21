@@ -149,7 +149,10 @@ class SQLite_or_MySQL :
         
         c = self.conn.cursor()
         
-        cbir_features_1_formatted = features_list_for_db( cbir_features_1 )
+        if cbir_features_1 != None :
+            cbir_features_1_formatted = features_list_for_db( cbir_features_1 )
+        else :
+            cbir_features_1_formatted = features_list_for_db( [] )
         
         if cbir_features_2 != None :
             cbir_features_2_formatted = features_list_for_db( cbir_features_2 )

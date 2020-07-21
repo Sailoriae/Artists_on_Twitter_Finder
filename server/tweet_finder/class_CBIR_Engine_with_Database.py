@@ -5,6 +5,8 @@ from cv2 import error as ErrorOpenCV
 from typing import List
 import traceback
 import urllib
+from time import sleep
+from random import randrange
 
 try :
     from lib_GetOldTweets3 import manager as GetOldTweets3_manager
@@ -77,6 +79,55 @@ class CBIR_Engine_with_Database :
                                          param.OAUTH_TOKEN_SECRET )
     
     """
+    Permet de gèrer les erreurs HTTP, et de les logger sans avoir a
+    redescendre dans le collecteur d'erreurs.
+    
+    @param image_url L'URL de l'image du Tweet
+    @param tweet_id L'ID du Tweet
+    @return La liste des caractéristiques calculées par le moteur CBIR,
+            OU None si il y a un un problème
+    """
+    def get_image_features ( self, image_url : str, tweet_id ) :
+        retry_count = 0
+        while True : # Solution très bourrin pour gèrer les rate limits
+            try :
+                return self.cbir_engine.index_cbir( url_to_cv2_image( image_url ) )
+                break
+            
+            # Oui, c'est possible, Twitter n'est pas parfait
+            # Exemple : https://twitter.com/apofissx/status/219051550696407040
+            # Ce tweet est indiqué comme ayant une image, mais elle est en 404 !
+            except urllib.error.HTTPError as error :
+                if error.code == 404 or error.code == 500 : # Erreurs insolvables
+                    print( "Erreur avec le Tweet : " + str(tweet_id) + " !" )
+                    print( error )
+                    return None
+                else :
+                    print( "Erreur avec le Tweet : " + str(tweet_id) + " !" )
+                    print( error )
+                    print( "On essaye d'attendre 10 secondes..." )
+                    if retry_count < 1 : # Essayer un coup d'attendre
+                        sleep( 10 )
+                        retry_count += 1
+                    else :
+                        file = open( "class_CBIR_Engine_with_Database_errors.log", "a" )
+                        file.write( "Erreur avec le Tweet : " + str(tweet_id) + " !\n" )
+                        traceback.print_exc( file = file )
+                        file.write( "\n\n\n" )
+                        file.close()
+                        return None
+            
+            except Exception as error :
+                print( "Erreur avec le Tweet : " + str(tweet_id) + " !" )
+                print( error )
+                file = open( "class_CBIR_Engine_with_Database_errors.log", "a" )
+                file.write( "Erreur avec le Tweet : " + str(tweet_id) + " !\n" )
+                traceback.print_exc( file = file )
+                file.write( "\n\n\n" )
+                file.close()
+                return None
+    
+    """
     Indexer les images d'un tweet dans la base de données.
     Chaque image est associée à l'ID de son tweet, l'ID de l'auteur du tweet
     et la liste des caractéristiques extraites par le moteur CBIR.
@@ -143,46 +194,18 @@ class CBIR_Engine_with_Database :
             return False
         
         # Traitement des images du Tweet
-        try :
-            if length > 0 :
-                image_1 = self.cbir_engine.index_cbir(
-                              url_to_cv2_image( tweet_images_url[0] ) )
-            if length > 1 :
-                image_2 = self.cbir_engine.index_cbir(
-                              url_to_cv2_image( tweet_images_url[1] ) )
-            if length > 2 :
-                image_3 = self.cbir_engine.index_cbir(
-                              url_to_cv2_image( tweet_images_url[2] ) )
-            if length > 3 :
-                image_4 = self.cbir_engine.index_cbir(
-                              url_to_cv2_image( tweet_images_url[3] ) )
+        if length > 0 :
+            image_1 = self.get_image_features( tweet_images_url[0], tweet_id )
+        if length > 1 :
+            image_2 = self.get_image_features( tweet_images_url[1], tweet_id )
+        if length > 2 :
+            image_3 = self.get_image_features( tweet_images_url[2], tweet_id )
+        if length > 3 :
+            image_4 = self.get_image_features( tweet_images_url[3], tweet_id )
         
-        # Oui, c'est possible, Twitter n'est pas parfait
-        # Exemple : https://twitter.com/apofissx/status/219051550696407040
-        # Ce tweet est indiqué comme ayant une image, mais elle est en 404 !
-        except urllib.error.HTTPError as error :
-            if error.code == 404 or error.code == 500 :
-                print( "Erreur avec le Tweet : " + str(tweet_id) + " !" )
-                print( error )
-                return False
-            else :
-                print( "Erreur avec le Tweet : " + str(tweet_id) + " !" )
-                print( error )
-                file = open( "class_CBIR_Engine_with_Database_errors.log", "a" )
-                file.write( "Erreur avec le Tweet : " + str(tweet_id) + " !\n" )
-                traceback.print_exc( file = file )
-                file.write( "\n\n\n" )
-                file.close()
-                return False
-        
-        except Exception as error :
-            print( "Erreur avec le Tweet : " + str(tweet_id) + " !" )
-            print( error )
-            file = open( "class_CBIR_Engine_with_Database_errors.log", "a" )
-            file.write( "Erreur avec le Tweet : " + str(tweet_id) + " !\n" )
-            traceback.print_exc( file = file )
-            file.write( "\n\n\n" )
-            file.close()
+        # Si toutes les images du Tweet ont un problème
+        if image_1 == None and image_2 == None and image_3 == None and image_4 == None :
+            print( "Toutes les images du Tweet " + str(tweet_id) + " son inindexables !" )
             return False
         
         # Prendre les hashtags
@@ -361,56 +384,30 @@ class CBIR_Engine_with_Database :
                 continue
             
             # Traitement des images du Tweet
-            try :
-                if tweets_to_scan_length > 0 :
-                    image_1 = self.cbir_engine.index_cbir(
-                              url_to_cv2_image(
-    #                              add_argument_to_url( tweets_to_scan[i].images[0], "name=large" ) ) )
-                                  tweets_to_scan[i].images[0] ) )
-                if tweets_to_scan_length > 1 :
-                    image_2 = self.cbir_engine.index_cbir(
-                              url_to_cv2_image(
-    #                              add_argument_to_url( tweets_to_scan[i].images[1], "name=large" ) ) )
-                                  tweets_to_scan[i].images[0] ) )
-                if tweets_to_scan_length > 2 :
-                    image_3 = self.cbir_engine.index_cbir(
-                              url_to_cv2_image(
-    #                              add_argument_to_url( tweets_to_scan[i].images[2], "name=large" ) ) )
-                                  tweets_to_scan[i].images[0] ) )
-                if tweets_to_scan_length > 3 :
-                    image_4 = self.cbir_engine.index_cbir(
-                              url_to_cv2_image(
-    #                              add_argument_to_url( tweets_to_scan[i].images[3], "name=large" ) ) )
-                                  tweets_to_scan[i].images[0] ) )
+            if tweets_to_scan_length > 0 :
+                image_1 = self.get_image_features(
+#                                  add_argument_to_url( tweets_to_scan[i].images[0], "name=large" ),
+                              tweets_to_scan[i].images[0],
+                              tweets_to_scan[i].id )
+            if tweets_to_scan_length > 1 :
+                image_2 = self.get_image_features(
+#                                  add_argument_to_url( tweets_to_scan[i].images[1], "name=large" ),
+                              tweets_to_scan[i].images[1],
+                              tweets_to_scan[i].id )
+            if tweets_to_scan_length > 2 :
+                image_3 = self.get_image_features(
+#                                  add_argument_to_url( tweets_to_scan[i].images[2], "name=large" ),
+                              tweets_to_scan[i].images[2],
+                              tweets_to_scan[i].id )
+            if tweets_to_scan_length > 3 :
+                image_4 = self.get_image_features(
+#                                  add_argument_to_url( tweets_to_scan[i].images[3], "name=large" ),
+                              tweets_to_scan[i].images[3],
+                              tweets_to_scan[i].id )
             
-            # Oui, c'est possible, Twitter n'est pas parfait
-            # Exemple : https://twitter.com/apofissx/status/219051550696407040
-            # Ce tweet est indiqué comme ayant une image, mais elle est en 404 !
-            #
-            # Permet aussi de gérer les images avec des formats à la noix
-            except urllib.error.HTTPError as error :
-                if error.code == 404 or error.code == 500 :
-                    print( "Erreur avec le Tweet : " + str(tweets_to_scan[i].id) + " !" )
-                    print( error )
-                    continue
-                else :
-                    print( "Erreur avec le Tweet : " + str(tweets_to_scan[i].id) + " !" )
-                    print( error )
-                    file = open( "class_CBIR_Engine_with_Database_errors.log", "a" )
-                    file.write( "Erreur avec le Tweet : " + str(tweets_to_scan[i].id) + " !\n" )
-                    traceback.print_exc( file = file )
-                    file.write( "\n\n\n" )
-                    file.close()
-                    continue
-            
-            except Exception as error :
-                print( "Erreur avec le Tweet : " + str(tweets_to_scan[i].id) + " !" )
-                print( error )
-                file = open( "class_CBIR_Engine_with_Database_errors.log", "a" )
-                file.write( "Erreur avec le Tweet : " + str(tweets_to_scan[i].id) + " !\n" )
-                traceback.print_exc( file = file )
-                file.write( "\n\n\n" )
-                file.close()
+            # Si toutes les images du Tweet ont un problème
+            if image_1 == None and image_2 == None and image_3 == None and image_4 == None :
+                print( "Toutes les images du Tweet " + str(tweets_to_scan[i].id) + " son inindexables !" )
                 continue
             
             # Prendre les hashtags du Tweet
