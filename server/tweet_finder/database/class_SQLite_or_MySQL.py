@@ -178,11 +178,12 @@ class SQLite_or_MySQL :
                       cbir_features_3 : List[float] = None,
                       cbir_features_4 : List[float] = None,
                       hashtags : List[str] = None ) :
-        if self.is_tweet_indexed( tweet_id ) :
-            return
+         # Ne pas re-vérifier, la classe CBIR_Engine_with_Database le fait déjà
+#        if self.is_tweet_indexed( tweet_id ) :
+#            return
         
-        if cbir_features_1 == None and cbir_features_2 == None and cbir_features_3 == None and cbir_features_4 == None :
-            return
+#        if cbir_features_1 == None and cbir_features_2 == None and cbir_features_3 == None and cbir_features_4 == None :
+#            return
         
         c = self.conn.cursor()
         
