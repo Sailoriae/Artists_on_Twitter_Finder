@@ -8,10 +8,12 @@ try :
     from class_Image_Features_Iterator import Image_Features_Iterator
     from class_Less_Recently_Updated_Accounts_Iterator import Less_Recently_Updated_Accounts_Iterator
     from features_list_for_db import features_list_for_db
+    from sql_requests_dict import sql_requests_dict
 except ModuleNotFoundError : # Si on a été exécuté en temps que module
     from .class_Image_Features_Iterator import Image_Features_Iterator
     from .class_Less_Recently_Updated_Accounts_Iterator import Less_Recently_Updated_Accounts_Iterator
     from .features_list_for_db import features_list_for_db
+    from .sql_requests_dict import sql_requests_dict
 
 # Ajouter le répertoire parent du parent au PATH pour pouvoir importer
 from sys import path as sys_path
@@ -60,36 +62,65 @@ class SQLite_or_MySQL :
             tweets_table = """CREATE TABLE IF NOT EXISTS tweets (
                                   account_id BIGINT UNSIGNED,
                                   tweet_id BIGINT UNSIGNED PRIMARY KEY,
-                                  hashtags TEXT,"""
+                                  hashtags TEXT )"""
+            
+            tweets_images_1_table = """CREATE TABLE IF NOT EXISTS tweets_images_1 (
+                                           tweet_id BIGINT UNSIGNED PRIMARY KEY,"""
+            tweets_images_2_table = """CREATE TABLE IF NOT EXISTS tweets_images_2 (
+                                           tweet_id BIGINT UNSIGNED PRIMARY KEY,"""
+            tweets_images_3_table = """CREATE TABLE IF NOT EXISTS tweets_images_3 (
+                                           tweet_id BIGINT UNSIGNED PRIMARY KEY,"""
+            tweets_images_4_table = """CREATE TABLE IF NOT EXISTS tweets_images_4 (
+                                           tweet_id BIGINT UNSIGNED PRIMARY KEY,"""
             
             # On stocker les listes de caractéristiques sur plusieurs colonnes
             # Cf. moteur CBIR, listes de 240 valeurs
             # Comme le moteur CBIR renvoit des listes de numpy.float32, c'est à
             # des floats sur 32 bits, on a besoin que de 4 octets pour les stocker,
             # donc les FLOAT qui prennent 4 octets
-            for image_id in range(1, 5) : # 4 images max dans un Tweet, numérotées de 1 à 4
-                for feature_id in range( 0, CBIR_LIST_LENGHT ) : # 240 valeurs à stocker
-                    tweets_table += " image_" + str(image_id) + "_feature_" + str(feature_id) + " FLOAT UNSIGNED,"
+            for feature_id in range( 0, CBIR_LIST_LENGHT ) : # 240 valeurs à stocker
+                tweets_images_1_table += " image_1_feature_" + str(feature_id) + " FLOAT UNSIGNED,"
+                tweets_images_2_table += " image_2_feature_" + str(feature_id) + " FLOAT UNSIGNED,"
+                tweets_images_3_table += " image_3_feature_" + str(feature_id) + " FLOAT UNSIGNED,"
+                tweets_images_4_table += " image_4_feature_" + str(feature_id) + " FLOAT UNSIGNED,"
         
         else :
             tweets_table = """CREATE TABLE IF NOT EXISTS tweets (
                                   account_id UNSIGNED BIGINT,
                                   tweet_id UNSIGNED BIGINT PRIMARY KEY,
-                                  hashtags TEXT,"""
+                                  hashtags TEXT )"""
+            
+            tweets_images_1_table = """CREATE TABLE IF NOT EXISTS tweets_images_1 (
+                                           tweet_id UNSIGNED BIGINT PRIMARY KEY,"""
+            tweets_images_2_table = """CREATE TABLE IF NOT EXISTS tweets_images_2 (
+                                           tweet_id UNSIGNED BIGINT PRIMARY KEY,"""
+            tweets_images_3_table = """CREATE TABLE IF NOT EXISTS tweets_images_3 (
+                                           tweet_id UNSIGNED BIGINT PRIMARY KEY,"""
+            tweets_images_4_table = """CREATE TABLE IF NOT EXISTS tweets_images_4 (
+                                           tweet_id UNSIGNED BIGINT PRIMARY KEY,"""
             
             # On stocker les listes de caractéristiques sur plusieurs colonnes
             # Cf. moteur CBIR, listes de 240 valeurs
             # Comme le moteur CBIR renvoit des listes de numpy.float32, c'est à
             # des floats sur 32 bits, on a besoin que de 4 octets pour les stocker,
             # donc les REAL qui prennent 4 octets
-            for image_id in range(1, 5) : # 4 images max dans un Tweet, numérotées de 1 à 4
-                for feature_id in range( 0, CBIR_LIST_LENGHT ) : # 240 valeurs à stocker
-                    tweets_table += " image_" + str(image_id) + "_feature_" + str(feature_id) + " UNSIGNED REAL,"
+            for feature_id in range( 0, CBIR_LIST_LENGHT ) : # 240 valeurs à stocker
+                tweets_images_1_table += " image_1_feature_" + str(feature_id) + " UNSIGNED REAL,"
+                tweets_images_2_table += " image_2_feature_" + str(feature_id) + " UNSIGNED REAL,"
+                tweets_images_3_table += " image_3_feature_" + str(feature_id) + " UNSIGNED REAL,"
+                tweets_images_4_table += " image_4_feature_" + str(feature_id) + " UNSIGNED REAL,"
         
-        tweets_table = tweets_table[:-1] # Suppression de la virgule finale
-        tweets_table += " )"
+        # Suppression de la virgule finale et ajout de la parenthèse finale
+        tweets_images_1_table = tweets_images_1_table[:-1] + " )"
+        tweets_images_2_table = tweets_images_2_table[:-1] + " )"
+        tweets_images_3_table = tweets_images_3_table[:-1] + " )"
+        tweets_images_4_table = tweets_images_4_table[:-1] + " )"
         
         c.execute( tweets_table )
+        c.execute( tweets_images_1_table )
+        c.execute( tweets_images_2_table )
+        c.execute( tweets_images_3_table )
+        c.execute( tweets_images_4_table )
         
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
             account_table = """CREATE TABLE IF NOT EXISTS accounts (
@@ -110,21 +141,6 @@ class SQLite_or_MySQL :
         c.execute( account_table )
         
         self.conn.commit()
-        
-        
-        # Stocker les grosses commandes SQL des méthodes de cette classe afin
-        # de ne pas avoir à les recréer à chaque fois
-        
-        request = "INSERT INTO tweets VALUES ( ?, ?, ?," + " ?," * CBIR_LIST_LENGHT * 4
-        request = request[:-1] # Suppression de la virgule finale
-        
-        if param.USE_MYSQL_INSTEAD_OF_SQLITE :
-            request = request.replace( "?", "%s" )
-            request += " ) ON DUPLICATE KEY UPDATE tweets.tweet_id = tweets.tweet_id"
-        else :
-            request += " ) ON CONFLICT ( tweet_id ) DO NOTHING"
-        
-        self.insert_tweet_request = request
     
     """
     Destructeur
@@ -134,11 +150,14 @@ class SQLite_or_MySQL :
     
     """
     Ajouter un tweet à la base de données
+    Attention ! Il faut au moins une image pour que le Tweet soit stocké !
+    
     @param account_id L'ID du compte associé au tweet
     @param tweet_id L'ID du tweet à ajouter
     @param cbir_features_1 La liste des caractéristiques issues de l'analyse
                            CBIR pour la première image du Tweet
                            240 VALEURS MAXIMUM
+                           (OPTIONNEL)
     @param cbir_features_2 La liste des caractéristiques issues de l'analyse
                            CBIR pour la seconde image du Tweet
                            240 VALEURS MAXIMUM
@@ -154,7 +173,7 @@ class SQLite_or_MySQL :
     @param hashtags La liste des hashtags du Tweet (OPTIONNEL)
     """
     def insert_tweet( self, account_id : int, tweet_id : int,
-                      cbir_features_1 : List[float],
+                      cbir_features_1 : List[float] = None, # Peut être à None en fait si la première image est corrompue
                       cbir_features_2 : List[float] = None,
                       cbir_features_3 : List[float] = None,
                       cbir_features_4 : List[float] = None,
@@ -162,42 +181,43 @@ class SQLite_or_MySQL :
         if self.is_tweet_indexed( tweet_id ) :
             return
         
+        if cbir_features_1 == None and cbir_features_2 == None and cbir_features_3 == None and cbir_features_4 == None :
+            return
+        
         c = self.conn.cursor()
         
         if cbir_features_1 != None :
             cbir_features_1_formatted = features_list_for_db( cbir_features_1 )
-        else :
-            cbir_features_1_formatted = features_list_for_db( [] )
+            c.execute( sql_requests_dict["insert_tweet_image_1"],
+                       tuple( [tweet_id] + cbir_features_1_formatted ) )
         
         if cbir_features_2 != None :
             cbir_features_2_formatted = features_list_for_db( cbir_features_2 )
-        else :
-            cbir_features_2_formatted = features_list_for_db( [] )
+            c.execute( sql_requests_dict["insert_tweet_image_2"],
+                       tuple( [tweet_id] + cbir_features_2_formatted ) )
         
         if cbir_features_3 != None :
             cbir_features_3_formatted = features_list_for_db( cbir_features_3 )
-        else :
-            cbir_features_3_formatted = features_list_for_db( [] )
+            c.execute( sql_requests_dict["insert_tweet_image_3"],
+                       tuple( [tweet_id] + cbir_features_3_formatted ) )
         
         if cbir_features_4 != None :
             cbir_features_4_formatted = features_list_for_db( cbir_features_4  )
-        else :
-            cbir_features_4_formatted = features_list_for_db( [] )
+            c.execute( sql_requests_dict["insert_tweet_image_4"],
+                       tuple( [tweet_id] + cbir_features_4_formatted ) )
         
         if hashtags != None and hashtags != [] and hashtags != [""] :
             hashtags_str = ";".join( [ hashtag for hashtag in hashtags ] )
         else :
             hashtags_str = None
         
-        to_insert = tuple( [ account_id,
-                            tweet_id,
-                            hashtags_str ]
-                           + cbir_features_1_formatted
-                           + cbir_features_2_formatted
-                           + cbir_features_3_formatted
-                           + cbir_features_4_formatted )
+        if param.USE_MYSQL_INSTEAD_OF_SQLITE :
+            c.execute( "INSERT INTO tweets VALUES ( %s, %s, %s ) ON DUPLICATE KEY UPDATE tweets.tweet_id = tweets.tweet_id",
+                       ( account_id, tweet_id, hashtags_str ) )
+        else :
+            c.execute( "INSERT INTO tweets VALUES ( ?, ?, ? ) ON CONFLICT ( tweet_id ) DO NOTHING",
+                       ( account_id, tweet_id, hashtags_str ) )
         
-        c.execute( self.insert_tweet_request, to_insert )
         self.conn.commit()
     
     """
@@ -208,22 +228,48 @@ class SQLite_or_MySQL :
             Voir le fichier "class_SQLite_Image_Features_Iterator.py"
     """
     def get_images_in_db_iterator( self, account_id : int = 0 ) :
-        c = self.conn.cursor()
+        c_1 = self.conn.cursor()
+        c_2 = self.conn.cursor()
+        c_3 = self.conn.cursor()
+        c_4 = self.conn.cursor()
+        
+        request_1 = """SELECT * FROM tweets
+                           INNER JOIN tweets_images_1 ON tweets.tweet_id = tweets_images_1.tweet_id"""
+        request_2 = """SELECT * FROM tweets
+                           INNER JOIN tweets_images_2 ON tweets.tweet_id = tweets_images_2.tweet_id"""
+        request_3 = """SELECT * FROM tweets
+                           INNER JOIN tweets_images_3 ON tweets.tweet_id = tweets_images_3.tweet_id"""
+        request_4 = """SELECT * FROM tweets
+                           INNER JOIN tweets_images_4 ON tweets.tweet_id = tweets_images_4.tweet_id"""
         
         if account_id != 0 :
             if param.USE_MYSQL_INSTEAD_OF_SQLITE :
-                request = "SELECT * FROM tweets WHERE account_id = %s"
+                request_1 += " WHERE account_id = %s"
+                request_2 += " WHERE account_id = %s"
+                request_3 += " WHERE account_id = %s"
+                request_4 += " WHERE account_id = %s"
             else :
-                request = "SELECT * FROM tweets WHERE account_id = ?"
+                request_1 += " WHERE account_id = ?"
+                request_2 += " WHERE account_id = ?"
+                request_3 += " WHERE account_id = ?"
+                request_4 += " WHERE account_id = ?"
             
-            c.execute( request,
+            c_1.execute( request_1,
                        ( account_id, ) )
-        else :
-            request = "SELECT * FROM tweets"
+            c_2.execute( request_2,
+                       ( account_id, ) )
+            c_3.execute( request_3,
+                       ( account_id, ) )
+            c_4.execute( request_4,
+                       ( account_id, ) )
             
-            c.execute( request )
+        else :
+            c_1.execute( request_1 )
+            c_2.execute( request_2 )
+            c_3.execute( request_3 )
+            c_4.execute( request_4 )
         
-        return Image_Features_Iterator( c )
+        return Image_Features_Iterator( c_1, c_2, c_3, c_4 )
     
     """
     Stocker la date du dernier scan d'un compte Twitter

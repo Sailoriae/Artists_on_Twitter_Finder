@@ -17,15 +17,12 @@ Cet objet doit uniquement être instancié par la méthode
 fichier "class_SQLite_or_MySQL.py".
 """
 class Image_Features_Iterator :
-    def __init__( self, cursor ) :
-        self.cursor = cursor
-        
-        # Ligne dans la base de données en cours de lecture
-        self.current_line = self.cursor.fetchone()
-        
-        # Image de la ligne en cours de lecture (Car il peut y avoir 4 images
-        # par ligne, pusique maximum de 4 images par Tweets)
-        self.image_cursor = 0
+    """
+    @param 4 curseurs sur les 4 tables d'images.
+    """
+    def __init__( self, c_1, c_2, c_3, c_4 ) :
+        self.current_cursor = 1
+        self.cursors = [ None, c_1, c_2, c_3, c_4 ]
 
     def __iter__( self ) :
         return self
@@ -33,33 +30,24 @@ class Image_Features_Iterator :
     """
     @return Un objet Image_in_DB
     """
-    def __next__( self ) -> Image_in_DB:
-        if self.current_line == None :
-            raise StopIteration
+    def __next__( self ) -> Image_in_DB :
+        # On prend une nouvelle ligne dans la table
+        current_line = self.cursors[ self.current_cursor ].fetchone()
         
-        # Si le curseur pointe vers une image non-vide
-        if self.current_line[ 3 + self.image_cursor * CBIR_LIST_LENGHT ] != None :
-            # A retourner
-            # On doit le faire avant car on modifie des valeurs juste après
-            to_return = Image_in_DB(
-                self.current_line[0], # ID du compte Twitter
-                self.current_line[1], # ID du Tweet
-                self.current_line[ 3 + self.image_cursor * CBIR_LIST_LENGHT : 3 + self.image_cursor * CBIR_LIST_LENGHT + CBIR_LIST_LENGHT ], # Features CBIR de l'image
-                self.image_cursor + 1
-            )
+        # Si cette ligne est vide, c'est qu'on est au bout de la table, donc on
+        # passe à la table suivante
+        if current_line == None :
+            self.current_cursor += 1
             
-            # Si c'était la dernière image, on prépare pour passer au Tweet suivant
-            if self.image_cursor == 3 :
-                self.image_cursor = 0
-                self.current_line = self.cursor.fetchone()
+            # Si on a fait les 4 tables, on termine l'itération
+            if self.current_cursor == 5 :
+                raise StopIteration
             
-            # Sinon, on prépare pour passer à l'image suivante
-            else :
-                self.image_cursor += 1
-                
-            return to_return
+            return self.__next__()
         
-        # Sinon, on passe au Tweet suivant
-        self.image_cursor = 0
-        self.current_line = self.cursor.fetchone()
-        return self.__next__()
+        return Image_in_DB (
+                   current_line[0], # ID du compte Twitter
+                   current_line[1], # ID du Tweet
+                   current_line[ 4 : 4+CBIR_LIST_LENGHT ], # Features CBIR de l'image
+                   self.current_cursor
+               )
