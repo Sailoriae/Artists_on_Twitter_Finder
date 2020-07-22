@@ -77,6 +77,9 @@ def thread_step_5_reverse_search( thread_id : int, pipeline ) :
                                          key = lambda x: x.distance,
                                          reverse = False )
         
+        # On ne garde que les 5 Tweets les plus proches
+        request.founded_tweets = request.founded_tweets[:5]
+        
         print( "[step_5_th" + str(thread_id) + "] Tweets trouvés (Du plus au moins proche) :\n" +
                "[step_5_th" + str(thread_id) + "] " + str( [ data.tweet_id for data in request.founded_tweets ] ) )
         
