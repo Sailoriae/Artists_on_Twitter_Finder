@@ -120,12 +120,17 @@ class CBIR_Engine_with_Database :
             except Exception as error :
                 print( "Erreur avec le Tweet : " + str(tweet_id) + " !" )
                 print( error )
-                file = open( "class_CBIR_Engine_with_Database_errors.log", "a" )
-                file.write( "Erreur avec le Tweet : " + str(tweet_id) + " !\n" )
-                traceback.print_exc( file = file )
-                file.write( "\n\n\n" )
-                file.close()
-                return None
+                print( "On essaye d'attendre 10 secondes..." )
+                if retry_count < 1 : # Essayer un coup d'attendre
+                        sleep( 10 )
+                        retry_count += 1
+                else :
+                    file = open( "class_CBIR_Engine_with_Database_errors.log", "a" )
+                    file.write( "Erreur avec le Tweet : " + str(tweet_id) + " !\n" )
+                    traceback.print_exc( file = file )
+                    file.write( "\n\n\n" )
+                    file.close()
+                    return None
     
     """
     Indexer les images d'un tweet dans la base de données.
@@ -459,8 +464,9 @@ class CBIR_Engine_with_Database :
         
         try :
             image = url_to_cv2_image( image_url )
-        except Exception :
+        except Exception as error :
             print( "L'URL \"" + str(image_url) + "\" ne mène pas à une image !" )
+            print( error )
             return None
         
         try :
