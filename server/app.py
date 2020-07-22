@@ -146,7 +146,7 @@ while True :
     if args[0] == "request" :
         if len(args) == 2 :
             print( "Lancement de la procédure !" )
-            pipeline.launch_full_process( args[1] )
+            pipeline.launch_full_process( args[1], intelligent_skip_indexing = param.FORCE_INTELLIGENT_SKIP_INDEXING )
         else :
             print( "Utilisation : request [URL de l'illustration]" )
     
