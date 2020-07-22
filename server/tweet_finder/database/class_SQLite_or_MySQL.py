@@ -254,23 +254,8 @@ class SQLite_or_MySQL :
                 request_2 += " WHERE account_id = ?"
                 request_3 += " WHERE account_id = ?"
                 request_4 += " WHERE account_id = ?"
-            
-            c_1.execute( request_1,
-                       ( account_id, ) )
-            c_2.execute( request_2,
-                       ( account_id, ) )
-            c_3.execute( request_3,
-                       ( account_id, ) )
-            c_4.execute( request_4,
-                       ( account_id, ) )
-            
-        else :
-            c_1.execute( request_1 )
-            c_2.execute( request_2 )
-            c_3.execute( request_3 )
-            c_4.execute( request_4 )
         
-        return Image_Features_Iterator( c_1, c_2, c_3, c_4 )
+        return Image_Features_Iterator( self.conn, account_id, request_1, request_2, request_3, request_4 )
     
     """
     Stocker la date du dernier scan d'un compte Twitter
