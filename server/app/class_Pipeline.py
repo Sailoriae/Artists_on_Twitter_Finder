@@ -234,8 +234,12 @@ class Pipeline :
         if request.status == 0 and request.do_link_finder :
             self.step_1_link_finder_queue.put( request )
         
-        if request.status == 2 and request.do_indexing :
-            self.step_2_GOT3_list_account_tweets_queue.put( request )
+        if request.status == 2 :
+            if request.do_indexing :
+                self.step_2_GOT3_list_account_tweets_queue.put( request )
+            else :
+                request.status = 7
+                return self.set_request_to_next_step( request )
         
         if request.status == 4 and request.do_indexing :
             self.step_3_GOT3_index_account_tweets_queue.put( request )

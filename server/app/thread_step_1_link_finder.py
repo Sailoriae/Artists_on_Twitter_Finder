@@ -12,6 +12,7 @@ sys_path.append(os_path.dirname(os_path.dirname(os_path.abspath(__file__))))
 import parameters as param
 from link_finder import Link_Finder
 from tweet_finder.twitter import TweepyAbtraction
+from tweet_finder.database import SQLite_or_MySQL
 
 
 """
@@ -27,6 +28,10 @@ def thread_step_1_link_finder( thread_id : int, pipeline ) :
                                 param.API_SECRET,
                                 param.OAUTH_TOKEN,
                                 param.OAUTH_TOKEN_SECRET )
+    
+    # Accès direct à la base de données
+    # N'UTILISER QUE DES METHODES QUI FONT SEULEMENT DES SELECT !
+    bdd_direct_access = SQLite_or_MySQL()
     
     # Dire qu'on ne fait rien
     pipeline.requests_in_thread[ "thread_step_1_link_finder_number" + str(thread_id) ] = None
@@ -121,6 +126,19 @@ def thread_step_1_link_finder( thread_id : int, pipeline ) :
         
         # Dire qu'on n'est plus en train de traiter cette requête
         pipeline.requests_in_thread[ "thread_step_1_link_finder_number" + str(thread_id) ] = None
+        
+        # Possibilité de sauter l'indexation si tous les comptes sont déjà dans
+        # la base de données
+        if request.intelligent_skip_indexing :
+            check_list = []
+            for twitter_account in request.twitter_accounts_with_id :
+                check_list.append(
+                    bdd_direct_access.is_account_indexed( twitter_account[1] )
+                )
+            if all( check_list ) :
+                print( "[step_1_th" + str(thread_id) + "] Tous les comptes Twitter trouvés sont déjà dans la base de données, on saute les 3 étapes de mise à jour !" )
+                pipeline.set_request_to_next_step( request )
+                continue
         
         # On passe la requête à l'étape suivante
         # C'est la procédure pipeline.set_request_to_next_step qui vérifie si elle peut
