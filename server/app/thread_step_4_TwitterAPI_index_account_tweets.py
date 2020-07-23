@@ -70,6 +70,10 @@ def thread_step_4_TwitterAPI_index_account_tweets( thread_id : int, pipeline ) :
         # On désactiver alors le bloquage mis lors de l'étape 2
         pipeline.indexing_done(
             [ data[1] for data in request.twitter_accounts_with_id ] )
+        
+        # Comme on est le dernier thread de scan / analyse / indexation, on
+        # peut Màj les statistiques mises en cache dans l'objet Pipeline
+        pipeline.tweets_count, pipeline.accounts_count = bdd_direct_access.get_stats()
     
     print( "[step_4_th" + str(thread_id) + "] Arrêté !" )
     return

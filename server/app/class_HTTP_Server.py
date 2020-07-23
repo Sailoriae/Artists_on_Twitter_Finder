@@ -10,7 +10,6 @@ from os import path as os_path
 sys_path.append(os_path.dirname(os_path.dirname(os_path.abspath(__file__))))
 
 import parameters as param
-from tweet_finder.database import SQLite_or_MySQL
 
 
 """
@@ -22,10 +21,6 @@ def http_server_container ( pipeline_arg ) :
         pipeline = pipeline_arg # Attribut de classe
         
         def __init__( self, *args, **kwargs ) :
-            # Accès direct à la base de données
-            # N'UTILISER QUE DES METHODES QUI FONT SEULEMENT DES SELECT !
-            self.bdd_direct_access = SQLite_or_MySQL()
-            
             super(BaseHTTPRequestHandler, self).__init__(*args, **kwargs)
         
         def do_GET( self ) :
@@ -113,9 +108,8 @@ def http_server_container ( pipeline_arg ) :
                 
                 response = "{"
                 
-                stats = self.bdd_direct_access.get_stats()
-                response += "\"indexed_tweets_count\" : " + str(stats[0]) + ", "
-                response += "\"indexed_accounts_count\" : " + str(stats[1])
+                response += "\"indexed_tweets_count\" : " + str(self.pipeline.tweets_count) + ", "
+                response += "\"indexed_accounts_count\" : " + str(self.pipeline.accounts_count)
                 
                 response += "}\n"
                 

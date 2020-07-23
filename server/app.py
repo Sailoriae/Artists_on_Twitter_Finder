@@ -53,21 +53,6 @@ pipeline = Pipeline()
 
 
 """
-Obtenir des statistiques sur la base de données.
-Utilisé par la CLI.
-@return Une liste contenant, dans l'ordre suivant :
-        - Le nombre de tweets indexés,
-        - Et nombre de comptes indexés.
-"""
-from tweet_finder.database import SQLite_or_MySQL
-# Accès direct à la base de données pour le processus principal
-# N'UTILISER QUE DES METHODES QUI FONT SEULEMENT DES SELECT !
-bdd_direct_access = SQLite_or_MySQL()
-def get_stats() :
-    return bdd_direct_access.get_stats()
-
-
-"""
 Démarrage des threads.
 Ce ne sont pas les procédures qui sont exécutées directement, mais le
 collecteur d'erreurs qui exécute la procédure.
@@ -227,9 +212,8 @@ while True :
     
     elif args[0] == "stats" :
         if len(args) == 1 :
-            stats = get_stats()
-            print( "Nombre de tweets indexés : ", stats[0] )
-            print( "Nombre de comptes Twitter indexés : ", stats[1] )
+            print( "Nombre de tweets indexés :", pipeline.tweets_count )
+            print( "Nombre de comptes Twitter indexés :", pipeline.accounts_count )
         else :
             print( "Utilisation : stats")
     

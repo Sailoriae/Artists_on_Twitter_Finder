@@ -17,6 +17,7 @@ sys_path.append(os_path.dirname(os_path.dirname(os_path.abspath(__file__))))
 
 import parameters as param
 from tweet_finder.twitter import TweepyAbtraction
+from tweet_finder.database import SQLite_or_MySQL
 
 
 """
@@ -110,6 +111,12 @@ class Pipeline :
         
         # Sémaphore d'accès au dictionnaire précédente
         self.dict_of_ip_addresses_sem = threading.Semaphore()
+        
+        
+        # Cache des statistiques
+        # Permet de faire moins d'appels à la méthode get_stats()
+        bdd_direct_access = SQLite_or_MySQL()
+        self.tweets_count, self.accounts_count = bdd_direct_access.get_stats()
     
     """
     Lancement de la procédure complète pour une URL d'illustration.

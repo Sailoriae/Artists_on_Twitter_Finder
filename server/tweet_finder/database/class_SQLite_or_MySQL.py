@@ -358,9 +358,9 @@ class SQLite_or_MySQL :
     """
     def get_stats( self ) :
         c = self.conn.cursor()
-        c.execute( "SELECT COUNT( * ) FROM tweets" )
+        c.execute( "SELECT COUNT( tweet_id ) FROM tweets" )
         count_tweets = c.fetchone()[0]
-        c.execute( "SELECT COUNT( * ) FROM accounts" )
+        c.execute( "SELECT COUNT( account_id ) FROM accounts" )
         count_accounts = c.fetchone()[0]
         return [ count_tweets, count_accounts ]
     
