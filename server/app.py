@@ -215,6 +215,16 @@ while True :
         else :
             print( "Utilisation : threads")
     
+    elif args[0] == "queues" :
+        if len(args) == 1 :
+            print( "step_1_link_finder_queue :", pipeline.step_1_link_finder_queue.qsize() )
+            print( "step_2_GOT3_list_account_tweets_queue :", pipeline.step_2_GOT3_list_account_tweets_queue.qsize() )
+            print( "step_3_GOT3_index_account_tweets_queue :", pipeline.step_3_GOT3_index_account_tweets_queue.qsize() )
+            print( "step_4_TwitterAPI_index_account_tweets_queue :", pipeline.step_4_TwitterAPI_index_account_tweets_queue.qsize() )
+            print( "step_5_reverse_search_queue :", pipeline.step_5_reverse_search_queue.qsize() )
+        else :
+            print( "Utilisation : queues")
+    
     elif args[0] == "stats" :
         if len(args) == 1 :
             stats = get_stats()
@@ -246,6 +256,7 @@ while True :
                    "\n" +
                    "Afficher des statistiques de la base de données : stats\n" +
                    "Afficher ce que font les threads de traitement : threads\n" +
+                   "Afficher la taille des files d'attente : queues\n" +
                    "Arrêter le service : stop\n" +
                    "Afficher l'aide : help\n" )
         else :
