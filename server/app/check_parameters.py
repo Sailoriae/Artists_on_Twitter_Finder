@@ -21,10 +21,12 @@ def check_parameters () :
         import imutils
         import cv2
         import pixivpy3
-        import mysql.connector
+        if param.USE_MYSQL_INSTEAD_OF_SQLITE :
+            import mysql.connector
     except ModuleNotFoundError :
         print( "Il manque une librairie !" )
         print( "Veuillez exécuter : pip install -r requirements.txt" )
+        return False
     else :
         print( "Toutes les librairies nécessaires sont présentes !" )
     
