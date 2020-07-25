@@ -1,0 +1,38 @@
+body {
+	padding: 10px;
+	margin: 0;
+	min-width: 300px;
+	font: 100% sans-serif;
+	text-align: center;
+}
+
+header, footer, main {
+	max-width: 600px;
+	margin: auto;
+}
+
+header {
+	border-bottom: solid grey 1px;
+}
+
+footer {
+	border-top: solid grey 1px;
+}
+
+label, input {
+	display: block;
+	margin: 10px auto;
+}
+
+input {
+	padding: 10px;
+}
+
+input#illust-url {
+	width: 90%;
+	max-width: 500px;
+}
+
+div.twitter-tweet {
+	margin:auto;
+}
