@@ -36,6 +36,7 @@ def http_server_container ( pipeline_arg ) :
             if len(page) == 1 and page[0] == "" :
                 self.send_response(200)
                 self.send_header("Content-type", "application/json")
+                self.send_header("Access-Control-Allow-Origin", "*")
                 self.end_headers()
                 
                 response = "{"
@@ -104,6 +105,7 @@ def http_server_container ( pipeline_arg ) :
             elif len(page) == 1 and page[0] == "stats" : 
                 self.send_response(200)
                 self.send_header("Content-type", "application/json")
+                self.send_header("Access-Control-Allow-Origin", "*")
                 self.end_headers()
                 
                 response = "{"

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+
+
+<html lang="fr">
+<head>
+	<meta charset=utf-8>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta name="robots" content="noindex" />
+
+	<title>Artist on Twitter Finder</title>
+
+	<script async src="javascript.js" charset="utf-8"></script>
+	<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+</head>
+
+
+<body>
+	<header>
+		<h1>Artist on Twitter Finder</h1>
+	</header>
+
+	<main>
+		<p id="display-stats"></p>
+
+		<label for="illust-url">URL de l'illustration :</label>
+		<input type="text" id="illust-url" name="illust-url" required />
+		<input id="launch" type="button" value="Rechercher les Tweets de l'artiste" onclick="mainFunction();" />
+
+		<p id="display-error"></p>
+		<p id="display-process-status"></p>
+		<div id="twitter-accounts"></div>
+		<div id="tweets"></div>
+	</main>
+
+	<footer>
+		<p>Ceci est un footer.</p>
+	</footer>
+</body>
+
+
+</html>
