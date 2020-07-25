@@ -35,6 +35,16 @@ Lorsqu'on parle d'un "site supporté" par le serveur, on parle de l'un des sites
 * Danbooru : https://danbooru.donmai.us/ (Attention, peut contenir du NSFW directement sur la page d'acceuil)
 
 
+## Répertoires
+
+* `server` : Serveur "Artist on Twitter Finder". Pour chaque requête, trouve les comptes Twitter des artistes, indexe leurs Tweets, et recherche l'illustration de requête. Il contient une API sous la forme d'un serveur HTTP pour recevoir des requêtes et renvoyer leurs status et leurs résultats en JSON.
+* `configs` : Fichier de configuration Apache2, pour faire un proxy depuis l'extérieur vers le serveur HTTP du serveur.
+* `maintenance` : Scripts de maintenance de la base de données du serveur.
+* `client` : Scripts du client à l'API du serveur.
+* `public` : Interface web pour utiliser l'API du serveur.
+* `doc` : Documentation.
+
+
 ## Installation et utilisation du serveur
 
 Voir le fichier `server/README.md`.
