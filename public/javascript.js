@@ -8,6 +8,8 @@ var displayInfosP = document.getElementById("display-infos");
 displayStats();
 
 function mainFunction () {
+	document.getElementById("launch").style.display = "none";
+
 	twitterAccountsDiv.innerHTML = "";
 	tweetsDiv.innerHTML = "";
 	displayErrorP.innerHTML = "";
@@ -52,6 +54,8 @@ async function waitAndUpdate ( json ) {
 	if ( ! ( json["status"] === "END" ) ) {
 		await new Promise(r => setTimeout(r, 5000));
 		mainFunction();
+	} else {
+		document.getElementById("launch").style.display = "block";
 	}
 }
 
