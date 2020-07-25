@@ -111,7 +111,14 @@ def http_server_container ( pipeline_arg ) :
                 response = "{"
                 
                 response += "\"indexed_tweets_count\" : " + str(self.pipeline.tweets_count) + ", "
-                response += "\"indexed_accounts_count\" : " + str(self.pipeline.accounts_count)
+                response += "\"indexed_accounts_count\" : " + str(self.pipeline.accounts_count) + ", "
+                response += "\"limit_per_ip_address\" : " + str(param.MAX_PENDING_REQUESTS_PER_IP_ADDRESS) + ", "
+                response += "\"update_accounts_frequency\" : " + str(param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE) + ", "
+                
+                if param.FORCE_INTELLIGENT_SKIP_INDEXING :
+                    response += "\"no_update_on_request\" : true"
+                else :
+                    response += "\"no_update_on_request\" : false"
                 
                 response += "}\n"
                 

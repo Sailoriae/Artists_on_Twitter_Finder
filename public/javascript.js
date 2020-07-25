@@ -3,6 +3,7 @@ var tweetsDiv = document.getElementById("tweets");
 var displayErrorP = document.getElementById("display-error");
 var displayProcessStatusP = document.getElementById("display-process-status");
 var displayStatsP = document.getElementById("display-stats");
+var displayInfosP = document.getElementById("display-infos");
 
 displayStats();
 
@@ -173,6 +174,7 @@ function populateTweets ( json ) {
 
 function displayStats() {
 	displayStatsP.innerHTML = "";
+	displayInfosP.innerHTML = "";
 
 	var request = new XMLHttpRequest();
 
@@ -186,6 +188,12 @@ function displayStats() {
 					var json = JSON.parse( request.responseText );
 					console.log( json );
 					displayStatsP.textContent = json["indexed_tweets_count"] + " Tweets indexés sur " + json["indexed_accounts_count"] + " comptes Twitter.";
+
+					displayInfosP.textContent = "Les nombre de requêtes en cours de traitement par adresse IP est limité à " + json["limit_per_ip_address"] + "."
+					if ( json["no_update_on_request"] ) {
+						displayInfosP.textContent += " Attention ! L'index des Tweets des comptes n'est pas mis à jour lors d'une requête."
+					}
+					displayInfosP.textContent += " L'index des Tweets avec images d'un compte est mis à jour automatiquement au bout de " + json["update_accounts_frequency"] + " jours."
 				}
 			} else {
 				displayStatsP.textContent = "Impossible d'afficher les statistiques.";
