@@ -9,6 +9,7 @@ displayStats();
 
 function mainFunction () {
 	document.getElementById("launch").style.display = "none";
+	document.getElementById("illust-url").readOnly = true;
 
 	twitterAccountsDiv.innerHTML = "";
 	tweetsDiv.innerHTML = "";
@@ -56,6 +57,7 @@ async function waitAndUpdate ( json ) {
 		mainFunction();
 	} else {
 		document.getElementById("launch").style.display = "block";
+		document.getElementById("illust-url").readOnly = false;
 	}
 }
 
