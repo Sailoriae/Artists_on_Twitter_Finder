@@ -39,6 +39,8 @@ Lorsqu'on parle d'un "site supporté" par le serveur, on parle de l'un des sites
 
 Voir le fichier `server/README.md`.
 
+Puis, si vous souhaitez activer l'interface web publique, consultez le fichier `configs/README.md`.
+
 
 ## Note de fin
 
