@@ -5,6 +5,7 @@ import requests
 from random import randrange
 from time import sleep
 import http
+import urllib
 
 """
 Faire un GET HTTP en réessant de manière bourrin si jamais on a une erreur,

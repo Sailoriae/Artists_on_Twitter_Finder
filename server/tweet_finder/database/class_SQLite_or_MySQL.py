@@ -229,11 +229,6 @@ class SQLite_or_MySQL :
             Voir le fichier "class_SQLite_Image_Features_Iterator.py"
     """
     def get_images_in_db_iterator( self, account_id : int = 0 ) :
-        c_1 = self.conn.cursor()
-        c_2 = self.conn.cursor()
-        c_3 = self.conn.cursor()
-        c_4 = self.conn.cursor()
-        
         request_1 = """SELECT * FROM tweets
                            INNER JOIN tweets_images_1 ON tweets.tweet_id = tweets_images_1.tweet_id"""
         request_2 = """SELECT * FROM tweets

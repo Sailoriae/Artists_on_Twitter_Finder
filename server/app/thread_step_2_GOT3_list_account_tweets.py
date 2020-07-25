@@ -79,8 +79,9 @@ def thread_step_2_GOT3_list_account_tweets( thread_id : int, pipeline ) :
             
             GOT3_list = cbir_engine.get_GOT3_list( twitter_account[0] )
             
-            request.get_GOT3_list_result.append( ( twitter_account[0],
-                                                   GOT3_list ) )
+            if GOT3_list != False : # Si entre le Link Finder et ce thread le compte est passé indisponible
+                request.get_GOT3_list_result.append( ( twitter_account[0],
+                                                       GOT3_list ) )
         
         # Dire qu'on n'est plus en train de traiter cette requête
         pipeline.requests_in_thread[ "thread_step_2_GOT3_list_account_tweets_number" + str(thread_id) ] = None

@@ -98,7 +98,7 @@ class CBIR_Engine_with_Database :
             # Exemple : https://twitter.com/apofissx/status/219051550696407040
             # Ce tweet est indiqué comme ayant une image, mais elle est en 404 !
             except urllib.error.HTTPError as error :
-                if error.code == 404 or error.code == 500 : # Erreurs insolvables
+                if error.code == 404 or error.code == 500 or error.code == 403 : # Erreurs insolvables
                     print( "Erreur avec le Tweet : " + str(tweet_id) + " !" )
                     print( error )
                     return None
@@ -106,7 +106,11 @@ class CBIR_Engine_with_Database :
                     print( "Erreur avec le Tweet : " + str(tweet_id) + " !" )
                     print( error )
                     print( "On essaye d'attendre 10 secondes..." )
-                    if retry_count < 1 : # Essayer un coup d'attendre
+                    if error.code == 502 : # Il suffit d'attendre pour ce genre d'erreurs
+                        if retry_count < 20 : # Essayer un coup d'attendre
+                            sleep( 10 )
+                            retry_count += 1
+                    elif retry_count < 1 : # Essayer un coup d'attendre
                         sleep( 10 )
                         retry_count += 1
                     else :
