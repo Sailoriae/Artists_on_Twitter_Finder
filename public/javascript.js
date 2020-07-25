@@ -100,7 +100,7 @@ function isThereAnErrorAndIfYesPopulateError ( json ) {
 		displayErrorP.textContent = "L'illustration entrée a un format à la noix et ne peut pas être cherchée.";
 		return true;
 	} else if ( json.error === "PROCESSING_ERROR" ) {
-		displayErrorP.textContent = "Erreur globale, impossible de terminer la requête.";
+		displayErrorP.textContent = "Erreur coté serveur, impossible de terminer le traitement de la requête.";
 		return true;
 	} else if ( json.error === "YOUR_IP_HAS_MAX_PENDING_REQUESTS" ) {
 		displayErrorP.textContent = "Votre adresse IP a atteint son quota maximal de requêtes en cours de traitement.";
