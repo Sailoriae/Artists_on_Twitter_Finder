@@ -2,11 +2,11 @@
 # coding: utf-8
 
 try :
-    from class_User_Requests_Pipeline import User_Requests_Pipeline
-    from class_Scan_Requests_Pipeline import Scan_Requests_Pipeline
+    from user_pipeline.class_User_Requests_Pipeline import User_Requests_Pipeline
+    from scan_pipeline.class_Scan_Requests_Pipeline import Scan_Requests_Pipeline
 except ModuleNotFoundError :
-    from .class_User_Requests_Pipeline import User_Requests_Pipeline
-    from .class_Scan_Requests_Pipeline import Scan_Requests_Pipeline
+    from .user_pipeline.class_User_Requests_Pipeline import User_Requests_Pipeline
+    from .scan_pipeline.class_Scan_Requests_Pipeline import Scan_Requests_Pipeline
 
 # Ajouter le répertoire parent au PATH pour pouvoir importer
 from sys import path as sys_path
