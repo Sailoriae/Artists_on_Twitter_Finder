@@ -24,7 +24,11 @@ class TweepyAbtraction :
                    oauth_token_secret ) :
         auth = tweepy.OAuthHandler(api_key, api_secret)
         auth.set_access_token(oauth_token, oauth_token_secret)
-        self.api = tweepy.API(auth)
+        
+        # Tweepy gère l'attente lors d'une rate limit !
+        self.api = tweepy.API( auth, 
+                               wait_on_rate_limit = True,
+                               wait_on_rate_limit_notify  = True )
     
     """
     @param tweet_id L'ID du Tweet
