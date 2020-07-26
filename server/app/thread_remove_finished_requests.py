@@ -37,7 +37,13 @@ def thread_remove_finished_requests( thread_id : int, shared_memory ) :
                 # Si la date de fin est à moins de 24h de maintenant, on garde
                 # cette requête
                 if now - request.finished_date < datetime.timedelta( hours = 24 ) :
-                    new_requests_list.append( request )
+                    # Si la requête s'est terminée en erreur, on la garde au
+                    # maximum 1h
+                    if request.problem != None :
+                        if now - request.finished_date < datetime.timedelta( hours = 1 ) :
+                            new_requests_list.append( request )
+                    else :
+                        new_requests_list.append( request )
         
         # On installe la nouvelle liste
         shared_memory.user_requests.requests = new_requests_list
