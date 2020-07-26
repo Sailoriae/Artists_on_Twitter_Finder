@@ -6,14 +6,14 @@ Il crée et gère les threads de traitement, la ligne de commande, les files d'a
 Mais comme tout ceci faisait un script beaucoup trop long, il a été séparé en plusieurs fichiers, ici, dans le module `app`.
 
 
+## Requêtes
+
+Il y a deux types de requêtes : Les requêtes utilisateur, et les requêtes de scan. Elles sont gérées et traitées respectivement dans les sous-modules `user_pipeline` et `scan_pipeline`.
+
+
 ## Liste des procédures des threads
 
-Voici la liste des procédure principales pour chaque thread (Ou plutôt "type de thread", puisqu'elles peuvent être utilisées plusieurs fois pour créer plusieurs fois le même thread) :
-- `thread_step_1_link_finder` : Thread de traitement de la partie Link Finder : Chercher les comptes Twitter de l'artiste de l'illustration de requête.
-- `thread_step_2_GOT3_list_account_tweets` : Premier thread de traitement de la partie Tweet Finder : Listage des Tweets par GetOldTweets3.
-- `thread_step_3_GOT3_index_account_tweets` : Deuxième thread de traitement de la partie Tweet Finder : Indexation des Tweets trouvés par GetOldTweets3.
-- `thread_step_4_TwitterAPI_index_account_tweets` : Deuxième thread de traitement de la partie Tweet Finder : Indexation des Tweets par Tweepy sur l'API Twitter publique.
-- `thread_step_5_reverse_search` : Troisième thread de traitement de la partie Tweet Finder : Recherche d'image inversée.
+Les threads de traitement sont dans le sous-module `user_pipeline` et `scan_pipeline`. A ces threads s'ajoutent les suivants :
 
 - `thread_http_server` : Thread de serveur HTTP.
 - `thread_auto_update_accounts` : Thread de mise à jour automatique des comptes dans la base de données.
@@ -26,6 +26,3 @@ Voici la liste des procédure principales pour chaque thread (Ou plutôt "type d
 
 - `class_HTTP_Server` : Classe du serveur HTTP. Le serveur HTTP intégré contient uniquement l'API.
 - `class_Threaded_HTTP_Server` : Classe du serveur HTTP pour le multi-thread.
-
-- `class_Request` : Réprésentation d'une requête. Les requêtes sont identifiées par leur URL de requête. L'objet Pipeline crée et gère toutes les requêtes.
-- `class_Pipeline` : Mémoire partagée entre tous les threads. Contient l'ensemble des requêtes, les files d'attentes, et leur gestion.
