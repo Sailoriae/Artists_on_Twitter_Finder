@@ -28,14 +28,14 @@ function mainFunction () {
 				} else {
 					var json = JSON.parse( request.responseText );
 					console.log( json );
-					var isThereAnError = isThereAnErrorAndIfYesPopulateError( json );
+					populateError( json );
 
 					populateStatus( json );
 
 					if ( canPrintAccounts( json ) ) {
 						populateTwitterAccounts( json );
 					}
-					if ( ! ( isThereAnError ) && ( canPrintTweets(json) ) ) {
+					if ( canPrintTweets(json) ) {
 						populateTweets( json );
 					}
 
@@ -72,43 +72,43 @@ function canPrintAccounts ( json ) {
 		 ( json.error === "NO_TWITTER_ACCOUNT_FOR_THIS_ARTIST" ) ||
 		 ( json.error === "NO_VALID_TWITTER_ACCOUNT_FOR_THIS_ARTIST" ) ||
 		 ( json.error === "YOUR_IP_HAS_MAX_PENDING_REQUESTS" ) ) {
-		return false;
+		 return false;
 	}
 
 	return true;
 }
 
 function canPrintTweets ( json ) {
+	if ( ( json.error === "NO_URL_FIELD" ) ||
+		 ( json.error === "INVALID_URL" ) ||
+		 ( json.error === "UNSUPPORTED_WEBSITE" ) ||
+		 ( json.error === "NO_TWITTER_ACCOUNT_FOR_THIS_ARTIST" ) ||
+		 ( json.error === "NO_VALID_TWITTER_ACCOUNT_FOR_THIS_ARTIST" ) ||
+		 ( json.error === "YOUR_IP_HAS_MAX_PENDING_REQUESTS" ) ) {
+		return false;
+	}
+
 	return ( json["status"] === "END" );
 }
 
-function isThereAnErrorAndIfYesPopulateError ( json ) {
+function populateError ( json ) {
 	if ( json.error === "NO_URL_FIELD" ) {
 		displayErrorP.textContent = "Aucune URL entrée.";
-		return true;
 	} else if ( json.error === "INVALID_URL" ) {
 		displayErrorP.textContent = "URL entrée invalide.";
-		return true;
 	} else if ( json.error === "UNSUPPORTED_WEBSITE" ) {
 		displayErrorP.textContent = "Site de l'URL entrée non supporté.";
-		return true;
 	} else if ( json.error === "NO_TWITTER_ACCOUNT_FOR_THIS_ARTIST" ) {
 		displayErrorP.textContent = "Aucun compte Twitter trouvé pour cet artiste.";
-		return true;
 	} else if ( json.error === "NO_VALID_TWITTER_ACCOUNT_FOR_THIS_ARTIST" ) {
 		displayErrorP.textContent = "Aucun compte Twitter valide trouvé pour cet artiste.";
-		return true;
 	} else if ( json.error === "ERROR_DURING_REVERSE_SEARCH" ) {
 		displayErrorP.textContent = "L'illustration entrée a un format à la noix et ne peut pas être cherchée.";
-		return true;
 	} else if ( json.error === "PROCESSING_ERROR" ) {
 		displayErrorP.textContent = "Erreur coté serveur, impossible de terminer le traitement de la requête.";
-		return true;
 	} else if ( json.error === "YOUR_IP_HAS_MAX_PENDING_REQUESTS" ) {
 		displayErrorP.textContent = "Votre adresse IP a atteint son quota maximal de requêtes en cours de traitement.";
-		return true;
 	}
-	return false;
 }
 
 function populateStatus ( json ) {
@@ -117,6 +117,8 @@ function populateStatus ( json ) {
 
 	if ( json["status"] === "END" ) {
 		p.textContent += "Fin de traitement.";
+	} else if ( json["status"] === "INDEX_ACCOUNTS_TWEETS" ) {
+		p.textContent += "En cours de traitement par le serveur... Indexation des Tweets des comptes Twitter trouvés";
 	} else {
 		p.textContent += "En cours de traitement par le serveur...";
 	}
@@ -130,15 +132,20 @@ function populateTwitterAccounts ( json ) {
 
 	var twitterAccounts = json['twitter_accounts'];
 
-	for ( var i = 0; i < twitterAccounts.length; i++ ) {
-		var a = document.createElement('a');
-		a.href = "https://twitter.com/" + twitterAccounts[i].account_name;
-		a.target = "_blank";
-		a.textContent = "@" + twitterAccounts[i].account_name;
-		p.appendChild(a);
+	if ( twitterAccounts.length === 0 ) {
+		var p = document.createElement('p');
+		p.textContent = "Aucun compte Twitter trouvé.";
+	} else {
+		for ( var i = 0; i < twitterAccounts.length; i++ ) {
+			var a = document.createElement('a');
+			a.href = "https://twitter.com/" + twitterAccounts[i].account_name;
+			a.target = "_blank";
+			a.textContent = "@" + twitterAccounts[i].account_name;
+			p.appendChild(a);
 
-		if ( i < twitterAccounts.length ) {
-			p.appendChild = ", ";
+			if ( i < twitterAccounts.length ) {
+				p.appendChild = ", ";
+			}
 		}
 	}
 
