@@ -15,10 +15,10 @@ import parameters as param
 """
 Serveur HTTP
 """
-# Fonction contenant la classe, permettant de passer le paramètre pipeline
-def http_server_container ( pipeline_arg ) :
+# Fonction contenant la classe, permettant de passer le paramètre shared_memory
+def http_server_container ( shared_memory_arg ) :
     class HTTP_Server( BaseHTTPRequestHandler ) :
-        pipeline = pipeline_arg # Attribut de classe
+        shared_memory = shared_memory_arg # Attribut de classe
         
         def __init__( self, *args, **kwargs ) :
             super(BaseHTTPRequestHandler, self).__init__(*args, **kwargs)
@@ -51,9 +51,8 @@ def http_server_container ( pipeline_arg ) :
                     response += ", \"error\" : \"NO_URL_FIELD\""
                 else :
                     # Lance une nouvelle requête, ou donne la requête déjà existante
-                    request = self.pipeline.launch_full_process( illust_url,
-                                                                 ip_address = self.client_address[0],
-                                                                 intelligent_skip_indexing = param.FORCE_INTELLIGENT_SKIP_INDEXING )
+                    request = self.shared_memory.user_requests.launch_request( illust_url,
+                                                                               ip_address = self.client_address[0] )
                     
                     # Si request == None, c'est qu'on ne peut pas lancer une
                     # nouvelle requête car l'addresse IP a trop de requêtes en
@@ -110,8 +109,8 @@ def http_server_container ( pipeline_arg ) :
                 
                 response = "{"
                 
-                response += "\"indexed_tweets_count\" : " + str(self.pipeline.tweets_count) + ", "
-                response += "\"indexed_accounts_count\" : " + str(self.pipeline.accounts_count) + ", "
+                response += "\"indexed_tweets_count\" : " + str(self.shared_memory.tweets_count) + ", "
+                response += "\"indexed_accounts_count\" : " + str(self.shared_memory.accounts_count) + ", "
                 response += "\"limit_per_ip_address\" : " + str(param.MAX_PENDING_REQUESTS_PER_IP_ADDRESS) + ", "
                 response += "\"update_accounts_frequency\" : " + str(param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE) + ", "
                 

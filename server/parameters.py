@@ -10,10 +10,10 @@ Pour une instance privée, ça peut aller, car il y a moins de requêtes. Pour u
 instance publique, c'est cauchemardesque.
 
 Ce paramètre (Lorsqu'il est sur "True") permet de ne pas mettre à jour
-l'indexation d'un compte lors d'une requête via l'API HTTP, mais uniquement de
-scanner les comptes Twitter inconnus de la base de données.
+l'indexation d'un compte lors d'une requête, et uniquement d'indexer les
+comptes Twitter inconnus de la base de données.
 Ainsi, seule la mise à jour automatique actualise l'indexation des Tweets des
-comptes dans la base de données.
+comptes déjà présents dans la base de données.
 
 Ceci est intéressant uniquement quand la base de données est bien remplie, avec
 beaucoup de comptes.
@@ -87,17 +87,18 @@ HTTP_SERVER_PORT = 3301
 """
 Paramètrage du nombre de threads.
 
-Les valeurs NUMBER_OF_STEP_2_GOT3_LIST_ACCOUNT_TWEETS_THREADS et
-NUMBER_OF_STEP_4_TWITTERAPI_INDEX_ACCOUNT_TWEETS doivent rester à 1
+Les valeurs NUMBER_OF_STEP_A_GOT3_LIST_ACCOUNT_TWEETS_THREADS et
+NUMBER_OF_STEP_C_TWITTERAPI_INDEX_ACCOUNT_TWEETS doivent rester à 1
 En effet, ces threads font beaucoup d'appels aux API Twitter, et donc peuvent
 recevoir des erreurs HTTP 429 "Too Many Requests".
 Les créer une seule fois permet de limiter les erreur 429.
 """
 NUMBER_OF_STEP_1_LINK_FINDER_THREADS = 5
-NUMBER_OF_STEP_2_GOT3_LIST_ACCOUNT_TWEETS_THREADS = 1 # Laisser à 1
-NUMBER_OF_STEP_3_GOT3_INDEX_ACCOUNT_TWEETS = 5
-NUMBER_OF_STEP_4_TWITTERAPI_INDEX_ACCOUNT_TWEETS = 1 # Laisser à 1
-NUMBER_OF_STEP_5_REVERSE_SEARCH_THREADS = 5
+NUMBER_OF_STEP_2_TWEETS_INDEXER_THREADS = 5
+NUMBER_OF_STEP_3_REVERSE_SEARCH_THREADS = 5
+NUMBER_OF_STEP_A_GOT3_LIST_ACCOUNT_TWEETS_THREADS = 1 # Laisser à 1
+NUMBER_OF_STEP_B_GOT3_INDEX_ACCOUNT_TWEETS = 5
+NUMBER_OF_STEP_C_TWITTERAPI_INDEX_ACCOUNT_TWEETS = 1 # Laisser à 1
 
 """
 Faire plus de print().

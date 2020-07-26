@@ -21,14 +21,14 @@ ATTENTION ! CE THREAD DOIT ETRE UNIQUE !
 
 Thread du serveur HTTP.
 """
-def thread_http_server( thread_id : int, pipeline ) :
-    HTTP_Server = http_server_container( pipeline )
+def thread_http_server( thread_id : int, shared_memory ) :
+    HTTP_Server = http_server_container( shared_memory )
     
     # http.server.ThreadingHTTPServer() fait lui-même le multi-threads du
     # serveur HTTP
     http_server = ThreadingHTTPServer( ("", param.HTTP_SERVER_PORT ), HTTP_Server )
     
-    while pipeline.keep_service_alive :
+    while shared_memory.keep_service_alive :
         http_server.handle_request()
     http_server.server_close()
     

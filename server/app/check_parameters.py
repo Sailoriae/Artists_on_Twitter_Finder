@@ -35,6 +35,7 @@ def check_parameters () :
     print( "Vérification des types des paramètres..." )
     try :
         check_list = []
+        check_list.append( type( param.FORCE_INTELLIGENT_SKIP_INDEXING ) == bool )
         check_list.append( type( param.API_KEY ) == str )
         check_list.append( type( param.API_SECRET ) == str )
         check_list.append( type( param.OAUTH_TOKEN ) == str )
@@ -51,10 +52,11 @@ def check_parameters () :
         check_list.append( type( param.MYSQL_DATABASE_NAME ) == str )
         check_list.append( type( param.HTTP_SERVER_PORT ) == int and param.HTTP_SERVER_PORT > 0 )
         check_list.append( type( param.NUMBER_OF_STEP_1_LINK_FINDER_THREADS ) == int and param.NUMBER_OF_STEP_1_LINK_FINDER_THREADS > 0 )
-        check_list.append( type( param.NUMBER_OF_STEP_2_GOT3_LIST_ACCOUNT_TWEETS_THREADS ) == int and param.NUMBER_OF_STEP_2_GOT3_LIST_ACCOUNT_TWEETS_THREADS > 0 )
-        check_list.append( type( param.NUMBER_OF_STEP_3_GOT3_INDEX_ACCOUNT_TWEETS ) == int and param.NUMBER_OF_STEP_3_GOT3_INDEX_ACCOUNT_TWEETS > 0 )
-        check_list.append( type( param.NUMBER_OF_STEP_4_TWITTERAPI_INDEX_ACCOUNT_TWEETS ) == int and param.NUMBER_OF_STEP_4_TWITTERAPI_INDEX_ACCOUNT_TWEETS > 0 )
-        check_list.append( type( param.NUMBER_OF_STEP_5_REVERSE_SEARCH_THREADS ) == int and param.NUMBER_OF_STEP_5_REVERSE_SEARCH_THREADS > 0 )
+        check_list.append( type( param.NUMBER_OF_STEP_2_TWEETS_INDEXER_THREADS ) == int and param.NUMBER_OF_STEP_2_TWEETS_INDEXER_THREADS > 0 )
+        check_list.append( type( param.NUMBER_OF_STEP_3_REVERSE_SEARCH_THREADS ) == int and param.NUMBER_OF_STEP_3_REVERSE_SEARCH_THREADS > 0 )
+        check_list.append( type( param.NUMBER_OF_STEP_A_GOT3_LIST_ACCOUNT_TWEETS_THREADS ) == int and param.NUMBER_OF_STEP_A_GOT3_LIST_ACCOUNT_TWEETS_THREADS > 0 )
+        check_list.append( type( param.NUMBER_OF_STEP_B_GOT3_INDEX_ACCOUNT_TWEETS ) == int and param.NUMBER_OF_STEP_B_GOT3_INDEX_ACCOUNT_TWEETS > 0 )
+        check_list.append( type( param.NUMBER_OF_STEP_C_TWITTERAPI_INDEX_ACCOUNT_TWEETS ) == int and param.NUMBER_OF_STEP_C_TWITTERAPI_INDEX_ACCOUNT_TWEETS > 0 )
         check_list.append( type( param.DEBUG ) == bool )
         check_list.append( type( param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE ) == int and param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE >= 0 )
         check_list.append( type( param.MAX_PENDING_REQUESTS_PER_IP_ADDRESS ) == int and param.MAX_PENDING_REQUESTS_PER_IP_ADDRESS > 0 )

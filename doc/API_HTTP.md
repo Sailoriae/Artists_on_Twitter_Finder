@@ -33,12 +33,8 @@ Liste des attributs d'un résultat dans la liste `results` :
 Liste des status possibles (Dans l'ordre de traitement) :
 - `WAIT_LINK_FINDER` : En attente de traitement par un thread de Link Finder.
 - `LINK_FINDER` : En cours de traitement par un thread de Link Finder.
-- `WAIT_LIST_ACCOUNT_TWEETS` : En attente de traitement par un thread de listage des tweets d'un compte Twitter par la librairie GetOldTweets3.
-- `LIST_ACCOUNT_TWEETS`: En cours de traitement par un thread de listage des tweets d'un compte Twitter par la librairie GetOldTweets3.
-- `WAIT_INDEX_ACCOUNT_TWEETS` : En attente de traitement par un thread d'indexation des tweets d'un compte Twitter via la librairie GetOldTweets3.
-- `INDEX_ACCOUNT_TWEETS` : En cours de traitement par un thread d'indexation des tweets d'un compte Twitter via la librairie GetOldTweets3.
-- `WAIT_SECOND_INDEX_ACCOUNT_TWEETS` : En attente de traitement par un thread d'indexation des tweets d'un compte Twitter via l'API Twitter publique.
-- `WAIT_SECOND_INDEX_ACCOUNT_TWEETS` : En cours de traitement par un thread d'indexation des tweets d'un compte Twitter via l'API Twitter publique.
+- `WAIT_INDEX_ACCOUNTS_TWEETS` : En attente de traitement par un thread de lancement de l'indexation ou de la mise à jour de l'indexation des Tweets des comptes Twitter de l'artiste.
+- `INDEX_ACCOUNTS_TWEETS`: En cours de traitement par les threads d'indexation ou de la mise à jour de l'indexation des Tweets des comptes Twitter de l'artiste. **Cette étape peut être très très longue.**
 - `WAIT_IMAGE_REVERSE_SEARCH` : En attente de traitement par un thread de recherche d'image inversée.
 - `IMAGE_REVERSE_SEARCH` : En cours de traitement par un thread de recherche d'image inversée.
 - `END` : Fin de traitement.

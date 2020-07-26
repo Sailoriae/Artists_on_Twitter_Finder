@@ -49,7 +49,7 @@ Variable globale, partagées entre les threads.
 Cet objet est passé en paramètre aux threads. Car en Python, les objets sont
 passés par adresse.
 """
-pipeline = Pipeline()
+shared_memory = Shared_Memory()
 
 
 """
@@ -61,60 +61,68 @@ threads_step_1_link_finder = []
 for i in range( param.NUMBER_OF_STEP_1_LINK_FINDER_THREADS ) :
     thread = threading.Thread( name = "step_1_link_finder_th" + str(i+1),
                                target = error_collector,
-                               args = ( thread_step_1_link_finder, i+1, pipeline, ) )
+                               args = ( thread_step_1_link_finder, i+1, shared_memory, ) )
     thread.start()
     threads_step_1_link_finder.append( thread )
 
-threads_step_2_GOT3_list_account_tweets = []
-for i in range( param.NUMBER_OF_STEP_2_GOT3_LIST_ACCOUNT_TWEETS_THREADS ) :
-    thread = threading.Thread( name = "step_2_GOT3_list_account_tweets_th" + str(i+1),
+threads_step_2_tweets_indexer = []
+for i in range( param.NUMBER_OF_STEP_2_TWEETS_INDEXER_THREADS ) :
+    thread = threading.Thread( name = "step_2_tweets_indexer_th" + str(i+1),
                                target = error_collector,
-                               args = ( thread_step_2_GOT3_list_account_tweets, i+1, pipeline, ) )
+                               args = ( thread_step_2_tweets_indexer, i+1, shared_memory, ) )
     thread.start()
-    threads_step_2_GOT3_list_account_tweets.append( thread )
+    threads_step_2_tweets_indexer.append( thread )
 
-threads_step_3_GOT3_index_account_tweets = []
-for i in range( param.NUMBER_OF_STEP_3_GOT3_INDEX_ACCOUNT_TWEETS ) :
-    thread = threading.Thread( name = "step_3_GOT3_index_account_tweets_th" + str(i+1),
+threads_step_3_reverse_search = []
+for i in range( param.NUMBER_OF_STEP_3_REVERSE_SEARCH_THREADS ) :
+    thread = threading.Thread( name = "step_3_reverse_search_th" + str(i+1),
                                target = error_collector,
-                               args = ( thread_step_3_GOT3_index_account_tweets, i+1, pipeline, ) )
+                               args = ( thread_step_3_reverse_search, i+1, shared_memory, ) )
     thread.start()
-    threads_step_3_GOT3_index_account_tweets.append( thread )
+    threads_step_3_reverse_search.append( thread )
 
-threads_step_4_TwitterAPI_index_account_tweets = []
-for i in range( param.NUMBER_OF_STEP_4_TWITTERAPI_INDEX_ACCOUNT_TWEETS ) :
-    thread = threading.Thread( name = "step_4_TwitterAPI_index_account_tweets_th" + str(i+1),
+threads_step_A_GOT3_list_account_tweets = []
+for i in range( param.NUMBER_OF_STEP_A_GOT3_LIST_ACCOUNT_TWEETS_THREADS ) :
+    thread = threading.Thread( name = "step_A_GOT3_list_account_tweets_th" + str(i+1),
                                target = error_collector,
-                               args = ( thread_step_4_TwitterAPI_index_account_tweets, i+1, pipeline, ) )
+                               args = ( thread_step_A_GOT3_list_account_tweets, i+1, shared_memory, ) )
     thread.start()
-    threads_step_4_TwitterAPI_index_account_tweets.append( thread )
+    threads_step_A_GOT3_list_account_tweets.append( thread )
 
-threads_step_5_reverse_search = []
-for i in range( param.NUMBER_OF_STEP_5_REVERSE_SEARCH_THREADS ) :
-    thread = threading.Thread( name = "step_5_reverse_search_th" + str(i+1),
+threads_step_B_GOT3_index_account_tweets = []
+for i in range( param.NUMBER_OF_STEP_B_GOT3_INDEX_ACCOUNT_TWEETS ) :
+    thread = threading.Thread( name = "step_B_GOT3_index_account_tweets_th" + str(i+1),
                                target = error_collector,
-                               args = ( thread_step_5_reverse_search, i+1, pipeline, ) )
+                               args = ( thread_step_B_GOT3_index_account_tweets, i+1, shared_memory, ) )
     thread.start()
-    threads_step_5_reverse_search.append( thread )
+    threads_step_B_GOT3_index_account_tweets.append( thread )
+
+threads_step_C_TwitterAPI_index_account_tweets = []
+for i in range( param.NUMBER_OF_STEP_C_TWITTERAPI_INDEX_ACCOUNT_TWEETS ) :
+    thread = threading.Thread( name = "step_C_TwitterAPI_index_account_tweets_th" + str(i+1),
+                               target = error_collector,
+                               args = ( thread_step_C_TwitterAPI_index_account_tweets, i+1, shared_memory, ) )
+    thread.start()
+    threads_step_C_TwitterAPI_index_account_tweets.append( thread )
 
 # On ne crée qu'un seul thread du serveur HTTP
 # C'est lui qui va créer plusieurs threads grace à la classe :
 # http.server.ThreadingHTTPServer()
 thread_http_server = threading.Thread( name = "http_server_th1",
                                        target = error_collector,
-                                       args = ( thread_http_server, 1, pipeline, ) )
+                                       args = ( thread_http_server, 1, shared_memory, ) )
 thread_http_server.start()
 
 # On ne crée qu'un seul thread de mise à jour automatique
 thread_auto_update_accounts = threading.Thread( name = "auto_update_accounts_th1",
                                                 target = error_collector,
-                                                args = ( thread_auto_update_accounts, 1, pipeline, ) )
+                                                args = ( thread_auto_update_accounts, 1, shared_memory, ) )
 thread_auto_update_accounts.start()
 
 # On ne crée qu'un seul thread de délestage de la liste des requêtes
 thread_remove_finished_requests = threading.Thread( name = "remove_finished_requests_th1",
                                                 target = error_collector,
-                                                args = ( thread_remove_finished_requests, 1, pipeline, ) )
+                                                args = ( thread_remove_finished_requests, 1, shared_memory, ) )
 thread_remove_finished_requests.start()
 
 
@@ -131,13 +139,13 @@ while True :
     if args[0] == "request" :
         if len(args) == 2 :
             print( "Lancement de la procédure !" )
-            pipeline.launch_full_process( args[1], intelligent_skip_indexing = param.FORCE_INTELLIGENT_SKIP_INDEXING )
+            shared_memory.user_requests.launch_request( args[1] )
         else :
             print( "Utilisation : request [URL de l'illustration]" )
     
     elif args[0] == "status" :
         if len(args) == 2 :
-            request = pipeline.get_request( args[1] )
+            request = shared_memory.user_requests.get_request( args[1] )
             if request != None :
                 print( "Status : " + str(request.status) + " " + request.get_status_string() )
             else :
@@ -147,7 +155,7 @@ while True :
     
     elif args[0] == "result" :
         if len(args) == 2 :
-            request = pipeline.get_request( args[1] )
+            request = shared_memory.user_requests.get_request( args[1] )
             if request != None :
                 print( "Résultat : " + str( [ (data.tweet_id, data.distance) for data in request.founded_tweets ] ) )
             else :
@@ -159,11 +167,14 @@ while True :
         if len(args) == 2 :
             # Vérification que le nom d'utilisateur Twitter est possible
             if re.compile("^@?(\w){1,15}$").match(args[1]) :
-                print( "Demande de scan / d'indexation du compte @" + args[1] + "." )
-                result = pipeline.launch_index_or_update_only( account_name = args[1] )
+                account_name = args[1]
+                print( "Demande de scan / d'indexation du compte @" + account_name + "." )
+                account_id = shared_memory.twitter.get_account_id( account_name )
                 
-                if result == False :
-                    print( "Compte @" + args[1] + " inexistant !" )
+                if account_id == None :
+                    print( "Compte @" + args[1] + " inexistant ou indisponible !" )
+                else :
+                    shared_memory.scan_requests.launch_request( account_id, account_name )
             else :
                 print( "Nom de compte Twitter impossible !" )
         else :
@@ -175,52 +186,59 @@ while True :
                 # Vérification que le nom d'utilisateur Twitter est possible
                 if re.compile("^@?(\w){1,15}$").match(args[2]) :
                     print( "Recherche sur le compte @" + args[2] + "." )
-                    pipeline.launch_reverse_search_only( args[1], account_name = args[2] )
+                    print( "FONCTIONNALITE TEMPORAIREMENT INDISPONIBLE !" ) # TODO
                 else :
                     print( "Nom de compte Twitter impossible !" )
             else :
                 print( "Recherche dans toute la base de données !" )
-                pipeline.launch_reverse_search_only( args[1] )
+                print( "FONCTIONNALITE TEMPORAIREMENT INDISPONIBLE !" ) # TODO
         else :
             print( "Utilisation : search [URL de l'image à chercher] [Nom du compte Twitter (OPTIONNEL)]" )
     
     elif args[0] == "threads" :
         if len(args) == 1 :
             to_print = ""
-            for key in pipeline.requests_in_thread :
-                value = pipeline.requests_in_thread[key]
+            for key in shared_memory.user_requests.requests_in_thread :
+                value = shared_memory.user_requests.requests_in_thread[key]
                 if value == None :
                     to_print += key + " : IDLE\n"
                 else :
-                    if value.input_url != None :
-                        to_print += key + " : " + value.input_url + "\n"
-                    else :
-                        to_print += key + " : Requête sans URL (Auto-update ?)\n"
+                    to_print += key + " : " + value.input_url + "\n"
+            for key in shared_memory.scan_requests.requests_in_thread :
+                value = shared_memory.scan_requests.requests_in_thread[key]
+                if value == None :
+                    to_print += key + " : IDLE\n"
+                else :
+                    to_print += key + " : @" + value.account_name + " (ID " + str(value.account_id) + ")\n"
             print( to_print )
         else :
             print( "Utilisation : threads")
     
     elif args[0] == "queues" :
         if len(args) == 1 :
-            print( "step_1_link_finder_queue :", pipeline.step_1_link_finder_queue.qsize() )
-            print( "step_2_GOT3_list_account_tweets_queue :", pipeline.step_2_GOT3_list_account_tweets_queue.qsize() )
-            print( "step_3_GOT3_index_account_tweets_queue :", pipeline.step_3_GOT3_index_account_tweets_queue.qsize() )
-            print( "step_4_TwitterAPI_index_account_tweets_queue :", pipeline.step_4_TwitterAPI_index_account_tweets_queue.qsize() )
-            print( "step_5_reverse_search_queue :", pipeline.step_5_reverse_search_queue.qsize() )
+            print( "step_1_link_finder_queue :", shared_memory.user_requests.step_1_link_finder_queue.qsize() )
+            print( "step_2_tweets_indexer_queue :", shared_memory.user_requests.step_2_tweets_indexer_queue.qsize() )
+            print( "step_3_reverse_search_queue :", shared_memory.user_requests.step_3_reverse_search_queue.qsize() )
+            print( "step_A_GOT3_list_account_tweets_prior_queue :", shared_memory.scan_requests.step_A_GOT3_list_account_tweets_prior_queue.qsize() )
+            print( "step_A_GOT3_list_account_tweets_queue :", shared_memory.scan_requests.step_A_GOT3_list_account_tweets_queue.qsize() )
+            print( "step_B_GOT3_index_account_tweets_prior_queue :", shared_memory.scan_requests.step_B_GOT3_index_account_tweets_prior_queue.qsize() )
+            print( "step_B_GOT3_index_account_tweets_queue :", shared_memory.scan_requests.step_B_GOT3_index_account_tweets_queue.qsize() )
+            print( "step_C_TwitterAPI_index_account_tweets_prior_queue :", shared_memory.scan_requests.step_C_TwitterAPI_index_account_tweets_prior_queue.qsize() )
+            print( "step_C_TwitterAPI_index_account_tweets_queue :", shared_memory.scan_requests.step_C_TwitterAPI_index_account_tweets_queue.qsize() )
         else :
             print( "Utilisation : queues")
     
     elif args[0] == "stats" :
         if len(args) == 1 :
-            print( "Nombre de tweets indexés :", pipeline.tweets_count )
-            print( "Nombre de comptes Twitter indexés :", pipeline.accounts_count )
+            print( "Nombre de tweets indexés :", shared_memory.tweets_count )
+            print( "Nombre de comptes Twitter indexés :", shared_memory.accounts_count )
         else :
             print( "Utilisation : stats")
     
     elif args[0] == "stop" :
         if len(args) == 1 :
             print( "Arrêt à la fin des procédures en cours..." )
-            pipeline.keep_service_alive = False
+            shared_memory.keep_service_alive = False
             break
         else :
             print( "Utilisation : stop")
@@ -263,13 +281,15 @@ requests.get( "http://localhost:" + str( param.HTTP_SERVER_PORT ) )
 # Attendre que les threads aient fini
 for thread in threads_step_1_link_finder :
     thread.join()
-for thread in threads_step_2_GOT3_list_account_tweets :
+for thread in threads_step_2_tweets_indexer :
     thread.join()
-for thread in threads_step_3_GOT3_index_account_tweets :
+for thread in threads_step_3_reverse_search :
     thread.join()
-for thread in threads_step_4_TwitterAPI_index_account_tweets :
+for thread in threads_step_A_GOT3_list_account_tweets :
     thread.join()
-for thread in threads_step_5_reverse_search :
+for thread in threads_step_B_GOT3_index_account_tweets :
+    thread.join()
+for thread in threads_step_C_TwitterAPI_index_account_tweets :
     thread.join()
 thread_http_server.join()
 thread_auto_update_accounts.join()

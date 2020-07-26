@@ -9,27 +9,44 @@ En vérité, les procédures des threads ne sont pas exécutées directement, ma
 le sont par ce collecteur d'erreur.
 @param thread_procedure Procédure à exécuter.
 @param thread_id ID du thread.
-@param pipeline Objet Pipeline, mémoire partagée.
+@param shared_memory Objet Shared_Memory, mémoire partagée.
 """
-def error_collector( thread_procedure, thread_id : int, pipeline ) :
+def error_collector( thread_procedure, thread_id : int, shared_memory ) :
     error_count = 0
     
-    while pipeline.keep_service_alive :
+    while shared_memory.keep_service_alive :
         try :
-            thread_procedure( thread_id, pipeline )
+            thread_procedure( thread_id, shared_memory )
         except Exception :
             error_name = "Erreur dans le thread " + str(thread_id) + " de la procédure " + thread_procedure.__name__ + " !\n"
             
-            # Mettre la requête en erreur
+            # Mettre la requête en erreur si c'est une requête utilisateur, et
+            # non une requête de scan
             try :
-                request = pipeline.requests_in_thread[ thread_procedure.__name__ + "_number" + str(thread_id) ]
-            except KeyError : # Si on est un thread du serveur HTTP, on aura forcément une KeyError
+                request = shared_memory.user_requests.requests_in_thread[ thread_procedure.__name__ + "_number" + str(thread_id) ]
+            # Si on n'est pas un thread de traitement des requêtes utilisateurs
+            # (Etapes 1, 2 et 3), on aura forcément une KeyError
+            except KeyError :
                 pass
             else :
                 if request != None :
                     request.problem = "PROCESSING_ERROR"
-                    request.set_status_done()
+                    shared_memory.user_requests.set_request_to_next_step( request, force_end = True )
                     error_name += "URL de requête : " + str(request.input_url) + "\n"
+            
+            # Mettre la requête en erreur si c'est une requête de scan, et non
+            # une requête utilisateur
+            try :
+                request = shared_memory.scan_requests.requests_in_thread[ thread_procedure.__name__ + "_number" + str(thread_id) ]
+            # Si on n'est pas un thread de traitement des requêtes de scan
+            # (Etapes A, B et C), on aura forcément une KeyError
+            except KeyError :
+                pass
+            else :
+                if request != None :
+                    request.has_failed = True
+                    shared_memory.scan_requests.set_request_to_next_step( request, force_end = True )
+                    error_name += "Compte Twitter : @" + request.account_name + " (ID " + str(request.account_id) + ")\n"
             
             # Enregistrer dans un fichier
             if error_count < 100 : # Ne pas créer trop de fichiers, s'il y a autant d'erreurs, c'est que c'est la même

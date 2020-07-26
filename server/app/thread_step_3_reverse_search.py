@@ -18,58 +18,58 @@ Thread de recherche d'image inversée.
 Utilisation de l'indexation pour trouver le tweet de que l'artiste a posté avec
 l'illustration de requête.
 """
-def thread_step_5_reverse_search( thread_id : int, pipeline ) :
+def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
     # Initialisation de notre moteur de recherche d'image par le contenu
     cbir_engine = CBIR_Engine_with_Database()
     
     # Dire qu'on ne fait rien
-    pipeline.requests_in_thread[ "thread_step_5_reverse_search_number" + str(thread_id) ] = None
+    shared_memory.user_requests.requests_in_thread[ "thread_step_3_reverse_search_number" + str(thread_id) ] = None
     
     # Tant que on ne nous dit pas de nous arrêter
-    while pipeline.keep_service_alive :
+    while shared_memory.keep_service_alive :
         
         # On tente de sortir une requête de la file d'attente
         try :
-            request = pipeline.step_5_reverse_search_queue.get( block = False )
+            request = shared_memory.user_requests.step_3_reverse_search_queue.get( block = False )
         # Si la queue est vide, on attend une seconde et on réessaye
         except queue.Empty :
             sleep( 1 )
             continue
         
         # Dire qu'on est en train de traiter cette requête
-        pipeline.requests_in_thread[ "thread_step_5_reverse_search_number" + str(thread_id) ] = request
+        shared_memory.user_requests.requests_in_thread[ "thread_step_3_reverse_search_number" + str(thread_id) ] = request
         
         # On passe la requête à l'étape suivante, c'est à dire notre étape
-        pipeline.set_request_to_next_step( request )
+        shared_memory.user_requests.set_request_to_next_step( request )
         
         if request.input_url != None :
-            print( "[step_5_th" + str(thread_id) + "] Recherche de l'image suivante :\n" +
-                   "[step_5_th" + str(thread_id) + "] " + request.input_url )
+            print( "[step_3_th" + str(thread_id) + "] Recherche de l'image suivante :\n" +
+                   "[step_3_th" + str(thread_id) + "] " + request.input_url )
         else :
-            print( "[step_5_th" + str(thread_id) + "] Recherche de l'image suivante :\n" +
-                   "[step_5_th" + str(thread_id) + "] " + request.image_url )
+            print( "[step_3_th" + str(thread_id) + "] Recherche de l'image suivante :\n" +
+                   "[step_3_th" + str(thread_id) + "] " + request.image_url )
         
         # On recherche les Tweets contenant l'image de requête
         # Et on les stocke dans l'objet de requête
         for twitter_account in request.twitter_accounts_with_id :
-            print( "[step_5_th" + str(thread_id) + "] Recherche sur le compte Twitter @" + twitter_account[0] + "." )
+            print( "[step_3_th" + str(thread_id) + "] Recherche sur le compte Twitter @" + twitter_account[0] + "." )
             
             result = cbir_engine.search_tweet( request.image_url, twitter_account[0] )
             if result != None :
                 request.founded_tweets += result
             else :
-                print( "[step_5_th" + str(thread_id) + "] Erreur lors de la recherche d'image inversée." )
+                print( "[step_3_th" + str(thread_id) + "] Erreur lors de la recherche d'image inversée." )
                 request.problem = "ERROR_DURING_REVERSE_SEARCH"
         
         # Si il n'y a pas de compte Twitter dans la requête
         if request.twitter_accounts_with_id == []:
-            print( "[step_5_th" + str(thread_id) + "] Recherche dans toute la base de données." )
+            print( "[step_3_th" + str(thread_id) + "] Recherche dans toute la base de données." )
             
             result = cbir_engine.search_tweet( request.image_url )
             if result != None :
                 request.founded_tweets += result
             else :
-                print( "[step_5_th" + str(thread_id) + "] Erreur lors de la recherche d'image inversée." )
+                print( "[step_3_th" + str(thread_id) + "] Erreur lors de la recherche d'image inversée." )
         
         # Trier la liste des résultats
         # On trie une liste d'objets par rapport à leur attribut "distance"
@@ -80,14 +80,16 @@ def thread_step_5_reverse_search( thread_id : int, pipeline ) :
         # On ne garde que les 5 Tweets les plus proches
         request.founded_tweets = request.founded_tweets[:5]
         
-        print( "[step_5_th" + str(thread_id) + "] Tweets trouvés (Du plus au moins proche) :\n" +
-               "[step_5_th" + str(thread_id) + "] " + str( [ data.tweet_id for data in request.founded_tweets ] ) )
+        print( "[step_3_th" + str(thread_id) + "] Tweets trouvés (Du plus au moins proche) :\n" +
+               "[step_3_th" + str(thread_id) + "] " + str( [ data.tweet_id for data in request.founded_tweets ] ) )
         
         # Dire qu'on n'est plus en train de traiter cette requête
-        pipeline.requests_in_thread[ "thread_step_5_reverse_search_number" + str(thread_id) ] = None
+        shared_memory.user_requests.requests_in_thread[ "thread_step_3_reverse_search_number" + str(thread_id) ] = None
         
-        # On passe le status de la requête à "Fin de traitement"
-        request.set_status_done()
+        # On passe la requête à l'étape suivante, fin du traitement
+        # C'est la procédure shared_memory.user_requests.set_request_to_next_step
+        # qui vérifie si elle peut
+        shared_memory.user_requests.set_request_to_next_step( request )
     
-    print( "[step_5_th" + str(thread_id) + "] Arrêté !" )
+    print( "[step_3_th" + str(thread_id) + "] Arrêté !" )
     return

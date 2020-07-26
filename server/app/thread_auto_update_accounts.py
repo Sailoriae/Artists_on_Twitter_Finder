@@ -4,11 +4,6 @@
 import datetime
 from time import sleep
 
-try :
-    from class_Request import Request
-except ModuleNotFoundError :
-    from .class_Request import Request
-
 # Ajouter le répertoire parent au PATH pour pouvoir importer
 from sys import path as sys_path
 from os import path as os_path
@@ -24,12 +19,12 @@ ATTENTION ! CE THREAD DOIT ETRE UNIQUE !
 Mise à jour automatique des comptes dans la base de données.
 Permet de gagner du temps lors d'une requête.
 """
-def thread_auto_update_accounts( thread_id : int, pipeline ) :
+def thread_auto_update_accounts( thread_id : int, shared_memory ) :
     # Accès direct à la base de données
     bdd_direct_access = SQLite_or_MySQL()
     
     # Tant que on ne nous dit pas de nous arrêter
-    while pipeline.keep_service_alive :
+    while shared_memory.keep_service_alive :
         # Prendre l'itérateur sur les comptes dans la base de donnée, triés
         # dans l'ordre du moins récemment mise à jour au plus récemment mis à jour
         oldest_updated_account_iterator = bdd_direct_access.get_oldest_updated_account()
@@ -37,11 +32,14 @@ def thread_auto_update_accounts( thread_id : int, pipeline ) :
         # Compteurs du nombre d'itération
         count = 0
         
+        # oldest_updated_account[0] : L'ID du compte Twitter
+        # oldest_updated_account[1] : Sa date de dernière MàJ avec GetOldTweets3
+        # oldest_updated_account[2] : Sa date dernière MàJ avec l'API Twitter publique
         for oldest_updated_account in oldest_updated_account_iterator  :
             count += 1
             
             # Vérifier que le compte n'est pas déjà en cours d'indexation
-            if pipeline.check_is_indexing( oldest_updated_account[0] ) :
+            if shared_memory.scan_requests.get_request( oldest_updated_account[0] ) != None :
                 continue
             
             # Prendre la date actuelle
@@ -64,15 +62,15 @@ def thread_auto_update_accounts( thread_id : int, pipeline ) :
                     # Retest dans (now - min_date) en secondes
                     for i in range( int( (now - min_date).total_seconds() / 3 ) ) :
                         sleep( 3 )
-                        if not pipeline.keep_service_alive :
+                        if not shared_memory.keep_service_alive :
                             break
                     break # Arrête de l'itération "for"
             
-            # On lance le scan pour ce compte
-            result = pipeline.launch_index_or_update_only( account_id = oldest_updated_account[0] )
+            # On cherche le nom du compte Twitter
+            account_name = shared_memory.twitter.get_account_id( oldest_updated_account[0], invert_mode = True )
             
             # Si l'ID du compte Twitter n'existe plus
-            if result == False :
+            if account_name == None :
                 print( "[auto_update_th" + str(thread_id) + "] L'ID de compte Twitter " + str(oldest_updated_account[0]) + " n'est plus accessible ou n'existe plus !" )
                 
                 # On met la date locale de la dernière MàJ à aujourd'hui pour
@@ -85,8 +83,12 @@ def thread_auto_update_accounts( thread_id : int, pipeline ) :
                 bdd_direct_access.set_account_last_scan_with_TwitterAPI( oldest_updated_account[0],
                                                                          bdd_direct_access.get_account_last_scan_with_TwitterAPI( oldest_updated_account[0] ) )
             
+            # Sinon, on lance le scan pour ce compte
             else :
-                print( "[auto_update_th" + str(thread_id) + "] Mise à jour du compte Twitter avec l'ID " + str(oldest_updated_account[0]) + "." )
+                print( "[auto_update_th" + str(thread_id) + "] Mise à jour du compte @" + account_name + " (ID " + str(oldest_updated_account[0]) + ")." )
+                shared_memory.scan_requests.launch_request( oldest_updated_account[0],
+                                                            account_name,
+                                                            is_prioritary = False )
         
         # Si il n'y avait aucun compte dans l'itérateur
         if count == 0 :
@@ -95,7 +97,7 @@ def thread_auto_update_accounts( thread_id : int, pipeline ) :
         # Retest dans une heure (1200*3 = 3600)
         for i in range( 1200 ) :
             sleep( 3 )
-            if not pipeline.keep_service_alive :
+            if not shared_memory.keep_service_alive :
                 break
     
     print( "[auto_update_th" + str(thread_id) + "] Arrêté !" )
