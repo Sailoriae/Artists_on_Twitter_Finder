@@ -160,27 +160,33 @@ function populateTweets ( json ) {
 		p.textContent = "Aucun Tweet trouvé.";
 		tweetsDiv.appendChild(p);
 	} else {
+		var alreadyDisplayedTweetsID = [];
+
 		for ( var i = 0; i < tweets.length; i++ ) {
-			var div = document.createElement('div');
+			if ( alreadyDisplayedTweetsID.indexOf( tweets[i].tweet_id ) === -1 ) {
+				alreadyDisplayedTweetsID.push( tweets[i].tweet_id );
 
-			var p = document.createElement('p');
-			p.textContent = "Tweet trouvé (" + (i+1) + "/" + tweets.length + ") : ";
-			var a = document.createElement('a');
-			a.href = "https://twitter.com/any/status/" + tweets[i].tweet_id;
-			a.target = "_blank";
-			a.textContent = "https://twitter.com/any/status/" + tweets[i].tweet_id;
-			p.appendChild(a);
-			div.appendChild(p);
+				var div = document.createElement('div');
 
-			twttr.widgets.createTweet( tweets[i].tweet_id, div, {
-				conversation : "none",
-				cards : "visible",
-				linkColor : "#cc0000",
-				theme : "light",
-				dnt : "true"
-			})
+				var p = document.createElement('p');
+				p.textContent = "Tweet trouvé : ";
+				var a = document.createElement('a');
+				a.href = "https://twitter.com/any/status/" + tweets[i].tweet_id;
+				a.target = "_blank";
+				a.textContent = "https://twitter.com/any/status/" + tweets[i].tweet_id;
+				p.appendChild(a);
+				div.appendChild(p);
 
-			tweetsDiv.appendChild(div);
+				twttr.widgets.createTweet( tweets[i].tweet_id, div, {
+					conversation : "none",
+					cards : "visible",
+					linkColor : "#cc0000",
+					theme : "light",
+					dnt : "true"
+				})
+
+				tweetsDiv.appendChild(div);
+			}
 		}
 	}
 }
