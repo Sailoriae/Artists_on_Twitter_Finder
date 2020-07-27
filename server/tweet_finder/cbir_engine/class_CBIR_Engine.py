@@ -13,10 +13,7 @@ except ModuleNotFoundError : # Si on a été exécuté en temps que module
 # Seuil de distance maximale (Calculé par la fonction "chi2_distance") entre
 # deux listes de caractéristiques d'images, pour dire que ces deux images sont
 # similaires ou sont les mêmes
-# TODO : Faire des recherches sur comment fonctionne la fonction index_cbir()
-# pour affiner ce seuil
-# Là on a pris une grosse marge
-SEUIL = 4
+SEUIL = 1
 
 
 """
