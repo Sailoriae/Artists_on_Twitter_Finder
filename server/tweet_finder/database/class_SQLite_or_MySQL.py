@@ -403,7 +403,19 @@ class SQLite_or_MySQL :
             Voir le fichier "class_Less_Recently_Updated_Accounts_Iterator.py"
     """
     def get_oldest_updated_account( self ) -> int :
-        c = self.conn.cursor()
+        # IL faut que ce curseur soit buffered car on peut être amené à faire
+        # d'autres requêtes sur la BDD lors de l'utilisation de l'itérateur,
+        # ce qui provoque des erreurs "mysql.connector.errors.InternalError:
+        # Unread result found"
+        # Parce que : For nonbuffered cursors, rows are not fetched from the
+        # server until a row-fetching method is called. In this case, you must
+        # be sure to fetch all rows of the result set before executing any
+        # other statements on the same connection, or an InternalError (Unread
+        # result found) exception will be raised.
+        # Source :
+        # https://dev.mysql.com/doc/connector-python/en/connector-python-api-mysqlcursorbuffered.html
+        c = self.conn.cursor(buffered=True)
+        
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
             # Le "ORDER BY LEAST()" considère bien la valeur NULL comme
             # inférieure à toutes les autres valeurs, et la place en tête.
