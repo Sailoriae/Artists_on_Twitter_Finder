@@ -187,25 +187,28 @@ class SQLite_or_MySQL :
         
         c = self.conn.cursor()
         
+        # features_list_for_db() ne devrait pas être utilisé puisque
+        # le moteur CBIR renvoit des listes fixes de 240 valeurs !
+        
         if cbir_features_1 != None :
-            cbir_features_1_formatted = features_list_for_db( cbir_features_1 )
+#            cbir_features_1_formatted = features_list_for_db( cbir_features_1 )
             c.execute( sql_requests_dict["insert_tweet_image_1"],
-                       tuple( [tweet_id] + cbir_features_1_formatted ) )
+                       tuple( [tweet_id] + cbir_features_1 ) )
         
         if cbir_features_2 != None :
-            cbir_features_2_formatted = features_list_for_db( cbir_features_2 )
+#            cbir_features_2_formatted = features_list_for_db( cbir_features_2 )
             c.execute( sql_requests_dict["insert_tweet_image_2"],
-                       tuple( [tweet_id] + cbir_features_2_formatted ) )
+                       tuple( [tweet_id] + cbir_features_2 ) )
         
         if cbir_features_3 != None :
-            cbir_features_3_formatted = features_list_for_db( cbir_features_3 )
+#            cbir_features_3_formatted = features_list_for_db( cbir_features_3 )
             c.execute( sql_requests_dict["insert_tweet_image_3"],
-                       tuple( [tweet_id] + cbir_features_3_formatted ) )
+                       tuple( [tweet_id] + cbir_features_3 ) )
         
         if cbir_features_4 != None :
-            cbir_features_4_formatted = features_list_for_db( cbir_features_4  )
+#            cbir_features_4_formatted = features_list_for_db( cbir_features_4  )
             c.execute( sql_requests_dict["insert_tweet_image_4"],
-                       tuple( [tweet_id] + cbir_features_4_formatted ) )
+                       tuple( [tweet_id] + cbir_features_4 ) )
         
         if hashtags != None and hashtags != [] and hashtags != [""] :
             hashtags_str = ";".join( [ hashtag for hashtag in hashtags ] )
