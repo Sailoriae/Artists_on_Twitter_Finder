@@ -92,22 +92,31 @@ function canPrintTweets ( json ) {
 }
 
 function populateError ( json ) {
-	if ( json.error === "NO_URL_FIELD" ) {
-		displayErrorP.textContent = "Aucune URL entrée.";
-	} else if ( json.error === "INVALID_URL" ) {
-		displayErrorP.textContent = "URL entrée invalide.";
-	} else if ( json.error === "UNSUPPORTED_WEBSITE" ) {
-		displayErrorP.textContent = "Site de l'URL entrée non supporté.";
-	} else if ( json.error === "NO_TWITTER_ACCOUNT_FOR_THIS_ARTIST" ) {
-		displayErrorP.textContent = "Aucun compte Twitter trouvé pour cet artiste.";
-	} else if ( json.error === "NO_VALID_TWITTER_ACCOUNT_FOR_THIS_ARTIST" ) {
-		displayErrorP.textContent = "Aucun compte Twitter valide trouvé pour cet artiste.";
-	} else if ( json.error === "ERROR_DURING_REVERSE_SEARCH" ) {
-		displayErrorP.textContent = "L'illustration entrée a un format à la noix et ne peut pas être cherchée.";
-	} else if ( json.error === "PROCESSING_ERROR" ) {
-		displayErrorP.textContent = "Erreur coté serveur, impossible de terminer le traitement de la requête.";
-	} else if ( json.error === "YOUR_IP_HAS_MAX_PENDING_REQUESTS" ) {
-		displayErrorP.textContent = "Votre adresse IP a atteint son quota maximal de requêtes en cours de traitement.";
+	switch ( json.error ) {
+		case "NO_URL_FIELD" :
+			displayErrorP.textContent = "Aucune URL entrée.";
+			break;
+		case "INVALID_URL" :
+			displayErrorP.textContent = "URL entrée invalide.";
+			break;
+		case "UNSUPPORTED_WEBSITE" :
+			displayErrorP.textContent = "Site de l'URL entrée non supporté.";
+			break;
+		case "NO_TWITTER_ACCOUNT_FOR_THIS_ARTIST" :
+			displayErrorP.textContent = "Aucun compte Twitter trouvé pour cet artiste.";
+			break;
+		case "NO_VALID_TWITTER_ACCOUNT_FOR_THIS_ARTIST" :
+			displayErrorP.textContent = "Aucun compte Twitter valide trouvé pour cet artiste.";
+			break;
+		case "ERROR_DURING_REVERSE_SEARCH" :
+			displayErrorP.textContent = "L'illustration entrée a un format à la noix et ne peut pas être cherchée.";
+			break;
+		case "PROCESSING_ERROR" :
+			displayErrorP.textContent = "Erreur coté serveur, impossible de terminer le traitement de la requête.";
+			break;
+		case "YOUR_IP_HAS_MAX_PENDING_REQUESTS" :
+			displayErrorP.textContent = "Votre adresse IP a atteint son quota maximal de requêtes en cours de traitement.";
+			break;
 	}
 }
 
