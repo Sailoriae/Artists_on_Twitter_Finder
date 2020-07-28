@@ -47,7 +47,7 @@ function mainFunction () {
 		}
 	});
 
-	request.open("GET", "http://localhost:3301/?url=" + illustURL); // self.send_header("Access-Control-Allow-Origin", "*")
+	request.open("GET", "./api/?url=" + illustURL); // self.send_header("Access-Control-Allow-Origin", "*")
 	request.send();
 }
 
@@ -229,6 +229,6 @@ function displayStats() {
 		}
 	});
 
-	request.open("GET", "http://localhost:3301/stats"); // self.send_header("Access-Control-Allow-Origin", "*")
+	request.open("GET", "./api/stats"); // self.send_header("Access-Control-Allow-Origin", "*")
 	request.send();
 }
