@@ -49,31 +49,44 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
         if request.scan_requests == None :
             request.scan_requests = []
             
+            # Sémaphore pour être bien tout seul dans cette procédure assez
+            # particulière
+            shared_memory.user_requests.thread_step_2_tweets_indexer_sem.acquire()
+            
             # On passe la requête à l'étape suivante, c'est à dire notre étape
             shared_memory.user_requests.set_request_to_next_step( request )
             
             # Liste des comptes Twitter dont on doit lancer le scan
             accounts_to_scan = []
             
-            # On vérifie d'avord si on peut sauter la mise à jour des comptes
-            # déjà dans la base de données
-            if param.FORCE_INTELLIGENT_SKIP_INDEXING :
-                for (account_name, account_id) in request.twitter_accounts_with_id :
-                    if not bdd_direct_access.is_account_indexed( account_id ) :
-                        accounts_to_scan.append( (account_name, account_id) )
-                    else :
-                        # Si le compte est en cours de scan, il faut suivre son scan
-                        currently_scanning = shared_memory.scan_requests.get_request( account_id )
-                        if currently_scanning != None :
-                            print( "[step_2_th" + str(thread_id) + "] @" + account_name + " est déjà en cours de scan, on le suit !" )
-                            # On passe la requête en prioritaire
-                            shared_memory.scan_requests.launch_request( account_id, is_prioritary = True )
-                            # On suit la progression de cette requête
-                            request.scan_requests.append( currently_scanning )
+            for (account_name, account_id) in request.twitter_accounts_with_id :
+                
+                # Si le compte est déjà en cours de scan, on s'y raccroche
+                currently_scanning = shared_memory.scan_requests.get_request( account_id )
+                if currently_scanning != None :
+                    print( "[step_2_th" + str(thread_id) + "] @" + account_name + " est déjà en cours de scan, on le suit !" )
+                    
+                    # On passe la requête en prioritaire
+                    shared_memory.scan_requests.launch_request( account_id,
+                                                                account_name,
+                                                                is_prioritary = True )
+                    
+                    # On suit la progression de cette requête
+                    request.scan_requests.append( currently_scanning )
+                
+                # Sinon, il faut peut-être lancer un scan
+                else :
+                    # Si on est en mode intelligent, on vérifie avant que le
+                    # compte ne soit pas déjà dans la base de données
+                    if param.FORCE_INTELLIGENT_SKIP_INDEXING :
+                        # Si le compte n'est pas déjà indexé
+                        if not bdd_direct_access.is_account_indexed( account_id ) :
+                            accounts_to_scan.append( (account_name, account_id) )
                         else :
                             print( "[step_2_th" + str(thread_id) + "] @" + account_name + " est déjà dans la BDD, on saute son scan !" )
-            else :
-                accounts_to_scan = request.twitter_accounts_with_id
+                    # Sinon, on force le scan
+                    else :
+                        accounts_to_scan.append( (account_name, account_id) )
             
             # On lance l'indexation, en mode prioritaire car on est une requête
             # utilisateur, et on stocke les requêtes qu'on a créé
@@ -83,6 +96,9 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
                     shared_memory.scan_requests.launch_request( account_id,
                                                                 account_name,
                                                                 is_prioritary = True ) )
+            
+            # Libérer le sémaphore
+            shared_memory.user_requests.thread_step_2_tweets_indexer_sem.release()
         
         # Sinon, on vérifie l'état de l'avancement des requêtes qu'on a lancé
         # Note importante : Nos requêtes ne peuvent pas être annulées car on

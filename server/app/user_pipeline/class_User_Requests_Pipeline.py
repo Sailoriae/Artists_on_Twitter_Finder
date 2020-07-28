@@ -51,6 +51,11 @@ class User_Requests_Pipeline :
         # Les threads sont identifiés par la chaine suivante :
         # procédure_du_thread.__name__ + "_number" + str(thread_id)
         self.requests_in_thread = {}
+        
+        # Sémaphore du "if request.scan_requests == None" de la procédure de
+        # thread "thread_step_2_tweets_indexer". Permet d'éviter des problèmes
+        # en cas de lancement d'un scan.
+        self.thread_step_2_tweets_indexer_sem = threading.Semaphore()
     
     """
     Lancer la recherche des Tweets de l'artiste contenant l'illustration dont
