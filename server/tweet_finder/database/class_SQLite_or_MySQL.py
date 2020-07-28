@@ -192,23 +192,31 @@ class SQLite_or_MySQL :
         
         if cbir_features_1 != None :
 #            cbir_features_1_formatted = features_list_for_db( cbir_features_1 )
+#            c.execute( sql_requests_dict["insert_tweet_image_1"],
+#                       tuple( [tweet_id] + cbir_features_1_formatted ) )
             c.execute( sql_requests_dict["insert_tweet_image_1"],
-                       tuple( [tweet_id] + cbir_features_1 ) )
+                       tuple( [tweet_id] + [ float(v) for v in cbir_features_1 ] ) )
         
         if cbir_features_2 != None :
 #            cbir_features_2_formatted = features_list_for_db( cbir_features_2 )
+#            c.execute( sql_requests_dict["insert_tweet_image_2"],
+#                       tuple( [tweet_id] + cbir_features_2_formatted ) )
             c.execute( sql_requests_dict["insert_tweet_image_2"],
-                       tuple( [tweet_id] + cbir_features_2 ) )
+                       tuple( [tweet_id] + [ float(v) for v in cbir_features_2 ] ) )
         
         if cbir_features_3 != None :
 #            cbir_features_3_formatted = features_list_for_db( cbir_features_3 )
+#            c.execute( sql_requests_dict["insert_tweet_image_3"],
+#                       tuple( [tweet_id] + cbir_features_3_formatted ) )
             c.execute( sql_requests_dict["insert_tweet_image_3"],
-                       tuple( [tweet_id] + cbir_features_3 ) )
+                       tuple( [tweet_id] + [ float(v) for v in cbir_features_3 ] ) )
         
         if cbir_features_4 != None :
 #            cbir_features_4_formatted = features_list_for_db( cbir_features_4  )
+#            c.execute( sql_requests_dict["insert_tweet_image_4"],
+#                       tuple( [tweet_id] + cbir_features_4_formatted ) )
             c.execute( sql_requests_dict["insert_tweet_image_4"],
-                       tuple( [tweet_id] + cbir_features_4 ) )
+                       tuple( [tweet_id] + [ float(v) for v in cbir_features_4 ] ) )
         
         if hashtags != None and hashtags != [] and hashtags != [""] :
             hashtags_str = ";".join( [ hashtag for hashtag in hashtags ] )
