@@ -23,12 +23,22 @@ def http_server_container ( shared_memory_arg ) :
         def __init__( self, *args, **kwargs ) :
             super(BaseHTTPRequestHandler, self).__init__(*args, **kwargs)
         
+        # Ne pas afficher les logs par défaut dans la console
+        def log_message( self, format, *args ) :
+            return
+        
         def do_GET( self ) :
             page = urlsplit( self.path ).path
             if page[0] == "/" :
                 page = page[1:] # On enlève le premier "/"
             page = page.split("/")
             parameters = dict( parse_qs( urlsplit( self.path ).query ) )
+            
+            client_ip = self.headers["X-Forwarded-For"]
+            if client_ip == None :
+                client_ip = self.client_address[0]
+            
+            print( "[HTTP]", client_ip, self.log_date_time_string(), "GET", self.path )
             
             # Si on est à la racine
             # GET /
@@ -52,7 +62,7 @@ def http_server_container ( shared_memory_arg ) :
                 else :
                     # Lance une nouvelle requête, ou donne la requête déjà existante
                     request = self.shared_memory.user_requests.launch_request( illust_url,
-                                                                               ip_address = self.client_address[0] )
+                                                                               ip_address = client_ip )
                     
                     # Si request == None, c'est qu'on ne peut pas lancer une
                     # nouvelle requête car l'addresse IP a trop de requêtes en
