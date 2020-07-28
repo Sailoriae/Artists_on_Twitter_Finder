@@ -425,7 +425,10 @@ class SQLite_or_MySQL :
         # result found) exception will be raised.
         # Source :
         # https://dev.mysql.com/doc/connector-python/en/connector-python-api-mysqlcursorbuffered.html
-        c = self.conn.cursor(buffered=True)
+        if param.USE_MYSQL_INSTEAD_OF_SQLITE :
+            c = self.conn.cursor(buffered=True)
+        else :
+            c = self.conn.cursor()
         
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
             # Le "ORDER BY LEAST()" considère bien la valeur NULL comme
