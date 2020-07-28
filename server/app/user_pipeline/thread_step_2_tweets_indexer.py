@@ -47,6 +47,8 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
         # Si la requête n'a pas eu les scans de ses comptes Twitter lancés,
         # c'est que c'est la première fois qu'on la voit
         if request.scan_requests == None :
+            request.scan_requests = []
+            
             # On passe la requête à l'étape suivante, c'est à dire notre étape
             shared_memory.user_requests.set_request_to_next_step( request )
             
@@ -60,13 +62,21 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
                     if not bdd_direct_access.is_account_indexed( account_id ) :
                         accounts_to_scan.append( (account_name, account_id) )
                     else :
-                        print( "[step_2_th" + str(thread_id) + "] @" + account_name + " est déjà dans la BDD, on saute son scan !" )
+                        # Si le compte est en cours de scan, il faut suivre son scan
+                        currently_scanning = shared_memory.scan_requests.get_request( account_id )
+                        if currently_scanning != None :
+                            print( "[step_2_th" + str(thread_id) + "] @" + account_name + " est déjà en cours de scan, on le suit !" )
+                            # On passe la requête en prioritaire
+                            shared_memory.scan_requests.launch_request( account_id, is_prioritary = True )
+                            # On suit la progression de cette requête
+                            request.scan_requests.append( currently_scanning )
+                        else :
+                            print( "[step_2_th" + str(thread_id) + "] @" + account_name + " est déjà dans la BDD, on saute son scan !" )
             else :
                 accounts_to_scan = request.twitter_accounts_with_id
             
             # On lance l'indexation, en mode prioritaire car on est une requête
             # utilisateur, et on stocke les requêtes qu'on a créé
-            request.scan_requests = []
             for (account_name, account_id) in accounts_to_scan :
                 print( "[step_2_th" + str(thread_id) + "] Lancement du scan de @" + account_name + "." )
                 request.scan_requests.append(

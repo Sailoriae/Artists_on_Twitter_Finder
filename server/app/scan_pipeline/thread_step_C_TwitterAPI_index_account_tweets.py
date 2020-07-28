@@ -34,6 +34,10 @@ def thread_step_C_TwitterAPI_index_account_tweets( thread_id : int, shared_memor
     # Tant que on ne nous dit pas de nous arrêter
     while shared_memory.keep_service_alive :
         
+        # Si on ne peut pas acquérir le sémaphore, on retest le keep_service_alive
+        if not shared_memory.scan_requests.queues_sem.acquire( timeout = 3 ) :
+            continue
+        
         # On tente de sortir une requête de la file d'attente prioritaire
         try :
             request = shared_memory.scan_requests.step_C_TwitterAPI_index_account_tweets_prior_queue.get( block = False )
@@ -44,8 +48,12 @@ def thread_step_C_TwitterAPI_index_account_tweets( thread_id : int, shared_memor
                 request = shared_memory.scan_requests.step_C_TwitterAPI_index_account_tweets_queue.get( block = False )
             # Si la queue est vide, on attend une seconde et on réessaye
             except queue.Empty :
+                shared_memory.scan_requests.queues_sem.release()
                 sleep( 1 )
                 continue
+        
+        # Lacher le sémaphore
+        shared_memory.scan_requests.queues_sem.release()
         
         # Si la requête est annulée, on la jette
         if request.is_cancelled :
