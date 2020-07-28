@@ -90,22 +90,30 @@ class Scan_Requests_Pipeline :
         self.requests_sem.acquire()
         for request in self.requests :
             if request.account_id == account_id and not request.is_cancelled :
+                self.queues_sem.acquire()
+                
                 # Si il faut passer la requête en proritaire.
                 if is_prioritary and not request.is_prioritary :
-                    self.queues_sem.acquire()
                     request.is_prioritary = True
                     
                     # Si est dans une file d'attente, on la sort, pour la
                     # la mettre dans la même file d'attente, mais prioritaire.
                     if request.status in [ 0, 2, 4 ] :
-                        request_new = copy.copy( request ) # Pas besoin de faire un deepcopy()
+                        # On la copie, pas besoin de faire un deepcopy()
+                        request_new = copy.copy( request ) 
+                        
+                        # On annule l'originale
                         request.is_cancelled = True
-                        self.request.append( request_new )
+                        self.set_request_to_next_step( request, force_end = True )
+                        
+                        # On relance la nouvelle
+                        self.requests.append( request_new )
                         request_new.status -= 1
                         self.set_request_to_next_step( request_new )
-                    
-                    self.queues_sem.release()
+                        
+                        request = request_new # Pour le return qui suit
                 
+                self.queues_sem.release()
                 self.requests_sem.release()
                 return request
         

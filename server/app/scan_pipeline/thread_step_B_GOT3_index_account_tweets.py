@@ -42,6 +42,10 @@ def thread_step_B_GOT3_index_account_tweets( thread_id : int, shared_memory ) :
                 sleep( 1 )
                 continue
         
+        # Si la requête est annulée, on la jette
+        if request.is_cancelled :
+            continue
+        
         # Dire qu'on est en train de traiter cette requête
         shared_memory.scan_requests.requests_in_thread[ "thread_step_B_GOT3_index_account_tweets_number" + str(thread_id) ] = request
         
