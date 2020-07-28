@@ -126,8 +126,18 @@ function populateStatus ( json ) {
 
 	if ( json["status"] === "END" ) {
 		p.textContent += "Fin de traitement.";
+	} else if ( json["status"] === "IMAGE_REVERSE_SEARCH" ) {
+		p.textContent += "En cours de traitement par le serveur... Recherche inversée de l'illustration.";
+	} else if ( json["status"] === "WAIT_IMAGE_REVERSE_SEARCH" ) {
+		p.textContent += "En cours de traitement par le serveur... En attente de la recherche inversée de l'illustration.";
 	} else if ( json["status"] === "INDEX_ACCOUNTS_TWEETS" ) {
-		p.textContent += "En cours de traitement par le serveur... Indexation des Tweets des comptes Twitter trouvés";
+		p.textContent += "En cours de traitement par le serveur... Indexation des Tweets des comptes Twitter trouvés.";
+	} else if ( json["status"] === "WAIT_INDEX_ACCOUNTS_TWEETS" ) {
+		p.textContent += "En cours de traitement par le serveur... En attente de l'indexation des Tweets des comptes Twitter trouvés.";
+	} else if ( json["status"] === "LINK_FINDER" ) {
+		p.textContent += "En cours de traitement par le serveur... Recherche des comptes Twitter de l'artiste.";
+	} else if ( json["status"] === "WAIT_LINK_FINDER" ) {
+		p.textContent += "En cours de traitement par le serveur... En attente de recherche des comptes Twitter de l'artiste.";
 	} else {
 		p.textContent += "En cours de traitement par le serveur...";
 	}
