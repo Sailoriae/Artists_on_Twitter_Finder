@@ -215,7 +215,7 @@ function displayStats() {
 				} else {
 					var json = JSON.parse( request.responseText );
 					console.log( json );
-					displayStatsP.textContent = json["indexed_tweets_count"] + " Tweets indexés sur " + json["indexed_accounts_count"] + " comptes Twitter.";
+					displayStatsP.textContent = numberWithSpaces( json["indexed_tweets_count"] ) + " Tweets indexés sur " + numberWithSpaces( json["indexed_accounts_count"] ) + " comptes Twitter.";
 
 					displayInfosP.textContent = "Les nombre de requêtes en cours de traitement par adresse IP est limité à " + json["limit_per_ip_address"] + "."
 					if ( json["no_update_on_request"] ) {
@@ -231,4 +231,9 @@ function displayStats() {
 
 	request.open("GET", "./api/stats"); // self.send_header("Access-Control-Allow-Origin", "*")
 	request.send();
+}
+
+// Source : https://stackoverflow.com/questions/16637051/adding-space-between-numbers
+function numberWithSpaces(x) {
+	return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 }
