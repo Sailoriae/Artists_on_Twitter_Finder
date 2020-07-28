@@ -9,8 +9,9 @@ enregistrement dans la base.
 
 import os
 import sys
-# On s'éxécute dans le répetoire "server"
+# On s'éxécute dans le répetoire "server", et l'ajouter au PATH
 os.chdir(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "server"))
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "server"))
 
 import tweepy
 import time

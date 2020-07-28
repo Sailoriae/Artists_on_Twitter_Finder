@@ -147,7 +147,7 @@ class CBIR_Engine_with_Database :
     @return True si l'indexation a réussi
             False sinon
     """
-    def index_tweet( self, tweet_id : int, tweepy_Status_object = None ) -> bool :
+    def index_tweet( self, tweet_id : int, tweepy_Status_object = None, FORCE_INDEX = False ) -> bool :
         if tweepy_Status_object == None :
             tweet = self.twitter.get_tweet( tweet_id )
             
@@ -163,7 +163,7 @@ class CBIR_Engine_with_Database :
             print( "Scan tweet " + str( tweet_id ) + "." )
         
         # Tester avant d'indexer si le tweet n'est pas déjà dans la BDD
-        if self.bdd.is_tweet_indexed( tweet_id ) :
+        if self.bdd.is_tweet_indexed( tweet_id ) and not FORCE_INDEX :
             if self.DEBUG :
                 print( "Tweet déjà indexé !" )
             return True
