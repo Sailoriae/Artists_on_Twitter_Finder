@@ -128,7 +128,9 @@ class SQLite_or_MySQL :
                                    last_GOT3_indexing_api_date CHAR(10),
                                    last_GOT3_indexing_local_date DATETIME,
                                    last_TwitterAPI_indexing_tweet_id BIGINT UNSIGNED,
-                                   last_TwitterAPI_indexing_local_date DATETIME )"""
+                                   last_TwitterAPI_indexing_local_date DATETIME,
+                                   last_use DATETIME,
+                                   uses_count BIGINT UNSIGNED DEFAULT 0 )"""
         
         else :
             account_table = """CREATE TABLE IF NOT EXISTS accounts (
@@ -136,7 +138,9 @@ class SQLite_or_MySQL :
                                    last_GOT3_indexing_api_date CHAR(10),
                                    last_GOT3_indexing_local_date DATETIME,
                                    last_TwitterAPI_indexing_tweet_id UNSIGNED BIGINT,
-                                   last_TwitterAPI_indexing_local_date DATETIME )"""
+                                   last_TwitterAPI_indexing_local_date DATETIME,
+                                   last_use DATETIME,
+                                   uses_count UNSIGNED BIGINT DEFAULT 0  )"""
         
         c.execute( account_table )
         
@@ -277,11 +281,24 @@ class SQLite_or_MySQL :
                 request_2 += " WHERE account_id = %s"
                 request_3 += " WHERE account_id = %s"
                 request_4 += " WHERE account_id = %s"
+                
+                save_date = "UPDATE accounts SET last_use = %s WHERE account_id = %s"
+                update_count = "UPDATE accounts SET uses_count = uses_count + 1 WHERE account_id = %s"
             else :
                 request_1 += " WHERE account_id = ?"
                 request_2 += " WHERE account_id = ?"
                 request_3 += " WHERE account_id = ?"
                 request_4 += " WHERE account_id = ?"
+                
+                save_date = "UPDATE accounts SET last_use = ? WHERE account_id = ?"
+                update_count = "UPDATE accounts SET uses_count = uses_count + 1 WHERE account_id = ?"
+            
+            # Sauvegarder la date d'utilisation de ce compte, et faire +1 au
+            # compteur d'utilisations
+            c = self.get_cursor()
+            c.execute( save_date, ( datetime.now().strftime('%Y-%m-%d %H:%M:%S'), account_id ) )
+            c.execute( update_count, ( account_id, ) )
+            self.conn.commit()
         
         return Image_Features_Iterator( self.conn, account_id, request_1, request_2, request_3, request_4 )
     
