@@ -8,6 +8,9 @@ import urllib
 from time import sleep
 from random import randrange
 
+from time import time
+from statistics import mean
+
 try :
     from lib_GetOldTweets3 import manager as GetOldTweets3_manager
     from cbir_engine import CBIR_Engine
@@ -261,6 +264,9 @@ class CBIR_Engine_with_Database :
         
         print( "Listage des Tweets de @" + account_name + "." )
         
+        if self.DEBUG :
+            start = time()
+        
         since_date = self.bdd.get_account_last_scan( account_id )
         
         # Note importante : GOT3 ne peut pas voir les Tweets marqués comme
@@ -310,6 +316,9 @@ class CBIR_Engine_with_Database :
         # comptes et des tweets marqués sensibles...
         
         # Bref, ce système fonctionne.
+        
+        if self.DEBUG :
+            print( "[List GOT3] Il a fallu", time() - start, "secondes pour lister les", len(to_return), "Tweets de @" + account_name + "." )
         
         return ( to_return, account_id )
     
@@ -370,9 +379,14 @@ class CBIR_Engine_with_Database :
         
         print( str(length) + " Tweets à indexer." )
         
+        # Liste des temps pour indexer un Tweet
+        if self.DEBUG :
+            times = []
+        
         for i in range( length ) :
             if self.DEBUG :
                 print( "Indexation tweet %s (%d/%d)." % ( tweets_to_scan[i].id, i+1, length) )
+                start = time()
             
             # Tester avant d'indexer si le tweet n'est pas déjà dans la BDD
             if self.bdd.is_tweet_indexed( tweets_to_scan[i].id ) :
@@ -434,6 +448,12 @@ class CBIR_Engine_with_Database :
                 image_4,
                 hashtags
             )
+            
+            if self.DEBUG :
+                times.append( time() - start )
+        
+        if self.DEBUG :
+            print( "[Index GOT3]", length, "Tweets indexés avec une moyenne de", mean(times), "secondes par Tweet." )
         
         # On met à jour la date du dernier scan dans la base de données
         if scan_date != None :
@@ -473,6 +493,9 @@ class CBIR_Engine_with_Database :
             print( error )
             return None
         
+        if self.DEBUG :
+                start = time()
+        
         try :
             to_return = self.cbir_engine.search_cbir(
                 image,
@@ -483,6 +506,9 @@ class CBIR_Engine_with_Database :
         except ErrorOpenCV :
             print( ErrorOpenCV )
             return None
+        
+        if self.DEBUG :
+            print( "La recherche s'est faite en", time() - start, "secondes." )
         
         # Suppression des attributs "image_features" pour gagner un peu de
         # mémoire
@@ -523,9 +549,16 @@ class CBIR_Engine_with_Database :
         
         last_tweet_id = None
         
+        # Liste des temps pour indexer un Tweet
+        if self.DEBUG :
+            times = []
+            count = 0
+        
         for tweet in self.twitter.get_account_tweets( account_id, since_tweet_id ) :
             if self.DEBUG :
                 print( "Indexation tweet %s." % ( tweet.id ) )
+                start = time()
+                count += 1
             
             # Le premier tweet est forcément le plus récent
             if last_tweet_id == None :
@@ -542,6 +575,12 @@ class CBIR_Engine_with_Database :
                 continue
             
             self.index_tweet( 0, tweepy_Status_object = tweet )
+            
+            if self.DEBUG :
+                times.append( time() - start )
+        
+        if self.DEBUG :
+            print( "[Index TwitAPI]", count, "Tweets indexés avec une moyenne de", mean(times), "secondes par Tweet." )
         
         # On met à jour la date du dernier scan dans la base de données
         if last_tweet_id != None :
