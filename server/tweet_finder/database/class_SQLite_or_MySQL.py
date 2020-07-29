@@ -149,6 +149,28 @@ class SQLite_or_MySQL :
         self.conn.close()
     
     """
+    Obtenir un curseur.
+    @param buffered Pour MySQL, obtenir un curseur dont toutes les données sont
+                    sorties de la base de données en mises en cache.
+    """
+    def get_cursor( self, buffered = False ) :
+        if param.USE_MYSQL_INSTEAD_OF_SQLITE :
+            try :
+                return self.conn.cursor( buffered = buffered )
+            except mysql.connector.errors.OperationalError :
+                print( "Reconnexion à la base de données MySQL..." )
+                self.conn = mysql.connector.connect(
+                    host = param.MYSQL_ADDRESS,
+                    port = param.MYSQL_PORT,
+                    user = param.MYSQL_USERNAME,
+                    password = param.MYSQL_PASSWORD,
+                    database = param.MYSQL_DATABASE_NAME
+                )
+                return self.conn.cursor( buffered = buffered )
+        else :
+            return self.conn.cursor()
+    
+    """
     Ajouter un tweet à la base de données
     Attention ! Il faut au moins une image pour que le Tweet soit stocké !
     
@@ -185,7 +207,7 @@ class SQLite_or_MySQL :
 #        if cbir_features_1 == None and cbir_features_2 == None and cbir_features_3 == None and cbir_features_4 == None :
 #            return
         
-        c = self.conn.cursor()
+        c = self.get_cursor()
         
         # features_list_for_db() ne devrait pas être utilisé puisque
         # le moteur CBIR renvoit des listes fixes de 240 valeurs !
@@ -281,7 +303,7 @@ class SQLite_or_MySQL :
             request = """INSERT INTO accounts ( account_id, last_GOT3_indexing_api_date, last_GOT3_indexing_local_date ) VALUES ( ?, ?, ? )
                          ON CONFLICT ( account_id ) DO UPDATE SET last_GOT3_indexing_api_date = ?, last_GOT3_indexing_local_date = ?"""
         
-        c = self.conn.cursor()
+        c = self.get_cursor()
         c.execute( request,
                    ( account_id, last_update, now.strftime('%Y-%m-%d %H:%M:%S'), last_update, now.strftime('%Y-%m-%d %H:%M:%S') ) )
         self.conn.commit()
@@ -297,7 +319,7 @@ class SQLite_or_MySQL :
     """
     def set_account_last_scan_with_TwitterAPI( self, account_id : int, tweet_id : int ) :
         now = datetime.now()
-        c = self.conn.cursor()
+        c = self.get_cursor()
         
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
             request = """INSERT INTO accounts ( account_id, last_TwitterAPI_indexing_tweet_id, last_TwitterAPI_indexing_local_date ) VALUES ( %s, %s, %s )
@@ -317,7 +339,7 @@ class SQLite_or_MySQL :
             Ou None si le compte est inconnu
     """
     def get_account_last_scan( self, account_id : int ) -> str :
-        c = self.conn.cursor()
+        c = self.get_cursor()
         
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
             request = "SELECT last_GOT3_indexing_api_date FROM accounts WHERE account_id = %s"
@@ -341,7 +363,7 @@ class SQLite_or_MySQL :
             Ou None si le compte est inconnu
     """
     def get_account_last_scan_with_TwitterAPI( self, account_id : int ) -> int :
-        c = self.conn.cursor()
+        c = self.get_cursor()
         
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
             request = "SELECT last_TwitterAPI_indexing_tweet_id FROM accounts WHERE account_id = %s"
@@ -363,7 +385,7 @@ class SQLite_or_MySQL :
             - Le nombre de comptes indexés
     """
     def get_stats( self ) :
-        c = self.conn.cursor()
+        c = self.get_cursor()
         c.execute( "SELECT COUNT( tweet_id ) FROM tweets" )
         count_tweets = c.fetchone()[0]
         c.execute( "SELECT COUNT( account_id ) FROM accounts" )
@@ -376,7 +398,7 @@ class SQLite_or_MySQL :
     @return True ou False
     """
     def is_tweet_indexed( self, tweet_id : int ) -> bool :
-        c = self.conn.cursor()
+        c = self.get_cursor()
         
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
             request = "SELECT tweet_id FROM tweets WHERE tweet_id = %s"
@@ -392,7 +414,7 @@ class SQLite_or_MySQL :
     @return True ou False
     """
     def is_account_indexed( self, account_id : int ) -> bool :
-        c = self.conn.cursor()
+        c = self.get_cursor()
         
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
             request = "SELECT account_id FROM accounts WHERE account_id = %s"
@@ -426,9 +448,9 @@ class SQLite_or_MySQL :
         # Source :
         # https://dev.mysql.com/doc/connector-python/en/connector-python-api-mysqlcursorbuffered.html
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
-            c = self.conn.cursor(buffered=True)
+            c = self.get_cursor(buffered=True)
         else :
-            c = self.conn.cursor()
+            c = self.get_cursor()
         
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
             # Le "ORDER BY LEAST()" considère bien la valeur NULL comme
