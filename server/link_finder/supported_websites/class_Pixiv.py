@@ -6,6 +6,7 @@ from typing import List
 import re
 from time import sleep
 from random import randrange
+from datetime import datetime
 
 try :
     from utils import validate_twitter_account_url
@@ -191,3 +192,19 @@ class Pixiv :
                     twitter_accounts.append( temp )
         
         return twitter_accounts
+    
+    """
+    Obtenir la date de publication de l'illustration.
+    
+    @param illust_id L'URL de l'illustration postée sur Pixiv.
+    @return L'objet datetime de la date de publication de l'image.
+            Ou None si il y a  eu un problème, c'est à dire que l'URL donnée
+            ne mène pas à une illustration sur Pixiv.
+    """
+    def get_datetime ( self, illust_url  : str ) -> str :
+        # On met en cache si ce n'est pas déjà fait
+        if not self.cache_or_get( illust_url ) :
+            return None
+        
+        # On retourne le résultat voulu
+        return datetime.fromisoformat( self.cache_illust_url_json["illust"]["create_date"] )

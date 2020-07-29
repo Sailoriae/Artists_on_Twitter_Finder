@@ -2,6 +2,7 @@
 # coding: utf-8
 
 from typing import List
+from datetime import datetime
 
 from class_Link_Finder import Link_Finder
 
@@ -14,9 +15,11 @@ engine = Link_Finder()
 
 def test ( url : str,
            should_get_image_url : str,
-           should_get_twitter_accounts : List[str] ) :
+           should_get_twitter_accounts : List[str],
+           should_get_datetime : str ) :
     image_url = engine.get_image_url( url )
     twitter_accounts = engine.get_twitter_accounts( url )
+    datetime = engine.get_datetime( url )
     
     print( "" )
     print( "Test : " + url )
@@ -39,23 +42,35 @@ def test ( url : str,
         print( "On a eu : " + str(twitter_accounts) )
         test_twitter_accounts = False
     
-    return test_image_url and test_twitter_accounts
+    if datetime == should_get_datetime :
+        print( "Test datetime : OK !" )
+        test_datetime = True
+    else :
+        print( "Test datetime : ECHEC !" )
+        print( "On aurait dû avoir : " + str(should_get_datetime) )
+        print( "On a eu : " + str(datetime) )
+        test_datetime = False
+    
+    return test_image_url and test_twitter_accounts and test_datetime
 
 
 print( "TEST DE PIXIV :" )
 
 test( "https://www.pixiv.net/en/artworks/82699500",
       "https://i.pximg.net/c/600x1200_90_webp/img-master/img/2020/07/02/09/32/31/82699500_p0_master1200.jpg",
-      ["hongnabya"] )
+      ["hongnabya"],
+      datetime.fromisoformat( "2020-07-02 09:32:31+09:00" ) )
 
 test( "https://www.pixiv.net/en/artworks/82566405",
       "https://i.pximg.net/c/600x1200_90_webp/img-master/img/2020/06/26/04/01/36/82566405_p0_master1200.jpg",
-      ["kazuko_art"] )
+      ["kazuko_art"],
+      datetime.fromisoformat( "2020-06-26 04:01:36+09:00" ) )
 
 # Attention, test de NSFW
 test( "https://www.pixiv.net/artworks/80875806",
       "https://i.pximg.net/c/600x1200_90_webp/img-master/img/2020/04/18/15/53/20/80875806_p0_master1200.jpg",
-      ["_ssnv"] )
+      ["_ssnv"],
+      datetime.fromisoformat( "2020-04-18 15:53:20+09:00" ) )
 
 
 print( "" )
@@ -63,12 +78,14 @@ print( "TEST DE DEVIANTART :" )
 
 test( "https://www.deviantart.com/nopeys/art/Azula-847851539",
       "Un truc qui change c'est chiant, vérifier à la main.",
-      ['nopeys1'] )
+      ['nopeys1'],
+      datetime.fromisoformat( "2020-07-06 06:59:43-07:00" ) )
 
 # Attention, test de NSFW
 test( "https://www.deviantart.com/dandonfuga/art/Harley-x-Ivy-YURI-NUDITY-warning-674880884",
       "Un truc qui change c'est chiant, vérifier à la main.",
-      ['dandonfuga'] )
+      ['dandonfuga'],
+      datetime.fromisoformat( "2017-04-14 12:50:12-07:00" ) )
 
 
 print( "" )
@@ -76,9 +93,11 @@ print( "TEST DE DANBOORU :" )
 
 test( "https://danbooru.donmai.us/posts/4000914",
       "https://danbooru.donmai.us/data/139dcc6b176fb999008522b9b80a9aa8.jpg",
-      ['graviqc'] )
+      ['graviqc'],
+      datetime.fromisoformat( "2020-07-15 04:14:30.199000-04:00" ) )
 
 # Attention, test de NSFW
 test( "https://danbooru.donmai.us/posts/3878029",
       "https://danbooru.donmai.us/data/f316f97186dab780a2a6e54b4acccd94.png",
-      ['wokada156'] )
+      ['wokada156'],
+      datetime.fromisoformat( "2020-04-24 06:54:45.053000-04:00" ) )

@@ -3,6 +3,7 @@
 
 from typing import List
 import re
+from datetime import datetime
 
 try :
     from utils import Webpage_to_Twitter_Accounts
@@ -180,6 +181,22 @@ class Danbooru :
             validator_function = validate_pixiv_account_url )
         
         return pixiv_accounts
+    
+    """
+    Obtenir la date de publication de l'illustration.
+    
+    @param illust_id L'URL de l'illustration postée sur Danbooru.
+    @return L'objet datetime de la date de publication de l'image.
+            Ou None si il y a  eu un problème, c'est à dire que l'URL donnée
+            ne mène pas à une illustration sur Danbooru.
+    """
+    def get_datetime ( self, illust_url  : str ) -> str :
+        # On met en cache si ce n'est pas déjà fait
+        if not self.cache_or_get( illust_url ) :
+            return None
+        
+        # On retourne le résultat voulu
+        return datetime.fromisoformat( self.cache_illust_url_json["created_at"] )
 
 
 """

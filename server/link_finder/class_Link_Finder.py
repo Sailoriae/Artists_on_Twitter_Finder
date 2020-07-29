@@ -129,6 +129,30 @@ class Link_Finder :
         
         else :
             return False # Oui c'est une bidouille
+    
+    """
+    @param illust_url L'URL d'une illustration postée sur l'un des sites
+                      supportés.
+    @return L'objet datetime de la date de publication de l'image.
+            None si l'URL est invalide (Mais que le site est supporté), c'est à
+            dire que l'URL donnée ne mène pas à une illustration.
+            False si le site n'est pas supporté.
+    """
+    def get_datetime ( self, illust_url : str ) -> str :
+        # Ce sont les clases qui analysent les URL et vont dire si elles
+        # mènent bien vers des illustrations.
+        # Ici, on vérifie juste le domaine.
+        if re.search( deviantart_url, illust_url ) != None :
+            return self.deviantart.get_datetime( illust_url )
+        
+        elif re.search( pixiv_url, illust_url ) != None :
+            return self.pixiv.get_datetime( illust_url )
+        
+        elif re.search( danbooru_url, illust_url ) != None :
+            return self.danbooru.get_datetime( illust_url )
+        
+        else :
+            return False # Oui c'est une bidouille
 
 
 """
