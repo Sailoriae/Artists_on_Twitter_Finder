@@ -33,11 +33,11 @@ Ceci lance le serveur et vous met en ligne de commande. Si vous souhaitez quitte
       Voir pourquoi il y a deux systèmes d'indexation dans `doc/Limites_de_scan_des_comptes_Twitter.md`.
     - Recherche inversée d'image.
 * Serveur web pour l'API HTTP qui renvoit les status des requêtes, avec les éventuels résultats, ou une erreur s'il y a un problème. Voir `doc/API_HTTP.md`.
-* Parallélisme : Chaqune des 5 étapes se fait dans un thread séparés, avec une files d'attente.
-  - Possibilité de créer plusieurs threads pour chaque étape,
-  - Et possibilité aussi de créer plusieurs threads pour le serveur HTTP.
-* Mémoire partagée entre tous les threads dans l'objet `Pipeline`.
-* Limite du nombre de requête en cours de traitement par
+* Parallélisme : 2 pipelines de traitement, divisés en étapes séparés dans des threads de traitement, avec files d'attentes :
+  - Traitement des requêtes des utilisateurs, en 3 étapes, exécutées l'une après l'autres. Voir `app/user_pipeline`.
+  - Traitement des requêtes d'indexation / de scan d'un comte Twitter, en 3 étapes. Voir `app/scan_pipeline`.
+* Mémoire partagée entre tous les threads dans l'objet `Shared_Memory`.
+* Limite du nombre de requête en cours de traitement par adresse IP.
 * Thread de délestage automatique des anciennes requêtes terminées.
 * Thread de lancement de mises à jour automatiques des comptes Twitter dans la base de données.
 * Collecteur d'erreurs : Tous les threads sont éxécuté dans une instance du collecteur d'erreurs. Stocke l'erreur dans un fichier, met l'éventuelle requête en cours de traitement en situation d'erreur / échec, et redémaerre le thread.
@@ -48,6 +48,8 @@ Ceci lance le serveur et vous met en ligne de commande. Si vous souhaitez quitte
 Script `app.py` : Script central, crée et gère les threads de traitement, la ligne de commande, les files d'attentes des requêtes, et le serveur HTTP.
 
 * Module `app` : Dépendances du script `app.py`. Contient les procédures de ses threads, et ses classes. Voir le `README.md` de ce module pour plus de détails.
+  - Module `user_pipeline` : Pipeline de traitement des requêtes utilisateurs, en 3 étapes : Link Finder, lancement si nécessaire et suivi du scan du ou des comptes Twitter dans l'autre pipeline, et recherche inversée de l'image de requête.
+  - Module `scan_pipeline` : Pipeline de traitement des requêtes de scan d'un compte Twitter, en 3 étapes.
 
 * Module `tweet_finder`, classe `CBIR_Engine_with_Database` : Moteur de recherche d'image par le contenu pour des comptes Twitter et des Tweets. Gère le stockage et la recherche d'image inversée.
   - Module `utils`: Contient un outil pour la classe ci-dessus.
