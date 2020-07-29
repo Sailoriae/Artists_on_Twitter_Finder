@@ -121,6 +121,10 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
         print( "[step_1_th" + str(thread_id) + "] URL de l'image trouvée :\n" +
                "[step_1_th" + str(thread_id) + "] " + request.image_url )
         
+        # Même théorie, donc on devrait forcément trouver la date pour cette
+        # requête
+        request.datetime = finder_engine.get_datetime( request.input_url )
+        
         # Dire qu'on n'est plus en train de traiter cette requête
         shared_memory.user_requests.requests_in_thread[ "thread_step_1_link_finder_number" + str(thread_id) ] = None
         

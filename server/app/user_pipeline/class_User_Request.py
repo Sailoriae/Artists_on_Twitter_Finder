@@ -33,6 +33,10 @@ class User_Request :
         # qui vérifie
         self.twitter_accounts_with_id = []
         
+        # Résultat du Link Finder (Etape 1)
+        # Objet datetime de la date de publication de l'image
+        self.datetime = None
+        
         # Cache de l'indexer (Etape 2)
         # Liste les requêtes de ses comptes dans le système d'indexation / de
         # mise à jour de l'indexation des comptes Twitter (Threads étapes A, B

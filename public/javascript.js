@@ -228,9 +228,6 @@ function displayStats() {
 					displayStatsP.textContent = numberWithSpaces( json["indexed_tweets_count"] ) + " Tweets indexés sur " + numberWithSpaces( json["indexed_accounts_count"] ) + " comptes Twitter.";
 
 					displayInfosP.textContent = "Les nombre de requêtes en cours de traitement par adresse IP est limité à " + json["limit_per_ip_address"] + "."
-					if ( json["no_update_on_request"] ) {
-						displayInfosP.textContent += " Attention ! L'index des Tweets des comptes n'est pas mis à jour lors d'une requête."
-					}
 					displayInfosP.textContent += " L'index des Tweets avec images d'un compte est mis à jour automatiquement au bout de " + json["update_accounts_frequency"] + " jours."
 				}
 			} else {

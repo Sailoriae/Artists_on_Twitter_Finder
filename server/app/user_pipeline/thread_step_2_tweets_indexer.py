@@ -3,6 +3,8 @@
 
 import queue
 from time import sleep
+from dateutil.tz import tzlocal
+import datetime
 
 # Ajouter le répertoire parent au PATH pour pouvoir importer
 from sys import path as sys_path
@@ -10,8 +12,7 @@ from os import path as os_path
 sys_path.append(os_path.dirname(os_path.dirname(os_path.abspath(__file__))))
 
 import parameters as param
-if param.FORCE_INTELLIGENT_SKIP_INDEXING :
-    from tweet_finder.database import SQLite_or_MySQL
+from tweet_finder.database import SQLite_or_MySQL
 
 
 """
@@ -25,10 +26,12 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
     # Dire qu'on ne fait rien
     shared_memory.user_requests.requests_in_thread[ "thread_step_2_tweets_indexer_number" + str(thread_id) ] = None
     
+    # Timezone locale
+    local_tz = tzlocal()
+    
     # Accès direct à la base de données
     # N'UTILISER QUE DES METHODES QUI FONT SEULEMENT DES SELECT !
-    if param.FORCE_INTELLIGENT_SKIP_INDEXING :
-        bdd_direct_access = SQLite_or_MySQL()
+    bdd_direct_access = SQLite_or_MySQL()
     
     # Tant que on ne nous dit pas de nous arrêter
     while shared_memory.keep_service_alive :
@@ -76,22 +79,44 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
                 
                 # Sinon, il faut peut-être lancer un scan
                 else :
-                    # Si on est en mode intelligent, on vérifie avant que le
-                    # compte ne soit pas déjà dans la base de données
-                    if param.FORCE_INTELLIGENT_SKIP_INDEXING :
-                        # Si le compte n'est pas déjà indexé
-                        if not bdd_direct_access.is_account_indexed( account_id ) :
-                            accounts_to_scan.append( (account_name, account_id) )
-                        else :
-                            print( "[step_2_th" + str(thread_id) + "] @" + account_name + " est déjà dans la BDD, on saute son scan !" )
-                    # Sinon, on force le scan
-                    else :
+                    # Si le compte n'est pas déjà indexé, il faut le scanner
+                    if not bdd_direct_access.is_account_indexed( account_id ) :
+                        print( "[step_2_th" + str(thread_id) + "] @" + account_name + " n'est pas dans la BDD, lancement de son scan !" )
                         accounts_to_scan.append( (account_name, account_id) )
+                    
+                    # Si le compte est déjà indexé
+                    else :
+                        # On prend ses deux dernières dates de scan
+                        last_scan_1 = bdd_direct_access.get_account_last_scan_local_datetime( account_id )
+                        last_scan_2 = bdd_direct_access.get_account_last_scan_with_TwitterAPI_local_datetime( account_id )
+                        
+                        # Si l'une des deux est à NULL, il faut scanner (Mais
+                        # théoriquement le thread d'auto-update l'a fait avant
+                        # nous)
+                        if last_scan_1 == None or last_scan_2 == None :
+                            accounts_to_scan.append( (account_name, account_id) )
+                        
+                        # Sinon, on prendre la date minimale
+                        else :
+                            min_date = min( last_scan_1, last_scan_2 )
+                            
+                            # On a besoin de mettre le fuseau horaire dans la
+                            # date minimale
+                            min_date = min_date.replace( tzinfo = local_tz )
+                            
+                            # Si cette mise à jour moins 3 jours est plus
+                            # vielle que la date de l'illustration, il faut MàJ
+                            # (On laisse 3 jours de marge à l'artiste pour
+                            # publier sur Twitter)
+                            if min_date - datetime.timedelta( days = 3 ) < request.datetime :
+                                print( "[step_2_th" + str(thread_id) + "] @" + account_name + " est déjà dans la BDD, mais il faut le MàJ car l'illustration de requête est trop récente !" )
+                                accounts_to_scan.append( (account_name, account_id) )
+                            else :
+                                print( "[step_2_th" + str(thread_id) + "] @" + account_name + " est déjà dans la BDD, on saute son scan !" )
             
             # On lance l'indexation, en mode prioritaire car on est une requête
             # utilisateur, et on stocke les requêtes qu'on a créé
             for (account_name, account_id) in accounts_to_scan :
-                print( "[step_2_th" + str(thread_id) + "] Lancement du scan de @" + account_name + "." )
                 request.scan_requests.append(
                     shared_memory.scan_requests.launch_request( account_id,
                                                                 account_name,

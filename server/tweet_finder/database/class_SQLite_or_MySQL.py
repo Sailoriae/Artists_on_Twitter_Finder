@@ -7,12 +7,12 @@ from datetime import datetime
 try :
     from class_Image_Features_Iterator import Image_Features_Iterator
     from class_Less_Recently_Updated_Accounts_Iterator import Less_Recently_Updated_Accounts_Iterator
-    from features_list_for_db import features_list_for_db
+#    from features_list_for_db import features_list_for_db
     from sql_requests_dict import sql_requests_dict
 except ModuleNotFoundError : # Si on a été exécuté en temps que module
     from .class_Image_Features_Iterator import Image_Features_Iterator
     from .class_Less_Recently_Updated_Accounts_Iterator import Less_Recently_Updated_Accounts_Iterator
-    from .features_list_for_db import features_list_for_db
+#    from .features_list_for_db import features_list_for_db
     from .sql_requests_dict import sql_requests_dict
 
 # Ajouter le répertoire parent du parent au PATH pour pouvoir importer
@@ -355,9 +355,7 @@ class SQLite_or_MySQL :
             return None
     
     """
-    Récupérer l'ID du dernier Tweet scanné avec l'API Twitter, associé à la
-    date locale de ce dernier scan.
-    
+    Récupérer l'ID du dernier Tweet scanné avec l'API Twitter.
     @param account_id ID du compte Twitter
     @return L'ID du dernier Tweet scanné
             Ou None si le compte est inconnu
@@ -375,6 +373,57 @@ class SQLite_or_MySQL :
         last_scan = c.fetchone()
         if last_scan != None :
             return last_scan[0]
+        else :
+            return None
+    
+    """
+    Récupérer la date de l'enregistrement du dernier scan d'un compte Twitter
+    @param account_id ID du compte Twitter
+    @return Objet datetime
+            Ou None si le compte est inconnu
+    """
+    def get_account_last_scan_local_datetime( self, account_id : int ) -> str :
+        c = self.get_cursor()
+        
+        if param.USE_MYSQL_INSTEAD_OF_SQLITE :
+            request = "SELECT last_GOT3_indexing_local_date FROM accounts WHERE account_id = %s"
+        else :
+            request = "SELECT last_GOT3_indexing_local_date FROM accounts WHERE account_id = ?"
+        
+        c.execute( request,
+                   ( account_id, ) )
+        last_scan = c.fetchone()
+        if last_scan != None :
+            if not param.USE_MYSQL_INSTEAD_OF_SQLITE :
+                return datetime.strptime( last_scan[0], '%Y-%m-%d %H:%M:%S' )
+            else :
+                return last_scan[0]
+        else :
+            return None
+    
+    """
+    Récupérer la date de l'enregistrement de l'ID du dernier Tweet scanné avec
+    l'API Twitter.
+    @param account_id ID du compte Twitter
+    @return Objet datetime
+            Ou None si le compte est inconnu
+    """
+    def get_account_last_scan_with_TwitterAPI_local_datetime( self, account_id : int ) -> int :
+        c = self.get_cursor()
+        
+        if param.USE_MYSQL_INSTEAD_OF_SQLITE :
+            request = "SELECT last_TwitterAPI_indexing_local_date FROM accounts WHERE account_id = %s"
+        else :
+            request = "SELECT last_TwitterAPI_indexing_local_date FROM accounts WHERE account_id = ?"
+        
+        c.execute( request,
+                   ( account_id, ) )
+        last_scan = c.fetchone()
+        if last_scan != None :
+            if not param.USE_MYSQL_INSTEAD_OF_SQLITE :
+                return datetime.strptime( last_scan[0], '%Y-%m-%d %H:%M:%S' )
+            else :
+                return last_scan[0]
         else :
             return None
     

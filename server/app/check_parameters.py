@@ -35,7 +35,6 @@ def check_parameters () :
     print( "Vérification des types des paramètres..." )
     try :
         check_list = []
-        check_list.append( type( param.FORCE_INTELLIGENT_SKIP_INDEXING ) == bool )
         check_list.append( type( param.API_KEY ) == str )
         check_list.append( type( param.API_SECRET ) == str )
         check_list.append( type( param.OAUTH_TOKEN ) == str )
