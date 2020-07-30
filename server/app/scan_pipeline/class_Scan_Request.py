@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 # coding: utf-8
 
+from queue import Queue
+
 
 """
 Classe représentant une indexation (Nouvelle ou mise à jour) d'un ID de compte
@@ -28,32 +30,29 @@ class Scan_Request :
         # collecteur d'erreur l'indiquera ici
         self.has_failed = False
         
-        # ID de l'étape dans laquelle la requête se trouve.
-        # 0 : En attente de traitement à l'étape suivante...
-        # 1 : En cours de traitement par un thread de Listage des Tweets avec
-        #     GetOldTweets3.
-        # 2 : En attente de traitement à l'étape suivante...
-        # 3 : En cours de traitement par un thread de Listage des Tweets avec
-        #     l'API publique de Twitter.
-        # 4 : En attente de traitement à l'étape suivante...
-        # 5 : En cours de traitement par un thread d'indexation des Tweets
-        #     trouvés par les deux threads précédents.
-        # 6 : Fin de traitement.
-        self.status = -1
+        # File d'attente pour mettre les Tweets trouvés par GetOldTweets3
+        self.GetOldTweets3_tweets_queue = Queue()
         
-        # Attribut pour annuler cette requête lorsqu'elle sortira d'une file
-        # d'attente. Utilisé afin de passer la requête en prioritaire.
-        self.is_cancelled = False
+        # Résultat de la fonction
+        # Tweets_Lister_with_GetOldTweets3.list_GOT3_tweets()
+        # Contient la date du Tweet trouvé par GOT3 le plus récent
+        self.GetOldTweets3_last_tweet_date = None
         
-        # Résultats de la fonction get_GOT3_list() de la classe
-        # CBIR_Engine_with_Database. A VIDER UNE FOIS UTILISE, CAR C'EST LOURD
-        # EN MEMOIRE !
-        self.get_GOT3_list_result = None
+        # File d'attente pour mettre les Tweets trouvés par Tweepy
+        self.TwitterAPI_tweets_queue = Queue()
         
-        # Résultats de la fonction get_TwitterAPI_list() de la classe
-        # CBIR_Engine_with_Database. A VIDER UNE FOIS UTILISE, CAR C'EST LOURD
-        # EN MEMOIRE !
-        self.get_TwitterAPI_list_result = None
+        # Résultat de la fonction
+        # Tweets_Lister_with_TwitterAPI.list_TwitterAPI_tweets()
+        # Contient l'ID du Tweet trouvé par l'API Twitter le plus récent
+        self.TwitterAPI_last_tweet_id = None
+        
+        # Deux variables de début de traitement de la requête
+        self.started_GOT3_listing = False
+        self.started_TwitterAPI_listing = False
+        
+        # Deux variables de fin du traitement de la requête
+        self.finished_GOT3_indexing = False
+        self.finished_TwitterAPI_indexing = False
         
         # Date de fin de la procédure
         self.finished_date = None

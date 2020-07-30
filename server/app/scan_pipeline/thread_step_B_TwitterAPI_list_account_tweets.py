@@ -10,7 +10,7 @@ from os import path as os_path
 sys_path.append(os_path.dirname(os_path.dirname(os_path.abspath(__file__))))
 
 import parameters as param
-from tweet_finder import CBIR_Engine_with_Database
+from tweet_finder import Tweets_Lister_with_TwitterAPI
 
 
 """
@@ -20,8 +20,8 @@ Thread de listage des tweets d'un compte Twitter en utilisant l'API publique
 de Twitter, via la librairie Tweepy.
 """
 def thread_step_B_TwitterAPI_list_account_tweets( thread_id : int, shared_memory ) :
-    # Initialisation de notre moteur de recherche d'image par le contenu
-    cbir_engine = CBIR_Engine_with_Database( DEBUG = param.DEBUG )
+    # Initialisation du listeur de Tweets
+    twitterapi_lister = Tweets_Lister_with_TwitterAPI( DEBUG = param.DEBUG )
     
     # Dire qu'on ne fait rien
     shared_memory.scan_requests.requests_in_thread[ "thread_step_B_TwitterAPI_list_account_tweets_number" + str(thread_id) ] = None
@@ -47,30 +47,21 @@ def thread_step_B_TwitterAPI_list_account_tweets( thread_id : int, shared_memory
                 sleep( 1 )
                 continue
         
+        # Dire qu'on a commencé à traiter cette requête
+        request.started_TwitterAPI_listing = True
+        
         # Lacher le sémaphore
         shared_memory.scan_requests.queues_sem.release()
-        
-        # Si la requête est annulée, on la jette
-        if request.is_cancelled :
-            continue
         
         # Dire qu'on est en train de traiter cette requête
         shared_memory.scan_requests.requests_in_thread[ "thread_step_B_TwitterAPI_list_account_tweets_number" + str(thread_id) ] = request
         
-        # On passe la requête à l'étape suivante, c'est à dire notre étape
-        shared_memory.scan_requests.set_request_to_next_step( request )
-        
         # On liste les Tweets du compte Twitter de la requête avec l'API Twitter
         print( "[step_B_th" + str(thread_id) + "] Listage des Tweets du compte Twitter @" + request.account_name + " avec l'API Twitter." )
-        request.get_TwitterAPI_list_result = cbir_engine.get_TwitterAPI_list( request.account_name )
+        request.TwitterAPI_last_tweet_id = twitterapi_lister.list_TwitterAPI_tweets( request.account_name, request.TwitterAPI_tweets_queue )
         
         # Dire qu'on n'est plus en train de traiter cette requête
         shared_memory.scan_requests.requests_in_thread[ "thread_step_B_TwitterAPI_list_account_tweets_number" + str(thread_id) ] = None
-        
-        # On passe la requête à l'étape suivante
-        # C'est la procédure shared_memory.scan_requests.set_request_to_next_step
-        # qui vérifie si elle peut
-        shared_memory.scan_requests.set_request_to_next_step( request )
     
     print( "[step_B_th" + str(thread_id) + "] Arrêté !" )
     return

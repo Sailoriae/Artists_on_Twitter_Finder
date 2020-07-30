@@ -39,8 +39,8 @@ class User_Request :
         
         # Cache de l'indexer (Etape 2)
         # Liste les requêtes de ses comptes dans le système d'indexation / de
-        # mise à jour de l'indexation des comptes Twitter (Threads étapes A, B
-        # et C, pipeline d'indexation / de scan)
+        # mise à jour de l'indexation des comptes Twitter (Threads étapes
+        # parallèles A, B, C et D, pipeline d'indexation / de scan)
         self.scan_requests = None
         
         # Résultat de la recherche inversée (Etape 3)

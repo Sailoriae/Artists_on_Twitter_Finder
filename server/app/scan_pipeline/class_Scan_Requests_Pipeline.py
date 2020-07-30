@@ -3,13 +3,13 @@
 
 import queue
 import threading
-import copy
-from datetime import datetime
 
 try :
     from class_Scan_Request import Scan_Request
+    from remove_account_id_from_queue import remove_account_id_from_queue
 except ModuleNotFoundError :
     from .class_Scan_Request import Scan_Request
+    from .remove_account_id_from_queue import remove_account_id_from_queue
 
 
 """
@@ -19,6 +19,9 @@ Instanciée une seule fois lors de l'unique instanciation de la mémoire
 partagée, c'est à dire de la classe Shared_Memory.
 
 Les requêtes sont identifiées par l'ID du compte Twitter.
+
+Attention : Ce pipeline de traitement est parallélisé, et non étapes par
+étapes !
 """
 class Scan_Requests_Pipeline :
     def __init__ ( self ) :
@@ -45,11 +48,18 @@ class Scan_Requests_Pipeline :
         self.step_B_TwitterAPI_list_account_tweets_queue = queue.Queue()
         
         # File d'attente à l'étape C du traitement : Indexation des Tweets
-        # trouvés par les deux étapes précédentes.
-        self.step_C_index_account_tweets_prior_queue = queue.Queue()
+        # trouvés par le listage des Tweets avec GetOldTweets3.
+        self.step_C_GOT3_index_account_tweets_prior_queue = queue.Queue()
         
         # Version non-prioritaire de la file d'attente précédente.
-        self.step_C_index_account_tweets_queue = queue.Queue()
+        self.step_C_GOT3_index_account_tweets_queue = queue.Queue()
+        
+        # File d'attente à l'étape D du traitement : Indexation des Tweets
+        # trouvés par le listage des Tweets avec l'API publique Twitter.
+        self.step_D_TwitterAPI_index_account_tweets_prior_queue = queue.Queue()
+        
+        # Version non-prioritaire de la file d'attente précédente.
+        self.step_D_TwitterAPI_index_account_tweets_queue = queue.Queue()
         
         # Bloquer toutes les files d'attentes. Permet de passer une requête
         # en prioritaire sans avoir de problème.
@@ -86,32 +96,46 @@ class Scan_Requests_Pipeline :
     def launch_request ( self, account_id : int,
                                account_name : str,
                                is_prioritary : bool = False ) -> Scan_Request :
-        # Vérifier d'abord qu'on n'est pas déjà en train de traiter ce compte.
         self.requests_sem.acquire()
+        self.queues_sem.acquire()
+        
+        # Vérifier d'abord qu'on n'est pas déjà en train de traiter ce compte.
         for request in self.requests :
-            if request.account_id == account_id and not request.is_cancelled :
-                self.queues_sem.acquire()
-                
+            if request.account_id == account_id :
                 # Si il faut passer la requête en proritaire.
                 if is_prioritary and not request.is_prioritary :
                     request.is_prioritary = True
                     
-                    # Si est dans une file d'attente, on la sort, pour la
-                    # la mettre dans la même file d'attente, mais prioritaire.
-                    if request.status in [ 0, 2, 4 ] :
-                        # On la copie, pas besoin de faire un deepcopy()
-                        request_new = copy.copy( request ) 
+                    # Si est dans une file d'attente de listage des Tweets avec
+                    # GetOldTweets3, on la sort, pour la mettre dans la même
+                    # file d'attente, mais prioritaire.
+                    if request.started_GOT3_listing :
+                        # On doit démonter et remonter la file en enlevant la
+                        # requête.
+                        self.step_A_GOT3_list_account_tweets_queue = remove_account_id_from_queue(
+                            self.step_A_GOT3_list_account_tweets_queue,
+                            account_id )
                         
-                        # On annule l'originale
-                        request.is_cancelled = True
-                        self.set_request_to_next_step( request, force_end = True )
+                        # On met la requête dans la file d'attente prioritaire.
+                        self.step_A_GOT3_list_account_tweets_queue.put( request )
+                    
+                    # Si est dans une file d'attente de listage des Tweets avec
+                    # Twitter API, on la sort, pour la mettre dans la même
+                    # file d'attente, mais prioritaire.
+                    if request.started_TwitterAPI_listing :
+                        # On doit démonter et remonter la file en enlevant la
+                        # requête.
+                        self.step_B_TwitterAPI_list_account_tweets_queue = remove_account_id_from_queue(
+                            self.step_B_TwitterAPI_list_account_tweets_queue,
+                            account_id )
                         
-                        # On relance la nouvelle
-                        self.requests.append( request_new )
-                        request_new.status -= 1
-                        self.set_request_to_next_step( request_new )
-                        
-                        request = request_new # Pour le return qui suit
+                        # On met la requête dans la file d'attente prioritaire.
+                        self.step_B_TwitterAPI_list_account_tweets_queue.put( request )
+                    
+                    # Comme les deux autres files d'attentes sont rapides à
+                    # dérouler (Et surtout sont ralenties par les deux
+                    # premières), il n'y a pas besoin de bouger les requêtes,
+                    # ça se fera tout seul avec le "request.is_prioritary".
                 
                 self.queues_sem.release()
                 self.requests_sem.release()
@@ -122,12 +146,25 @@ class Scan_Requests_Pipeline :
                                 account_name,
                                 is_prioritary = is_prioritary )
         self.requests.append( request ) # Passé par adresse car c'est un objet.
-        self.requests_sem.release() # Seulement ici !
         
-        # Les requêtes sont initialisée au status -1
-        self.set_request_to_next_step( request )
         
-        # Retourner l'objet User_Request.
+        # Comme le traitement des requêtes de scan est parallélisé, on peut
+        # mettre la requêtes dans toutes les files d'attente
+        if is_prioritary :
+            self.step_A_GOT3_list_account_tweets_prior_queue.put( request )
+            self.step_B_TwitterAPI_list_account_tweets_prior_queue.put( request )
+            self.step_C_GOT3_index_account_tweets_prior_queue.put( request )
+            self.step_D_TwitterAPI_index_account_tweets_prior_queue.put( request )
+        else :
+            self.step_A_GOT3_list_account_tweets_queue.put( request )
+            self.step_B_TwitterAPI_list_account_tweets_queue.put( request )
+            self.step_C_GOT3_index_account_tweets_queue.put( request )
+            self.step_D_TwitterAPI_index_account_tweets_queue.put( request )
+        
+        self.queues_sem.release()
+        self.requests_sem.release()
+        
+        # Retourner l'objet Scan_Request.
         return request
     
     """
@@ -146,42 +183,3 @@ class Scan_Requests_Pipeline :
         self.requests_sem.release()
         
         return None
-    
-    """
-    Passer la requête à l'étape suivante.
-    A utiliser uniquement à la fin et au début d'une itération d'un thread de
-    traitement. Et utilise obligatoirement cette méthode pour modifier le
-    status d'une requête.
-    """
-    def set_request_to_next_step ( self, request : Scan_Request, force_end : bool = False ) :
-        self.queues_sem.acquire()
-        
-        if force_end :
-            request.status = 6
-        elif request.status < 6 :
-            request.status += 1
-        
-        if request.is_prioritary :
-            if request.status == 0 :
-                self.step_A_GOT3_list_account_tweets_prior_queue.put( request )
-            
-            if request.status == 2 :
-                self.step_B_TwitterAPI_list_account_tweets_prior_queue.put( request )
-            
-            if request.status == 4 :
-                self.step_C_index_account_tweets_prior_queue.put( request )
-        
-        else :
-            if request.status == 0 :
-                self.step_A_GOT3_list_account_tweets_queue.put( request )
-            
-            if request.status == 2 :
-                self.step_B_TwitterAPI_list_account_tweets_queue.put( request )
-            
-            if request.status == 4 :
-                self.step_C_index_account_tweets_queue.put( request )
-        
-        if request.status == 6 :
-            request.finished_date = datetime.now()
-        
-        self.queues_sem.release()

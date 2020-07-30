@@ -131,7 +131,7 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
         # Seules les requêtes non-prioritaires peuvent être annulées
         check_list = []
         for scan_request in request.scan_requests :
-            check_list.append( scan_request.finished_date != None )
+            check_list.append( scan_request.finished_GOT3_indexing and scan_request.finished_TwitterAPI_indexing )
             
             # On vérifie quand même que le scan s'est bien passé, et si un
             # thread de traitement a planté avec la requête, on l'indique

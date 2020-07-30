@@ -39,13 +39,12 @@ def error_collector( thread_procedure, thread_id : int, shared_memory ) :
             try :
                 request = shared_memory.scan_requests.requests_in_thread[ thread_procedure.__name__ + "_number" + str(thread_id) ]
             # Si on n'est pas un thread de traitement des requêtes de scan
-            # (Etapes A, B et C), on aura forcément une KeyError
+            # (Etapes paralléles A, B, C et D), on aura forcément une KeyError
             except KeyError :
                 pass
             else :
                 if request != None :
                     request.has_failed = True
-                    shared_memory.scan_requests.set_request_to_next_step( request, force_end = True )
                     error_name += "Compte Twitter : @" + request.account_name + " (ID " + str(request.account_id) + ")\n"
             
             # Enregistrer dans un fichier
