@@ -6,7 +6,6 @@ from typing import List
 import traceback
 import urllib
 from time import sleep
-from random import randrange
 
 from time import time
 from statistics import mean
@@ -519,6 +518,38 @@ class CBIR_Engine_with_Database :
         return to_return
     
     """
+    Obtenir la liste des Tweets trouvés par l'API Twitter.
+    
+    @param account_name Le nom d'utilisateur du compte à scanner
+    @return La liste des tweets du compte à partir de la date du dernier scan.
+            Associée à l'ID du compte Twitter.
+            False si le nom du compte est introuvable, ou est suspendu, ou est
+            désactivé, ou est privé.
+    """
+    def get_TwitterAPI_list ( self, account_name : str ) -> bool :
+        account_id = self.twitter.get_account_id( account_name )
+        if account_id == None :
+            print( "Compte @" + account_name + " introuvable !" )
+            return False
+        
+        print( "Listage des Tweets de @" + account_name + " avec l'API Twitter." )
+        
+        if self.DEBUG :
+            start = time()
+        
+        since_tweet_id = self.bdd.get_account_last_scan_with_TwitterAPI( account_id )
+        
+        to_return = []
+        
+        for tweet in self.twitter.get_account_tweets( account_id, since_tweet_id ) :
+            to_return.append( tweet )
+        
+        if self.DEBUG :
+            print( "[List TwitterAPI] Il a fallu", time() - start, "secondes pour lister les", len(to_return), "Tweets de @" + account_name + "." )
+        
+        return ( to_return, account_id )
+    
+    """
     Scanner tous les tweets d'un compte (Les retweets ne comptent pas).
     Seuls les tweets avec des médias seront scannés.
     Et parmis eux, seuls les tweets avec 1 à 4 images seront indexés.
@@ -537,15 +568,13 @@ class CBIR_Engine_with_Database :
             False si le compte est introuvable, ou est suspendu, ou est
             désactivé, ou est privé
     """
-    def index_or_update_with_TwitterAPI( self, account_name : str ) -> bool :
-        account_id = self.twitter.get_account_id( account_name )
-        if account_id == None :
-            print( "Compte @" + account_name + " introuvable !" )
+    def index_or_update_with_TwitterAPI( self, account_name : str, get_TwitterAPI_list_result = None ) -> bool :
+        if get_TwitterAPI_list_result == None :
+            get_TwitterAPI_list_result = self.get_TwitterAPI_list( account_name )
+        if get_TwitterAPI_list_result == False : # Si le nom du compte est introuvable
             return False
         
         print( "Indexation / scan des Tweets de @" + account_name + " avec l'API Twitter." )
-        
-        since_tweet_id = self.bdd.get_account_last_scan_with_TwitterAPI( account_id )
         
         last_tweet_id = None
         
@@ -554,7 +583,7 @@ class CBIR_Engine_with_Database :
             times = []
             count = 0
         
-        for tweet in self.twitter.get_account_tweets( account_id, since_tweet_id ) :
+        for tweet in get_TwitterAPI_list_result[0] :
             if self.DEBUG :
                 print( "Indexation tweet %s." % ( tweet.id ) )
                 start = time()
@@ -564,7 +593,7 @@ class CBIR_Engine_with_Database :
             if last_tweet_id == None :
                 last_tweet_id = tweet.id
             
-            # Cela ne sert à rien ester avant d'indexer si le tweet n'est pas
+            # Cela ne sert à rien tester avant d'indexer si le tweet n'est pas
             # déjà dans la BDD car la fonction index_tweet() le fait
             
             try :
@@ -584,14 +613,14 @@ class CBIR_Engine_with_Database :
         
         # On met à jour la date du dernier scan dans la base de données
         if last_tweet_id != None :
-            self.bdd.set_account_last_scan_with_TwitterAPI( account_id, last_tweet_id )
+            self.bdd.set_account_last_scan_with_TwitterAPI( get_TwitterAPI_list_result[1], last_tweet_id )
         
         # On force la MàJ de la date local de scan pour que le thread de
         # MàJ automatique ne repasse pas de si tôt dessus
         else :
             self.bdd.set_account_last_scan_with_TwitterAPI(
-                account_id,
-                self.bdd.get_account_last_scan_with_TwitterAPI( account_id ) )
+                get_TwitterAPI_list_result[1],
+                self.bdd.get_account_last_scan_with_TwitterAPI( get_TwitterAPI_list_result[1] ) )
         
         return True
 

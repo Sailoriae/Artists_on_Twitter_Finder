@@ -89,21 +89,21 @@ for i in range( param.NUMBER_OF_STEP_A_GOT3_LIST_ACCOUNT_TWEETS_THREADS ) :
     thread.start()
     threads_step_A_GOT3_list_account_tweets.append( thread )
 
-threads_step_B_GOT3_index_account_tweets = []
-for i in range( param.NUMBER_OF_STEP_B_GOT3_INDEX_ACCOUNT_TWEETS ) :
-    thread = threading.Thread( name = "step_B_GOT3_index_account_tweets_th" + str(i+1),
+threads_step_B_TwitterAPI_list_account_tweets = []
+for i in range( param.NUMBER_OF_STEP_B_TWITTERAPI_LIST_ACCOUNT_TWEETS_THREADS ) :
+    thread = threading.Thread( name = "step_B_TwitterAPI_list_account_tweets_th" + str(i+1),
                                target = error_collector,
-                               args = ( thread_step_B_GOT3_index_account_tweets, i+1, shared_memory, ) )
+                               args = ( thread_step_B_TwitterAPI_list_account_tweets, i+1, shared_memory, ) )
     thread.start()
-    threads_step_B_GOT3_index_account_tweets.append( thread )
+    threads_step_B_TwitterAPI_list_account_tweets.append( thread )
 
-threads_step_C_TwitterAPI_index_account_tweets = []
-for i in range( param.NUMBER_OF_STEP_C_TWITTERAPI_INDEX_ACCOUNT_TWEETS ) :
-    thread = threading.Thread( name = "step_C_TwitterAPI_index_account_tweets_th" + str(i+1),
+threads_step_C_index_account_tweets = []
+for i in range( param.NUMBER_OF_STEP_C_INDEX_ACCOUNT_TWEETS ) :
+    thread = threading.Thread( name = "step_C_index_account_tweets_th" + str(i+1),
                                target = error_collector,
-                               args = ( thread_step_C_TwitterAPI_index_account_tweets, i+1, shared_memory, ) )
+                               args = ( thread_step_C_index_account_tweets, i+1, shared_memory, ) )
     thread.start()
-    threads_step_C_TwitterAPI_index_account_tweets.append( thread )
+    threads_step_C_index_account_tweets.append( thread )
 
 # On ne crée qu'un seul thread du serveur HTTP
 # C'est lui qui va créer plusieurs threads grace à la classe :
@@ -221,10 +221,10 @@ while True :
             print( "step_3_reverse_search_queue :", shared_memory.user_requests.step_3_reverse_search_queue.qsize() )
             print( "step_A_GOT3_list_account_tweets_prior_queue :", shared_memory.scan_requests.step_A_GOT3_list_account_tweets_prior_queue.qsize() )
             print( "step_A_GOT3_list_account_tweets_queue :", shared_memory.scan_requests.step_A_GOT3_list_account_tweets_queue.qsize() )
-            print( "step_B_GOT3_index_account_tweets_prior_queue :", shared_memory.scan_requests.step_B_GOT3_index_account_tweets_prior_queue.qsize() )
-            print( "step_B_GOT3_index_account_tweets_queue :", shared_memory.scan_requests.step_B_GOT3_index_account_tweets_queue.qsize() )
-            print( "step_C_TwitterAPI_index_account_tweets_prior_queue :", shared_memory.scan_requests.step_C_TwitterAPI_index_account_tweets_prior_queue.qsize() )
-            print( "step_C_TwitterAPI_index_account_tweets_queue :", shared_memory.scan_requests.step_C_TwitterAPI_index_account_tweets_queue.qsize() )
+            print( "step_B_TwitterAPI_list_account_tweets_prior_queue :", shared_memory.scan_requests.step_B_TwitterAPI_list_account_tweets_prior_queue.qsize() )
+            print( "step_B_TwitterAPI_list_account_tweets_queue :", shared_memory.scan_requests.step_B_TwitterAPI_list_account_tweets_queue.qsize() )
+            print( "step_C_index_account_tweets_prior_queue :", shared_memory.scan_requests.step_C_index_account_tweets_prior_queue.qsize() )
+            print( "step_C_index_account_tweets_queue :", shared_memory.scan_requests.step_C_index_account_tweets_queue.qsize() )
         else :
             print( "Utilisation : queues")
     
@@ -287,9 +287,9 @@ for thread in threads_step_3_reverse_search :
     thread.join()
 for thread in threads_step_A_GOT3_list_account_tweets :
     thread.join()
-for thread in threads_step_B_GOT3_index_account_tweets :
+for thread in threads_step_A_TwitterAPI_list_account_tweets :
     thread.join()
-for thread in threads_step_C_TwitterAPI_index_account_tweets :
+for thread in threads_step_C_index_account_tweets :
     thread.join()
 thread_http_server.join()
 thread_auto_update_accounts.join()

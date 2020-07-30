@@ -61,7 +61,7 @@ def thread_step_A_GOT3_list_account_tweets( thread_id : int, shared_memory ) :
         shared_memory.scan_requests.set_request_to_next_step( request )
         
         # On liste les tweets du compte Twitter de la requête avec GetOldTweets3
-        print( "[step_A_th" + str(thread_id) + "] Listage des tweets du compte Twitter @" + request.account_name + " avec GetOldTweets3." )
+        print( "[step_A_th" + str(thread_id) + "] Listage des Tweets du compte Twitter @" + request.account_name + " avec GetOldTweets3." )
         request.get_GOT3_list_result = cbir_engine.get_GOT3_list( request.account_name )
         
         # Dire qu'on n'est plus en train de traiter cette requête

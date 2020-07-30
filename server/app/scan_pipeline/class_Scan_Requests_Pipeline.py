@@ -37,19 +37,19 @@ class Scan_Requests_Pipeline :
         # Version non-prioritaire de la file d'attente précédente.
         self.step_A_GOT3_list_account_tweets_queue = queue.Queue()
         
-        # File d'attente à l'étape B du traitement : Indexation des Tweets
-        # avec GetOldTweets3.
-        self.step_B_GOT3_index_account_tweets_prior_queue = queue.Queue()
+        # File d'attente à l'étape B du traitement : Listage des Tweets avec
+        # l'API publique Twitter.
+        self.step_B_TwitterAPI_list_account_tweets_prior_queue = queue.Queue()
         
         # Version non-prioritaire de la file d'attente précédente.
-        self.step_B_GOT3_index_account_tweets_queue = queue.Queue()
+        self.step_B_TwitterAPI_list_account_tweets_queue = queue.Queue()
         
         # File d'attente à l'étape C du traitement : Indexation des Tweets
-        # avec l'API Twitter publique.
-        self.step_C_TwitterAPI_index_account_tweets_prior_queue = queue.Queue()
+        # trouvés par les deux étapes précédentes.
+        self.step_C_index_account_tweets_prior_queue = queue.Queue()
         
         # Version non-prioritaire de la file d'attente précédente.
-        self.step_C_TwitterAPI_index_account_tweets_queue = queue.Queue()
+        self.step_C_index_account_tweets_queue = queue.Queue()
         
         # Bloquer toutes les files d'attentes. Permet de passer une requête
         # en prioritaire sans avoir de problème.
@@ -166,20 +166,20 @@ class Scan_Requests_Pipeline :
                 self.step_A_GOT3_list_account_tweets_prior_queue.put( request )
             
             if request.status == 2 :
-                self.step_B_GOT3_index_account_tweets_prior_queue.put( request )
+                self.step_B_TwitterAPI_list_account_tweets_prior_queue.put( request )
             
             if request.status == 4 :
-                self.step_C_TwitterAPI_index_account_tweets_prior_queue.put( request )
+                self.step_C_index_account_tweets_prior_queue.put( request )
         
         else :
             if request.status == 0 :
                 self.step_A_GOT3_list_account_tweets_queue.put( request )
             
             if request.status == 2 :
-                self.step_B_GOT3_index_account_tweets_queue.put( request )
+                self.step_B_TwitterAPI_list_account_tweets_queue.put( request )
             
             if request.status == 4 :
-                self.step_C_TwitterAPI_index_account_tweets_queue.put( request )
+                self.step_C_index_account_tweets_queue.put( request )
         
         if request.status == 6 :
             request.finished_date = datetime.now()

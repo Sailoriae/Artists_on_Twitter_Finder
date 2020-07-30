@@ -33,11 +33,11 @@ class Scan_Request :
         # 1 : En cours de traitement par un thread de Listage des Tweets avec
         #     GetOldTweets3.
         # 2 : En attente de traitement à l'étape suivante...
-        # 3 : En cours de traitement par un thread d'Indexation des Tweets avec
-        #     GetOldTweets3.
+        # 3 : En cours de traitement par un thread de Listage des Tweets avec
+        #     l'API publique de Twitter.
         # 4 : En attente de traitement à l'étape suivante...
-        # 5 : En cours de traitement par un thread d'Indexation des Tweets avec
-        #     l'API Twitter publique.
+        # 5 : En cours de traitement par un thread d'indexation des Tweets
+        #     trouvés par les deux threads précédents.
         # 6 : Fin de traitement.
         self.status = -1
         
@@ -49,6 +49,11 @@ class Scan_Request :
         # CBIR_Engine_with_Database. A VIDER UNE FOIS UTILISE, CAR C'EST LOURD
         # EN MEMOIRE !
         self.get_GOT3_list_result = None
+        
+        # Résultats de la fonction get_TwitterAPI_list() de la classe
+        # CBIR_Engine_with_Database. A VIDER UNE FOIS UTILISE, CAR C'EST LOURD
+        # EN MEMOIRE !
+        self.get_TwitterAPI_list_result = None
         
         # Date de fin de la procédure
         self.finished_date = None
