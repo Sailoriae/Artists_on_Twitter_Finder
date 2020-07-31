@@ -4,9 +4,11 @@
 try :
     from user_pipeline.class_User_Requests_Pipeline import User_Requests_Pipeline
     from scan_pipeline.class_Scan_Requests_Pipeline import Scan_Requests_Pipeline
+    from class_HTTP_Requests_Limitator import HTTP_Requests_Limitator
 except ModuleNotFoundError :
     from .user_pipeline.class_User_Requests_Pipeline import User_Requests_Pipeline
     from .scan_pipeline.class_Scan_Requests_Pipeline import Scan_Requests_Pipeline
+    from .class_HTTP_Requests_Limitator import HTTP_Requests_Limitator
 
 # Ajouter le répertoire parent au PATH pour pouvoir importer
 from sys import path as sys_path
@@ -43,3 +45,7 @@ class Shared_Memory :
                                          param.API_SECRET,
                                          param.OAUTH_TOKEN,
                                          param.OAUTH_TOKEN_SECRET )
+        
+        # Limitateur du nombre de requêtes sur le serveur HTTP / l'API par
+        # secondes
+        self.http_limitator = HTTP_Requests_Limitator()

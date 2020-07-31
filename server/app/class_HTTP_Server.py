@@ -40,6 +40,15 @@ def http_server_container ( shared_memory_arg ) :
             
             print( "[HTTP]", client_ip, self.log_date_time_string(), "GET", self.path )
             
+            # Vérifier que l'utilisateur ne fait pas trop de requêtes
+            if not self.shared_memory.http_limitator.can_request( client_ip ) :
+                self.send_response(429)
+                self.send_header("Content-type", "text/plain")
+                self.end_headers()
+                
+                self.wfile.write( "429 Too Many Requests\n".encode("utf-8") )
+                return
+            
             # Si on est à la racine
             # GET /
             # GET /?url=[URL de l'illustration de requête]

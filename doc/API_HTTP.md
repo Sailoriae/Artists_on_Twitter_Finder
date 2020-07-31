@@ -52,3 +52,7 @@ Liste des erreurs possibles :
 La liste `results` peut être vide, ou comporter plusieurs résultats. Ils sont alors classés par ordre croissant de distance avec l'illustration de requête.
 
 L'API peut aussi fournir des statistiques sur la base de données : `GET /stats`
+
+Attention : Le serveur limite :
+- Le nombre de requêtes en cours de traitement par adresse IP. Si dépassement, le JSON de réponse contient l'erreur : `YOUR_IP_HAS_MAX_PENDING_REQUESTS`.
+- Et le nombre de requêtes par secondes. Si dépassement, le serveur renvoit une erreur HTTP 429.
