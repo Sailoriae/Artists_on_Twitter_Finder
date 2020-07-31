@@ -2,7 +2,7 @@
 # coding: utf-8
 
 import queue
-from time import sleep
+from time import sleep, time
 from dateutil.tz import tzlocal
 import datetime
 
@@ -11,7 +11,6 @@ from sys import path as sys_path
 from os import path as os_path
 sys_path.append(os_path.dirname(os_path.dirname(os_path.abspath(__file__))))
 
-import parameters as param
 from tweet_finder.database import SQLite_or_MySQL
 
 
@@ -46,6 +45,13 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
         
         # Dire qu'on est en train de traiter cette requête
         shared_memory.user_requests.requests_in_thread[ "thread_step_2_tweets_indexer_number" + str(thread_id) ] = request
+        
+        # Si on a vu cette requête il y a moins de 5 secondes, c'est qu'il n'y
+        # a pas beaucoup de requêtes dans le pipeline, on peut donc dormir
+        # 3 secondes, pour éviter de trop itérer dessus
+        if time() - request.last_seen_indexer < 5 :
+            sleep( 3 )
+        request.last_seen_indexer = time()
         
         # Si la requête n'a pas eu les scans de ses comptes Twitter lancés,
         # c'est que c'est la première fois qu'on la voit

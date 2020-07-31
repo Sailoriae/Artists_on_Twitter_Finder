@@ -2,7 +2,7 @@
 # coding: utf-8
 
 import queue
-from time import sleep
+from time import sleep, time
 from datetime import datetime
 
 # Ajouter le répertoire parent au PATH pour pouvoir importer
@@ -58,6 +58,13 @@ def thread_step_C_GOT3_index_account_tweets( thread_id : int, shared_memory ) :
         
         # Dire qu'on est en train de traiter cette requête
         shared_memory.scan_requests.requests_in_thread[ "thread_step_C_GOT3_index_account_tweets_number" + str(thread_id) ] = request
+        
+        # Si on a vu cette requête il y a moins de 5 secondes, c'est qu'il n'y
+        # a pas beaucoup de requêtes dans le pipeline, on peut donc dormir
+        # 3 secondes, pour éviter de trop itérer dessus
+        if time() - request.last_seen_GOT3_indexer < 5 :
+            sleep( 3 )
+        request.last_seen_GOT3_indexer = time()
         
         # On index / scan les comptes Twitter de la requête avec GetOldTweets3
 #        print( "[step_C_th" + str(thread_id) + "] Indexation des Tweets de @" + request.account_name + " trouvés par GetOldTweets3." )

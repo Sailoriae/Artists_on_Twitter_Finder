@@ -34,7 +34,7 @@ class Scan_Request :
         self.GetOldTweets3_tweets_queue = Queue()
         
         # Résultat de la fonction
-        # Tweets_Lister_with_GetOldTweets3.list_GOT3_tweets()
+        # Tweets_Lister_with_GetOldTweets3.list_GOT3_tweets() (Etape A)
         # Contient la date du Tweet trouvé par GOT3 le plus récent
         self.GetOldTweets3_last_tweet_date = None
         
@@ -42,13 +42,19 @@ class Scan_Request :
         self.TwitterAPI_tweets_queue = Queue()
         
         # Résultat de la fonction
-        # Tweets_Lister_with_TwitterAPI.list_TwitterAPI_tweets()
+        # Tweets_Lister_with_TwitterAPI.list_TwitterAPI_tweets() (Etape B)
         # Contient l'ID du Tweet trouvé par l'API Twitter le plus récent
         self.TwitterAPI_last_tweet_id = None
         
         # Deux variables de début de traitement de la requête
         self.started_GOT3_listing = False
         self.started_TwitterAPI_listing = False
+        
+        # Cache pour les deux indexeurs (Etapes C et D)
+        # Permet de savoir quand la requête a été vue pour la dernière fois,
+        # afin de ne pas trop itérer dessus
+        self.last_seen_GOT3_indexer = 0
+        self.last_seen_TwitterAPI_indexer = 0
         
         # Deux variables de fin du traitement de la requête
         self.finished_GOT3_indexing = False

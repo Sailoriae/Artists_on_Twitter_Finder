@@ -43,6 +43,11 @@ class User_Request :
         # parallèles A, B, C et D, pipeline d'indexation / de scan)
         self.scan_requests = None
         
+        # Cache de l'indexer (Etape 2)
+        # Permet de savoir quand la requête a été vue pour la dernière fois,
+        # afin de ne pas trop itérer dessus
+        self.last_seen_indexer = 0
+        
         # Résultat de la recherche inversée (Etape 3)
         # Résultats de la recherche inversée de l'image
         # Est une liste d'objets Image_in_DB
