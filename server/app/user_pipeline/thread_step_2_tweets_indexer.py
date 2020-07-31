@@ -6,10 +6,10 @@ from time import sleep, time
 from dateutil.tz import tzlocal
 import datetime
 
-# Ajouter le répertoire parent au PATH pour pouvoir importer
+# Ajouter le répertoire parent du répertoire parent au PATH pour pouvoir importer
 from sys import path as sys_path
 from os import path as os_path
-sys_path.append(os_path.dirname(os_path.dirname(os_path.abspath(__file__))))
+sys_path.append(os_path.dirname(os_path.dirname(os_path.dirname(os_path.abspath(__file__)))))
 
 from tweet_finder.database import SQLite_or_MySQL
 
