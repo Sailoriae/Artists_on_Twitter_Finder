@@ -42,4 +42,4 @@ def scan_deviantart_hoome ( NUMBER_OF_ILLUST_TO_SEND ) :
 
 
 if __name__ == "__main__" :
-    scan_deviantart_hoome( 10 )
+    scan_deviantart_hoome( 150 )
