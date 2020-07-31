@@ -295,7 +295,7 @@ class SQLite_or_MySQL :
             
             # Sauvegarder la date d'utilisation de ce compte, et faire +1 au
             # compteur d'utilisations
-            c = self.get_cursor()
+            c = self.get_cursor( buffered = True )
             c.execute( save_date, ( datetime.now().strftime('%Y-%m-%d %H:%M:%S'), account_id ) )
             c.execute( update_count, ( account_id, ) )
             self.conn.commit()
