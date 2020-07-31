@@ -17,6 +17,12 @@ Met en minuscule pour être certain de supprimer les doublons, car Twitterr
 n'est pas sensible à la casse pour les noms d'utilisateurs.
 """
 def filter_twitter_accounts_list ( accounts_list : List[str] ) -> List[str] :
+    # Si l'URL ne mène pas à une illustration, les méthodes des sites supportés
+    # retournent None. Pour faciliter le travail dans la class "Link_Finder",
+    # on retourne ici None.
+    if accounts_list == None :
+        return None
+    
     return_list : List[str] = []
     for account in accounts_list :
         account_lower = account.lower()

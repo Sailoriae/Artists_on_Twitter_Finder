@@ -17,38 +17,36 @@ def test ( url : str,
            should_get_image_url : str,
            should_get_twitter_accounts : List[str],
            should_get_datetime : str ) :
-    image_url = engine.get_image_url( url )
-    twitter_accounts = engine.get_twitter_accounts( url )
-    datetime = engine.get_datetime( url )
+    data = engine.get_data( url )
     
     print( "" )
     print( "Test : " + url )
     
-    if image_url == should_get_image_url :
+    if data.image_url == should_get_image_url :
         print( "Test images sources : OK !" )
         test_image_url = True
     else :
         print( "Test images sources : ECHEC !" )
         print( "On aurait dû avoir : " + should_get_image_url )
-        print( "On a eu : " + image_url )
+        print( "On a eu : " + data.image_url )
         test_image_url = False
     
-    if twitter_accounts == should_get_twitter_accounts :
+    if data.twitter_accounts == should_get_twitter_accounts :
         print( "Test comptes Twitter : OK !" )
         test_twitter_accounts = True
     else :
         print( "Test comptes Twitter : ECHEC !" )
         print( "On aurait dû avoir : " + str(should_get_twitter_accounts) )
-        print( "On a eu : " + str(twitter_accounts) )
+        print( "On a eu : " + str(data.twitter_accounts) )
         test_twitter_accounts = False
     
-    if datetime == should_get_datetime :
+    if data.publish_date == should_get_datetime :
         print( "Test datetime : OK !" )
         test_datetime = True
     else :
         print( "Test datetime : ECHEC !" )
         print( "On aurait dû avoir : " + str(should_get_datetime) )
-        print( "On a eu : " + str(datetime) )
+        print( "On a eu : " + str(data.publish_date) )
         test_datetime = False
     
     return test_image_url and test_twitter_accounts and test_datetime

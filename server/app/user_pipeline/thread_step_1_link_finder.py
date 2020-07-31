@@ -10,7 +10,7 @@ from os import path as os_path
 sys_path.append(os_path.dirname(os_path.dirname(os_path.abspath(__file__))))
 
 import parameters as param
-from link_finder import Link_Finder
+from link_finder import Link_Finder, Unsupported_Website
 from tweet_finder.twitter import TweepyAbtraction
 
 
@@ -53,24 +53,13 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
         print( "[step_1_th" + str(thread_id) + "] Link Finder pour :\n" +
                "[step_1_th" + str(thread_id) + "] " + request.input_url )
         
-        # On lance la recherche des comptes Twitter de l'artiste
-        twitter_accounts = finder_engine.get_twitter_accounts( request.input_url )
-        
-        # Si jamais l'URL de la requête est invalide, on ne va pas plus loin
-        # avec elle (On passe donc son status à "Fin de traitement")
-        if twitter_accounts == None :
-            request.problem = "INVALID_URL"
-            shared_memory.user_requests.set_request_to_next_step( request, force_end = True )
-            
-            # Dire qu'on n'est plus en train de traiter cette requête
-            shared_memory.user_requests.requests_in_thread[ "thread_step_1_link_finder_number" + str(thread_id) ] = None
-            
-            print( "[step_1_th" + str(thread_id) + "] URL invalide ! Elle ne mène pas à une illustration." )
-            continue
+        # On lance le Link Finder sur cet URL
+        try :
+            data = finder_engine.get_data( request.input_url )
         
         # Si jamais le site n'est pas supporté, on ne va pas plus loin avec
         # cette requête (On passe donc son status à "Fin de traitement")
-        elif twitter_accounts == False :
+        except Unsupported_Website :
             request.problem = "UNSUPPORTED_WEBSITE"
             shared_memory.user_requests.set_request_to_next_step( request, force_end = True )
             
@@ -80,9 +69,21 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
             print( "[step_1_th" + str(thread_id) + "] Site non supporté !" )
             continue
         
+        # Si jamais l'URL de la requête est invalide, on ne va pas plus loin
+        # avec elle (On passe donc son status à "Fin de traitement")
+        if data == None :
+            request.problem = "INVALID_URL"
+            shared_memory.user_requests.set_request_to_next_step( request, force_end = True )
+            
+            # Dire qu'on n'est plus en train de traiter cette requête
+            shared_memory.user_requests.requests_in_thread[ "thread_step_1_link_finder_number" + str(thread_id) ] = None
+            
+            print( "[step_1_th" + str(thread_id) + "] URL invalide ! Elle ne mène pas à une illustration." )
+            continue
+        
         # Si jamais aucun compte Twitter n'a été trouvé, on ne va pas plus loin
         # avec la requête (On passe donc son status à "Fin de traitement")
-        elif twitter_accounts == []:
+        elif data.twitter_accounts == []:
             request.problem = "NO_TWITTER_ACCOUNT_FOR_THIS_ARTIST"
             shared_memory.user_requests.set_request_to_next_step( request, force_end = True )
             
@@ -93,7 +94,7 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
             continue
         
         # On vérifie la liste des comptes Twitter
-        for account in twitter_accounts :
+        for account in data.twitter_accounts :
             account_id = twitter.get_account_id( account )
             if account_id != None :
                 request.twitter_accounts_with_id.append( ( account, account_id ) )
@@ -111,19 +112,19 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
             print( "[step_1_th" + str(thread_id) + "] Aucun compte Twitter valide trouvé pour l'artiste de cette illustration !" )
             continue
         
-        print( "[step_1_th" + str(thread_id) + "] Comptes Twitter trouvés pour cet artiste :\n" +
-               "[step_1_th" + str(thread_id) + "] " + str( twitter_accounts ) )
+        print( "[step_1_th" + str(thread_id) + "] Comptes Twitter valides trouvés pour cet artiste :\n" +
+               "[step_1_th" + str(thread_id) + "] " + str( [ account[0] for account in request.twitter_accounts_with_id ] ) )
         
         # Théoriquement, on a déjà vérifié que l'URL existe, donc on devrait
         # forcément trouver une image pour cette requête
-        request.image_url = finder_engine.get_image_url( request.input_url )
+        request.image_url = data.image_url
         
         print( "[step_1_th" + str(thread_id) + "] URL de l'image trouvée :\n" +
                "[step_1_th" + str(thread_id) + "] " + request.image_url )
         
         # Même théorie, donc on devrait forcément trouver la date pour cette
         # requête
-        request.datetime = finder_engine.get_datetime( request.input_url )
+        request.datetime = data.publish_date
         
         # Dire qu'on n'est plus en train de traiter cette requête
         shared_memory.user_requests.requests_in_thread[ "thread_step_1_link_finder_number" + str(thread_id) ] = None

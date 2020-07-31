@@ -8,11 +8,13 @@ try :
     from supported_websites import Pixiv
     from supported_websites import Danbooru
     from supported_websites.utils import filter_twitter_accounts_list
+    from class_Link_Finder_Result import Link_Finder_Result, Unsupported_Website
 except ModuleNotFoundError : # Si on a été exécuté en temps que module
     from .supported_websites import DeviantArt
     from .supported_websites import Pixiv
     from .supported_websites import Danbooru
     from .supported_websites.utils import filter_twitter_accounts_list
+    from .class_Link_Finder_Result import Link_Finder_Result, Unsupported_Website
 
 # Ajouter le répertoire parent au PATH pour pouvoir importer les paramètres
 from sys import path as sys_path
@@ -59,100 +61,79 @@ class Link_Finder :
     """
     @param illust_url L'URL d'une illustration postée sur l'un des sites
                       supportés.
-    @return L'URL de l'image.
-            None si l'URL est invalide (Mais que le site est supporté), c'est à
-            dire que l'URL donnée ne mène pas à une illustration.
-            False si le site n'est pas supporté.
-    """
-    def get_image_url ( self, illust_url : str ) -> str :
-        # Ce sont les clases qui analysent les URL et vont dire si elles
-        # mènent bien vers des illustrations.
-        # Ici, on vérifie juste le domaine.
-        if re.search( deviantart_url, illust_url ) != None :
-            return self.deviantart.get_image_url( illust_url )
-        
-        elif re.search( pixiv_url, illust_url ) != None :
-            return self.pixiv.get_image_url( illust_url )
-        
-        elif re.search( danbooru_url, illust_url ) != None :
-            return self.danbooru.get_image_url( illust_url )
-        
-        else :
-            return False # Oui c'est une bidouille
     
-    """
-    @param illust_url L'URL d'une illustration postée sur l'un des sites
-                      supportés.
-    @return Une liste de comptes Twitter.
-            Ou une liste vide si aucun URL de compte Twitter valide n'a été
-            trouvé.
-            None si l'URL est invalide (Mais que le site est supporté), c'est à
-            dire que l'URL donnée ne mène pas à une illustration.
-            False si le site n'est pas supporté.
-    """
-    def get_twitter_accounts ( self, illust_url : str ) -> str :
-        # Ce sont les clases qui analysent les URL et vont dire si elles
-        # mènent bien vers des illustrations.
-        # Ici, on vérifie juste le domaine.
-        if re.search( deviantart_url, illust_url ) != None :
-            accounts = self.deviantart.get_twitter_accounts( illust_url )
-            if accounts == None :
-                return None
-            return filter_twitter_accounts_list( accounts )
-        
-        elif re.search( pixiv_url, illust_url ) != None :
-            accounts = self.pixiv.get_twitter_accounts( illust_url )
-            if accounts == None :
-                return None
-            return filter_twitter_accounts_list( accounts )
-        
-        elif re.search( danbooru_url, illust_url ) != None :
-            # Pour beaucoup d'artistes sur Danbooru, on peut trouver leur
-            # compte Pixiv, et donc s'assurer de touver leurs comptes Twitter.
-            pixiv_accounts = self.danbooru.get_pixiv_accounts( illust_url )
-            twitter_accounts = []
-            if pixiv_accounts != None :
-                for pixiv_account in pixiv_accounts :
-                    accounts = self.pixiv.get_twitter_accounts(
-                        None,
-                        force_pixiv_account_id = pixiv_account )
-                    if accounts != None :
-                        twitter_accounts += accounts
-            
-            accounts = self.danbooru.get_twitter_accounts( illust_url )
-            if accounts != None :
-                twitter_accounts += accounts
-            else : # L'URL est invalide
-                return None
-            
-            return filter_twitter_accounts_list( twitter_accounts )
-        
-        else :
-            return False # Oui c'est une bidouille
+    @return Un objet "Link_Finder_Result" contenant les attributs suivants :
+            - image_url : L'URL de l'image.
+            - twitter_accounts : Une liste de comptes Twitter, ou une liste 
+              vide si aucun URL de compte Twitter valide n'a été trouvé.
+            - publish_date : L'objet datetime de la date de publication de
+              l'image.
     
+            Ou None si l'URL est invalide (Mais que le site est supporté),
+            c'est à dire que l'URL donnée ne mène pas à une illustration.
+
+    Attention : Cette méthode émet des exceptions Unsupported_Website si le
+    site n'est pas supporté !
     """
-    @param illust_url L'URL d'une illustration postée sur l'un des sites
-                      supportés.
-    @return L'objet datetime de la date de publication de l'image.
-            None si l'URL est invalide (Mais que le site est supporté), c'est à
-            dire que l'URL donnée ne mène pas à une illustration.
-            False si le site n'est pas supporté.
-    """
-    def get_datetime ( self, illust_url : str ) -> str :
+    def get_data ( self, illust_url : str ) -> str :
         # Ce sont les clases qui analysent les URL et vont dire si elles
         # mènent bien vers des illustrations.
         # Ici, on vérifie juste le domaine.
+        
+        # ====================================================================
+        # DEVIANTART
+        # ====================================================================
         if re.search( deviantart_url, illust_url ) != None :
-            return self.deviantart.get_datetime( illust_url )
+            image_url = self.deviantart.get_image_url( illust_url )
+            twitter_accounts = self.deviantart.get_twitter_accounts( illust_url )
+            publish_date = self.deviantart.get_datetime( illust_url )
         
+        # ====================================================================
+        # PIXIV
+        # ====================================================================
         elif re.search( pixiv_url, illust_url ) != None :
-            return self.pixiv.get_datetime( illust_url )
+            image_url = self.pixiv.get_image_url( illust_url )
+            twitter_accounts = self.pixiv.get_twitter_accounts( illust_url )
+            publish_date = self.pixiv.get_datetime( illust_url )
         
+        # ====================================================================
+        # DANBOORU
+        # ====================================================================
         elif re.search( danbooru_url, illust_url ) != None :
-            return self.danbooru.get_datetime( illust_url )
+            image_url = self.danbooru.get_image_url( illust_url )
+            
+            twitter_accounts = self.danbooru.get_twitter_accounts( illust_url )
+            
+            # Si l'URL n'est pas invalide
+            if twitter_accounts != None :
+                # Pour beaucoup d'artistes sur Danbooru, on peut trouver leur
+                # compte Pixiv, et donc s'assurer de touver leurs comptes Twitter.
+                pixiv_accounts = self.danbooru.get_pixiv_accounts( illust_url )
+                if pixiv_accounts != None :
+                    for pixiv_account in pixiv_accounts :
+                        accounts = self.pixiv.get_twitter_accounts(
+                            None,
+                            force_pixiv_account_id = pixiv_account )
+                        if accounts != None :
+                            twitter_accounts += accounts
+            
+            publish_date = self.danbooru.get_datetime( illust_url )
         
+        # ====================================================================
+        # Site non supporté
+        # ====================================================================
         else :
-            return False # Oui c'est une bidouille
+            raise Unsupported_Website
+        
+        # ====================================================================
+        # Retourner
+        # ====================================================================
+        if image_url == None :
+            return None
+        else :
+            return Link_Finder_Result( image_url,
+                                       filter_twitter_accounts_list( twitter_accounts ),
+                                       publish_date )
 
 
 """
