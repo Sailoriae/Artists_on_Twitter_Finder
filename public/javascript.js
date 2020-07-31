@@ -96,11 +96,11 @@ function populateError ( json ) {
 		case "NO_URL_FIELD" :
 			displayErrorP.textContent = "Aucune URL entrée.";
 			break;
-		case "INVALID_URL" :
-			displayErrorP.textContent = "URL entrée invalide.";
-			break;
 		case "UNSUPPORTED_WEBSITE" :
-			displayErrorP.textContent = "Site de l'URL entrée non supporté.";
+			displayErrorP.textContent = "Site de l'URL entrée non supporté, ou l'URL est invalide.";
+			break;
+		case "INVALID_URL" :
+			displayErrorP.textContent = "Le site est supporté, mais l'URL entrée ne mène pas à une illustration.";
 			break;
 		case "NO_TWITTER_ACCOUNT_FOR_THIS_ARTIST" :
 			displayErrorP.textContent = "Aucun compte Twitter trouvé pour cet artiste.";
