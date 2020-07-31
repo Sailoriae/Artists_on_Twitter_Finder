@@ -119,27 +119,27 @@ class Tweets_Indexer_with_GetOldTweets3 :
                 image_3 = None
                 image_4 = None
                 
-                tweets_to_scan_length = len( tweet.images )
+                length = len( tweet.images )
                 
-                if tweets_to_scan_length == 0 :
+                if length == 0 :
                     if self.DEBUG :
                         print( "Tweet sans image, on le passe !" )
                     continue
                 
                 # Traitement des images du Tweet
-                if tweets_to_scan_length > 0 :
+                if length > 0 :
                     image_1 = self.engine.get_image_features(
                                   tweet.images[0],
                                   tweet.id )
-                if tweets_to_scan_length > 1 :
+                if length > 1 :
                     image_2 = self.engine.get_image_features(
                                   tweet.images[1],
                                   tweet.id )
-                if tweets_to_scan_length > 2 :
+                if length > 2 :
                     image_3 = self.engine.get_image_features(
                                   tweet.images[2],
                                   tweet.id )
-                if tweets_to_scan_length > 3 :
+                if length > 3 :
                     image_4 = self.engine.get_image_features(
                                   tweet.images[3],
                                   tweet.id )
