@@ -146,15 +146,15 @@ function populateStatus ( json ) {
 }
 
 function populateTwitterAccounts ( json ) {
-	var p = document.createElement('p');
-	p.textContent = "Comptes Twitter trouvés : ";
-
 	var twitterAccounts = json['twitter_accounts'];
 
 	if ( twitterAccounts.length === 0 ) {
 		var p = document.createElement('p');
 		p.textContent = "Aucun compte Twitter trouvé.";
 	} else {
+		var p = document.createElement('p');
+		p.textContent = "Comptes Twitter trouvés : ";
+
 		for ( var i = 0; i < twitterAccounts.length; i++ ) {
 			var a = document.createElement('a');
 			a.href = "https://twitter.com/" + twitterAccounts[i].account_name;
@@ -162,8 +162,8 @@ function populateTwitterAccounts ( json ) {
 			a.textContent = "@" + twitterAccounts[i].account_name;
 			p.appendChild(a);
 
-			if ( i < twitterAccounts.length ) {
-				p.appendChild = ", ";
+			if ( i < twitterAccounts.length - 1 ) {
+				p.append( ", " );
 			}
 		}
 	}
