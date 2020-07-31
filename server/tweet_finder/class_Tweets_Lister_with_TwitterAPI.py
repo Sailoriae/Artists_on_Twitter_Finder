@@ -22,8 +22,9 @@ Classe permettant de lister les Tweets d'un compte Twitter avec l'API publique
 de Twitter via la librairie Tweepy.
 """
 class Tweets_Lister_with_TwitterAPI :
-    def __init__( self, DEBUG : bool = False ) :
+    def __init__( self, DEBUG : bool = False, DISPLAY_STATS : bool = False ) :
         self.DEBUG = DEBUG
+        self.DISPLAY_STATS = DISPLAY_STATS
         self.bdd = SQLite_or_MySQL()
         self.twitter = TweepyAbtraction( param.API_KEY,
                                          param.API_SECRET,
@@ -52,6 +53,7 @@ class Tweets_Lister_with_TwitterAPI :
         
         if self.DEBUG :
             print( "[List TwiAPI] Listage des Tweets de @" + account_name + "." )
+        if self.DEBUG or self.DISPLAY_STATS :
             start = time()
         
         since_tweet_id = self.bdd.get_account_TwitterAPI_last_tweet_id( account_id )
@@ -65,8 +67,9 @@ class Tweets_Lister_with_TwitterAPI :
                 last_tweet_id = tweet.id
             
             queue.put( tweet )
+            count += 1
         
-        if self.DEBUG :
+        if self.DEBUG or self.DISPLAY_STATS :
             print( "[List TwitterAPI] Il a fallu", time() - start, "secondes pour lister", count, "Tweets de @" + account_name + "." )
         
         # Indiquer qu'on a fini le listage

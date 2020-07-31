@@ -24,8 +24,9 @@ Classe permettant de lister les Tweets d'un compte Twitter avec la librairie
 GetOldTweets3.
 """
 class Tweets_Lister_with_GetOldTweets3 :
-    def __init__( self, DEBUG : bool = False ) :
+    def __init__( self, DEBUG : bool = False, DISPLAY_STATS : bool = False ) :
         self.DEBUG = DEBUG
+        self.DISPLAY_STATS = DISPLAY_STATS
         self.bdd = SQLite_or_MySQL()
         self.twitter = TweepyAbtraction( param.API_KEY,
                                          param.API_SECRET,
@@ -56,6 +57,7 @@ class Tweets_Lister_with_GetOldTweets3 :
         
         if self.DEBUG :
             print( "[List GOT3] Listage des Tweets de @" + account_name + "." )
+        if self.DEBUG or self.DISPLAY_STATS :
             start = time()
         
         since_date = self.bdd.get_account_GOT3_last_tweet_date( account_id )
@@ -113,7 +115,7 @@ class Tweets_Lister_with_GetOldTweets3 :
         
         # Bref, ce système fonctionne.
         
-        if self.DEBUG :
+        if self.DEBUG or self.DISPLAY_STATS :
             print( "[List GOT3] Il a fallu", time() - start, "secondes pour lister", len(tweets_list_1 + tweets_list_2), "Tweets de @" + account_name + "." )
         
         # Indiquer qu'on a fini le listage

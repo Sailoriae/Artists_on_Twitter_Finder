@@ -86,6 +86,7 @@ NUMBER_OF_STEP_D_TWITTERAPI_INDEX_ACCOUNT_TWEETS = 5
 Faire plus de print().
 """
 DEBUG = False
+DISPLAY_STATS = False
 
 """
 MàJ automatique des comptes dans la BDD.

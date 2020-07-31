@@ -23,8 +23,9 @@ import parameters as param
 
 
 class Reverse_Searcher :
-    def __init__ ( self, DEBUG : bool = False ) :
+    def __init__ ( self, DEBUG : bool = False, DISPLAY_STATS : bool = False ) :
         self.DEBUG = DEBUG
+        self.DISPLAY_STATS = DISPLAY_STATS
         self.cbir_engine = CBIR_Engine()
         self.bdd = SQLite_or_MySQL()
         self.twitter = TweepyAbtraction( param.API_KEY,
@@ -57,8 +58,8 @@ class Reverse_Searcher :
             print( error )
             return None
         
-        if self.DEBUG :
-                start = time()
+        if self.DEBUG or self.DISPLAY_STATS :
+            start = time()
         
         try :
             to_return = self.cbir_engine.search_cbir(
@@ -71,7 +72,7 @@ class Reverse_Searcher :
             print( ErrorOpenCV )
             return None
         
-        if self.DEBUG :
+        if self.DEBUG or self.DISPLAY_STATS :
             print( "La recherche s'est faite en", time() - start, "secondes." )
         
         # Suppression des attributs "image_features" pour gagner un peu de

@@ -30,8 +30,9 @@ Classe permettant d'indexer les Tweets d'un compte Twitter trouvés avec la
 librairie GetOldTweets3.
 """
 class Tweets_Indexer_with_GetOldTweets3 :
-    def __init__( self, DEBUG : bool = False ) :
+    def __init__( self, DEBUG : bool = False, DISPLAY_STATS : bool = False ) :
         self.DEBUG = DEBUG
+        self.DISPLAY_STATS = DISPLAY_STATS
         self.bdd = SQLite_or_MySQL()
         self.engine = CBIR_Engine_for_Tweets_Images( DEBUG = DEBUG )
     
@@ -73,29 +74,31 @@ class Tweets_Indexer_with_GetOldTweets3 :
     """
     
     def index_or_update_with_GOT3 ( self, account_name, queue, indexing_tweets ) -> bool :
-        if self.DEBUG :
+#        if self.DEBUG :
 #            print( "Indexation / scan des Tweets de @" + account_name + " avec GetOldTweets3." )
+        if self.DEBUG or self.DISPLAY_STATS :
             times = [] # Liste des temps pour indexer un Tweet
         
         while True :
             try :
                 tweets = queue.get( block = False )
             except Empty_Queue : # Si la queue est vide
-                if self.DEBUG :
+                if self.DEBUG or self.DISPLAY_STATS :
                     if len(times) > 0 :
-                        print( "[Index TwitAPI]", len(times), "Tweets indexés avec une moyenne de", mean(times), "secondes par Tweet." )
+                        print( "[Index GOT3]", len(times), "Tweets indexés avec une moyenne de", mean(times), "secondes par Tweet." )
                 break
             
             # Si on a atteint la fin de la file
             if tweets == None :
-                if self.DEBUG :
+                if self.DEBUG or self.DISPLAY_STATS :
                     if len(times) > 0 :
-                        print( "[Index TwitAPI]", len(times), "Tweets indexés avec une moyenne de", mean(times), "secondes par Tweet." )
+                        print( "[Index GOT3]", len(times), "Tweets indexés avec une moyenne de", mean(times), "secondes par Tweet." )
                 return True
             
             for tweet in tweets :
                 if self.DEBUG :
                     print( "[Index GOT3] Indexation Tweet " + str(tweet.id) + " de @" + account_name + "." )
+                if self.DEBUG or self.DISPLAY_STATS :
                     start = time()
                 
                 # Tester si l'autre classe d'indexation n'est pas déjà en train de
@@ -162,5 +165,5 @@ class Tweets_Indexer_with_GetOldTweets3 :
                     hashtags
                 )
                 
-                if self.DEBUG :
+                if self.DEBUG or self.DISPLAY_STATS :
                     times.append( time() - start )
