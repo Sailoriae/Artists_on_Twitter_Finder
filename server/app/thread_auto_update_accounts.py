@@ -78,10 +78,10 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
                 # On peut faire ce INSERT INTO, pusiqu'il n'y a que ce thread qui
                 # utilise la date locale de dernière MàJ, et que ce thread est
                 # unique
-                bdd_direct_access.set_account_last_scan( oldest_updated_account[0],
-                                                         bdd_direct_access.get_account_last_scan( oldest_updated_account[0] ) )
-                bdd_direct_access.set_account_last_scan_with_TwitterAPI( oldest_updated_account[0],
-                                                                         bdd_direct_access.get_account_last_scan_with_TwitterAPI( oldest_updated_account[0] ) )
+                bdd_direct_access.set_account_GOT3_last_tweet_date( oldest_updated_account[0],
+                                                                    bdd_direct_access.get_account_GOT3_last_tweet_date( oldest_updated_account[0] ) )
+                bdd_direct_access.set_account_TwitterAPI_last_tweet_id( oldest_updated_account[0],
+                                                                        bdd_direct_access.get_account_TwitterAPI_last_tweet_id( oldest_updated_account[0] ) )
             
             # Sinon, on lance le scan pour ce compte
             else :

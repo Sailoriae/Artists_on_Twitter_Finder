@@ -44,7 +44,7 @@ class Tweets_Indexer_with_GetOldTweets3 :
     @param account_id L'ID du compte Twitter.
     """
     def save_last_tweet_date ( self, account_id, last_tweet_date ) :
-        self.bdd.set_account_last_scan( account_id, last_tweet_date )
+        self.bdd.set_account_GOT3_last_tweet_date( account_id, last_tweet_date )
     
     """
     Scanner tous les tweets d'un compte (Les retweets ne comptent pas).

@@ -54,7 +54,7 @@ class Tweets_Lister_with_TwitterAPI :
             print( "[List TwiAPI] Listage des Tweets de @" + account_name + "." )
             start = time()
         
-        since_tweet_id = self.bdd.get_account_last_scan_with_TwitterAPI( account_id )
+        since_tweet_id = self.bdd.get_account_TwitterAPI_last_tweet_id( account_id )
         last_tweet_id = None
         count = 0
         
@@ -75,6 +75,6 @@ class Tweets_Lister_with_TwitterAPI :
         # Retourner l'ID du Tweet trouvé le plus récent, ou celui enregistré
         # dans la base de données si aucun Tweet n'a été trouvé
         if last_tweet_id == None :
-            return self.bdd.get_account_last_scan_with_TwitterAPI( account_id )
+            return self.bdd.get_account_TwitterAPI_last_tweet_id( account_id )
         else :
             return last_tweet_id

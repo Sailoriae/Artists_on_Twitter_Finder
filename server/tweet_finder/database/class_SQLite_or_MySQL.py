@@ -310,7 +310,7 @@ class SQLite_or_MySQL :
     @param account_id ID du compte Twitter
     @param last_scan Date du dernier scan, au format YYYY-MM-DD
     """
-    def set_account_last_scan( self, account_id : int, last_update : str ) :
+    def set_account_GOT3_last_tweet_date( self, account_id : int, last_update : str ) :
         now = datetime.now()
         
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
@@ -334,7 +334,7 @@ class SQLite_or_MySQL :
     @param account_id ID du compte Twitter
     @param tweet_id ID du Tweet scanné le plus récent
     """
-    def set_account_last_scan_with_TwitterAPI( self, account_id : int, tweet_id : int ) :
+    def set_account_TwitterAPI_last_tweet_id( self, account_id : int, tweet_id : int ) :
         now = datetime.now()
         c = self.get_cursor()
         
@@ -355,7 +355,7 @@ class SQLite_or_MySQL :
     @return Date du dernier scan, au format YYYY-MM-DD
             Ou None si le compte est inconnu
     """
-    def get_account_last_scan( self, account_id : int ) -> str :
+    def get_account_GOT3_last_tweet_date( self, account_id : int ) -> str :
         c = self.get_cursor()
         
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
@@ -377,7 +377,7 @@ class SQLite_or_MySQL :
     @return L'ID du dernier Tweet scanné
             Ou None si le compte est inconnu
     """
-    def get_account_last_scan_with_TwitterAPI( self, account_id : int ) -> int :
+    def get_account_TwitterAPI_last_tweet_id( self, account_id : int ) -> int :
         c = self.get_cursor()
         
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
@@ -399,7 +399,7 @@ class SQLite_or_MySQL :
     @return Objet datetime
             Ou None si le compte est inconnu
     """
-    def get_account_last_scan_local_datetime( self, account_id : int ) -> str :
+    def get_account_GOT3_last_scan_local_date( self, account_id : int ) -> str :
         c = self.get_cursor()
         
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
@@ -425,7 +425,7 @@ class SQLite_or_MySQL :
     @return Objet datetime
             Ou None si le compte est inconnu
     """
-    def get_account_last_scan_with_TwitterAPI_local_datetime( self, account_id : int ) -> int :
+    def get_account_TwitterAPI_last_scan_local_date( self, account_id : int ) -> int :
         c = self.get_cursor()
         
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
@@ -542,7 +542,7 @@ if __name__ == '__main__' :
     bdd.insert_tweet( 12, 42, [10.01, 1.1] )
     bdd.get_images_in_db_iterator( 12 )
     
-    bdd.set_account_last_scan( 12, "2020-07-02" )
-    bdd.get_account_last_scan( 13 )
+    bdd.set_account_GOT3_last_tweet_date( 12, "2020-07-02" )
+    bdd.get_account_GOT3_last_tweet_date( 13 )
     
     bdd.conn.close()

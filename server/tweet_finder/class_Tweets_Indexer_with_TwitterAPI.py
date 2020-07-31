@@ -32,7 +32,7 @@ class Tweets_Indexer_with_TwitterAPI :
     @param account_id L'ID du compte Twitter.
     """
     def save_last_tweet_id ( self, account_id, last_tweet_id ) :
-        self.bdd.set_account_last_scan_with_TwitterAPI( account_id, last_tweet_id )
+        self.bdd.set_account_TwitterAPI_last_tweet_id( account_id, last_tweet_id )
     
     """
     Indexer les images d'un tweet dans la base de données.

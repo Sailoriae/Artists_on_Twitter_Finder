@@ -58,7 +58,7 @@ class Tweets_Lister_with_GetOldTweets3 :
             print( "[List GOT3] Listage des Tweets de @" + account_name + "." )
             start = time()
         
-        since_date = self.bdd.get_account_last_scan( account_id )
+        since_date = self.bdd.get_account_GOT3_last_tweet_date( account_id )
         
         # Note importante : GOT3 ne peut pas voir les Tweets marqués comme
         # sensibles... Mais il peut voir les tweets non-sensibles de comptes
@@ -123,7 +123,7 @@ class Tweets_Lister_with_GetOldTweets3 :
         # dans la base de données si aucun Tweet n'a été trouvé
         if len( tweets_list_1 ) == 0 :
             if len( tweets_list_2 ) == 0 :
-                return self.bdd.get_account_last_scan( account_id )
+                return self.bdd.get_account_GOT3_last_tweet_date( account_id )
             else :
                 return tweets_list_2[0].date.strftime('%Y-%m-%d')
         else :

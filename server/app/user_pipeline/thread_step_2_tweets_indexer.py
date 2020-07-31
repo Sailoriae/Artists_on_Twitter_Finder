@@ -87,8 +87,8 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
                     # Si le compte est déjà indexé
                     else :
                         # On prend ses deux dernières dates de scan
-                        last_scan_1 = bdd_direct_access.get_account_last_scan_local_datetime( account_id )
-                        last_scan_2 = bdd_direct_access.get_account_last_scan_with_TwitterAPI_local_datetime( account_id )
+                        last_scan_1 = bdd_direct_access.get_account_GOT3_last_scan_local_date( account_id )
+                        last_scan_2 = bdd_direct_access.get_account_TwitterAPI_last_scan_local_date( account_id )
                         
                         # Si l'une des deux est à NULL, il faut scanner (Mais
                         # théoriquement le thread d'auto-update l'a fait avant
