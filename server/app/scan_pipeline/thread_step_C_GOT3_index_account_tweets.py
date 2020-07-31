@@ -68,7 +68,10 @@ def thread_step_C_GOT3_index_account_tweets( thread_id : int, shared_memory ) :
         
         # On index / scan les comptes Twitter de la requête avec GetOldTweets3
 #        print( "[step_C_th" + str(thread_id) + "] Indexation des Tweets de @" + request.account_name + " trouvés par GetOldTweets3." )
-        request.finished_GOT3_indexing = getoldtweets3_indexer.index_or_update_with_GOT3( request.account_name, request.GetOldTweets3_tweets_queue )
+        request.finished_GOT3_indexing = getoldtweets3_indexer.index_or_update_with_GOT3(
+                                             request.account_name,
+                                             request.GetOldTweets3_tweets_queue,
+                                             request.indexing_tweets )
         
         # Si l'indexation est terminée, on met la date de fin dans la requête
         if request.finished_GOT3_indexing :
@@ -78,9 +81,15 @@ def thread_step_C_GOT3_index_account_tweets( thread_id : int, shared_memory ) :
             # Enregistrer la date du Tweet trouvé le plus récent
             getoldtweets3_indexer.save_last_tweet_date( request.account_id, request.GetOldTweets3_last_tweet_date )
             
-            # On peut Màj les statistiques mises en cache dans l'objet
-            # Shared_Memory
-            shared_memory.tweets_count, shared_memory.accounts_count = bdd_direct_access.get_stats()
+            # Si les deux indexations ont terminé
+            if request.finished_TwitterAPI_indexing :
+                # On peut Màj les statistiques mises en cache dans l'objet
+                # Shared_Memory
+                shared_memory.tweets_count, shared_memory.accounts_count = bdd_direct_access.get_stats()
+                
+                # On peut supprimer l'objet Common_Tweet_IDs_List() pour gagner
+                # de la mémoire vive
+                request.indexing_tweets = None
         
         # Sinon, il faut la remettre dans notre file d'attente
         else :

@@ -161,11 +161,14 @@ class Tweets_Indexer_with_TwitterAPI :
                         faire des "print()".
     @param queue La file d'attente donnée à la méthode
                  Tweet_Lister_with_TwitterAPI.list_TwitterAPI_tweets().
+    @param indexing_tweets Objet "Common_Tweet_IDs_List" permettant d'éviter de
+                           traiter le même Tweet en même temps quand on tourne
+                           en parallèle de l'autre classe d'indexation.
     
     @return True si la file d'attente est terminée.
             False si il faut attendre un peu et rappeler cette méthode.
     """
-    def index_or_update_with_TwitterAPI ( self, account_name : str, queue ) -> bool :
+    def index_or_update_with_TwitterAPI ( self, account_name : str, queue, indexing_tweets) -> bool :
         if self.DEBUG :
 #            print( "[Index TwiAPI] Indexation de Tweets de @" + account_name + "." )
             times = [] # Liste des temps pour indexer un Tweet
@@ -195,6 +198,13 @@ class Tweets_Indexer_with_TwitterAPI :
             except AttributeError : # Le Tweet n'est pas un RT
                 pass
             else : # Le Tweet est un RT
+                continue
+            
+            # Tester si l'autre classe d'indexation n'est pas déjà en train de
+            # traiter, on n'a pas déjà traité, ce Tweet
+            if not indexing_tweets.add( tweet.id ) :
+                if self.DEBUG :
+                    print( "[Index TwitAPI] Tweet déjà indexé par l'autre indexeur !" )
                 continue
             
             # Cela ne sert à rien tester avant d'indexer si le tweet n'est pas

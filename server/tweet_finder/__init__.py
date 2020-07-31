@@ -11,3 +11,5 @@ from .class_Tweets_Indexer_with_GetOldTweets3 import Tweets_Indexer_with_GetOldT
 from .class_Tweets_Indexer_with_TwitterAPI import Tweets_Indexer_with_TwitterAPI
 from .class_Tweets_Lister_with_GetOldTweets3 import Tweets_Lister_with_GetOldTweets3
 from .class_Tweets_Lister_with_TwitterAPI import Tweets_Lister_with_TwitterAPI
+
+from .class_Common_Tweet_IDs_List import Common_Tweet_IDs_List

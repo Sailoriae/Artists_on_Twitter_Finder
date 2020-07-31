@@ -3,6 +3,13 @@
 
 from queue import Queue
 
+# Ajouter le répertoire parent du répertoire parent au PATH pour pouvoir importer
+from sys import path as sys_path
+from os import path as os_path
+sys_path.append(os_path.dirname(os_path.dirname(os_path.dirname(os_path.abspath(__file__)))))
+
+from tweet_finder import Common_Tweet_IDs_List
+
 
 """
 Classe représentant une indexation (Nouvelle ou mise à jour) d'un ID de compte
@@ -55,6 +62,11 @@ class Scan_Request :
         # afin de ne pas trop itérer dessus
         self.last_seen_GOT3_indexer = 0
         self.last_seen_TwitterAPI_indexer = 0
+        
+        # Cache pour les deux indexeurs (Etape C et D)
+        # Permet de savoir si l'autre est en train ou a déjà traiter un Tweet,
+        # sans avoir à faire un appel à la base de données
+        self.indexing_tweets = Common_Tweet_IDs_List()
         
         # Deux variables de fin du traitement de la requête
         self.finished_GOT3_indexing = False

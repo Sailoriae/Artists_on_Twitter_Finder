@@ -64,12 +64,15 @@ class Tweets_Indexer_with_GetOldTweets3 :
                         faire des "print()".
     @param queue La file d'attente donnée à la méthode
                  Tweet_Lister_with_GetOldTweets3.list_GOT3_tweets().
+    @param indexing_tweets Objet "Common_Tweet_IDs_List" permettant d'éviter de
+                           traiter le même Tweet en même temps quand on tourne
+                           en parallèle de l'autre classe d'indexation.
     
     @return True si la file d'attente est terminée.
             False si il faut attendre un peu et rappeler cette méthode.
     """
     
-    def index_or_update_with_GOT3 ( self, account_name, queue ) -> bool :
+    def index_or_update_with_GOT3 ( self, account_name, queue, indexing_tweets ) -> bool :
         if self.DEBUG :
 #            print( "Indexation / scan des Tweets de @" + account_name + " avec GetOldTweets3." )
             times = [] # Liste des temps pour indexer un Tweet
@@ -94,6 +97,13 @@ class Tweets_Indexer_with_GetOldTweets3 :
                 if self.DEBUG :
                     print( "[Index GOT3] Indexation Tweet " + str(tweet.id) + " de @" + account_name + "." )
                     start = time()
+                
+                # Tester si l'autre classe d'indexation n'est pas déjà en train de
+                # traiter, on n'a pas déjà traité, ce Tweet
+                if not indexing_tweets.add( tweet.id ) :
+                    if self.DEBUG :
+                        print( "[Index GOT3] Tweet déjà indexé par l'autre indexeur !" )
+                    continue
                 
                 # Tester avant d'indexer si le tweet n'est pas déjà dans la BDD
                 if self.bdd.is_tweet_indexed( tweet.id ) :
