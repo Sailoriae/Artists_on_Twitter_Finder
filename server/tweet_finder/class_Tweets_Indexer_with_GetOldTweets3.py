@@ -86,7 +86,7 @@ class Tweets_Indexer_with_GetOldTweets3 :
                 if self.DEBUG or self.DISPLAY_STATS :
                     if len(times) > 0 :
                         print( "[Index GOT3]", len(times), "Tweets indexés avec une moyenne de", mean(times), "secondes par Tweet." )
-                break
+                return False
             
             # Si on a atteint la fin de la file
             if tweets == None :

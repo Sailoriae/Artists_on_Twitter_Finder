@@ -10,7 +10,7 @@ from os import path as os_path
 sys_path.append(os_path.dirname(os_path.dirname(os_path.dirname(os_path.abspath(__file__)))))
 
 import parameters as param
-from tweet_finder import Tweets_Lister_with_TwitterAPI
+from tweet_finder import Tweets_Lister_with_TwitterAPI, Unfounded_Account_on_Lister_with_TwitterAPI
 
 
 """
@@ -58,7 +58,10 @@ def thread_step_B_TwitterAPI_list_account_tweets( thread_id : int, shared_memory
         
         # On liste les Tweets du compte Twitter de la requête avec l'API Twitter
         print( "[step_B_th" + str(thread_id) + "] Listage des Tweets du compte Twitter @" + request.account_name + " avec l'API Twitter." )
-        request.TwitterAPI_last_tweet_id = twitterapi_lister.list_TwitterAPI_tweets( request.account_name, request.TwitterAPI_tweets_queue )
+        try :
+            request.TwitterAPI_last_tweet_id = twitterapi_lister.list_TwitterAPI_tweets( request.account_name, request.TwitterAPI_tweets_queue )
+        except Unfounded_Account_on_Lister_with_TwitterAPI :
+            request.unfounded_account = True
         
         # Dire qu'on n'est plus en train de traiter cette requête
         shared_memory.scan_requests.requests_in_thread[ "thread_step_B_TwitterAPI_list_account_tweets_number" + str(thread_id) ] = None

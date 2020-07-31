@@ -56,6 +56,12 @@ def thread_step_C_GOT3_index_account_tweets( thread_id : int, shared_memory ) :
         # Lacher le sémaphore
         shared_memory.scan_requests.queues_sem.release()
         
+        # Si le compte est marqué comme introuvable par un des thread de
+        # listage, on peur arrêter là avec cette requête
+        if request.unfounded_account :
+            request.finished_date = datetime.now()
+            continue
+        
         # Dire qu'on est en train de traiter cette requête
         shared_memory.scan_requests.requests_in_thread[ "thread_step_C_GOT3_index_account_tweets_number" + str(thread_id) ] = request
         

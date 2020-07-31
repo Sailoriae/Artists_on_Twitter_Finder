@@ -33,6 +33,9 @@ class Scan_Request :
         self.account_name = acount_name
         self.is_prioritary = is_prioritary
         
+        # Si le compte est introuvable
+        self.unfounded_account = False
+        
         # Si jamais un thread de traitement a planté avec la requête, le
         # collecteur d'erreur l'indiquera ici
         self.has_failed = False

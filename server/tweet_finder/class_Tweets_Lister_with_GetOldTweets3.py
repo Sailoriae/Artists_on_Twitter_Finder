@@ -19,6 +19,10 @@ sys_path.append(os_path.dirname(os_path.dirname(os_path.abspath(__file__))))
 import parameters as param
 
 
+class Unfounded_Account_on_Lister_with_GetOldTweets3 ( Exception ) :
+    pass
+
+
 """
 Classe permettant de lister les Tweets d'un compte Twitter avec la librairie
 GetOldTweets3.
@@ -47,13 +51,18 @@ class Tweets_Lister_with_GetOldTweets3 :
     
     @return La date du Tweet le plus récent, à enregistrer dans la base lorsque
             l'indexation sera terminée.
-            Ou None si le compte est introuvable.
+            Ou None si aucun Tweet n'a jamais été trouvé (Donc enregistrement
+            "NULL" pour ce compte dans la base de données si le compte était
+            déjà dans la base.
+    
+    Peut émettre une exception "Unfounded_Account_on_Lister_with_TwitterAPI" si
+    le compte est introuvable.
     """
     def list_getoldtweets3_tweets ( self, account_name, queue ) :
         account_id = self.twitter.get_account_id( account_name )
         if account_id == None :
             print( "[List GOT3] Compte @" + account_name + " introuvable !" )
-            return None
+            raise Unfounded_Account_on_Lister_with_GetOldTweets3
         
         if self.DEBUG :
             print( "[List GOT3] Listage des Tweets de @" + account_name + "." )
@@ -123,14 +132,16 @@ class Tweets_Lister_with_GetOldTweets3 :
         
         # Retourner la date du Tweet trouvé le plus récent, ou celui enregistré
         # dans la base de données si aucun Tweet n'a été trouvé
-        if len( tweets_list_1 ) == 0 :
-            if len( tweets_list_2 ) == 0 :
-                return self.bdd.get_account_GOT3_last_tweet_date( account_id )
-            else :
-                return tweets_list_2[0].date.strftime('%Y-%m-%d')
-        else :
-            if len( tweets_list_2 ) == 0 :
-                return tweets_list_1[0].date.strftime('%Y-%m-%d')
-            else :
+        # La BDD peut retourner None si elle ne connait pas le Tweet (Donc aucun
+        # Tweet n'est enregistré pour ce compte), c'est pas grave
+        if len( tweets_list_1 ) > 0 :
+            if len( tweets_list_2 ) > 0 :
                 min_date = min( tweets_list_1[0].date, tweets_list_2[0].date )
                 return min_date.strftime('%Y-%m-%d')
+            else :
+                return tweets_list_1[0].date.strftime('%Y-%m-%d')
+        else :
+            if len( tweets_list_2 ) > 0 :
+                return tweets_list_2[0].date.strftime('%Y-%m-%d')
+            else :
+                return self.bdd.get_account_GOT3_last_tweet_date( account_id )
