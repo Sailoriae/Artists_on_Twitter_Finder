@@ -23,7 +23,7 @@ function mainFunction () {
 		if ( this.readyState === 4 ) {
 			if ( request.status === 200 ) {
 				if ( request.responseText === "" ) {
-					displayErrorP.textContent = "Impossible de contacter le serveur.";
+					displayErrorP.textContent = lang["CANNOT_CONTACT_SERVER"];
 					return;
 				} else {
 					var json = JSON.parse( request.responseText );
@@ -42,7 +42,7 @@ function mainFunction () {
 					waitAndUpdate( json );
 				}
 			} else {
-				displayErrorP.textContent = "Impossible de contacter le serveur.";
+				displayErrorP.textContent = lang["CANNOT_CONTACT_SERVER"];
 			}
 		}
 	});
@@ -92,56 +92,13 @@ function canPrintTweets ( json ) {
 }
 
 function populateError ( json ) {
-	switch ( json.error ) {
-		case "NO_URL_FIELD" :
-			displayErrorP.textContent = "Aucune URL entrée.";
-			break;
-		case "UNSUPPORTED_WEBSITE" :
-			displayErrorP.textContent = "Site de l'URL entrée non supporté, ou l'URL est invalide.";
-			break;
-		case "INVALID_URL" :
-			displayErrorP.textContent = "Le site est supporté, mais l'URL entrée ne mène pas à une illustration.";
-			break;
-		case "NO_TWITTER_ACCOUNT_FOR_THIS_ARTIST" :
-			displayErrorP.textContent = "Aucun compte Twitter trouvé pour cet artiste.";
-			break;
-		case "NO_VALID_TWITTER_ACCOUNT_FOR_THIS_ARTIST" :
-			displayErrorP.textContent = "Aucun compte Twitter valide trouvé pour cet artiste.";
-			break;
-		case "ERROR_DURING_REVERSE_SEARCH" :
-			displayErrorP.textContent = "L'illustration entrée a un format à la noix et ne peut pas être cherchée.";
-			break;
-		case "PROCESSING_ERROR" :
-			displayErrorP.textContent = "Erreur coté serveur, impossible de terminer le traitement de la requête.";
-			break;
-		case "YOUR_IP_HAS_MAX_PENDING_REQUESTS" :
-			displayErrorP.textContent = "Votre adresse IP a atteint son quota maximal de requêtes en cours de traitement.";
-			break;
-	}
+	displayErrorP.textContent = lang[ json.error ];
 }
 
 function populateStatus ( json ) {
 	var p = document.createElement('p');
-	p.textContent = "Status du traitement : ";
-
-	if ( json["status"] === "END" ) {
-		p.textContent += "Fin de traitement.";
-	} else if ( json["status"] === "IMAGE_REVERSE_SEARCH" ) {
-		p.textContent += "En cours de traitement par le serveur... Recherche inversée de l'illustration.";
-	} else if ( json["status"] === "WAIT_IMAGE_REVERSE_SEARCH" ) {
-		p.textContent += "En cours de traitement par le serveur... En attente de la recherche inversée de l'illustration.";
-	} else if ( json["status"] === "INDEX_ACCOUNTS_TWEETS" ) {
-		p.textContent += "En cours de traitement par le serveur... Indexation des Tweets des comptes Twitter trouvés.";
-	} else if ( json["status"] === "WAIT_INDEX_ACCOUNTS_TWEETS" ) {
-		p.textContent += "En cours de traitement par le serveur... En attente de l'indexation des Tweets des comptes Twitter trouvés.";
-	} else if ( json["status"] === "LINK_FINDER" ) {
-		p.textContent += "En cours de traitement par le serveur... Recherche des comptes Twitter de l'artiste.";
-	} else if ( json["status"] === "WAIT_LINK_FINDER" ) {
-		p.textContent += "En cours de traitement par le serveur... En attente de recherche des comptes Twitter de l'artiste.";
-	} else {
-		p.textContent += "En cours de traitement par le serveur...";
-	}
-
+	p.textContent = lang[ "STATUS" ];
+	p.textContent += lang[ json["status"] ]
 	displayProcessStatusP.appendChild(p);
 }
 
@@ -150,10 +107,10 @@ function populateTwitterAccounts ( json ) {
 
 	if ( twitterAccounts.length === 0 ) {
 		var p = document.createElement('p');
-		p.textContent = "Aucun compte Twitter trouvé.";
+		p.textContent = lang[ "NO_TWITTER_ACCOUNT_FOUNDED" ];
 	} else {
 		var p = document.createElement('p');
-		p.textContent = "Comptes Twitter trouvés : ";
+		p.textContent = lang[ "FOUNDED_TWITTER_ACCOUNTS" ];
 
 		for ( var i = 0; i < twitterAccounts.length; i++ ) {
 			var a = document.createElement('a');
@@ -176,7 +133,7 @@ function populateTweets ( json ) {
 
 	if ( tweets.length === 0 ) {
 		var p = document.createElement('p');
-		p.textContent = "Aucun Tweet trouvé.";
+		p.textContent = lang[ "NO_TWEET_FOUNDED" ];
 		tweetsDiv.appendChild(p);
 	} else {
 		var alreadyDisplayedTweetsID = [];
@@ -188,7 +145,7 @@ function populateTweets ( json ) {
 				var div = document.createElement('div');
 
 				var p = document.createElement('p');
-				p.textContent = "Tweet trouvé : ";
+				p.textContent = lang[ "FOUNDED_TWEET" ];
 				var a = document.createElement('a');
 				a.href = "https://twitter.com/any/status/" + tweets[i].tweet_id;
 				a.target = "_blank";
@@ -210,6 +167,14 @@ function populateTweets ( json ) {
 	}
 }
 
+// Source : https://stackoverflow.com/questions/7790811/how-do-i-put-variables-inside-javascript-strings-node-js
+function parse(str) {
+	var args = [].slice.call(arguments, 1),
+		i = 0;
+
+	return str.replace(/%s/g, () => args[i++]);
+}
+
 function displayStats() {
 	displayStatsP.innerHTML = "";
 	displayInfosP.innerHTML = "";
@@ -220,18 +185,17 @@ function displayStats() {
 		if ( this.readyState === 4 ) {
 			if ( request.status === 200 ) {
 				if ( request.responseText === "" ) {
-					displayStatsP.textContent = "Impossible d'afficher les statistiques.";
+					displayStatsP.textContent = lang[ "CANNOT_DISPLAY_STATS" ];
 					return;
 				} else {
 					var json = JSON.parse( request.responseText );
 					console.log( json );
-					displayStatsP.textContent = numberWithSpaces( json["indexed_tweets_count"] ) + " Tweets indexés sur " + numberWithSpaces( json["indexed_accounts_count"] ) + " comptes Twitter.";
+					displayStatsP.textContent = parse( lang[ "STATS" ], numberWithSpaces( json["indexed_tweets_count"] ), numberWithSpaces( json["indexed_accounts_count"] ) );
 
-					displayInfosP.textContent = "Les nombre de requêtes en cours de traitement par adresse IP est limité à " + json["limit_per_ip_address"] + "."
-					displayInfosP.textContent += " L'index des Tweets avec images d'un compte est mis à jour automatiquement au bout de " + json["update_accounts_frequency"] + " jours."
+					displayInfosP.textContent = parse( lang[ "INFO" ], json["limit_per_ip_address"] )
 				}
 			} else {
-				displayStatsP.textContent = "Impossible d'afficher les statistiques.";
+				displayStatsP.textContent = lang[ "CANNOT_DISPLAY_STATS" ];
 			}
 		}
 	});
