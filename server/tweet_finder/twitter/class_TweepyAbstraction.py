@@ -73,7 +73,7 @@ class TweepyAbtraction :
             retry = False
             try :
                 if invert_mode :
-                    json = self.api.get_user( account_name )
+                    json = self.api.get_user( user_id = account_name )
                     if json._json["protected"] == True :
                         if invert_mode :
                             print( "Erreur en récupérant le nom du compte " + str(account_name) + "." )
@@ -83,7 +83,7 @@ class TweepyAbtraction :
                         return None
                     return json.screen_name
                 else :
-                    json = self.api.get_user( account_name )
+                    json = self.api.get_user( screen_name = account_name )
                     if json._json["protected"] == True :
                         if invert_mode :
                             print( "Erreur en récupérant le nom du compte " + str(account_name) + "." )
@@ -126,7 +126,7 @@ class TweepyAbtraction :
         if since_tweet_id == None :
             return Cursor_Iterator(
                 tweepy.Cursor( self.api.user_timeline,
-                               id = account_id,
+                               user_id = account_id,
                                tweet_mode = "extended",
                                include_rts = False,
                                trim_user = True # Supprimer les infos sur l'utilisateur, on en n'a pas besoin
@@ -134,7 +134,7 @@ class TweepyAbtraction :
         else :
             return Cursor_Iterator(
                 tweepy.Cursor( self.api.user_timeline,
-                               id = account_id,
+                               user_id = account_id,
                                since_id = since_tweet_id,
                                tweet_mode = "extended",
                                include_rts = False,
