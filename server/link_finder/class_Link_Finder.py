@@ -7,12 +7,14 @@ try :
     from supported_websites import DeviantArt
     from supported_websites import Pixiv
     from supported_websites import Danbooru
+    from supported_websites import Philomena
     from supported_websites.utils import filter_twitter_accounts_list
     from class_Link_Finder_Result import Link_Finder_Result, Unsupported_Website
 except ModuleNotFoundError : # Si on a été exécuté en temps que module
     from .supported_websites import DeviantArt
     from .supported_websites import Pixiv
     from .supported_websites import Danbooru
+    from .supported_websites import Philomena
     from .supported_websites.utils import filter_twitter_accounts_list
     from .class_Link_Finder_Result import Link_Finder_Result, Unsupported_Website
 
@@ -33,6 +35,10 @@ pixiv_url = re.compile(
     "^http(?:s)?:\/\/(?:www\.)?pixiv\.net(?:\/|$)" )
 danbooru_url = re.compile(
     "^http(?:s)?:\/\/danbooru\.donmai\.us(?:\/|$)" )
+derpibooru_url = re.compile(
+    "^http(?:s)?:\/\/(?:www\.)?derpibooru\.org(?:\/|$)" )
+furbooru_url = re.compile(
+    "^http(?:s)?:\/\/(?:www\.)?furbooru\.org(?:\/|$)" )
 
 # Bien mettre (?:\/|$) au bout pour s'assurer qu'il y a un "/" ou qu'on est à
 # la fin de la chaine. Permet d'éviter de passer des sous domaines. Par exemple
@@ -51,12 +57,17 @@ Ainsi, afin d'optimiser l'utilisation de cette classe, il faut :
 - Et exécuter les deux méthodes get_image_url() et get_twitter_accounts() l'une
   après l'autre pour une même illustration (C'est à dire ne pas mélanger les
   illustrations).
+
+Note importante : Si la source d'une image est un Tweet, ne jamais être tenté
+de prendre le compte qui l'a posté pour le compte Twitter de l'artiste !
 """
 class Link_Finder :
     def __init__ ( self ) :
         self.deviantart = DeviantArt()
         self.pixiv = Pixiv( param.PIXIV_USERNAME, param.PIXIV_PASSWORD )
         self.danbooru = Danbooru()
+        self.derpibooru = Philomena( site_ID = 1 )
+        self.furbooru = Philomena( site_ID = 2 )
     
     """
     @param illust_url L'URL d'une illustration postée sur l'un des sites
@@ -118,6 +129,46 @@ class Link_Finder :
                             twitter_accounts += accounts
             
             publish_date = self.danbooru.get_datetime( illust_url )
+        
+        # ====================================================================
+        # DERPIBOORU
+        # ====================================================================
+        elif re.search( derpibooru_url, illust_url ) != None :
+            image_url = self.derpibooru.get_image_url( illust_url )
+            twitter_accounts = self.derpibooru.get_twitter_accounts( illust_url )
+            publish_date = self.derpibooru.get_datetime( illust_url )
+            
+            # Comme les Boorus sont des sites de reposts, on peut trouver la
+            # source de l'illustration. Si c'est sur un site que l'on supporte,
+            # le Link Finder peut aller y faire un tour !
+            source = self.derpibooru.get_source( illust_url )
+            if source != None and source != "" :
+                try :
+                    data = self.get_data( source )
+                except Unsupported_Website :
+                    pass
+                else :
+                    twitter_accounts += data.twitter_accounts
+        
+        # ====================================================================
+        # FURBOORU
+        # ====================================================================
+        elif re.search( furbooru_url, illust_url ) != None :
+            image_url = self.furbooru.get_image_url( illust_url )
+            twitter_accounts = self.furbooru.get_twitter_accounts( illust_url )
+            publish_date = self.furbooru.get_datetime( illust_url )
+            
+            # Comme les Boorus sont des sites de reposts, on peut trouver la
+            # source de l'illustration. Si c'est sur un site que l'on supporte,
+            # le Link Finder peut aller y faire un tour !
+            source = self.furbooru.get_source( illust_url )
+            if source != None and source != "" :
+                try :
+                    data = self.get_data( source )
+                except Unsupported_Website :
+                    pass
+                else :
+                    twitter_accounts += data.twitter_accounts
         
         # ====================================================================
         # Site non supporté

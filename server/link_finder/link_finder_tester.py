@@ -99,3 +99,29 @@ test( "https://danbooru.donmai.us/posts/3878029",
       "https://danbooru.donmai.us/data/f316f97186dab780a2a6e54b4acccd94.png",
       ['wokada156'],
       datetime.fromisoformat( "2020-04-24 06:54:45.053000-04:00" ) )
+
+
+print( "" )
+print( "TEST DE DERPIBOORU :" )
+
+# Test intéressant, puisque le compte Twitter de l'artiste n'est pas (encore)
+# listé sur Derpibooru : https://www.derpibooru.org/tags/artist-colon-fidzfox
+test( "https://www.derpibooru.org/images/1851874",
+      "https://derpicdn.net/img/2018/10/9/1851874/large.jpeg",
+      ['fidzfox'],
+      datetime.fromisoformat( "2018-10-09T01:30:23" ) )
+
+# Attention, test de NSFW
+test( "https://www.derpibooru.org/images/2043814",
+      "https://derpicdn.net/img/2019/5/19/2043814/large.png",
+      ['kingkakapo'],
+      datetime.fromisoformat( "2019-05-19T22:59:22" ) )
+
+
+print( "" )
+print( "TEST DE FURBOORU :" )
+
+test( "https://furbooru.org/images/18",
+      "https://furrycdn.org/img/2020/4/24/18/large.png",
+      ['twiren_arts'],
+      datetime.fromisoformat( "2020-04-24T22:50:11" ) )
