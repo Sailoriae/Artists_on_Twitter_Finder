@@ -4,8 +4,10 @@ var displayErrorP = document.getElementById("display-error");
 var displayProcessStatusP = document.getElementById("display-process-status");
 var displayStatsP = document.getElementById("display-stats");
 var displayInfosP = document.getElementById("display-infos");
+var displaySupportedWebitesP = document.getElementById("supported-websites");
 
 displayStats();
+displaySupportedWebites();
 
 function mainFunction () {
 	document.getElementById("launch").style.display = "none";
@@ -207,4 +209,42 @@ function displayStats() {
 // Source : https://stackoverflow.com/questions/16637051/adding-space-between-numbers
 function numberWithSpaces(x) {
 	return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+}
+
+function displaySupportedWebites() {
+	displaySupportedWebitesP.innerHTML = "";
+
+	var request = new XMLHttpRequest();
+
+	request.addEventListener( "readystatechange", function() {
+		if ( this.readyState === 4 ) {
+			if ( request.status === 200 ) {
+				if ( request.responseText === "" ) {
+					return;
+				} else {
+					var json = JSON.parse( request.responseText );
+					console.log( json );
+					displaySupportedWebitesP.textContent = lang[ "SUPPORTED_WEBSITES" ];
+
+					var keys = Object.keys( json );
+					for ( var i = 0; i < keys.length; i++ ) {
+						var a = document.createElement('a');
+						a.href = json[ keys[i] ];
+						a.target = "_blank";
+						a.textContent = keys[i];
+						displaySupportedWebitesP.appendChild(a);
+
+						if ( i < keys.length - 1 ) {
+							displaySupportedWebitesP.append( ", " );
+						} else {
+							displaySupportedWebitesP.append( "." );
+						}
+					}
+				}
+			}
+		}
+	});
+
+	request.open("GET", "./supported_websites.json");
+	request.send();
 }
