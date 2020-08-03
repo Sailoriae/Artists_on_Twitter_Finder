@@ -1,6 +1,9 @@
 #!/usr/bin/python3
 # coding: utf-8
 
+from time import time
+from statistics import mean
+
 try :
     from class_Image_in_DB import Image_in_DB
     from sql_requests_dict import sql_requests_dict
@@ -36,7 +39,8 @@ class Image_Features_Iterator :
                         request_1,
                         request_2,
                         request_3,
-                        request_4 ) :
+                        request_4,
+                        DISPLAY_STATS = False ) :
         self.conn = conn
         self.current_cursor = self.conn.cursor()
         self.current_table = 1
@@ -50,6 +54,12 @@ class Image_Features_Iterator :
         self.request_2 = request_2
         self.request_3 = request_3
         self.request_4 = request_4
+        
+        self.DISPLAY_STATS = DISPLAY_STATS
+        if DISPLAY_STATS :
+            self.iteration_times = [] # Durées des itérations
+            self.usage_times = [] # Durées des utilisations
+            self.usage_start = None
 
     def __iter__( self ) :
         return self
@@ -58,6 +68,11 @@ class Image_Features_Iterator :
     @return Un objet Image_in_DB
     """
     def __next__( self ) -> Image_in_DB :
+        if self.DISPLAY_STATS :
+            iteration_start = time()
+            if self.usage_start != None :
+                self.usage_times.append( time() - self.usage_start )
+        
         # On prend une nouvelle ligne dans la table
         current_line = self.current_cursor.fetchone()
         
@@ -68,6 +83,9 @@ class Image_Features_Iterator :
             
             # Si on a fait les 4 tables, on termine l'itération
             if self.current_table == 5 :
+                if self.DISPLAY_STATS :
+                    print( "[Images_It] Temps moyen d'itération :", mean( self.iteration_times ) )
+                    print( "[Images_It] Temps moyen d'utilisation :", mean( self.usage_times ) )
                 raise StopIteration
             
             if self.current_table == 2 :
@@ -90,6 +108,10 @@ class Image_Features_Iterator :
                     self.current_cursor.execute( self.request_2 )
             
             return self.__next__()
+        
+        if self.DISPLAY_STATS :
+            self.iteration_times.append( time() - iteration_start )
+            self.usage_start = time()
         
         return Image_in_DB (
                    current_line[0], # ID du compte Twitter

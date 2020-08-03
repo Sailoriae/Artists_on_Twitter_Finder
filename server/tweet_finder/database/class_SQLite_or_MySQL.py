@@ -300,7 +300,7 @@ class SQLite_or_MySQL :
             c.execute( update_count, ( account_id, ) )
             self.conn.commit()
         
-        return Image_Features_Iterator( self.conn, account_id, request_1, request_2, request_3, request_4 )
+        return Image_Features_Iterator( self.conn, account_id, request_1, request_2, request_3, request_4, DISPLAY_STATS = param.DISPLAY_STATS )
     
     """
     Stocker la date du dernier scan d'un compte Twitter
