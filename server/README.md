@@ -16,7 +16,7 @@ Lorsqu'il est démarré, il affiche une interface en ligne de commande. Tapez `h
 ## Utilisation
 
 1. Si vous êtes connecté en SSH sur un serveur, créez d'abord une fenêtre : `screen -S temp`
-2. Lancez le serveur avec IPython : `ipython app.py`
+2. Lancez le serveur : `python3 app.py`, ou le lancer avec sortie dans un fichier logs : `./launch.sh`
 
 Ceci lance le serveur et vous met en ligne de commande. Si vous souhaitez quitter la fenêtre en laissant le serveur tourner, faites `Crtl + A + D`.
 

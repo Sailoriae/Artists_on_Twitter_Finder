@@ -23,9 +23,6 @@ else:
 
 """
 Script principal. NE PAS LE LANCER PLUSIEURS FOIS !
-
-Doit être utilisé avec IPython de préférance.
-Sinon les messages des threads s'afficheront mélangés à la ligne d'input.
 """
 
 import threading
