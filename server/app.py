@@ -31,8 +31,14 @@ Sinon les messages des threads s'afficheront que lorsqu'il y aura une input.
 import threading
 import re
 
+try :
+    import parameters as param
+except ModuleNotFoundError :
+    print( "Fichier \"parameters.py\" introuvable !" )
+    print( "Veuillez dupliquer \"parameters_sample.py\" vers \"parameters.py\", puis configurer ce-dernier." )
+    import sys
+    sys.exit(0)
 from app import *
-import parameters as param
 
 
 """

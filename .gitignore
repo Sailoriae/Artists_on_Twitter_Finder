@@ -7,3 +7,9 @@ __pycache__/
 
 # Fichiers log
 *.log
+
+# Configuration du serveur modifiée
+/server/parameters.py
+
+# Configuration Apache2 modifiée
+/configs/apache2.conf
