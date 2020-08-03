@@ -69,6 +69,7 @@ function canPrintAccounts ( json ) {
 		return false;
 	}
 	if ( ( json.error === "NO_URL_FIELD" ) ||
+		 ( json.error === "NOT_AN_URL" ) ||
 		 ( json.error === "INVALID_URL" ) ||
 		 ( json.error === "UNSUPPORTED_WEBSITE" ) ||
 		 ( json.error === "NO_TWITTER_ACCOUNT_FOR_THIS_ARTIST" ) ||
@@ -82,6 +83,7 @@ function canPrintAccounts ( json ) {
 
 function canPrintTweets ( json ) {
 	if ( ( json.error === "NO_URL_FIELD" ) ||
+		 ( json.error === "NOT_AN_URL" ) ||
 		 ( json.error === "INVALID_URL" ) ||
 		 ( json.error === "UNSUPPORTED_WEBSITE" ) ||
 		 ( json.error === "NO_TWITTER_ACCOUNT_FOR_THIS_ARTIST" ) ||
