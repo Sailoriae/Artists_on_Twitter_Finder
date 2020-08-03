@@ -18,6 +18,12 @@ class Link_Finder_Result :
 
 
 """
+Exception si l'entrée n'est pas une URL.
+"""
+class Not_an_URL ( Exception ) :
+    pass
+
+"""
 Exception si le site n'est pas supporté.
 """
 class Unsupported_Website ( Exception ) :

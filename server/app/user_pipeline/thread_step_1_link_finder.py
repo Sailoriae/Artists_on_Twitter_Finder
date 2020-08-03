@@ -10,7 +10,7 @@ from os import path as os_path
 sys_path.append(os_path.dirname(os_path.dirname(os_path.dirname(os_path.abspath(__file__)))))
 
 import parameters as param
-from link_finder import Link_Finder, Unsupported_Website
+from link_finder import Link_Finder, Not_an_URL, Unsupported_Website
 from tweet_finder.twitter import TweepyAbtraction
 
 
@@ -56,6 +56,18 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
         # On lance le Link Finder sur cet URL
         try :
             data = finder_engine.get_data( request.input_url )
+        
+        # Si jamais l'entrée n'est pas une URL, on ne peut pas aller plus loin
+        # avec cette requête (On passe donc son status à "Fin de traitement")
+        except Not_an_URL :
+            request.problem = "NOT_AN_URL"
+            shared_memory.user_requests.set_request_to_next_step( request, force_end = True )
+            
+            # Dire qu'on n'est plus en train de traiter cette requête
+            shared_memory.user_requests.requests_in_thread[ "thread_step_1_link_finder_number" + str(thread_id) ] = None
+            
+            print( "[step_1_th" + str(thread_id) + "] Ceci n'est pas une URL !" )
+            continue
         
         # Si jamais le site n'est pas supporté, on ne va pas plus loin avec
         # cette requête (On passe donc son status à "Fin de traitement")

@@ -41,6 +41,7 @@ Liste des status possibles (Dans l'ordre de traitement) :
 
 Liste des erreurs possibles :
 - `NO_URL_FIELD` : Il n'y a pas de paramètre / argument `url` dans l'URL de requête.
+- `NOT_AN_URL` : L'entrée du paramètre / argument `url` n'est pas une URL.
 - `UNSUPPORTED_WEBSITE` : Le site passé en paramètre n'est pas supporté, ou l'URL est invalide.
 - `INVALID_URL` : Le site est supporté, mais l'URL entrée ne mène pas à une illustration.
 - `NO_TWITTER_ACCOUNT_FOR_THIS_ARTIST` : Aucun compte Twitter trouvé pour l'artiste de l'illustration.

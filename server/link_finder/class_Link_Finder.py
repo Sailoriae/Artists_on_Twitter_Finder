@@ -9,14 +9,14 @@ try :
     from supported_websites import Danbooru
     from supported_websites import Philomena
     from supported_websites.utils import filter_twitter_accounts_list
-    from class_Link_Finder_Result import Link_Finder_Result, Unsupported_Website
+    from class_Link_Finder_Result import Link_Finder_Result, Not_an_URL, Unsupported_Website
 except ModuleNotFoundError : # Si on a été exécuté en temps que module
     from .supported_websites import DeviantArt
     from .supported_websites import Pixiv
     from .supported_websites import Danbooru
     from .supported_websites import Philomena
     from .supported_websites.utils import filter_twitter_accounts_list
-    from .class_Link_Finder_Result import Link_Finder_Result, Unsupported_Website
+    from .class_Link_Finder_Result import Link_Finder_Result, Not_an_URL , Unsupported_Website
 
 # Ajouter le répertoire parent au PATH pour pouvoir importer les paramètres
 from sys import path as sys_path
@@ -43,6 +43,11 @@ furbooru_url = re.compile(
 # Bien mettre (?:\/|$) au bout pour s'assurer qu'il y a un "/" ou qu'on est à
 # la fin de la chaine. Permet d'éviter de passer des sous domaines. Par exemple
 # deviantart.com.example.tld, ce qui pourrait être une faille de sécurité.
+
+# Source :
+# https://stackoverflow.com/questions/3809401/what-is-a-good-regular-expression-to-match-a-url
+url = re.compile(
+    "^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)$" )
 
 
 """
@@ -91,10 +96,14 @@ class Link_Finder :
         # mènent bien vers des illustrations.
         # Ici, on vérifie juste le domaine.
         
+        # Vérification que ce soit bien une URL
+        if re.search( url, illust_url ) == None :
+            raise Not_an_URL
+        
         # ====================================================================
         # DEVIANTART
         # ====================================================================
-        if re.search( deviantart_url, illust_url ) != None :
+        elif re.search( deviantart_url, illust_url ) != None :
             image_url = self.deviantart.get_image_url( illust_url )
             twitter_accounts = self.deviantart.get_twitter_accounts( illust_url )
             publish_date = self.deviantart.get_datetime( illust_url )
