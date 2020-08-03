@@ -25,7 +25,7 @@ else:
 Script principal. NE PAS LE LANCER PLUSIEURS FOIS !
 
 Doit être utilisé avec IPython de préférance.
-Sinon les messages des threads s'afficheront que lorsqu'il y aura une input.
+Sinon les messages des threads s'afficheront mélangés à la ligne d'input.
 """
 
 import threading
@@ -38,7 +38,17 @@ except ModuleNotFoundError :
     print( "Veuillez dupliquer \"parameters_sample.py\" vers \"parameters.py\", puis configurer ce-dernier." )
     import sys
     sys.exit(0)
-from app import *
+
+print( "Vérification des importations...")
+try :
+    from app import *
+except ModuleNotFoundError as error :
+    print( "Il manque une librairie :", error )
+    print( "Veuillez exécuter : pip install -r requirements.txt" )
+    import sys
+    sys.exit(0)
+else :
+    print( "Toutes les librairies nécessaires sont présentes !" )
 
 
 """

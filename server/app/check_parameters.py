@@ -14,24 +14,6 @@ Fonction de vérification des paramètres.
 @return True si on peut démarrer, False sinon.
 """
 def check_parameters () :
-    print( "Vérification de l'importation des librairies...")
-    try :
-        import numpy
-        import urllib3
-        import imutils
-        import cv2
-        import pixivpy3
-        if param.USE_MYSQL_INSTEAD_OF_SQLITE :
-            import mysql.connector
-    except ModuleNotFoundError :
-        print( "Il manque une librairie !" )
-        print( "Veuillez exécuter : pip install -r requirements.txt" )
-        return False
-    else :
-        print( "Toutes les librairies nécessaires sont présentes !" )
-    
-    # ========================================================================
-    
     print( "Vérification des types des paramètres..." )
     try :
         check_list = []
@@ -134,6 +116,7 @@ def check_parameters () :
     if param.USE_MYSQL_INSTEAD_OF_SQLITE :
         print( "Vérification de la connexion à la BDD MySQL..." )
         try :
+            import mysql
             mysql.connector.connect(
                     host = param.MYSQL_ADDRESS,
                     port = param.MYSQL_PORT,
