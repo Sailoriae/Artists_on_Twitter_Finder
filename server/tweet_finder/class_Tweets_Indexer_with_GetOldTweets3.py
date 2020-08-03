@@ -78,6 +78,8 @@ class Tweets_Indexer_with_GetOldTweets3 :
 #            print( "Indexation / scan des Tweets de @" + account_name + " avec GetOldTweets3." )
         if self.DEBUG or self.DISPLAY_STATS :
             times = [] # Liste des temps pour indexer un Tweet
+            calculate_features_times = [] # Liste des temps pour calculer les caractéristiques des images du Tweet
+            insert_into_times = [] # Liste des temps pour faire le INSERT INTO
         
         while True :
             try :
@@ -86,6 +88,8 @@ class Tweets_Indexer_with_GetOldTweets3 :
                 if self.DEBUG or self.DISPLAY_STATS :
                     if len(times) > 0 :
                         print( "[Index GOT3]", len(times), "Tweets indexés avec une moyenne de", mean(times), "secondes par Tweet." )
+                        print( "[Index GOT3] Temps moyens de calcul des caractéristiques :", mean( calculate_features_times ) )
+                        print( "[Index GOT3] Temps moyens d'enregistrement dans la BDD :", mean( insert_into_times ) )
                 return False
             
             # Si on a atteint la fin de la file
@@ -93,6 +97,8 @@ class Tweets_Indexer_with_GetOldTweets3 :
                 if self.DEBUG or self.DISPLAY_STATS :
                     if len(times) > 0 :
                         print( "[Index GOT3]", len(times), "Tweets indexés avec une moyenne de", mean(times), "secondes par Tweet." )
+                        print( "[Index GOT3] Temps moyens de calcul des caractéristiques :", mean( calculate_features_times ) )
+                        print( "[Index GOT3] Temps moyens d'enregistrement dans la BDD :", mean( insert_into_times ) )
                 return True
             
             for tweet in tweets :
@@ -126,6 +132,9 @@ class Tweets_Indexer_with_GetOldTweets3 :
                         print( "Tweet sans image, on le passe !" )
                     continue
                 
+                if self.DEBUG or self.DISPLAY_STATS :
+                    start_calculate_features = time()
+                
                 # Traitement des images du Tweet
                 if length > 0 :
                     image_1 = self.engine.get_image_features(
@@ -149,10 +158,16 @@ class Tweets_Indexer_with_GetOldTweets3 :
                     print( "Toutes les images du Tweet " + str(tweet.id) + " son inindexables !" )
                     continue
                 
+                if self.DEBUG or self.DISPLAY_STATS :
+                    calculate_features_times.append( time() - start_calculate_features )
+                
                 # Prendre les hashtags du Tweet
                 # Fonctionne avec n'importe quel Tweet, même ceux entre 160 et 280
                 # caractères (GOT3 les voit en entier)
                 hashtags = tweet.hashtags.split(" ")
+                
+                if self.DEBUG or self.DISPLAY_STATS :
+                    start_insert_into = time()
                 
                 # Stockage des résultats
                 self.bdd.insert_tweet(
@@ -166,4 +181,5 @@ class Tweets_Indexer_with_GetOldTweets3 :
                 )
                 
                 if self.DEBUG or self.DISPLAY_STATS :
+                    insert_into_times.append( time() - start_insert_into )
                     times.append( time() - start )
