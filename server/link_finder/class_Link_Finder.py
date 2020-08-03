@@ -30,15 +30,15 @@ import parameters as param
 
 # ^ = Début de la chaine, $ = Fin de la chaine
 deviantart_url = re.compile(
-    "^http(?:s)?:\/\/(?:([a-zA-Z0-9]+)\.)?deviantart\.com(?:\/|$)" )
+    r"^http(?:s)?:\/\/(?:([a-zA-Z0-9]+)\.)?deviantart\.com(?:\/|$)" )
 pixiv_url = re.compile(
-    "^http(?:s)?:\/\/(?:www\.)?pixiv\.net(?:\/|$)" )
+    r"^http(?:s)?:\/\/(?:www\.)?pixiv\.net(?:\/|$)" )
 danbooru_url = re.compile(
-    "^http(?:s)?:\/\/danbooru\.donmai\.us(?:\/|$)" )
+    r"^http(?:s)?:\/\/danbooru\.donmai\.us(?:\/|$)" )
 derpibooru_url = re.compile(
-    "^http(?:s)?:\/\/(?:www\.)?derpibooru\.org(?:\/|$)" )
+    r"^http(?:s)?:\/\/(?:www\.)?derpibooru\.org(?:\/|$)" )
 furbooru_url = re.compile(
-    "^http(?:s)?:\/\/(?:www\.)?furbooru\.org(?:\/|$)" )
+    r"^http(?:s)?:\/\/(?:www\.)?furbooru\.org(?:\/|$)" )
 
 # Bien mettre (?:\/|$) au bout pour s'assurer qu'il y a un "/" ou qu'on est à
 # la fin de la chaine. Permet d'éviter de passer des sous domaines. Par exemple
@@ -47,7 +47,7 @@ furbooru_url = re.compile(
 # Source :
 # https://stackoverflow.com/questions/3809401/what-is-a-good-regular-expression-to-match-a-url
 url = re.compile(
-    "^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)$" )
+    r"^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&\/=]*)$" )
 
 
 """

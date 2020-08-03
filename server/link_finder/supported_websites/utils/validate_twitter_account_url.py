@@ -5,10 +5,10 @@ import re
 
 
 twitter_account_name_regex = re.compile(
-    "http(?:s)?:\/\/(?:www\.)?twitter\.com\/(?:#!\/)?(?:@)?([a-zA-Z0-9_]+)(?:\/)?" )
+    r"http(?:s)?:\/\/(?:www\.)?twitter\.com\/(?:#!\/)?(?:@)?([a-zA-Z0-9_]+)(?:\/)?" )
 # ^ = Début de la chaine, $ = Fin de la chaine
 twitter_account_name_regex_strict = re.compile(
-    "^http(?:s)?:\/\/(?:www\.)?twitter\.com\/(?:#!\/)?(?:@)?([a-zA-Z0-9_]+)(?:\/)?$" )
+    r"^http(?:s)?:\/\/(?:www\.)?twitter\.com\/(?:#!\/)?(?:@)?([a-zA-Z0-9_]+)(?:\/)?$" )
     
 """
 Est ce que cet URL est l'URL d'un compte Twitter ?

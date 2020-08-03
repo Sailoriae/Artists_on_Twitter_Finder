@@ -8,15 +8,15 @@ import re
 
 # Nouveau format : deviantart.com/artiste
 new_deviantart_account_name_regex = re.compile(
-    "http(?:s)?:\/\/(?:www\.)?deviantart\.com\/([a-zA-Z0-9]+)(?:\/)?" )
+    r"http(?:s)?:\/\/(?:www\.)?deviantart\.com\/([a-zA-Z0-9]+)(?:\/)?" )
 new_deviantart_account_name_regex_strict = re.compile(
-    "^http(?:s)?:\/\/(?:www\.)?deviantart\.com\/([a-zA-Z0-9]+)(?:\/)?$" )
+    r"^http(?:s)?:\/\/(?:www\.)?deviantart\.com\/([a-zA-Z0-9]+)(?:\/)?$" )
 
 # Ancien format : artiste.deviantart.com
 old_deviantart_account_name_regex = re.compile(
-    "http(?:s)?:\/\/(?:([a-zA-Z0-9]+)\.)deviantart\.com(?:\/)?" )
+    r"http(?:s)?:\/\/(?:([a-zA-Z0-9]+)\.)deviantart\.com(?:\/)?" )
 old_deviantart_account_name_regex_strict = re.compile(
-    "^http(?:s)?:\/\/(?:([a-zA-Z0-9]+)\.)deviantart\.com(?:\/)?$" )
+    r"^http(?:s)?:\/\/(?:([a-zA-Z0-9]+)\.)deviantart\.com(?:\/)?$" )
 
 """
 Est ce que cet URL est l'URL d'un compte DeviantArt ?

@@ -17,7 +17,7 @@ except ImportError : # Si on a été exécuté en temps que module
 
 # ^ = Début de la chaine
 danbooru_post_id_regex = re.compile(
-    "^http(?:s)?:\/\/danbooru\.donmai\.us\/posts\/([0-9]+)(?:\/)?" )
+    r"^http(?:s)?:\/\/danbooru\.donmai\.us\/posts\/([0-9]+)(?:\/)?" )
 
 
 """

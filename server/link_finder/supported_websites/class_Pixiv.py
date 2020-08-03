@@ -16,9 +16,9 @@ except ImportError : # Si on a été exécuté en temps que module
 
 # ^ = Début de la chaine
 pixiv_artwork_id_regex_new = re.compile(
-    "^http(?:s)?:\/\/(?:www\.)?pixiv\.net\/(?:en\/)?artworks\/([0-9]+)(?:\/)?" )
+    r"^http(?:s)?:\/\/(?:www\.)?pixiv\.net\/(?:en\/)?artworks\/([0-9]+)(?:\/)?" )
 pixiv_artwork_id_regex_old = re.compile(
-    "^http(?:s)?:\/\/(?:www\.)?pixiv\.net\/(?:en\/)?member_illust\.php\?(?:[a-zA-Z0-9=_\-&]+)?illust_id=([0-9]+)(?:\/)?" )
+    r"^http(?:s)?:\/\/(?:www\.)?pixiv\.net\/(?:en\/)?member_illust\.php\?(?:[a-zA-Z0-9=_\-&]+)?illust_id=([0-9]+)(?:\/)?" )
 
 """
 Couche d'abstraction à la librairie PixivPy3 pour utiliser l'API publique de

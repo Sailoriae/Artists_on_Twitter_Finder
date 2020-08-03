@@ -5,15 +5,15 @@ import re
 
 
 pixiv_account_id_regex_new = re.compile(
-    "http(?:s)?:\/\/(?:www\.)?pixiv\.net\/(?:en\/)?users\/([0-9]+)(?:\/)?" )
+    r"http(?:s)?:\/\/(?:www\.)?pixiv\.net\/(?:en\/)?users\/([0-9]+)(?:\/)?" )
 pixiv_account_id_regex_old = re.compile(
-    "http(?:s)?:\/\/(?:www\.)?pixiv\.net\/member\.php\?id=([0-9]+)(?:\/)?" )
+    r"http(?:s)?:\/\/(?:www\.)?pixiv\.net\/member\.php\?id=([0-9]+)(?:\/)?" )
 
 # ^ = Début de la chaine, $ = Fin de la chaine
 pixiv_account_id_regex_new_strict = re.compile(
-    "^http(?:s)?:\/\/(?:www\.)?pixiv\.net\/(?:en\/)?users\/([0-9]+)(?:\/)?$" )
+    r"^http(?:s)?:\/\/(?:www\.)?pixiv\.net\/(?:en\/)?users\/([0-9]+)(?:\/)?$" )
 pixiv_account_id_regex_old_strict = re.compile(
-    "^http(?:s)?:\/\/(?:www\.)?pixiv\.net\/member\.php\?id=([0-9]+)(?:\/)?$" )
+    r"^http(?:s)?:\/\/(?:www\.)?pixiv\.net\/member\.php\?id=([0-9]+)(?:\/)?$" )
 
 """
 Est ce que cet URL est l'URL d'un compte Pixiv ?

@@ -191,7 +191,7 @@ while True :
     elif args[0] == "scan" :
         if len(args) == 2 :
             # Vérification que le nom d'utilisateur Twitter est possible
-            if re.compile("^@?(\w){1,15}$").match(args[1]) :
+            if re.compile(r"^@?(\w){1,15}$").match(args[1]) :
                 account_name = args[1]
                 print( "Demande de scan / d'indexation du compte @" + account_name + "." )
                 account_id = shared_memory.twitter.get_account_id( account_name )
@@ -209,7 +209,7 @@ while True :
         if len(args) in [ 2, 3 ] :
             if len(args) == 3 :
                 # Vérification que le nom d'utilisateur Twitter est possible
-                if re.compile("^@?(\w){1,15}$").match(args[2]) :
+                if re.compile(r"^@?(\w){1,15}$").match(args[2]) :
                     print( "Recherche sur le compte @" + args[2] + "." )
                     print( "FONCTIONNALITE TEMPORAIREMENT INDISPONIBLE !" ) # TODO
                 else :
