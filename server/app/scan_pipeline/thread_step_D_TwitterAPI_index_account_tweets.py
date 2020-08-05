@@ -80,7 +80,7 @@ def thread_step_D_TwitterAPI_index_account_tweets( thread_id : int, shared_memor
                                                    request.indexing_tweets )
         
         # Si l'indexation est terminée, on met la date de fin dans la requête
-        if request.finished_TwitterAPI_indexing :
+        if request.finished_TwitterAPI_indexing and not request.has_failed :
             print( "[step_D_th" + str(thread_id) + "] Fin de l'indexation des Tweets de @" + request.account_name + " trouvés par l'API Twitter." )
             request.finished_date = datetime.now()
             

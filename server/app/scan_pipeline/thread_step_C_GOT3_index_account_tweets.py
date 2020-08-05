@@ -80,7 +80,7 @@ def thread_step_C_GOT3_index_account_tweets( thread_id : int, shared_memory ) :
                                              request.indexing_tweets )
         
         # Si l'indexation est terminée, on met la date de fin dans la requête
-        if request.finished_GOT3_indexing :
+        if request.finished_GOT3_indexing and not request.has_failed :
             print( "[step_C_th" + str(thread_id) + "] Fin de l'indexation des Tweets de @" + request.account_name + " trouvés par GetOldTweets3." )
             request.finished_date = datetime.now()
             
