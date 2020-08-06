@@ -2,6 +2,14 @@
 # coding: utf-8
 
 """
+Activer le multiprocessing. Prend alors plus de processeur, mais le traitement
+des requêtes est plus efficace.
+ATTENTION ! SQLite bloque la BDD lors d'une écriture ! Ne pas activer ce
+paramètre si vous utilisez SQLite !
+"""
+ENABLE_MULTIPROCESSING = True
+
+"""
 Paramètres pour l'accès à l'API Twitter.
 https://developer.twitter.com/en/apps
 Il est très recommandé de paramètrer l'app Twitter pour qu'elle un un accès en
