@@ -170,6 +170,13 @@ if __name__ == "__main__" :
     """
     Entrée en ligne de commande (CLI).
     """
+    # Initialisation de notre couche d'abstraction à l'API Twitter
+    from tweet_finder.twitter import TweepyAbtraction
+    twitter = TweepyAbtraction( param.API_KEY,
+                                param.API_SECRET,
+                                param.OAUTH_TOKEN,
+                                param.OAUTH_TOKEN_SECRET )
+    
     print( "Vous êtes en ligne de commande.")
     print( "Tapez `help` pour afficher l'aide.")
     
@@ -217,7 +224,7 @@ if __name__ == "__main__" :
                 if re.compile(r"^@?(\w){1,15}$").match(args[1]) :
                     account_name = args[1]
                     print( "Demande de scan / d'indexation du compte @" + account_name + "." )
-                    account_id = shared_memory.twitter.get_account_id( account_name )
+                    account_id = twitter.get_account_id( account_name )
                     
                     if account_id == None :
                         print( "Compte @" + args[1] + " inexistant ou indisponible !" )
@@ -234,12 +241,18 @@ if __name__ == "__main__" :
                     # Vérification que le nom d'utilisateur Twitter est possible
                     if re.compile(r"^@?(\w){1,15}$").match(args[2]) :
                         print( "Recherche sur le compte @" + args[2] + "." )
-                        print( "FONCTIONNALITE TEMPORAIREMENT INDISPONIBLE !" ) # TODO
+                        account_id = twitter.get_account_id( args[2] )
+                        
+                        if account_id == None :
+                            print( "Compte @" + args[2] + " inexistant ou indisponible !" )
+                        else :
+                            print( "Attention ! Si ce compte n'est pas indexé, la recherche ne retournera aucun résultat." )
+                            shared_memory.user_requests.launch_reverse_search_only( args[1], args[2], account_id )
                     else :
                         print( "Nom de compte Twitter impossible !" )
                 else :
                     print( "Recherche dans toute la base de données !" )
-                    print( "FONCTIONNALITE TEMPORAIREMENT INDISPONIBLE !" ) # TODO
+                    shared_memory.user_requests.launch_reverse_search_only( args[1] )
             else :
                 print( "Utilisation : search [URL de l'image à chercher] [Nom du compte Twitter (OPTIONNEL)]" )
         

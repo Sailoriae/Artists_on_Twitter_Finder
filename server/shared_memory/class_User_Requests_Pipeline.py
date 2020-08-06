@@ -147,6 +147,39 @@ class User_Requests_Pipeline :
         return Pyro4.Proxy( request )
     
     """
+    Lancer une recherche inversée d'image.
+    Si account_name ou account_id ne sont pas indiqués, la recherche se fera
+    dans toute la base de données.
+    
+    @param image_url URL de l'image à rechercher. Sert à identifier la requête !
+    @param account_name Nom du compte Twitter sur lequel rechercher.
+    @param account_id ID du compte Twitter sur lequel rechercher.
+    """
+    def launch_reverse_search_only ( self, image_url : str,
+                                           account_name : str = None,
+                                           account_id : int = None ) -> User_Request :
+        requests_sem = Pyro4.Proxy( self._requests_sem )
+        requests_sem.acquire()
+        
+        # Créer et ajouter l'objet User_Request à notre système.
+        request = self._root.register_obj( User_Request( image_url ), None )
+        self._requests.append( request )
+        
+        requests_sem.release()
+        
+        # Modifier cet objet si nécessaire
+        request = Pyro4.Proxy( request )
+        request.image_url = image_url
+        if account_name != None and account_id != None :
+            request.twitter_accounts_with_id += [ (account_name,account_id) ]
+        
+        request.status = 3
+        self.set_request_to_next_step( request)
+        
+        # Retourner l'objet User_Request.
+        return request
+    
+    """
     Obtenir l'objet User_Request d'une requête.
     
     @param illust_url L'illustration d'entrée.
