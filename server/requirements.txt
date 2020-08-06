@@ -7,3 +7,4 @@ mysql-connector-python
 pyquery
 tweepy
 beautifulsoup4
+Pyro4
