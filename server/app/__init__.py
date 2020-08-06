@@ -2,8 +2,6 @@
 # coding: utf-8
 
 # Importer seulement ce dont on a besoin dans le app.py
-from .class_Shared_Memory import Shared_Memory
-
 from .check_parameters import check_parameters
 
 from .error_collector import error_collector

@@ -1,8 +1,6 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-from .class_Scan_Requests_Pipeline import Scan_Requests_Pipeline
-
 from .thread_step_A_GOT3_list_account_tweets import thread_step_A_GOT3_list_account_tweets
 from .thread_step_B_TwitterAPI_list_account_tweets import thread_step_B_TwitterAPI_list_account_tweets
 from .thread_step_C_GOT3_index_account_tweets import thread_step_C_GOT3_index_account_tweets
