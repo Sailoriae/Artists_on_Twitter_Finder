@@ -11,6 +11,7 @@ sys_path.append(os_path.dirname(os_path.dirname(os_path.abspath(__file__))))
 
 import parameters as param
 from tweet_finder.database import SQLite_or_MySQL
+from tweet_finder.twitter import TweepyAbtraction
 
 
 """
@@ -22,6 +23,12 @@ Permet de gagner du temps lors d'une requête.
 def thread_auto_update_accounts( thread_id : int, shared_memory ) :
     # Accès direct à la base de données
     bdd_direct_access = SQLite_or_MySQL()
+    
+    # Initialisation de notre couche d'abstraction à l'API Twitter
+    twitter = TweepyAbtraction( param.API_KEY,
+                                param.API_SECRET,
+                                param.OAUTH_TOKEN,
+                                param.OAUTH_TOKEN_SECRET )
     
     # Tant que on ne nous dit pas de nous arrêter
     while shared_memory.keep_service_alive :
@@ -67,7 +74,7 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
                     break # Arrête de l'itération "for"
             
             # On cherche le nom du compte Twitter
-            account_name = shared_memory.twitter.get_account_id( oldest_updated_account[0], invert_mode = True )
+            account_name = twitter.get_account_id( oldest_updated_account[0], invert_mode = True )
             
             # Si l'ID du compte Twitter n'existe plus
             if account_name == None :

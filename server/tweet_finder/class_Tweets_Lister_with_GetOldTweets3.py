@@ -24,6 +24,17 @@ class Unfounded_Account_on_Lister_with_GetOldTweets3 ( Exception ) :
 
 
 """
+Envoyer un liste d'objets Tweet de GOT3 dans la mémoire partagée.
+"""
+class GOT3_Tweet_List_to_Shared_Memory :
+    def __init__ ( self, queue_put_function ) :
+        self.queue_put_function = queue_put_function
+    def insert ( self, GOT3_Tweets_list ) :
+        for tweet in GOT3_Tweets_list :
+            self.queue_put_function( tweet.id, tweet.author_id, tweet.images, tweet.hashtags )
+
+
+"""
 Classe permettant de lister les Tweets d'un compte Twitter avec la librairie
 GetOldTweets3.
 """
@@ -43,11 +54,8 @@ class Tweets_Lister_with_GetOldTweets3 :
     partir de la date du Tweet indexé de ce compte le plus récent, stockée dans
     la base.
     
-    @param queue Objet queue.Queue() pour y stocker les Tweets trouvés. Les
-                 Tweets y sont stockés en paquets, sous la forme de listes.
-                 Un Tweet est représenté par un objet
-                 "GetOldTweets3.models.Tweet".
-                 Lorsque le listage sera terminé, "None" sera ajouté.
+    @param queue_put Fonction à appeler pour mettre les Tweets trouvés.
+                     Lorsque le listage sera terminé, "None" sera ajouté.
     
     @return La date du Tweet le plus récent, à enregistrer dans la base lorsque
             l'indexation sera terminée.
@@ -58,7 +66,7 @@ class Tweets_Lister_with_GetOldTweets3 :
     Peut émettre une exception "Unfounded_Account_on_Lister_with_TwitterAPI" si
     le compte est introuvable.
     """
-    def list_getoldtweets3_tweets ( self, account_name, queue ) :
+    def list_getoldtweets3_tweets ( self, account_name, queue_put ) :
         account_id = self.twitter.get_account_id( account_name )
         if account_id == None :
             print( "[List GOT3] Compte @" + account_name + " introuvable !" )
@@ -70,6 +78,8 @@ class Tweets_Lister_with_GetOldTweets3 :
             start = time()
         
         since_date = self.bdd.get_account_GOT3_last_tweet_date( account_id )
+        
+        conversion_obj = GOT3_Tweet_List_to_Shared_Memory( queue_put )
         
         # Note importante : GOT3 ne peut pas voir les Tweets marqués comme
         # sensibles... Mais il peut voir les tweets non-sensibles de comptes
@@ -89,7 +99,7 @@ class Tweets_Lister_with_GetOldTweets3 :
         # inférieure ou égale à 100.
         tweets_list_1 = GetOldTweets3_manager.TweetManager.getTweets( tweetCriteria,
                                                                       auth_token=param.TWITTER_AUTH_TOKEN,
-                                                                      receiveBuffer = queue.put )
+                                                                      receiveBuffer = conversion_obj.insert )
         
         # Second scan en désactivant complètement le filtre "safe"
         # Ce n'est pas grave si on scan deux fois, mais il vaut mieux le faire
@@ -101,7 +111,7 @@ class Tweets_Lister_with_GetOldTweets3 :
             
         tweets_list_2 = GetOldTweets3_manager.TweetManager.getTweets( tweetCriteria,
                                                                       auth_token=param.TWITTER_AUTH_TOKEN,
-                                                                      receiveBuffer = queue.put )
+                                                                      receiveBuffer = conversion_obj.insert )
         
         # Note : Le filtre "safe" filtre aussi les "gros-mots", par exemple :
         # "putain".
@@ -128,7 +138,7 @@ class Tweets_Lister_with_GetOldTweets3 :
             print( "[List GOT3] Il a fallu", time() - start, "secondes pour lister", len(tweets_list_1 + tweets_list_2), "Tweets de @" + account_name + "." )
         
         # Indiquer qu'on a fini le listage
-        queue.put( None )
+        queue_put( None, None, None, None )
         
         # Retourner la date du Tweet trouvé le plus récent, ou celui enregistré
         # dans la base de données si aucun Tweet n'a été trouvé

@@ -30,7 +30,7 @@ def thread_step_C_GOT3_index_account_tweets( thread_id : int, shared_memory ) :
     bdd_direct_access = SQLite_or_MySQL()
     
     # Dire qu'on ne fait rien
-    shared_memory.scan_requests.requests_in_thread[ "thread_step_C_GOT3_index_account_tweets_number" + str(thread_id) ] = None
+    shared_memory.scan_requests.requests_in_thread.set_request( "thread_step_C_GOT3_index_account_tweets_number" + str(thread_id), None )
     
     # Tant que on ne nous dit pas de nous arrêter
     while shared_memory.keep_service_alive :
@@ -63,7 +63,7 @@ def thread_step_C_GOT3_index_account_tweets( thread_id : int, shared_memory ) :
             continue
         
         # Dire qu'on est en train de traiter cette requête
-        shared_memory.scan_requests.requests_in_thread[ "thread_step_C_GOT3_index_account_tweets_number" + str(thread_id) ] = request
+        shared_memory.scan_requests.requests_in_thread.set_request( "thread_step_C_GOT3_index_account_tweets_number" + str(thread_id), request )
         
         # Si on a vu cette requête il y a moins de 5 secondes, c'est qu'il n'y
         # a pas beaucoup de requêtes dans le pipeline, on peut donc dormir
@@ -73,10 +73,10 @@ def thread_step_C_GOT3_index_account_tweets( thread_id : int, shared_memory ) :
         request.last_seen_GOT3_indexer = time()
         
         # On index / scan les comptes Twitter de la requête avec GetOldTweets3
-#        print( "[step_C_th" + str(thread_id) + "] Indexation des Tweets de @" + request.account_name + " trouvés par GetOldTweets3." )
+        print( "[step_C_th" + str(thread_id) + "] Indexation des Tweets de @" + request.account_name + " trouvés par GetOldTweets3." )
         request.finished_GOT3_indexing = getoldtweets3_indexer.index_or_update_with_GOT3(
                                              request.account_name,
-                                             request.GetOldTweets3_tweets_queue,
+                                             request.GetOldTweets3_tweets_queue_get,
                                              request.indexing_tweets )
         
         # Si l'indexation est terminée, on met la date de fin dans la requête
@@ -108,7 +108,7 @@ def thread_step_C_GOT3_index_account_tweets( thread_id : int, shared_memory ) :
                 shared_memory.scan_requests.step_C_GOT3_index_account_tweets_queue.put( request )
         
         # Dire qu'on n'est plus en train de traiter cette requête
-        shared_memory.scan_requests.requests_in_thread[ "thread_step_C_GOT3_index_account_tweets_number" + str(thread_id) ] = None
+        shared_memory.scan_requests.requests_in_thread.set_request( "thread_step_C_GOT3_index_account_tweets_number" + str(thread_id), None )
     
     print( "[step_C_th" + str(thread_id) + "] Arrêté !" )
     return

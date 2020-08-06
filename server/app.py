@@ -57,12 +57,24 @@ if not check_parameters() :
 
 
 """
-MEMOIRE PARTAGEE ENTRE LES THREADS.
-Variable globale, partagées entre les threads.
-Cet objet est passé en paramètre aux threads. Car en Python, les objets sont
-passés par adresse.
+Lancement du serveur de mémoire partagée, et accès pour ce processus (Le
+collecteur d'erreurs crée les accès pour les threads).
 """
-shared_memory = Shared_Memory()
+from random import randint
+from shared_memory.thread_pyro_server import thread_pyro_server
+
+# On démarre le serveur sur un port aléatoire, j'en ai marre des processus
+# fantomes qui massacrent tous mes tests !
+pyro_port = randint( 49152, 65535 )
+
+thread_pyro = threading.Thread( name = "thread_pyro_th1",
+                                target = thread_pyro_server,
+                                args = ( pyro_port, ) )
+thread_pyro.start()
+
+import Pyro4
+Pyro4.config.SERIALIZER = "pickle"
+shared_memory = Pyro4.Proxy( "PYRO:shared_memory@localhost:" + str(pyro_port) )
 
 
 """
@@ -74,7 +86,7 @@ threads_step_1_link_finder = []
 for i in range( param.NUMBER_OF_STEP_1_LINK_FINDER_THREADS ) :
     thread = threading.Thread( name = "step_1_link_finder_th" + str(i+1),
                                target = error_collector,
-                               args = ( thread_step_1_link_finder, i+1, shared_memory, ) )
+                               args = ( thread_step_1_link_finder, i+1, pyro_port, ) )
     thread.start()
     threads_step_1_link_finder.append( thread )
 
@@ -82,7 +94,7 @@ threads_step_2_tweets_indexer = []
 for i in range( param.NUMBER_OF_STEP_2_TWEETS_INDEXER_THREADS ) :
     thread = threading.Thread( name = "step_2_tweets_indexer_th" + str(i+1),
                                target = error_collector,
-                               args = ( thread_step_2_tweets_indexer, i+1, shared_memory, ) )
+                               args = ( thread_step_2_tweets_indexer, i+1, pyro_port, ) )
     thread.start()
     threads_step_2_tweets_indexer.append( thread )
 
@@ -90,7 +102,7 @@ threads_step_3_reverse_search = []
 for i in range( param.NUMBER_OF_STEP_3_REVERSE_SEARCH_THREADS ) :
     thread = threading.Thread( name = "step_3_reverse_search_th" + str(i+1),
                                target = error_collector,
-                               args = ( thread_step_3_reverse_search, i+1, shared_memory, ) )
+                               args = ( thread_step_3_reverse_search, i+1, pyro_port, ) )
     thread.start()
     threads_step_3_reverse_search.append( thread )
 
@@ -98,7 +110,7 @@ threads_step_A_GOT3_list_account_tweets = []
 for i in range( param.NUMBER_OF_STEP_A_GOT3_LIST_ACCOUNT_TWEETS_THREADS ) :
     thread = threading.Thread( name = "step_A_GOT3_list_account_tweets_th" + str(i+1),
                                target = error_collector,
-                               args = ( thread_step_A_GOT3_list_account_tweets, i+1, shared_memory, ) )
+                               args = ( thread_step_A_GOT3_list_account_tweets, i+1, pyro_port, ) )
     thread.start()
     threads_step_A_GOT3_list_account_tweets.append( thread )
 
@@ -106,7 +118,7 @@ threads_step_B_TwitterAPI_list_account_tweets = []
 for i in range( param.NUMBER_OF_STEP_B_TWITTERAPI_LIST_ACCOUNT_TWEETS_THREADS ) :
     thread = threading.Thread( name = "step_B_TwitterAPI_list_account_tweets_th" + str(i+1),
                                target = error_collector,
-                               args = ( thread_step_B_TwitterAPI_list_account_tweets, i+1, shared_memory, ) )
+                               args = ( thread_step_B_TwitterAPI_list_account_tweets, i+1, pyro_port, ) )
     thread.start()
     threads_step_B_TwitterAPI_list_account_tweets.append( thread )
 
@@ -114,7 +126,7 @@ threads_step_C_GOT3_index_account_tweets = []
 for i in range( param.NUMBER_OF_STEP_C_GOT3_INDEX_ACCOUNT_TWEETS ) :
     thread = threading.Thread( name = "step_C_GOT3_index_account_tweets_th" + str(i+1),
                                target = error_collector,
-                               args = ( thread_step_C_GOT3_index_account_tweets, i+1, shared_memory, ) )
+                               args = ( thread_step_C_GOT3_index_account_tweets, i+1, pyro_port, ) )
     thread.start()
     threads_step_C_GOT3_index_account_tweets.append( thread )
 
@@ -122,7 +134,7 @@ threads_step_D_TwitterAPI_index_account_tweets = []
 for i in range( param.NUMBER_OF_STEP_D_TWITTERAPI_INDEX_ACCOUNT_TWEETS ) :
     thread = threading.Thread( name = "step_D_TwitterAPI_index_account_tweets_th" + str(i+1),
                                target = error_collector,
-                               args = ( thread_step_D_TwitterAPI_index_account_tweets, i+1, shared_memory, ) )
+                               args = ( thread_step_D_TwitterAPI_index_account_tweets, i+1, pyro_port, ) )
     thread.start()
     threads_step_D_TwitterAPI_index_account_tweets.append( thread )
 
@@ -132,19 +144,19 @@ for i in range( param.NUMBER_OF_STEP_D_TWITTERAPI_INDEX_ACCOUNT_TWEETS ) :
 # http.server.ThreadingHTTPServer()
 thread_http_server = threading.Thread( name = "http_server_th1",
                                        target = error_collector,
-                                       args = ( thread_http_server, 1, shared_memory, ) )
+                                       args = ( thread_http_server, 1, pyro_port, ) )
 thread_http_server.start()
 
 # On ne crée qu'un seul thread de mise à jour automatique
 thread_auto_update_accounts = threading.Thread( name = "auto_update_accounts_th1",
                                                 target = error_collector,
-                                                args = ( thread_auto_update_accounts, 1, shared_memory, ) )
+                                                args = ( thread_auto_update_accounts, 1, pyro_port, ) )
 thread_auto_update_accounts.start()
 
 # On ne crée qu'un seul thread de délestage de la liste des requêtes
 thread_remove_finished_requests = threading.Thread( name = "remove_finished_requests_th1",
                                                 target = error_collector,
-                                                args = ( thread_remove_finished_requests, 1, shared_memory, ) )
+                                                args = ( thread_remove_finished_requests, 1, pyro_port, ) )
 thread_remove_finished_requests.start()
 
 
@@ -219,19 +231,8 @@ while True :
     
     elif args[0] == "threads" :
         if len(args) == 1 :
-            to_print = ""
-            for key in shared_memory.user_requests.requests_in_thread :
-                value = shared_memory.user_requests.requests_in_thread[key]
-                if value == None :
-                    to_print += key + " : IDLE\n"
-                else :
-                    to_print += key + " : " + value.input_url + "\n"
-            for key in shared_memory.scan_requests.requests_in_thread :
-                value = shared_memory.scan_requests.requests_in_thread[key]
-                if value == None :
-                    to_print += key + " : IDLE\n"
-                else :
-                    to_print += key + " : @" + value.account_name + " (ID " + str(value.account_id) + ")\n"
+            to_print = shared_memory.user_requests.requests_in_thread.get_status()
+            to_print += shared_memory.scan_requests.requests_in_thread.get_status()
             print( to_print )
         else :
             print( "Utilisation : threads")
@@ -320,3 +321,6 @@ for thread in threads_step_D_TwitterAPI_index_account_tweets :
 thread_http_server.join()
 thread_auto_update_accounts.join()
 thread_remove_finished_requests.join()
+
+shared_memory.keep_pyro_alive = False
+thread_pyro.join()

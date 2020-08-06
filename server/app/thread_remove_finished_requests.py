@@ -20,6 +20,10 @@ def thread_remove_finished_requests( thread_id : int, shared_memory ) :
             if not shared_memory.keep_service_alive :
                 break
         
+        break
+        # TODO : Déplacer ce qu'on fait en dessous dans le serveur de mémoire
+        # partagée, et appeler seulement des méthodes !
+        
         # On prend la date actuelle
         now = datetime.datetime.now()
         

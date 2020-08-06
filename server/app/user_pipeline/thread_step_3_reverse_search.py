@@ -24,7 +24,7 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
     cbir_engine = Reverse_Searcher( DEBUG = param.DEBUG, DISPLAY_STATS = param.DISPLAY_STATS)
     
     # Dire qu'on ne fait rien
-    shared_memory.user_requests.requests_in_thread[ "thread_step_3_reverse_search_number" + str(thread_id) ] = None
+    shared_memory.user_requests.requests_in_thread.set_request( "thread_step_3_reverse_search_number" + str(thread_id), None )
     
     # Tant que on ne nous dit pas de nous arrêter
     while shared_memory.keep_service_alive :
@@ -38,7 +38,7 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
             continue
         
         # Dire qu'on est en train de traiter cette requête
-        shared_memory.user_requests.requests_in_thread[ "thread_step_3_reverse_search_number" + str(thread_id) ] = request
+        shared_memory.user_requests.requests_in_thread.set_request( "thread_step_3_reverse_search_number" + str(thread_id), request )
         
         # On passe la requête à l'étape suivante, c'est à dire notre étape
         shared_memory.user_requests.set_request_to_next_step( request )
@@ -85,7 +85,7 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
                "[step_3_th" + str(thread_id) + "] " + str( [ data.tweet_id for data in request.founded_tweets ] ) )
         
         # Dire qu'on n'est plus en train de traiter cette requête
-        shared_memory.user_requests.requests_in_thread[ "thread_step_3_reverse_search_number" + str(thread_id) ] = None
+        shared_memory.user_requests.requests_in_thread.set_request( "thread_step_3_reverse_search_number" + str(thread_id), None )
         
         # On passe la requête à l'étape suivante, fin du traitement
         # C'est la procédure shared_memory.user_requests.set_request_to_next_step

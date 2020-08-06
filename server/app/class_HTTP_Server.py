@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # coding: utf-8
 
+import Pyro4
 from http.server import BaseHTTPRequestHandler
 from urllib.parse import parse_qs, urlsplit
 
@@ -16,11 +17,12 @@ import parameters as param
 Serveur HTTP
 """
 # Fonction contenant la classe, permettant de passer le paramètre shared_memory
-def http_server_container ( shared_memory_arg ) :
+def http_server_container ( shared_memory_uri_arg ) :
     class HTTP_Server( BaseHTTPRequestHandler ) :
-        shared_memory = shared_memory_arg # Attribut de classe
+        shared_memory_uri = shared_memory_uri_arg # Attribut de classe
         
         def __init__( self, *args, **kwargs ) :
+            self.shared_memory = Pyro4.Proxy( self.shared_memory_uri )
             super(BaseHTTPRequestHandler, self).__init__(*args, **kwargs)
         
         # Ne pas afficher les logs par défaut dans la console

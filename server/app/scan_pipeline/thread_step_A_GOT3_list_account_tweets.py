@@ -24,7 +24,7 @@ def thread_step_A_GOT3_list_account_tweets( thread_id : int, shared_memory ) :
     getoldtweets3_lister = Tweets_Lister_with_GetOldTweets3( DEBUG = param.DEBUG, DISPLAY_STATS = param.DISPLAY_STATS )
     
     # Dire qu'on ne fait rien
-    shared_memory.scan_requests.requests_in_thread[ "thread_step_A_GOT3_list_account_tweets_number" + str(thread_id) ] = None
+    shared_memory.scan_requests.requests_in_thread.set_request( "thread_step_A_GOT3_list_account_tweets_number" + str(thread_id), None )
     
     # Tant que on ne nous dit pas de nous arrêter
     while shared_memory.keep_service_alive :
@@ -54,17 +54,17 @@ def thread_step_A_GOT3_list_account_tweets( thread_id : int, shared_memory ) :
         shared_memory.scan_requests.queues_sem.release()
         
         # Dire qu'on est en train de traiter cette requête
-        shared_memory.scan_requests.requests_in_thread[ "thread_step_A_GOT3_list_account_tweets_number" + str(thread_id) ] = request
+        shared_memory.scan_requests.requests_in_thread.set_request( "thread_step_A_GOT3_list_account_tweets_number" + str(thread_id), request )
         
         # On liste les tweets du compte Twitter de la requête avec GetOldTweets3
         print( "[step_A_th" + str(thread_id) + "] Listage des Tweets du compte Twitter @" + request.account_name + " avec GetOldTweets3." )
         try :
-            request.GetOldTweets3_last_tweet_date = getoldtweets3_lister.list_getoldtweets3_tweets( request.account_name, request.GetOldTweets3_tweets_queue )
+            request.GetOldTweets3_last_tweet_date = getoldtweets3_lister.list_getoldtweets3_tweets( request.account_name, request.GetOldTweets3_tweets_queue_put )
         except Unfounded_Account_on_Lister_with_GetOldTweets3 :
             request.unfounded_account = True
         
         # Dire qu'on n'est plus en train de traiter cette requête
-        shared_memory.scan_requests.requests_in_thread[ "thread_step_A_GOT3_list_account_tweets_number" + str(thread_id) ] = None
+        shared_memory.scan_requests.requests_in_thread.set_request( "thread_step_A_GOT3_list_account_tweets_number" + str(thread_id), None )
     
     print( "[step_A_th" + str(thread_id) + "] Arrêté !" )
     return

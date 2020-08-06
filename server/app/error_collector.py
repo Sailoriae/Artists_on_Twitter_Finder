@@ -2,6 +2,7 @@
 # coding: utf-8
 
 import traceback
+import Pyro4
 
 
 """
@@ -11,7 +12,9 @@ le sont par ce collecteur d'erreur.
 @param thread_id ID du thread.
 @param shared_memory Objet Shared_Memory, mémoire partagée.
 """
-def error_collector( thread_procedure, thread_id : int, shared_memory ) :
+def error_collector( thread_procedure, thread_id : int, pyro_port : int ) :
+    Pyro4.config.SERIALIZER = "pickle"
+    shared_memory = Pyro4.Proxy( "PYRO:shared_memory@localhost:" + str(pyro_port) )
     error_count = 0
     
     while shared_memory.keep_service_alive :
@@ -23,7 +26,7 @@ def error_collector( thread_procedure, thread_id : int, shared_memory ) :
             # Mettre la requête en erreur si c'est une requête utilisateur, et
             # non une requête de scan
             try :
-                request = shared_memory.user_requests.requests_in_thread[ thread_procedure.__name__ + "_number" + str(thread_id) ]
+                request = shared_memory.user_requests.requests_in_thread.get_request( thread_procedure.__name__ + "_number" + str(thread_id) )
             # Si on n'est pas un thread de traitement des requêtes utilisateurs
             # (Etapes 1, 2 et 3), on aura forcément une KeyError
             except KeyError :
@@ -37,7 +40,7 @@ def error_collector( thread_procedure, thread_id : int, shared_memory ) :
             # Mettre la requête en erreur si c'est une requête de scan, et non
             # une requête utilisateur
             try :
-                request = shared_memory.scan_requests.requests_in_thread[ thread_procedure.__name__ + "_number" + str(thread_id) ]
+                request = shared_memory.scan_requests.requests_in_thread.get_request( thread_procedure.__name__ + "_number" + str(thread_id) )
             # Si on n'est pas un thread de traitement des requêtes de scan
             # (Etapes paralléles A, B, C et D), on aura forcément une KeyError
             except KeyError :
