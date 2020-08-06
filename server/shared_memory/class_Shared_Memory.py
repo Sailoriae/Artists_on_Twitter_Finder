@@ -7,10 +7,12 @@ try :
     from class_User_Requests_Pipeline import User_Requests_Pipeline
     from class_Scan_Requests_Pipeline import Scan_Requests_Pipeline
     from class_HTTP_Requests_Limitator import HTTP_Requests_Limitator
+    from class_Metrics_Container import Metrics_Container
 except ModuleNotFoundError :
     from .class_User_Requests_Pipeline import User_Requests_Pipeline
     from .class_Scan_Requests_Pipeline import Scan_Requests_Pipeline
     from .class_HTTP_Requests_Limitator import HTTP_Requests_Limitator
+    from .class_Metrics_Container import Metrics_Container
 
 # Ajouter le répertoire parent au PATH pour pouvoir importer
 from sys import path as sys_path
@@ -58,6 +60,9 @@ class Shared_Memory :
         # Limitateur du nombre de requêtes sur le serveur HTTP / l'API par
         # secondes
         self._http_limitator = self.register_obj( HTTP_Requests_Limitator(), "http_limitator" )
+        
+        # Conteneur des mesures de temps d'éxécution.
+        self._execution_metrics = self.register_obj( Metrics_Container(), "execution_metrics" )
     
     """
     Getters et setters pour Pyro.
@@ -90,6 +95,9 @@ class Shared_Memory :
     
     @property
     def http_limitator( self ) : return Pyro4.Proxy( self._http_limitator )
+    
+    @property
+    def execution_metrics( self ) : return Pyro4.Proxy( self._execution_metrics )
     
     """
     Lancer le sevreur de mémoire partagée, avec Pyro.

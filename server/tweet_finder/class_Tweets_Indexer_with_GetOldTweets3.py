@@ -73,7 +73,7 @@ class Tweets_Indexer_with_GetOldTweets3 :
             False si il faut attendre un peu et rappeler cette méthode.
     """
     
-    def index_or_update_with_GOT3 ( self, account_name, queue_get, indexing_tweets ) -> bool :
+    def index_or_update_with_GOT3 ( self, account_name, queue_get, indexing_tweets, add_step_C_times = None ) -> bool :
 #        if self.DEBUG :
 #            print( "Indexation / scan des Tweets de @" + account_name + " avec GetOldTweets3." )
         if self.DEBUG or self.DISPLAY_STATS :
@@ -90,6 +90,8 @@ class Tweets_Indexer_with_GetOldTweets3 :
                         print( "[Index GOT3]", len(times), "Tweets indexés avec une moyenne de", mean(times), "secondes par Tweet." )
                         print( "[Index GOT3] Temps moyens de calcul des caractéristiques :", mean( calculate_features_times ) )
                         print( "[Index GOT3] Temps moyens d'enregistrement dans la BDD :", mean( insert_into_times ) )
+                        if add_step_C_times != None :
+                            add_step_C_times( times, calculate_features_times, insert_into_times )
                 return False
             
             # Si on a atteint la fin de la file
@@ -99,6 +101,8 @@ class Tweets_Indexer_with_GetOldTweets3 :
                         print( "[Index GOT3]", len(times), "Tweets indexés avec une moyenne de", mean(times), "secondes par Tweet." )
                         print( "[Index GOT3] Temps moyens de calcul des caractéristiques :", mean( calculate_features_times ) )
                         print( "[Index GOT3] Temps moyens d'enregistrement dans la BDD :", mean( insert_into_times ) )
+                        if add_step_C_times != None :
+                            add_step_C_times( times, calculate_features_times, insert_into_times )
                 return True
             
             if self.DEBUG :

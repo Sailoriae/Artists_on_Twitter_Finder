@@ -59,7 +59,9 @@ def thread_step_A_GOT3_list_account_tweets( thread_id : int, shared_memory ) :
         # On liste les tweets du compte Twitter de la requête avec GetOldTweets3
         print( "[step_A_th" + str(thread_id) + "] Listage des Tweets du compte Twitter @" + request.account_name + " avec GetOldTweets3." )
         try :
-            request.GetOldTweets3_last_tweet_date = getoldtweets3_lister.list_getoldtweets3_tweets( request.account_name, request.GetOldTweets3_tweets_queue_put )
+            request.GetOldTweets3_last_tweet_date = getoldtweets3_lister.list_getoldtweets3_tweets( request.account_name,
+                                                                                                    request.GetOldTweets3_tweets_queue_put,
+                                                                                                    add_step_A_time = shared_memory.execution_metrics.add_step_A_time )
         except Unfounded_Account_on_Lister_with_GetOldTweets3 :
             request.unfounded_account = True
         

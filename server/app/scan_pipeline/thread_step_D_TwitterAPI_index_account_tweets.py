@@ -77,7 +77,8 @@ def thread_step_D_TwitterAPI_index_account_tweets( thread_id : int, shared_memor
         request.finished_TwitterAPI_indexing = twitterapi_indexer.index_or_update_with_TwitterAPI(
                                                    request.account_name,
                                                    request.TwitterAPI_tweets_queue,
-                                                   request.indexing_tweets )
+                                                   request.indexing_tweets,
+                                                   add_step_D_times = shared_memory.execution_metrics.add_step_D_times )
         
         # Si l'indexation est terminée, on met la date de fin dans la requête
         if request.finished_TwitterAPI_indexing and not request.has_failed :

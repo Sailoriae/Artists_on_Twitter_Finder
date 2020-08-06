@@ -45,7 +45,7 @@ class Reverse_Searcher :
             - image_position : La position de l'image dans le Tweet (1-4)
             None si il y a eu un problème
     """
-    def search_tweet ( self, image_url : str, account_name : str = None ) :
+    def search_tweet ( self, image_url : str, account_name : str = None, add_step_3_times = None ) :
         if account_name != None :
             account_id = self.twitter.get_account_id( account_name )
         else :
@@ -61,11 +61,11 @@ class Reverse_Searcher :
         if self.DEBUG or self.DISPLAY_STATS :
             start = time()
         
+        iterator = self.bdd.get_images_in_db_iterator( account_id )
+        iterator.add_step_3_times = add_step_3_times
+        
         try :
-            to_return = self.cbir_engine.search_cbir(
-                image,
-                self.bdd.get_images_in_db_iterator( account_id )
-            )
+            to_return = self.cbir_engine.search_cbir( image, iterator )
         # Si j'amais l'image passée a un format à la noix et fait planter notre
         # moteur CBIR
         except ErrorOpenCV :

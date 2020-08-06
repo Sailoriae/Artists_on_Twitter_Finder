@@ -66,7 +66,7 @@ class Tweets_Lister_with_GetOldTweets3 :
     Peut émettre une exception "Unfounded_Account_on_Lister_with_TwitterAPI" si
     le compte est introuvable.
     """
-    def list_getoldtweets3_tweets ( self, account_name, queue_put ) :
+    def list_getoldtweets3_tweets ( self, account_name, queue_put, add_step_A_time = None ) :
         account_id = self.twitter.get_account_id( account_name )
         if account_id == None :
             print( "[List GOT3] Compte @" + account_name + " introuvable !" )
@@ -136,6 +136,10 @@ class Tweets_Lister_with_GetOldTweets3 :
         
         if self.DEBUG or self.DISPLAY_STATS :
             print( "[List GOT3] Il a fallu", time() - start, "secondes pour lister", len(tweets_list_1 + tweets_list_2), "Tweets de @" + account_name + "." )
+            if add_step_A_time != None :
+                count = len(tweets_list_1 + tweets_list_2)
+                if count > 0 :
+                    add_step_A_time( (time() - start) / count )
         
         # Indiquer qu'on a fini le listage
         queue_put( None, None, None, None )

@@ -169,7 +169,7 @@ class Tweets_Indexer_with_TwitterAPI :
     @return True si la file d'attente est terminée.
             False si il faut attendre un peu et rappeler cette méthode.
     """
-    def index_or_update_with_TwitterAPI ( self, account_name : str, queue, indexing_tweets) -> bool :
+    def index_or_update_with_TwitterAPI ( self, account_name : str, queue, indexing_tweets, add_step_D_times = None ) -> bool :
 #        if self.DEBUG :
 #            print( "[Index TwiAPI] Indexation de Tweets de @" + account_name + "." )
         if self.DEBUG  or self.DISPLAY_STATS :
@@ -182,6 +182,8 @@ class Tweets_Indexer_with_TwitterAPI :
                 if self.DEBUG or self.DISPLAY_STATS :
                     if len(times) > 0 :
                         print( "[Index TwitAPI]", len(times), "Tweets indexés avec une moyenne de", mean(times), "secondes par Tweet." )
+                        if add_step_D_times != None :
+                            add_step_D_times( times )
                 return False
             
             # Si on a atteint la fin de la file
@@ -189,6 +191,8 @@ class Tweets_Indexer_with_TwitterAPI :
                 if self.DEBUG or self.DISPLAY_STATS :
                     if len(times) > 0 :
                         print( "[Index TwitAPI]", len(times), "Tweets indexés avec une moyenne de", mean(times), "secondes par Tweet." )
+                        if add_step_D_times != None :
+                            add_step_D_times( times )
                 return True
             
             if self.DEBUG :

@@ -274,6 +274,12 @@ if __name__ == "__main__" :
             else :
                 print( "Utilisation : stats")
         
+        elif args[0] == "metrics" :
+            if len(args) == 1 :
+                print( shared_memory.execution_metrics.get_metrics() )
+            else :
+                print( "Utilisation : metrics")
+        
         elif args[0] == "stop" :
             if len(args) == 1 :
                 print( "Arrêt à la fin des procédures en cours..." )

@@ -77,7 +77,8 @@ def thread_step_C_GOT3_index_account_tweets( thread_id : int, shared_memory ) :
         request.finished_GOT3_indexing = getoldtweets3_indexer.index_or_update_with_GOT3(
                                              request.account_name,
                                              request.GetOldTweets3_tweets_queue_get,
-                                             request.indexing_tweets )
+                                             request.indexing_tweets,
+                                             add_step_C_times = shared_memory.execution_metrics.add_step_C_times )
         
         # Si l'indexation est terminée, on met la date de fin dans la requête
         if request.finished_GOT3_indexing and not request.has_failed :

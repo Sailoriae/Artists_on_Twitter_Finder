@@ -54,7 +54,7 @@ class Tweets_Lister_with_TwitterAPI :
     Peut émettre une exception "Unfounded_Account_on_Lister_with_TwitterAPI" si
     le compte est introuvable.
     """
-    def list_TwitterAPI_tweets ( self, account_name, queue ) :
+    def list_TwitterAPI_tweets ( self, account_name, queue, add_step_B_time = None ) :
         account_id = self.twitter.get_account_id( account_name )
         if account_id == None :
             print( "[List TwiAPI] Compte @" + account_name + " introuvable !" )
@@ -80,6 +80,9 @@ class Tweets_Lister_with_TwitterAPI :
         
         if self.DEBUG or self.DISPLAY_STATS :
             print( "[List TwitterAPI] Il a fallu", time() - start, "secondes pour lister", count, "Tweets de @" + account_name + "." )
+            if add_step_B_time != None :
+                if count > 0 :
+                    add_step_B_time( (time() - start) / count )
         
         # Indiquer qu'on a fini le listage
         queue.put( None )

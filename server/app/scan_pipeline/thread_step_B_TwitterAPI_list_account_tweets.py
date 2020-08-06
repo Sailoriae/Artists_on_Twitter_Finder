@@ -59,7 +59,9 @@ def thread_step_B_TwitterAPI_list_account_tweets( thread_id : int, shared_memory
         # On liste les Tweets du compte Twitter de la requête avec l'API Twitter
         print( "[step_B_th" + str(thread_id) + "] Listage des Tweets du compte Twitter @" + request.account_name + " avec l'API Twitter." )
         try :
-            request.TwitterAPI_last_tweet_id = twitterapi_lister.list_TwitterAPI_tweets( request.account_name, request.TwitterAPI_tweets_queue )
+            request.TwitterAPI_last_tweet_id = twitterapi_lister.list_TwitterAPI_tweets( request.account_name,
+                                                                                         request.TwitterAPI_tweets_queue,
+                                                                                         add_step_B_time = shared_memory.execution_metrics.add_step_B_time )
         except Unfounded_Account_on_Lister_with_TwitterAPI :
             request.unfounded_account = True
         
