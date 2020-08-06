@@ -177,4 +177,6 @@ class Scan_Request :
         Pyro4.Proxy( self._GetOldTweets3_tweets_queue ).put( uri )
     
     def GetOldTweets3_tweets_queue_get ( self, block = True ) :
-        Pyro4.Proxy( self._GetOldTweets3_tweets_queue ).get( block = block )
+        uri = Pyro4.Proxy( self._GetOldTweets3_tweets_queue ).get( block = block )
+        
+        return Pyro4.Proxy( uri )

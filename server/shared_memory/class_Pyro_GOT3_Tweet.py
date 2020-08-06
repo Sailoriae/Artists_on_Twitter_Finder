@@ -22,7 +22,7 @@ class Pyro_GOT3_Tweet :
     def author_id ( self ) : return self._author_id
     
     @property
-    def images_urls ( self ) : return self._images_urls
+    def images ( self ) : return self._images
     
     @property
     def hashtags ( self ) : return self._hashtags

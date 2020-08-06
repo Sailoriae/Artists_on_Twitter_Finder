@@ -25,6 +25,7 @@ class Unfounded_Account_on_Lister_with_GetOldTweets3 ( Exception ) :
 
 """
 Envoyer un liste d'objets Tweet de GOT3 dans la mémoire partagée.
+Permet de sortir de la liste donnée par GOT3 et de mettre dans la file.
 """
 class GOT3_Tweet_List_to_Shared_Memory :
     def __init__ ( self, queue_put_function ) :
