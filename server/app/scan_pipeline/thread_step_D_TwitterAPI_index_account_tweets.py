@@ -23,7 +23,7 @@ GetOldTweets3.
 """
 def thread_step_D_TwitterAPI_index_account_tweets( thread_id : int, shared_memory ) :
     # Initialisation de l'indexeur de Tweets
-    twitterapi_indexer = Tweets_Indexer_with_TwitterAPI( DEBUG = param.DEBUG, DISPLAY_STATS = param.DISPLAY_STATS )
+    twitterapi_indexer = Tweets_Indexer_with_TwitterAPI( DEBUG = param.DEBUG, ENABLE_METRICS = param.ENABLE_METRICS )
     
     # Accès direct à la base de données
     # N'UTILISER QUE DES METHODES QUI FONT SEULEMENT DES SELECT !

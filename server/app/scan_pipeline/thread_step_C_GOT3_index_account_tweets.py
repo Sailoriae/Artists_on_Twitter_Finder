@@ -23,7 +23,7 @@ l'API publique Twitter.
 """
 def thread_step_C_GOT3_index_account_tweets( thread_id : int, shared_memory ) :
     # Initialisation de l'indexeur de Tweets
-    getoldtweets3_indexer = Tweets_Indexer_with_GetOldTweets3( DEBUG = param.DEBUG, DISPLAY_STATS = param.DISPLAY_STATS )
+    getoldtweets3_indexer = Tweets_Indexer_with_GetOldTweets3( DEBUG = param.DEBUG, ENABLE_METRICS = param.ENABLE_METRICS )
     
     # Accès direct à la base de données
     # N'UTILISER QUE DES METHODES QUI FONT SEULEMENT DES SELECT !

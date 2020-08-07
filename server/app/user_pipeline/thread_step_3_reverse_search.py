@@ -21,7 +21,7 @@ l'illustration de requête.
 """
 def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
     # Initialisation de notre moteur de recherche d'image par le contenu
-    cbir_engine = Reverse_Searcher( DEBUG = param.DEBUG, DISPLAY_STATS = param.DISPLAY_STATS)
+    cbir_engine = Reverse_Searcher( DEBUG = param.DEBUG, ENABLE_METRICS = param.ENABLE_METRICS)
     
     # Dire qu'on ne fait rien
     shared_memory.user_requests.requests_in_thread.set_request( "thread_step_3_reverse_search_number" + str(thread_id), None )

@@ -30,9 +30,9 @@ Classe permettant d'indexer les Tweets d'un compte Twitter trouvés avec la
 librairie GetOldTweets3.
 """
 class Tweets_Indexer_with_GetOldTweets3 :
-    def __init__( self, DEBUG : bool = False, DISPLAY_STATS : bool = False ) :
+    def __init__( self, DEBUG : bool = False, ENABLE_METRICS : bool = False ) :
         self.DEBUG = DEBUG
-        self.DISPLAY_STATS = DISPLAY_STATS
+        self.ENABLE_METRICS = ENABLE_METRICS
         self.bdd = SQLite_or_MySQL()
         self.engine = CBIR_Engine_for_Tweets_Images( DEBUG = DEBUG )
     
@@ -76,7 +76,7 @@ class Tweets_Indexer_with_GetOldTweets3 :
     def index_or_update_with_GOT3 ( self, account_name, queue_get, indexing_tweets, add_step_C_times = None ) -> bool :
 #        if self.DEBUG :
 #            print( "Indexation / scan des Tweets de @" + account_name + " avec GetOldTweets3." )
-        if self.DEBUG or self.DISPLAY_STATS :
+        if self.DEBUG or self.ENABLE_METRICS :
             times = [] # Liste des temps pour indexer un Tweet
             calculate_features_times = [] # Liste des temps pour calculer les caractéristiques des images du Tweet
             insert_into_times = [] # Liste des temps pour faire le INSERT INTO
@@ -85,7 +85,7 @@ class Tweets_Indexer_with_GetOldTweets3 :
             try :
                 tweet = queue_get( block = False )
             except Empty_Queue : # Si la queue est vide
-                if self.DEBUG or self.DISPLAY_STATS :
+                if self.DEBUG or self.ENABLE_METRICS :
                     if len(times) > 0 :
                         print( "[Index GOT3]", len(times), "Tweets indexés avec une moyenne de", mean(times), "secondes par Tweet." )
                         print( "[Index GOT3] Temps moyens de calcul des caractéristiques :", mean( calculate_features_times ) )
@@ -96,7 +96,7 @@ class Tweets_Indexer_with_GetOldTweets3 :
             
             # Si on a atteint la fin de la file
             if tweet.id == None :
-                if self.DEBUG or self.DISPLAY_STATS :
+                if self.DEBUG or self.ENABLE_METRICS :
                     if len(times) > 0 :
                         print( "[Index GOT3]", len(times), "Tweets indexés avec une moyenne de", mean(times), "secondes par Tweet." )
                         print( "[Index GOT3] Temps moyens de calcul des caractéristiques :", mean( calculate_features_times ) )
@@ -107,7 +107,7 @@ class Tweets_Indexer_with_GetOldTweets3 :
             
             if self.DEBUG :
                 print( "[Index GOT3] Indexation Tweet " + str(tweet.id) + " de @" + account_name + "." )
-            if self.DEBUG or self.DISPLAY_STATS :
+            if self.DEBUG or self.ENABLE_METRICS :
                 start = time()
             
             # Tester si l'autre classe d'indexation n'est pas déjà en train de
@@ -135,7 +135,7 @@ class Tweets_Indexer_with_GetOldTweets3 :
                     print( "Tweet sans image, on le passe !" )
                 continue
             
-            if self.DEBUG or self.DISPLAY_STATS :
+            if self.DEBUG or self.ENABLE_METRICS :
                 start_calculate_features = time()
             
             # Traitement des images du Tweet
@@ -161,7 +161,7 @@ class Tweets_Indexer_with_GetOldTweets3 :
                 print( "Toutes les images du Tweet " + str(tweet.id) + " son inindexables !" )
                 continue
             
-            if self.DEBUG or self.DISPLAY_STATS :
+            if self.DEBUG or self.ENABLE_METRICS :
                 calculate_features_times.append( time() - start_calculate_features )
             
             # Prendre les hashtags du Tweet
@@ -169,7 +169,7 @@ class Tweets_Indexer_with_GetOldTweets3 :
             # caractères (GOT3 les voit en entier)
             hashtags = tweet.hashtags.split(" ")
             
-            if self.DEBUG or self.DISPLAY_STATS :
+            if self.DEBUG or self.ENABLE_METRICS :
                 start_insert_into = time()
             
             # Stockage des résultats
@@ -183,6 +183,6 @@ class Tweets_Indexer_with_GetOldTweets3 :
                 hashtags
             )
             
-            if self.DEBUG or self.DISPLAY_STATS :
+            if self.DEBUG or self.ENABLE_METRICS :
                 insert_into_times.append( time() - start_insert_into )
                 times.append( time() - start )

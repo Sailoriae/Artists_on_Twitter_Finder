@@ -40,7 +40,7 @@ class Image_Features_Iterator :
                         request_2,
                         request_3,
                         request_4,
-                        DISPLAY_STATS = False ) :
+                        ENABLE_METRICS = False ) :
         self.conn = conn
         self.current_cursor = self.conn.cursor()
         self.current_table = 1
@@ -55,8 +55,8 @@ class Image_Features_Iterator :
         self.request_3 = request_3
         self.request_4 = request_4
         
-        self.DISPLAY_STATS = DISPLAY_STATS
-        if DISPLAY_STATS :
+        self.ENABLE_METRICS = ENABLE_METRICS
+        if ENABLE_METRICS :
             self.iteration_times = [] # Durées des itérations
             self.usage_times = [] # Durées des utilisations
             self.usage_start = None
@@ -71,7 +71,7 @@ class Image_Features_Iterator :
     @return Un objet Image_in_DB
     """
     def __next__( self ) -> Image_in_DB :
-        if self.DISPLAY_STATS :
+        if self.ENABLE_METRICS :
             iteration_start = time()
             if self.usage_start != None :
                 self.usage_times.append( time() - self.usage_start )
@@ -86,7 +86,7 @@ class Image_Features_Iterator :
             
             # Si on a fait les 4 tables, on termine l'itération
             if self.current_table == 5 :
-                if self.DISPLAY_STATS :
+                if self.ENABLE_METRICS :
                     print( "[Images_It] Temps moyen d'itération :", mean( self.iteration_times ) )
                     print( "[Images_It] Temps moyen d'utilisation :", mean( self.usage_times ) )
                     if self.add_step_3_times != None :
@@ -114,7 +114,7 @@ class Image_Features_Iterator :
             
             return self.__next__()
         
-        if self.DISPLAY_STATS :
+        if self.ENABLE_METRICS :
             self.iteration_times.append( time() - iteration_start )
             self.usage_start = time()
         

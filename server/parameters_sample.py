@@ -94,7 +94,12 @@ NUMBER_OF_STEP_D_TWITTERAPI_INDEX_ACCOUNT_TWEETS = 5
 Faire plus de print().
 """
 DEBUG = False
-DISPLAY_STATS = False
+
+"""
+Activer la mesure des temps d'éxécutions des procédures longues.
+Les moyennes sont alors accessibles via la commande "metrics".
+"""
+ENABLE_METRICS = True
 
 """
 MàJ automatique des comptes dans la BDD.

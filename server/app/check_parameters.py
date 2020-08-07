@@ -41,6 +41,7 @@ def check_parameters () :
         check_list.append( type( param.NUMBER_OF_STEP_C_GOT3_INDEX_ACCOUNT_TWEETS ) == int and param.NUMBER_OF_STEP_C_GOT3_INDEX_ACCOUNT_TWEETS > 0 )
         check_list.append( type( param.NUMBER_OF_STEP_D_TWITTERAPI_INDEX_ACCOUNT_TWEETS ) == int and param.NUMBER_OF_STEP_D_TWITTERAPI_INDEX_ACCOUNT_TWEETS > 0 )
         check_list.append( type( param.DEBUG ) == bool )
+        check_list.append( type( param.ENABLE_METRICS ) == bool )
         check_list.append( type( param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE ) == int and param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE >= 0 )
         check_list.append( type( param.MAX_PENDING_REQUESTS_PER_IP_ADDRESS ) == int and param.MAX_PENDING_REQUESTS_PER_IP_ADDRESS > 0 )
         check_list.append( type( param.UNLIMITED_IP_ADDRESSES ) == list )

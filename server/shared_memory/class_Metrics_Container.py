@@ -93,5 +93,5 @@ class Metrics_Container :
         if self._step_3_usage_times != [] :
             to_print += "Tempys moyen pour comparer lors de la recherche : " + str(mean(self._step_3_usage_times)) + "\n"
         if to_print == "" :
-            to_print = "Aucune statistique disponible ! Aucune requête n'a été lancée, ou le paramètre \"DISPLAY_STATS\" est à \"False\"."
+            to_print = "Aucune statistique disponible ! Aucune requête n'a été lancée, ou le paramètre \"ENABLE_METRICS\" est à \"False\"."
         return to_print

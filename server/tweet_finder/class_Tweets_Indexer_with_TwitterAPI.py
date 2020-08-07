@@ -18,9 +18,9 @@ Classe permettant d'indexer les Tweets d'un compte Twitter trouvés avec l'API
 publique de Twitter via la librairie Tweepy.
 """
 class Tweets_Indexer_with_TwitterAPI :
-    def __init__( self, DEBUG : bool = False, DISPLAY_STATS : bool = False ) :
+    def __init__( self, DEBUG : bool = False, ENABLE_METRICS : bool = False ) :
         self.DEBUG = DEBUG
-        self.DISPLAY_STATS = DISPLAY_STATS
+        self.ENABLE_METRICS = ENABLE_METRICS
         self.bdd = SQLite_or_MySQL()
         self.engine = CBIR_Engine_for_Tweets_Images( DEBUG = DEBUG )
     
@@ -172,14 +172,14 @@ class Tweets_Indexer_with_TwitterAPI :
     def index_or_update_with_TwitterAPI ( self, account_name : str, queue, indexing_tweets, add_step_D_times = None ) -> bool :
 #        if self.DEBUG :
 #            print( "[Index TwiAPI] Indexation de Tweets de @" + account_name + "." )
-        if self.DEBUG  or self.DISPLAY_STATS :
+        if self.DEBUG  or self.ENABLE_METRICS :
             times = [] # Liste des temps pour indexer un Tweet
         
         while True :
             try :
                 tweet = queue.get( block = False )
             except Empty_Queue : # Si la queue est vide
-                if self.DEBUG or self.DISPLAY_STATS :
+                if self.DEBUG or self.ENABLE_METRICS :
                     if len(times) > 0 :
                         print( "[Index TwitAPI]", len(times), "Tweets indexés avec une moyenne de", mean(times), "secondes par Tweet." )
                         if add_step_D_times != None :
@@ -188,7 +188,7 @@ class Tweets_Indexer_with_TwitterAPI :
             
             # Si on a atteint la fin de la file
             if tweet == None :
-                if self.DEBUG or self.DISPLAY_STATS :
+                if self.DEBUG or self.ENABLE_METRICS :
                     if len(times) > 0 :
                         print( "[Index TwitAPI]", len(times), "Tweets indexés avec une moyenne de", mean(times), "secondes par Tweet." )
                         if add_step_D_times != None :
@@ -197,7 +197,7 @@ class Tweets_Indexer_with_TwitterAPI :
             
             if self.DEBUG :
                 print( "[Index TwitAPI] Indexation Tweet " + str(tweet.id) + " de @" + account_name + "." )
-            if self.DEBUG or self.DISPLAY_STATS :
+            if self.DEBUG or self.ENABLE_METRICS :
                 start = time()
             
             try :
@@ -218,6 +218,6 @@ class Tweets_Indexer_with_TwitterAPI :
             # déjà dans la BDD car la fonction index_tweet() le fait
             has_been_indexed = self.index_tweet( 0, tweepy_Status_object = tweet )
             
-            if self.DEBUG or self.DISPLAY_STATS :
+            if self.DEBUG or self.ENABLE_METRICS :
                 if has_been_indexed :
                     times.append( time() - start )
