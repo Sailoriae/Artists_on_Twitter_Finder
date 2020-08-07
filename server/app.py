@@ -79,9 +79,25 @@ if __name__ == "__main__" :
                                     args = ( pyro_port, ) )
     thread_pyro.start()
     
+    # On prépare la connexion au serveur.
     import Pyro4
     Pyro4.config.SERIALIZER = "pickle"
-    shared_memory = Pyro4.Proxy( "PYRO:shared_memory@localhost:" + str(pyro_port) )
+    
+    # On test pendant 30 secondes que la connection s'établisse.
+    from time import sleep
+    shared_memory = None
+    for i in range( 30 ) :
+        try :
+            shared_memory = Pyro4.Proxy( "PYRO:shared_memory@localhost:" + str(pyro_port) )
+        except Pyro4.errors.ConnectionClosedError :
+            sleep(1)
+        else :
+            break
+    
+    if shared_memory == None :
+        print( "Connexion au serveur de mémoire partagée impossible !" )
+        import sys
+        sys.exit(0)
     
     
     """
@@ -203,6 +219,10 @@ if __name__ == "__main__" :
                 request = shared_memory.user_requests.get_request( args[1] )
                 if request != None :
                     print( "Status : " + str(request.status) + " " + request.get_status_string() )
+                    if request.problem != None :
+                        print( "Problème : " + request.problem )
+                    if request.finished_date != None :
+                        print( "Fin du traitement : " + str(request.finished_date) )
                 else :
                     print( "Requête inconnue pour cet URL !" )
             else :

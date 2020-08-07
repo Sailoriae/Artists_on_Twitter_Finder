@@ -2,7 +2,7 @@
 # coding: utf-8
 
 import Pyro4
-from datetime import datetime
+import datetime
 
 try :
     from class_User_Request import User_Request
@@ -220,6 +220,77 @@ class User_Requests_Pipeline :
             Pyro4.Proxy( self._step_3_reverse_search_queue ).put( request )
         
         if request.status == 6 :
-            request.finished_date = datetime.now()
+            request.finished_date = datetime.datetime.now()
             if request.ip_address != None :
                 Pyro4.Proxy( self._limit_per_ip_addresses ).remove_ip_address( request.ip_address )
+    
+    """
+    Délester les anciennes requêtes.
+    """
+    def shed_requests ( self ) :
+        # On prend la date actuelle
+        now = datetime.datetime.now()
+        
+        # On bloque l'accès la liste des requêtes
+        Pyro4.Proxy( self._requests_sem ).acquire()
+        
+        # On filtre la liste des requêtes utilisateurs
+        new_requests_list = []
+        to_unregister_list = []
+        
+        for request_uri in self._requests :
+            request = Pyro4.Proxy( request_uri )
+            
+            # Si la requête est terminée, il faut vérifier qu'on puisse la garder
+            if request.finished_date != None :
+                
+                # Si la date de fin est à moins de 3 heures de maintenant, on
+                # peut peut-être garder cette requête
+                if now - request.finished_date < datetime.timedelta( hours = 3 ) :
+                    # Si la requête s'est terminée en erreur
+                    if request.problem != None :
+                        # Si l'URL de requête est invalide ou le site n'est pas
+                        # supporté, on garde la requête 10 minutes
+                        if request.problem in [ "NOT_AN_URL",
+                                                "INVALID_URL",
+                                                "UNSUPPORTED_WEBSITE"] :
+                            if now - request.finished_date < datetime.timedelta( minutes = 10 ) :
+                                new_requests_list.append( request_uri )
+                            
+                            else : # On désenregistre la requête
+                                to_unregister_list.append( request_uri )
+                        
+                        # Sinon, on la garde 1 heure
+                        else :
+                            if now - request.finished_date < datetime.timedelta( hours = 1 ) :
+                                new_requests_list.append( request_uri )
+                            
+                            else : # On désenregistre la requête
+                                to_unregister_list.append( request_uri )
+                    
+                    # Si la requête ne s'est pas terminée en erreur, on la
+                    # garde 3 heures
+                    else :
+                        new_requests_list.append( request_uri )
+                
+                else : # On désenregistre la requête
+                    to_unregister_list.append( request_uri )
+            
+            # Sinon, on la garde forcément
+            else :
+                new_requests_list.append( request_uri )
+        
+        # On installe la nouvelle liste
+        self._requests = new_requests_list
+        
+        # On désenregistre les requêtes à désenregistrer
+        # Mais normalement le garbadge collector l'a fait avant nous
+        # Oui : Pyro4 désenregistre les objets que le garbadge collector a viré
+        for uri in to_unregister_list :
+            try :
+                self._root.unregister_obj( uri )
+            except Pyro4.errors.DaemonError : # Déjà désenregistré
+                pass
+        
+        # On débloque l'accès à la liste des requêtes
+        Pyro4.Proxy( self._requests_sem ).release()

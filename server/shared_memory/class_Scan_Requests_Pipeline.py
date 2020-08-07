@@ -2,6 +2,7 @@
 # coding: utf-8
 
 import Pyro4
+import datetime
 
 try :
     from class_Scan_Request import Scan_Request
@@ -252,3 +253,50 @@ class Scan_Requests_Pipeline :
         requests_sem.release()
         
         return None
+    
+    """
+    Délester les anciennes requêtes.
+    """
+    def shed_requests ( self ) :
+        # On prend la date actuelle
+        now = datetime.datetime.now()
+        
+        # On bloque l'accès la liste des requêtes
+        Pyro4.Proxy( self._requests_sem ).acquire()
+        
+        # On filtre la liste des requêtes de scan
+        new_requests_list = []
+        to_unregister_list = []
+        
+        for request_uri in self._requests :
+            request = Pyro4.Proxy( request_uri )
+            
+            # Si la requête est terminée, il faut vérifier qu'on puisse la garder
+            if request.finished_date != None :
+                
+                # Si la date de fin est à moins de 24h de maintenant, on garde
+                # cette requête
+                if now - request.finished_date < datetime.timedelta( hours = 24 ) :
+                    new_requests_list.append( request_uri )
+                
+                else : # On désenregistre la requête
+                    to_unregister_list.append( request_uri )
+            
+            # Sinon, on la garde forcément
+            else :
+                new_requests_list.append( request_uri )
+        
+        # On installe la nouvelle liste
+        self._requests = new_requests_list
+        
+        # On désenregistre les requêtes à désenregistrer
+        # Mais normalement le garbadge collector l'a fait avant nous
+        # Oui : Pyro4 désenregistre les objets que le garbadge collector a viré
+        for uri in to_unregister_list :
+            try :
+                self._root.unregister_obj( uri )
+            except Pyro4.errors.DaemonError : # Déjà désenregistré
+                pass
+        
+        # On débloque l'accès à la liste des requêtes
+        Pyro4.Proxy( self._requests_sem ).release()
