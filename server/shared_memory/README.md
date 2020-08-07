@@ -6,6 +6,19 @@ Documentation : https://pyro4.readthedocs.io/en/stable/index.html
 
 Cette librairie permet de partager des objets entre des processus (Car nous sommes obligés de faire du multi-processus et non du multi-threading à cause du GIL). De plus, elle permet aussi de faire des systèmes distribués. "Artist on Twitter Finder" peut donc être distribué sur plusieurs serveurs (En modifiant un peu le code).
 
+
+## Origine de ce module
+
+Le Global Interpreter Lock, ou "GIL", est une sorte de sémaphore qui empêche deux threads Python de s'éxécuter en même temps, afin de ne pas corrompre la mémoire. Ainsi, le multi-threading en Python (Module `threading`) n'est pas du vrai multi-threading, car les instructions Python ne sont pas exécutées en même temps. Si l'on veut faire du vrai multi-threading en Python, il faut faire du multi-processing (Module `multiprocessing`).
+
+Et faire du multi-processing Python rend l'utilisation d'une mémoire partagée impossible ! Pour partager des données, il faut obligatoirement faire un serveur de mémoire partagée.
+
+Ainsi, j'ai exploré deux solutions de serveur de mémoire partagée :
+- Les "Managers" du module `multiprocessing`. Leur gros problème est qu'ils n'acceptent qu'une liste restreinte d'objets, ce qui transforme complétement la mémoire partagée et leur utilisation.
+
+- La librarie `Pyro4`. Peut supporter des classes, et exécuter coté-serveur le code de leurs attributs, mais pas pour les sous-objets ! Cependant, une parade a été trouvée pour pallier ce problème, et faire une mémoire partagée efficace, voir ci-dessous.
+
+
 ## Procédure de lancement : `thread_pyro_server`
 
 Cette procédure est appelée en procédure de création d'un processus (Ou d'un thread) par `app.py`.
