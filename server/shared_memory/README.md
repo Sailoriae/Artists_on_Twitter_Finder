@@ -65,3 +65,9 @@ Arbre des objets :
   - Attribut `http_limitator` : URI vers objet `HTTP_Requests_Limitator` : Limitateur du nombre de requêtes sur l'API HTTP.
 
 Voir chaque classe pour plus de documentation.
+
+
+# Notes
+
+Les objets `Pyro4.Proxy` ferment leur connexion lorsqu'ils arrivent dans le garbadge collector. Source : https://github.com/irmen/Pyro4/blob/79de6434259ff82d202090cbd0901673d4b8344b/src/Pyro4/core.py#L264
+
