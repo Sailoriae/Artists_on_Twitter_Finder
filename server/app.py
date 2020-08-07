@@ -58,11 +58,6 @@ if __name__ == "__main__" :
         import sys
         sys.exit(0)
     
-    if param.ENABLE_MULTIPROCESSING :
-        import multiprocessing
-        threading.Thread = multiprocessing.Process # Très bourrin, mais évite de faire plein de "if"
-    
-    
     """
     Lancement du serveur de mémoire partagée, et accès pour ce processus (Le
     collecteur d'erreurs crée les accès pour les threads).
@@ -74,6 +69,12 @@ if __name__ == "__main__" :
     # fantomes qui massacrent tous mes tests !
     pyro_port = randint( 49152, 65535 )
     
+    # Note : Je ne comprend pas bien pourquoi, mais sous Linux, en mode multi-
+    # processus, les processus fils se connectent à leur frère processus
+    # serveur Pyro, mais freezent sur "shared_memory.keep_service_alive", c'est
+    # à dire à l'accès à un attribut. Idem sur ce processus père.
+    # Du coup, on crée forcément le serveur Pyro en thread, ce qui n'est pas
+    # génant puisque sur le processus pére (Ici, "app.py"), il n'y a que la CLI.
     thread_pyro = threading.Thread( name = "thread_pyro_th1",
                                     target = thread_pyro_server,
                                     args = ( pyro_port, ) )
@@ -88,11 +89,14 @@ if __name__ == "__main__" :
     from time import sleep
     shared_memory = None
     for i in range( 30 ) :
+        print( "Connexion au serveur de mémoire partagée..." )
         try :
             shared_memory = Pyro4.Proxy( shared_memory_uri )
-        except Pyro4.errors.ConnectionClosedError :
+            shared_memory.keep_service_alive # Test d'accès
+        except ( Pyro4.errors.ConnectionClosedError, Pyro4.errors.CommunicationError, ConnectionRefusedError ) :
             sleep(1)
         else :
+            print( "Connexion au serveur de mémoire partagée réussie !" )
             break
     
     if shared_memory == None :
@@ -106,6 +110,10 @@ if __name__ == "__main__" :
     Ce ne sont pas les procédures qui sont exécutées directement, mais le
     collecteur d'erreurs qui exécute la procédure.
     """
+    if param.ENABLE_MULTIPROCESSING :
+        import multiprocessing
+        threading.Thread = multiprocessing.Process # Très bourrin, mais évite de faire plein de "if"
+    
     threads_step_1_link_finder = []
     for i in range( param.NUMBER_OF_STEP_1_LINK_FINDER_THREADS ) :
         thread = threading.Thread( name = "step_1_link_finder_th" + str(i+1),
