@@ -10,11 +10,12 @@ En vérité, les procédures des threads ne sont pas exécutées directement, ma
 le sont par ce collecteur d'erreur.
 @param thread_procedure Procédure à exécuter.
 @param thread_id ID du thread.
-@param shared_memory Objet Shared_Memory, mémoire partagée.
+@param shared_memory_uri L'URI menant à la racine du serveur de mémoire
+                         partagée Pyro4.
 """
-def error_collector( thread_procedure, thread_id : int, pyro_port : int ) :
+def error_collector( thread_procedure, thread_id : int, shared_memory_uri : str ) :
     Pyro4.config.SERIALIZER = "pickle"
-    shared_memory = Pyro4.Proxy( "PYRO:shared_memory@localhost:" + str(pyro_port) )
+    shared_memory = Pyro4.Proxy( shared_memory_uri )
     error_count = 0
     
     while shared_memory.keep_service_alive :
