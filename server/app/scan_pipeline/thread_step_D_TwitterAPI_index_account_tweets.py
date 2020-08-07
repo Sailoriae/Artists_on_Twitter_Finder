@@ -73,7 +73,8 @@ def thread_step_D_TwitterAPI_index_account_tweets( thread_id : int, shared_memor
         request.last_seen_TwitterAPI_indexer = time()
         
         # On index / scan les comptes Twitter de la requête avec l'API Twitter
-        print( "[step_D_th" + str(thread_id) + "] Indexation des Tweets de @" + request.account_name + " trouvés par l'API Twitter." )
+        if param.DEBUG :
+            print( "[step_D_th" + str(thread_id) + "] Indexation des Tweets de @" + request.account_name + " trouvés par l'API Twitter." )
         request.finished_TwitterAPI_indexing = twitterapi_indexer.index_or_update_with_TwitterAPI(
                                                    request.account_name,
                                                    request.TwitterAPI_tweets_queue,

@@ -73,7 +73,8 @@ def thread_step_C_GOT3_index_account_tweets( thread_id : int, shared_memory ) :
         request.last_seen_GOT3_indexer = time()
         
         # On index / scan les comptes Twitter de la requête avec GetOldTweets3
-        print( "[step_C_th" + str(thread_id) + "] Indexation des Tweets de @" + request.account_name + " trouvés par GetOldTweets3." )
+        if param.DEBUG :
+            print( "[step_C_th" + str(thread_id) + "] Indexation des Tweets de @" + request.account_name + " trouvés par GetOldTweets3." )
         request.finished_GOT3_indexing = getoldtweets3_indexer.index_or_update_with_GOT3(
                                              request.account_name,
                                              request.GetOldTweets3_tweets_queue_get,
