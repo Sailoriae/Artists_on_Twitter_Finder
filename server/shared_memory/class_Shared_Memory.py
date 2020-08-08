@@ -34,8 +34,8 @@ Proxy ne peut être utilisé que par un seul thread à la fois).
 class Shared_Memory :
     def __init__ ( self, pyro_port ) :
         # Initialisation du serveur Pyro4
-#        Pyro4.config.SERVERTYPE = "multiplex"
-        Pyro4.config.THREADPOOL_SIZE = 10000
+ #       Pyro4.config.SERVERTYPE = "multiplex" # NE PAS FAIRE DE MULTIPLEX, CA NE FONCTIONNE PAS POUR NOTRE UTILISATION
+        Pyro4.config.THREADPOOL_SIZE = 10000   # On doit donc autoriser beaucoup de connexions en même temps !
         Pyro4.config.SERIALIZERS_ACCEPTED = { "pickle" }
         Pyro4.config.SERIALIZER = "pickle"
         self._daemon = Pyro4.Daemon( port = pyro_port )

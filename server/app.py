@@ -15,13 +15,14 @@ if __name__ == "__main__" :
     # Très très étrange.
     # Les lignes ci-dessous règles ces problèmes, mais désactivent la vérification
     # SSL, ce qui est pas mal dangereux !
-    import ssl
-    try:
-        _create_unverified_https_context = ssl._create_unverified_context
-    except AttributeError:
-        pass
-    else:
-        ssl._create_default_https_context = _create_unverified_https_context
+#    import ssl
+#    try:
+#        _create_unverified_https_context = ssl._create_unverified_context
+#    except AttributeError:
+#        pass
+#    else:
+#        ssl._create_default_https_context = _create_unverified_https_context
+    # EDIT : Ce problème semble résolu, mais je ne sais pas pourquoi.
     
     
     """
