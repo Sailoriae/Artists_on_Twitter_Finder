@@ -21,7 +21,7 @@ function mainFunction () {
 	var illustURL = document.getElementById("illust-url").value;
 	var request = new XMLHttpRequest();
 
-	request.addEventListener( "readystatechange", function() {
+	request.addEventListener( "readystatechange", async function() {
 		if ( this.readyState === 4 ) {
 			if ( request.status === 200 ) {
 				if ( request.responseText === "" ) {
@@ -43,6 +43,9 @@ function mainFunction () {
 
 					waitAndUpdate( json );
 				}
+			} else if ( request.status === 429 ) {
+				await new Promise(r => setTimeout(r, 1000));
+				mainFunction();
 			} else {
 				displayErrorP.textContent = lang["CANNOT_CONTACT_SERVER"];
 			}
@@ -185,7 +188,7 @@ function displayStats() {
 
 	var request = new XMLHttpRequest();
 
-	request.addEventListener( "readystatechange", function() {
+	request.addEventListener( "readystatechange", async function() {
 		if ( this.readyState === 4 ) {
 			if ( request.status === 200 ) {
 				if ( request.responseText === "" ) {
@@ -198,6 +201,9 @@ function displayStats() {
 
 					displayInfosP.textContent = parse( lang[ "INFO" ], json["limit_per_ip_address"] )
 				}
+			} else if ( request.status === 429 ) {
+				await new Promise(r => setTimeout(r, 1000));
+				displayStats();
 			} else {
 				displayStatsP.textContent = lang[ "CANNOT_DISPLAY_STATS" ];
 			}
