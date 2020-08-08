@@ -154,10 +154,11 @@ class Link_Finder :
             if source != None and source != "" :
                 try :
                     data = self.get_data( source )
-                except Unsupported_Website :
+                except ( Unsupported_Website, Not_an_URL ) :
                     pass
                 else :
-                    twitter_accounts += data.twitter_accounts
+                    if data != None :
+                        twitter_accounts += data.twitter_accounts
         
         # ====================================================================
         # FURBOORU
@@ -174,10 +175,11 @@ class Link_Finder :
             if source != None and source != "" :
                 try :
                     data = self.get_data( source )
-                except Unsupported_Website :
+                except ( Unsupported_Website, Not_an_URL ) :
                     pass
                 else :
-                    twitter_accounts += data.twitter_accounts
+                    if data != None :
+                        twitter_accounts += data.twitter_accounts
         
         # ====================================================================
         # Site non supporté
