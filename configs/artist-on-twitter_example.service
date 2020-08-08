@@ -1,0 +1,18 @@
+[Unit]
+Description = Artist on Twitter Finder
+After = screen-cleanup.service network.target mysql.service
+Requires = mysql.service
+Conflicts = shutdown.target reboot.target halt.target
+
+[Service]
+User = username																								# MODIFIER ICI
+Type = forking
+
+# Nombre de descripteurs de fichiers possibles ("ulimit -n", 1024 par défaut)
+LimitNOFILE = 10000
+LimitNOFILESoft = 10000
+
+ExecStart = screen -dmS twitter /usr/bin/python3 /path/to/Artist_on_Twitter_Finder/server/app.py			# MODIFIER ICI
+
+[Install]
+WantedBy = multi-user.target

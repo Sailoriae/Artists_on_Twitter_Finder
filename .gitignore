@@ -13,3 +13,6 @@ __pycache__/
 
 # Configuration Apache2 modifiée
 /configs/apache2.conf
+
+# Configuration Systemd modifiée
+/configs/artist-on-twitter.service

@@ -31,3 +31,14 @@ sudo letsencrypt certonly --webroot -w /path/to/Artist_on_Twitter_Finder/public 
 sudo a2enmod ssl
 sudo service apache2 restart
 ```
+
+## `artist-on-twitter_example.service` : Service
+
+Ce fichier est à modifier ! Remplacez :
+* `/path/to/Artist_on_Twitter_Finder/server` par le chemin vers le répetoire `server` de "Artist on Twitter Finder",
+* Et `username` par le nom d'utilisateur qui aura le processus.
+
+Puis activez ce service, et démarrez-le :
+```
+sudo systemctl enable /path/to/Artist_on_Twitter_Finder/configs/artist-on-twitter.service
+```
