@@ -41,7 +41,7 @@ class Metrics_Container :
                        l'API Twitter publique.
     """
     def add_step_B_time ( self, step_A_time ) :
-        self._step_A_times.append( step_A_time )
+        self._step_B_times.append( step_A_time )
     
     """
     @param step_C_times Liste de temps d'éxécution pour indexer un Tweet.
