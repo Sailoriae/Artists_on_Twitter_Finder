@@ -364,7 +364,10 @@ if __name__ == "__main__" :
     # Car http_server.handle_request() est bloquant tant qu'il n'y a pas eu de
     # requête
     import requests
-    requests.get( "http://localhost:" + str( param.HTTP_SERVER_PORT ) )
+    try :
+        requests.get( "http://localhost:" + str( param.HTTP_SERVER_PORT ) )
+    except requests.exceptions.ConnectionError :
+        pass
     
     # Attendre que les threads aient fini
     for thread in threads_step_1_link_finder :
