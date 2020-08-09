@@ -103,15 +103,15 @@ class Image_Features_Iterator :
             if self.current_table == 3 :
                 self.current_cursor = self.conn.cursor()
                 if self.account_id != 0 :
-                    self.current_cursor.execute( self.request_2, ( self.account_id, ) )
+                    self.current_cursor.execute( self.request_3, ( self.account_id, ) )
                 else :
-                    self.current_cursor.execute( self.request_2 )
+                    self.current_cursor.execute( self.request_3 )
             if self.current_table == 4 :
                 self.current_cursor = self.conn.cursor()
                 if self.account_id != 0 :
-                    self.current_cursor.execute( self.request_2, ( self.account_id, ) )
+                    self.current_cursor.execute( self.request_4, ( self.account_id, ) )
                 else :
-                    self.current_cursor.execute( self.request_2 )
+                    self.current_cursor.execute( self.request_4 )
             
             return self.__next__()
         
