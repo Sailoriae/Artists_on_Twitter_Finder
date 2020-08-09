@@ -2,6 +2,7 @@
 # coding: utf-8
 
 import Pyro4
+from time import time
 
 try :
     from class_Pyro_Queue import Pyro_Queue
@@ -86,6 +87,9 @@ class Scan_Request :
         self._finished_GOT3_indexing = False
         self._finished_TwitterAPI_indexing = False
         
+        # Date de début de la procédure
+        self._start = time()
+        
         # Date de fin de la procédure
         self._finished_date = None
     
@@ -160,6 +164,9 @@ class Scan_Request :
     def finished_TwitterAPI_indexing( self ) : return self._finished_TwitterAPI_indexing
     @finished_TwitterAPI_indexing.setter
     def finished_TwitterAPI_indexing( self, value ) : self._finished_TwitterAPI_indexing = value
+    
+    @property
+    def start( self ) : return self._start
     
     @property
     def finished_date( self ) : return self._finished_date

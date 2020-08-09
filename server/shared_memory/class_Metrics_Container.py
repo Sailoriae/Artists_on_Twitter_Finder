@@ -28,6 +28,10 @@ class Metrics_Container :
         # Classe Image_Features_Iterator
         self._step_3_iteration_times = []
         self._step_3_usage_times = []
+        
+        # Temps de traitement complet
+        self._user_request_full_time = []
+        self._scan_request_full_time = []
     
     """
     @param step_A_time Temps d'éxécution MOYEN pour le listage des Tweets avec
@@ -72,6 +76,20 @@ class Metrics_Container :
         self._step_3_usage_times += step_3_usage_times
     
     """
+    Enregistrer le temps de traitement complet d'une requête utilisateur.
+    @param scan_request_full_time Temps d'éxécution.
+    """
+    def add_user_request_full_time ( self, user_request_full_time : float ) :
+        self._user_request_full_time.append( user_request_full_time )
+    
+    """
+    Enregistrer le temps de traitement complet d'une requête de scan.
+    @param scan_request_full_time Temps d'éxécution.
+    """
+    def add_scan_request_full_time ( self, scan_request_full_time : float ) :
+        self._scan_request_full_time.append( scan_request_full_time )
+    
+    """
     @return Une chaine de caractères à afficher.
     """
     def get_metrics ( self ) :
@@ -92,6 +110,10 @@ class Metrics_Container :
             to_print += "Tempys moyen pour itérer lors de la recherche : " + str(mean(self._step_3_iteration_times)) + "\n"
         if self._step_3_usage_times != [] :
             to_print += "Tempys moyen pour comparer lors de la recherche : " + str(mean(self._step_3_usage_times)) + "\n"
+        if self._user_request_full_time != [] :
+            to_print += "Temps moyen pour traiter une requête utilisateur : " + str(mean(self._user_request_full_time)) + "\n"
+        if self._scan_request_full_time != [] :
+            to_print += "Temps moyen pour traiter une requête de scan : " + str(mean(self._scan_request_full_time)) + "\n"
         if to_print == "" :
             to_print = "Aucune statistique disponible ! Aucune requête n'a été lancée, ou le paramètre \"ENABLE_METRICS\" est à \"False\"."
         return to_print

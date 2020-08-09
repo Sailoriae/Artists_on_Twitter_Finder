@@ -2,7 +2,7 @@
 # coding: utf-8
 
 import queue
-from time import sleep
+from time import sleep, time
 
 # Ajouter le répertoire parent du répertoire parent au PATH pour pouvoir importer
 from sys import path as sys_path
@@ -83,6 +83,9 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
         
         print( "[step_3_th" + str(thread_id) + "] Tweets trouvés (Du plus au moins proche) :\n" +
                "[step_3_th" + str(thread_id) + "] " + str( [ data.tweet_id for data in request.founded_tweets ] ) )
+        
+        # Enregistrer le temps complet pour traiter cette requête
+        shared_memory.execution_metrics.add_user_request_full_time( time() - request.start )
         
         # Dire qu'on n'est plus en train de traiter cette requête
         shared_memory.user_requests.requests_in_thread.set_request( "thread_step_3_reverse_search_number" + str(thread_id), None )

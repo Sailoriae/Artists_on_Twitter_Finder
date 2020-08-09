@@ -98,6 +98,9 @@ def thread_step_C_GOT3_index_account_tweets( thread_id : int, shared_memory ) :
                 # On peut supprimer l'objet Common_Tweet_IDs_List() pour gagner
                 # de la mémoire vive
                 request.indexing_tweets = None
+                
+                # Enregistrer le temps complet pour traiter cette requête
+                shared_memory.execution_metrics.add_scan_request_full_time( time() - request.start )
         
         # Sinon, il faut la remettre dans notre file d'attente, si elle n'a pas
         # été marquée comme "has_failed", car si c'est le cas, cela veut dire

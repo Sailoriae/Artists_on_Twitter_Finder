@@ -2,6 +2,7 @@
 # coding: utf-8
 
 import Pyro4
+from time import time
 
 
 """
@@ -71,6 +72,9 @@ class User_Request :
         # 6 : Fin de traitement.
         self._status = -1
         
+        # Date de début de la procédure
+        self._start = time()
+        
         # Date de fin de la procédure
         self._finished_date = None
     
@@ -122,6 +126,9 @@ class User_Request :
     def status( self ) : return self._status
     @status.setter
     def status( self, value ) : self._status = value
+    
+    @property
+    def start( self ) : return self._start
     
     @property
     def finished_date( self ) : return self._finished_date
