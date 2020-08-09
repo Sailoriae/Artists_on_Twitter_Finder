@@ -159,7 +159,10 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
             shared_memory.user_requests.step_2_tweets_indexer_queue.put( request )
             continue
         
-        # On passe la requête à l'étape suivante, fin du traitement
+        # Sinon, on peut vider la liste des requêtes de scan
+        request.scan_requests = []
+        
+        # Et on passe la requête à l'étape suivante
         # C'est la procédure shared_memory.user_requests.set_request_to_next_step
         # qui vérifie si elle peut
         shared_memory.user_requests.set_request_to_next_step( request )
