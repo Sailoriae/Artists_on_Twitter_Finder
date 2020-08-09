@@ -79,9 +79,9 @@ class ColorDescriptor :
             hist = self.histogram(image, cornerMask)
             features.extend(hist)
         
-            # Calculer l'histogramme 3D de la zone de l'image pas encore
-            # trairée (C'est à dire l'ellipse) et l'ajouter à la liste des
-            # caractéristiques
+        # Calculer l'histogramme 3D de la zone de l'image pas encore
+        # trairée (C'est à dire l'ellipse) et l'ajouter à la liste des
+        # caractéristiques
         hist = self.histogram(image, ellipMask)
         features.extend(hist)
         

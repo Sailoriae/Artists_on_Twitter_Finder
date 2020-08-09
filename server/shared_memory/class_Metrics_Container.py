@@ -107,9 +107,9 @@ class Metrics_Container :
         if self._step_D_times != [] :
             to_print += "Temps moyen pour indexer avec TwitterAPI : " + str(mean(self._step_D_times)) + "\n"
         if self._step_3_iteration_times != [] :
-            to_print += "Tempys moyen pour itérer lors de la recherche : " + str(mean(self._step_3_iteration_times)) + "\n"
+            to_print += "Temps moyen pour itérer lors de la recherche : " + str(mean(self._step_3_iteration_times)) + "\n"
         if self._step_3_usage_times != [] :
-            to_print += "Tempys moyen pour comparer lors de la recherche : " + str(mean(self._step_3_usage_times)) + "\n"
+            to_print += "Temps moyen pour comparer lors de la recherche : " + str(mean(self._step_3_usage_times)) + "\n"
         if self._user_request_full_time != [] :
             to_print += "Temps moyen pour traiter une requête utilisateur : " + str(mean(self._user_request_full_time)) + "\n"
         if self._scan_request_full_time != [] :
