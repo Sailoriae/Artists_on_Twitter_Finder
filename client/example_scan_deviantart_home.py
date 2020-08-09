@@ -37,8 +37,6 @@ def scan_deviantart_hoome ( NUMBER_OF_ILLUST_TO_SEND ) :
             page_number += 1
         else :
             return
-        
-        sleep( 60 )
 
 
 if __name__ == "__main__" :

@@ -58,8 +58,6 @@ def scan_danbooru_tag ( TAG_TO_SCAN ) :
         
         if len(json) == 0 :
             break
-        
-        sleep( 60 )
 
 
 if __name__ == "__main__" :

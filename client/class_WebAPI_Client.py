@@ -73,11 +73,17 @@ class WebAPI_Client :
             print( "La connexion au serveur n'a pas été initialisée correctement." )
             raise Server_Connection_Not_Initialised
         try :
-            response = requests.get( "http://localhost:3301/?url=" + illust_url ).json()
-            if response["error"] == "YOUR_IP_HAS_MAX_PENDING_REQUESTS" :
-                raise Max_Pending_Requests_On_Server
-            return response
-        except Exception :
+            while True :
+                response = requests.get( "http://localhost:3301/?url=" + illust_url )
+                if response.status_code == 429 :
+                    sleep(1)
+                else :
+                    response = response.json()
+                    if response["error"] == "YOUR_IP_HAS_MAX_PENDING_REQUESTS" :
+                        raise Max_Pending_Requests_On_Server
+                    return response
+        except Exception as error :
+            print(error)
             print( "Problème de connexion avec le serveur." )
             return None
     
