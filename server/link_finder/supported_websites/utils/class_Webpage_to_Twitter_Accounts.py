@@ -87,13 +87,14 @@ class Webpage_to_Twitter_Accounts :
         accounts_founded : List[str] = []
         
         # Pour trouver toutes les balises HTML <a href=""> trouvables dans la page
-        for link in self.soup.findAll( "a" ) :
-            href = link.get("href")
-            if href == None :
-                continue
-            result = validator_function( link.get("href"), STRICT = STRICT )
-            if result != None :
-                accounts_founded.append( result )
+        if self.soup != None :
+            for link in self.soup.findAll( "a" ) :
+                href = link.get("href")
+                if href == None :
+                    continue
+                result = validator_function( link.get("href"), STRICT = STRICT )
+                if result != None :
+                    accounts_founded.append( result )
         
         # Retourner
         return accounts_founded
