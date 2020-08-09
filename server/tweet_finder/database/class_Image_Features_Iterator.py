@@ -60,6 +60,7 @@ class Image_Features_Iterator :
             self.iteration_times = [] # Durées des itérations
             self.usage_times = [] # Durées des utilisations
             self.usage_start = None
+            self.iteration_start = None
         
         # Fonction pour enregistrer les temps d'éxécution
         self.add_step_3_times = None
@@ -70,11 +71,12 @@ class Image_Features_Iterator :
     """
     @return Un objet Image_in_DB
     """
-    def __next__( self ) -> Image_in_DB :
+    def __next__( self, do_not_reset_iteration_start = False ) -> Image_in_DB :
         if self.ENABLE_METRICS :
-            iteration_start = time()
-            if self.usage_start != None :
-                self.usage_times.append( time() - self.usage_start )
+            if not do_not_reset_iteration_start :
+                self.iteration_start = time()
+                if self.usage_start != None :
+                    self.usage_times.append( time() - self.usage_start )
         
         # On prend une nouvelle ligne dans la table
         current_line = self.current_cursor.fetchone()
@@ -113,10 +115,10 @@ class Image_Features_Iterator :
                 else :
                     self.current_cursor.execute( self.request_4 )
             
-            return self.__next__()
+            return self.__next__( do_not_reset_iteration_start = True )
         
         if self.ENABLE_METRICS :
-            self.iteration_times.append( time() - iteration_start )
+            self.iteration_times.append( time() - self.iteration_start )
             self.usage_start = time()
         
         return Image_in_DB (
