@@ -87,8 +87,9 @@ class Image_Features_Iterator :
             # Si on a fait les 4 tables, on termine l'itération
             if self.current_table == 5 :
                 if self.ENABLE_METRICS :
-                    print( "[Images_It] Temps moyen d'itération :", mean( self.iteration_times ) )
-                    print( "[Images_It] Temps moyen d'utilisation :", mean( self.usage_times ) )
+                    if self.iteration_times != [] and self.usage_times != [] :
+                        print( "[Images_It] Temps moyen d'itération :", mean( self.iteration_times ) )
+                        print( "[Images_It] Temps moyen d'utilisation :", mean( self.usage_times ) )
                     if self.add_step_3_times != None :
                         self.add_step_3_times( self.iteration_times, self.usage_times )
                 raise StopIteration
