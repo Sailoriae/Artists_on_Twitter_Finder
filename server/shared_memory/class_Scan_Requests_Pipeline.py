@@ -2,6 +2,7 @@
 # coding: utf-8
 
 import Pyro4
+import threading
 import datetime
 
 try :
@@ -47,7 +48,7 @@ class Scan_Requests_Pipeline :
         self._requests = []
         
         # Sémaphore d'accès à la liste précédente.
-        self._requests_sem = self._root.register_obj( Pyro_Semaphore(), "scan_requests_requests_sem" )
+        self._requests_sem = threading.Semaphore()
         
         # File d'attente à l'étape A du traitement : Listage des Tweets avec
         # GetOldTweets3.
@@ -146,7 +147,7 @@ class Scan_Requests_Pipeline :
     def launch_request ( self, account_id : int,
                                account_name : str,
                                is_prioritary : bool = False ) -> Scan_Request :
-        requests_sem = Pyro4.Proxy( self._requests_sem )
+        requests_sem = self._requests_sem
         queues_sem = Pyro4.Proxy( self._queues_sem )
         
         requests_sem.acquire()
@@ -243,14 +244,13 @@ class Scan_Requests_Pipeline :
             Ou None si la requête est inconnue.
     """
     def get_request ( self, account_id : str ) -> Scan_Request :
-        requests_sem = Pyro4.Proxy( self._requests_sem )
-        requests_sem.acquire()
+        self._requests_sem.acquire()
         for request_uri in self._requests :
             request = Pyro4.Proxy( request_uri )
             if request.account_id == account_id :
-                requests_sem.release()
+                self._requests_sem.release()
                 return request
-        requests_sem.release()
+        self._requests_sem.release()
         
         return None
     
@@ -262,7 +262,7 @@ class Scan_Requests_Pipeline :
         now = datetime.datetime.now()
         
         # On bloque l'accès la liste des requêtes
-        Pyro4.Proxy( self._requests_sem ).acquire()
+        self._requests_sem.acquire()
         
         # On filtre la liste des requêtes de scan
         new_requests_list = []
@@ -299,4 +299,4 @@ class Scan_Requests_Pipeline :
                 pass
         
         # On débloque l'accès à la liste des requêtes
-        Pyro4.Proxy( self._requests_sem ).release()
+        self._requests_sem.release()

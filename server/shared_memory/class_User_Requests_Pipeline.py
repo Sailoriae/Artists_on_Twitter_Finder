@@ -2,6 +2,7 @@
 # coding: utf-8
 
 import Pyro4
+import threading
 import datetime
 
 try :
@@ -43,7 +44,7 @@ class User_Requests_Pipeline :
         self._requests = []
         
         # Sémaphore d'accès à la liste précédente.
-        self._requests_sem = self._root.register_obj( Pyro_Semaphore(), "user_requests_requests_sem" )
+        self._requests_sem = threading.Semaphore()
         
         # File d'attente à l'étape 1 du traitement : Link Finder.
         # Les objets queue.Queue sont prévus pour faire du multi-threading.
@@ -76,9 +77,6 @@ class User_Requests_Pipeline :
     """
     Getters et setters pour Pyro.
     """
-    @property
-    def requests_sem( self ) : return Pyro4.Proxy( self._requests_sem )
-    
     @property
     def step_1_link_finder_queue( self ) : return Pyro4.Proxy( self._step_1_link_finder_queue )
     
@@ -120,25 +118,24 @@ class User_Requests_Pipeline :
                                ip_address : str = None ) -> User_Request :
         # Vérifier d'abord qu'on n'est pas déjà en train de traiter cette
         # illustration.
-        requests_sem = Pyro4.Proxy( self._requests_sem )
-        requests_sem.acquire()
+        self._requests_sem.acquire()
         for request_uri in self._requests :
             request = Pyro4.Proxy( request_uri )
             if request.input_url == illust_url :
-                requests_sem.release()
+                self._requests_sem.release()
                 return request
         
         # Faire +1 au nombre de requêtes en cours de traitement pour cette
         # adresse IP. Si on ne peut pas, on retourne None.
         if not Pyro4.Proxy( self._limit_per_ip_addresses ).add_ip_address( ip_address ) :
-            requests_sem.release()
+            self._requests_sem.release()
             return None
         
         # Créer et ajouter l'objet User_Request à notre système.
         request = self._root.register_obj( User_Request( illust_url,
                                                          ip_address = ip_address ), None )
         self._requests.append( request ) # Passé par adresse car c'est un objet.
-        requests_sem.release() # Seulement ici !
+        self._requests_sem.release() # Seulement ici !
         
         # Les requêtes sont initialisée au status -1
         self.set_request_to_next_step( Pyro4.Proxy( request ) )
@@ -158,14 +155,13 @@ class User_Requests_Pipeline :
     def launch_reverse_search_only ( self, image_url : str,
                                            account_name : str = None,
                                            account_id : int = None ) -> User_Request :
-        requests_sem = Pyro4.Proxy( self._requests_sem )
-        requests_sem.acquire()
+        self._requests_sem.acquire()
         
         # Créer et ajouter l'objet User_Request à notre système.
         request = self._root.register_obj( User_Request( image_url ), None )
         self._requests.append( request )
         
-        requests_sem.release()
+        self._requests_sem.release()
         
         # Modifier cet objet si nécessaire
         request = Pyro4.Proxy( request )
@@ -187,14 +183,13 @@ class User_Requests_Pipeline :
             Ou None si la requête est inconnue.
     """
     def get_request ( self, illust_url : str ) -> User_Request :
-        requests_sem = Pyro4.Proxy( self._requests_sem )
-        requests_sem.acquire()
+        self._requests_sem.acquire()
         for request_uri in self._requests :
             request = Pyro4.Proxy( request_uri )
             if request.input_url == illust_url :
-                requests_sem.release()
+                self._requests_sem.release()
                 return request
-        requests_sem.release()
+        self._requests_sem.release()
         
         return None
     
@@ -232,7 +227,7 @@ class User_Requests_Pipeline :
         now = datetime.datetime.now()
         
         # On bloque l'accès la liste des requêtes
-        Pyro4.Proxy( self._requests_sem ).acquire()
+        self._requests_sem.acquire()
         
         # On filtre la liste des requêtes utilisateurs
         new_requests_list = []
@@ -293,4 +288,4 @@ class User_Requests_Pipeline :
                 pass
         
         # On débloque l'accès à la liste des requêtes
-        Pyro4.Proxy( self._requests_sem ).release()
+        self._requests_sem.release()
