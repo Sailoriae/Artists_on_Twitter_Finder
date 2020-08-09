@@ -38,8 +38,8 @@ class Threads_Register :
     """
     def get_status ( self ) :
         to_print = ""
-        for key in self._dict :
-            value = self._dict[key]
+        sorted_dict = sorted( self._dict.items() )
+        for (key, value) in sorted_dict :
             if value == None :
                 to_print += key + " : IDLE\n"
             else :
