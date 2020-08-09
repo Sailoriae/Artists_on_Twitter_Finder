@@ -122,6 +122,16 @@ class SQLite_or_MySQL :
         c.execute( tweets_images_3_table )
         c.execute( tweets_images_4_table )
         
+        # Créer un index permet d'accélérer grandement la recherche sur un
+        # compte Twitter en particulier !
+        if param.USE_MYSQL_INSTEAD_OF_SQLITE :
+            try :
+                c.execute( "CREATE INDEX account_id ON tweets ( account_id )" )
+            except mysql.connector.errors.ProgrammingError : # L'index existe déjà
+                pass
+        else :
+            c.execute( "CREATE INDEX IF NOT EXISTS account_id ON tweets ( account_id )" )
+        
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
             account_table = """CREATE TABLE IF NOT EXISTS accounts (
                                    account_id BIGINT UNSIGNED PRIMARY KEY,
