@@ -3,6 +3,7 @@
 
 import numpy as np
 from typing import List
+import cv2
 
 try :
     from class_ColorDescriptor import ColorDescriptor
@@ -58,10 +59,10 @@ class CBIR_Engine :
     @return La différence entre les deux images
             Plus elle est faible, plus les images sont similaires
     """
-    def chi2_distance( self, histA, histB, eps = 1e-10 ):
+    def chi2_distance( self, histA, histB ):
         # Calculer la distance avec le test du khi-deux
-        d = 0.5 * np.sum([((a - b) ** 2) / (a + b + eps)
-            for (a, b) in zip(histA, histB)])
+        # Documentation : https://docs.opencv.org/2.4/modules/imgproc/doc/histograms.html#comparehist
+        d = cv2.compareHist( np.float32(histA), np.float32(histB), cv2.HISTCMP_CHISQR )
         
         # Retourner cette distance
         return d
