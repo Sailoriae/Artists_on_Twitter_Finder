@@ -43,11 +43,12 @@ class Scan_Requests_Pipeline :
         self._root = root_shared_memory
         
         # Comme les objets dans la mémoire partagée sont identifiées par leur
-        # URI, et donc uniques, on peut faire une liste principale qui contient
-        # toutes les requêtes. C'est donc une liste de chaines !
-        self._requests = []
+        # URI, et donc uniques, on peut faire le dictionnaire de correspondance
+        # suivant :
+        # Clé : URL de requête -> Valeur : URI de l'objet Scan_Request.
+        self._requests = {}
         
-        # Sémaphore d'accès à la liste précédente.
+        # Sémaphore d'accès au dictionnaire précédent.
         self._requests_sem = threading.Semaphore()
         
         # File d'attente à l'étape A du traitement : Listage des Tweets avec
@@ -154,9 +155,10 @@ class Scan_Requests_Pipeline :
         queues_sem.acquire()
         
         # Vérifier d'abord qu'on n'est pas déjà en train de traiter ce compte.
-        for request_uri in self._requests :
-            request = Pyro4.Proxy( request_uri )
-            if request.account_id == account_id :
+        for key in self._requests :
+            if key == account_id :
+                request = Pyro4.Proxy( self._requests[key] )
+                
                 # Si il faut passer la requête en proritaire.
                 if is_prioritary and not request.is_prioritary :
                     request.is_prioritary = True
@@ -213,12 +215,12 @@ class Scan_Requests_Pipeline :
                                                          account_id,
                                                          account_name,
                                                          is_prioritary = is_prioritary ), None )
-        self._requests.append( request ) # Passé par URI car c'est un objet.
+        self._requests[ account_id ] = request # On passe ici l'URI de l'objet.
         
         request = Pyro4.Proxy( request )
         
         # Comme le traitement des requêtes de scan est parallélisé, on peut
-        # mettre la requêtes dans toutes les files d'attente
+        # mettre la requêtes dans toutes les files d'attente.
         if is_prioritary :
             Pyro4.Proxy( self._step_A_GOT3_list_account_tweets_prior_queue ).put( request )
             Pyro4.Proxy( self._step_B_TwitterAPI_list_account_tweets_prior_queue ).put( request )
@@ -245,11 +247,10 @@ class Scan_Requests_Pipeline :
     """
     def get_request ( self, account_id : str ) -> Scan_Request :
         self._requests_sem.acquire()
-        for request_uri in self._requests :
-            request = Pyro4.Proxy( request_uri )
-            if request.account_id == account_id :
+        for key in self._requests :
+            if key == account_id :
                 self._requests_sem.release()
-                return request
+                return Pyro4.Proxy( self._requests[key] )
         self._requests_sem.release()
         
         return None
@@ -265,10 +266,11 @@ class Scan_Requests_Pipeline :
         self._requests_sem.acquire()
         
         # On filtre la liste des requêtes de scan
-        new_requests_list = []
+        new_requests_dict = {}
         to_unregister_list = []
         
-        for request_uri in self._requests :
+        for key in self._requests :
+            request_uri = self._requests[key]
             request = Pyro4.Proxy( request_uri )
             
             # Si la requête est terminée, il faut vérifier qu'on puisse la garder
@@ -277,17 +279,17 @@ class Scan_Requests_Pipeline :
                 # Si la date de fin est à moins de 24h de maintenant, on garde
                 # cette requête
                 if now - request.finished_date < datetime.timedelta( hours = 24 ) :
-                    new_requests_list.append( request_uri )
+                    new_requests_dict[ key ] = request_uri
                 
                 else : # On désenregistre la requête
                     to_unregister_list.append( request_uri )
             
             # Sinon, on la garde forcément
             else :
-                new_requests_list.append( request_uri )
+                new_requests_dict[ key ] = request_uri
         
         # On installe la nouvelle liste
-        self._requests = new_requests_list
+        self._requests = new_requests_dict
         
         # On désenregistre les requêtes à désenregistrer
         # Mais normalement le garbadge collector l'a fait avant nous

@@ -39,11 +39,12 @@ class User_Requests_Pipeline :
         self._root = root_shared_memory
         
         # Comme les objets dans la mémoire partagée sont identifiées par leur
-        # URI, et donc uniques, on peut faire une liste principale qui contient
-        # toutes les requêtes. C'est donc une liste de chaines !
-        self._requests = []
+        # URI, et donc uniques, on peut faire le dictionnaire de correspondance
+        # suivant :
+        # Clé : URL de requête -> Valeur : URI de l'objet User_Request.
+        self._requests = {}
         
-        # Sémaphore d'accès à la liste précédente.
+        # Sémaphore d'accès au dictionnaire précédent.
         self._requests_sem = threading.Semaphore()
         
         # File d'attente à l'étape 1 du traitement : Link Finder.
@@ -119,22 +120,24 @@ class User_Requests_Pipeline :
         # Vérifier d'abord qu'on n'est pas déjà en train de traiter cette
         # illustration.
         self._requests_sem.acquire()
-        for request_uri in self._requests :
-            request = Pyro4.Proxy( request_uri )
-            if request.input_url == illust_url :
+        for key in self._requests :
+            if key == illust_url :
                 self._requests_sem.release()
-                return request
+                return Pyro4.Proxy( self._requests[key] )
         
         # Faire +1 au nombre de requêtes en cours de traitement pour cette
         # adresse IP. Si on ne peut pas, on retourne None.
-        if not Pyro4.Proxy( self._limit_per_ip_addresses ).add_ip_address( ip_address ) :
-            self._requests_sem.release()
-            return None
+        # C'est l'objet "Limit_per_IP_Address" qui vérifie que l'IP est dans la
+        # liste "UNLIMITED_IP_ADDRESSES".
+        if ip_address != None :
+            if not Pyro4.Proxy( self._limit_per_ip_addresses ).add_ip_address( ip_address ) :
+                self._requests_sem.release()
+                return None
         
         # Créer et ajouter l'objet User_Request à notre système.
         request = self._root.register_obj( User_Request( illust_url,
                                                          ip_address = ip_address ), None )
-        self._requests.append( request ) # Passé par adresse car c'est un objet.
+        self._requests[ illust_url ] = request # On passe ici l'URI de l'objet.
         self._requests_sem.release() # Seulement ici !
         
         # Les requêtes sont initialisée au status -1
@@ -159,7 +162,7 @@ class User_Requests_Pipeline :
         
         # Créer et ajouter l'objet User_Request à notre système.
         request = self._root.register_obj( User_Request( image_url ), None )
-        self._requests.append( request )
+        self._requests[ image_url ] = request
         
         self._requests_sem.release()
         
@@ -170,7 +173,7 @@ class User_Requests_Pipeline :
             request.twitter_accounts_with_id += [ (account_name,account_id) ]
         
         request.status = 3
-        self.set_request_to_next_step( request)
+        self.set_request_to_next_step( request )
         
         # Retourner l'objet User_Request.
         return request
@@ -184,11 +187,10 @@ class User_Requests_Pipeline :
     """
     def get_request ( self, illust_url : str ) -> User_Request :
         self._requests_sem.acquire()
-        for request_uri in self._requests :
-            request = Pyro4.Proxy( request_uri )
-            if request.input_url == illust_url :
+        for key in self._requests :
+            if key == illust_url :
                 self._requests_sem.release()
-                return request
+                return Pyro4.Proxy( self._requests[key] )
         self._requests_sem.release()
         
         return None
@@ -229,11 +231,12 @@ class User_Requests_Pipeline :
         # On bloque l'accès la liste des requêtes
         self._requests_sem.acquire()
         
-        # On filtre la liste des requêtes utilisateurs
-        new_requests_list = []
+        # On filtre le dictionnaire des requêtes utilisateurs
+        new_requests_dict = {}
         to_unregister_list = []
         
-        for request_uri in self._requests :
+        for key in self._requests :
+            request_uri = self._requests[key]
             request = Pyro4.Proxy( request_uri )
             
             # Si la requête est terminée, il faut vérifier qu'on puisse la garder
@@ -250,7 +253,7 @@ class User_Requests_Pipeline :
                                                 "INVALID_URL",
                                                 "UNSUPPORTED_WEBSITE"] :
                             if now - request.finished_date < datetime.timedelta( minutes = 10 ) :
-                                new_requests_list.append( request_uri )
+                                new_requests_dict[ key ] = request_uri
                             
                             else : # On désenregistre la requête
                                 to_unregister_list.append( request_uri )
@@ -258,7 +261,7 @@ class User_Requests_Pipeline :
                         # Sinon, on la garde 1 heure
                         else :
                             if now - request.finished_date < datetime.timedelta( hours = 1 ) :
-                                new_requests_list.append( request_uri )
+                                new_requests_dict[ key ] = request_uri
                             
                             else : # On désenregistre la requête
                                 to_unregister_list.append( request_uri )
@@ -266,17 +269,17 @@ class User_Requests_Pipeline :
                     # Si la requête ne s'est pas terminée en erreur, on la
                     # garde 3 heures
                     else :
-                        new_requests_list.append( request_uri )
+                        new_requests_dict[ key ] = request_uri
                 
                 else : # On désenregistre la requête
                     to_unregister_list.append( request_uri )
             
             # Sinon, on la garde forcément
             else :
-                new_requests_list.append( request_uri )
+                new_requests_dict[ key ] = request_uri
         
         # On installe la nouvelle liste
-        self._requests = new_requests_list
+        self._requests = new_requests_dict
         
         # On désenregistre les requêtes à désenregistrer
         # Mais normalement le garbadge collector l'a fait avant nous
