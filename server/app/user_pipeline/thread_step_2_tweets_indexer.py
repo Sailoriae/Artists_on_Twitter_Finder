@@ -5,6 +5,7 @@ import queue
 from time import sleep, time
 from dateutil.tz import tzlocal
 import datetime
+import Pyro4
 
 # Ajouter le répertoire parent du répertoire parent au PATH pour pouvoir importer
 from sys import path as sys_path
@@ -75,13 +76,14 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
                 if currently_scanning != None :
                     print( "[step_2_th" + str(thread_id) + "] @" + account_name + " est déjà en cours de scan, on le suit !" )
                     
-                    # On passe la requête en prioritaire
-                    shared_memory.scan_requests.launch_request( account_id,
-                                                                account_name,
-                                                                is_prioritary = True )
+                    # On passe la requête en prioritaire si nécessaire
+                    if not currently_scanning.is_prioritary :
+                        shared_memory.scan_requests.launch_request( account_id,
+                                                                    account_name,
+                                                                    is_prioritary = True )
                     
                     # On suit la progression de cette requête
-                    request.scan_requests += [ currently_scanning ] # Ne peut pas faire de append avec Pyro
+                    request.scan_requests += [ currently_scanning._pyroUri ] # Ne peut pas faire de append avec Pyro
                 
                 # Sinon, il faut peut-être lancer un scan
                 else :
@@ -126,7 +128,7 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
                 request.scan_requests += [
                     shared_memory.scan_requests.launch_request( account_id,
                                                                 account_name,
-                                                                is_prioritary = True ) ] # Ne peut pas faire de append avec Pyro
+                                                                is_prioritary = True )._pyroUri ] # Ne peut pas faire de append avec Pyro
             
             # Libérer le sémaphore
             shared_memory.user_requests.thread_step_2_tweets_indexer_sem.release()
@@ -136,7 +138,8 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
         # est un thread utilisateur
         # Seules les requêtes non-prioritaires peuvent être annulées
         check_list = []
-        for scan_request in request.scan_requests :
+        for scan_request_uri in request.scan_requests :
+            scan_request = Pyro4.Proxy( scan_request_uri )
             check_list.append( scan_request.finished_GOT3_indexing and scan_request.finished_TwitterAPI_indexing )
             
             # On vérifie quand même que le scan s'est bien passé, et si un
