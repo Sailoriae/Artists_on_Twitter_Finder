@@ -132,6 +132,8 @@ def http_server_container ( shared_memory_uri_arg ) :
                 
                 response += "\"indexed_tweets_count\" : " + str(self.shared_memory.tweets_count) + ", "
                 response += "\"indexed_accounts_count\" : " + str(self.shared_memory.accounts_count) + ", "
+                response += "\"pending_user_requests_count\" : " + str(self.shared_memory.user_requests.pending_requests_count) + ", "
+                response += "\"pending_scan_requests_count\" : " + str(self.shared_memory.scan_requests.pending_requests_count) + ", "
                 response += "\"limit_per_ip_address\" : " + str(param.MAX_PENDING_REQUESTS_PER_IP_ADDRESS) + ", "
                 response += "\"update_accounts_frequency\" : " + str(param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE)
                 
