@@ -3,7 +3,6 @@
 
 import queue
 from time import sleep, time
-from datetime import datetime
 
 # Ajouter le répertoire parent du répertoire parent au PATH pour pouvoir importer
 from sys import path as sys_path
@@ -59,7 +58,8 @@ def thread_step_D_TwitterAPI_index_account_tweets( thread_id : int, shared_memor
         # Si le compte est marqué comme introuvable par un des thread de
         # listage, on peut arrêter là avec cette requête
         if request.unfounded_account :
-            request.finished_date = datetime.now()
+            # On appelle la méthode qui termine la requête
+            shared_memory.scan_request.end_request( request, None )
             continue
         
         # Si le listage des Tweets n'a pas commencé, on doit attendre un peu
@@ -98,19 +98,8 @@ def thread_step_D_TwitterAPI_index_account_tweets( thread_id : int, shared_memor
             
             # Si les deux indexations ont terminé
             if request.finished_GOT3_indexing :
-                # On indique la date de fin du scan
-                request.finished_date = datetime.now()
-                
-                # On peut Màj les statistiques mises en cache dans l'objet
-                # Shared_Memory
-                shared_memory.tweets_count, shared_memory.accounts_count = bdd_direct_access.get_stats()
-                
-                # On peut supprimer l'objet Common_Tweet_IDs_List() pour gagner
-                # de la mémoire vive
-                request.indexing_tweets = None
-                
-                # Enregistrer le temps complet pour traiter cette requête
-                shared_memory.execution_metrics.add_scan_request_full_time( time() - request.start )
+                # On appelle la méthode qui termine la requête
+                shared_memory.scan_request.end_request( request, bdd_direct_access.get_stats() )
         
         # Sinon, il faut la remettre dans notre file d'attente, si elle n'a pas
         # été marquée comme "has_failed", car si c'est le cas, cela veut dire

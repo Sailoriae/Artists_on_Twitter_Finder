@@ -4,6 +4,7 @@
 import Pyro4
 import threading
 import datetime
+from time import time
 
 try :
     from class_Scan_Request import Scan_Request
@@ -90,6 +91,10 @@ class Scan_Requests_Pipeline :
         # Les threads sont identifiés par la chaine suivante :
         # procédure_du_thread.__name__ + "_number" + str(thread_id)
         self._requests_in_thread = self._root.register_obj( Threads_Register(), "scan_requests_requests_in_thread" )
+        
+        # Compteur du nombre de requêtes en cours de traitement dans le
+        # pipeline.
+        self._pending_requests_count = 0
     
     """
     Getters et setters pour Pyro.
@@ -123,6 +128,9 @@ class Scan_Requests_Pipeline :
     
     @property
     def requests_in_thread( self ) : return Pyro4.Proxy( self._requests_in_thread )
+    
+    @property
+    def pending_requests_count( self ) : return self._pending_requests_count
     
     """
     Lancer l'indexation ou la mise à jour de l'indexation d'un compte Twitter
@@ -215,6 +223,7 @@ class Scan_Requests_Pipeline :
                                                          account_id,
                                                          account_name,
                                                          is_prioritary = is_prioritary ), None )
+        self._pending_requests_count += 1 # Augmenter le compteur du nombre de requêtes en cours de traitement
         self._requests[ account_id ] = request # On passe ici l'URI de l'objet.
         
         request = Pyro4.Proxy( request )
@@ -254,6 +263,43 @@ class Scan_Requests_Pipeline :
         self._requests_sem.release()
         
         return None
+    
+    """
+    Marquer une requête comme terminée.
+    @param Un objet Scan_Request.
+    @param get_stats Le résultat de la méthode "get_stats()" de l'objet
+                     "SQLite_or_MySQL". Car Pyro est multithreadé, donc on ne
+                     peut pas avoir notre propre accès à la BDD !
+    """
+    def end_request ( self, request : Scan_Request, get_stats = None ) :
+        self._requests_sem.acquire()
+        
+        # Si la requête n'a pas déjà été marquée comme terminée (Car il y a
+        # deux threads, C et D, qui peut appeler cette méthode)
+        if request.finished_date == None :
+            # On indique la date de fin du scan
+            request.finished_date = datetime.datetime.now()
+            
+            # On fais -1 au compteur du nombre de requêtes en cours de traitement
+            self._pending_requests_count -= 1
+            
+            # On peut lacher le sémaphore, tant pis pour les statistiques, car
+            # Python nous garantie qu'il n'y aura pas deux écritures en même temps
+            self._requests_sem.release()
+            
+            # On peut Màj les statistiques mises en cache dans l'objet Shared_Memory
+            if get_stats != None :
+                self._root.tweets_count, self._root.accounts_count = get_stats
+            
+            # On peut supprimer l'objet Common_Tweet_IDs_List() pour gagner de la
+            # mémoire vive
+            request.indexing_tweets = None
+            
+            # Enregistrer le temps complet pour traiter cette requête
+            self._root.execution_metrics.add_scan_request_full_time( time() - request.start )
+        
+        else :
+            self._requests_sem.release()
     
     """
     Délester les anciennes requêtes.

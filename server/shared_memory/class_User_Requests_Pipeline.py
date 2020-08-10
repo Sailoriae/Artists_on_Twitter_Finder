@@ -74,6 +74,10 @@ class User_Requests_Pipeline :
         # thread "thread_step_2_tweets_indexer". Permet d'éviter des problèmes
         # en cas de lancement d'un scan.
         self._thread_step_2_tweets_indexer_sem = self._root.register_obj( Pyro_Semaphore(), "user_requests_thread_step_2_tweets_indexer_sem" )
+        
+        # Compteur du nombre de requêtes en cours de traitement dans le
+        # pipeline.
+        self._pending_requests_count = 0
     
     """
     Getters et setters pour Pyro.
@@ -95,6 +99,9 @@ class User_Requests_Pipeline :
     
     @property
     def thread_step_2_tweets_indexer_sem( self ) : return Pyro4.Proxy( self._thread_step_2_tweets_indexer_sem )
+    
+    @property
+    def pending_requests_count( self ) : return self._pending_requests_count
     
     """
     Lancer la recherche des Tweets de l'artiste contenant l'illustration dont
@@ -138,6 +145,8 @@ class User_Requests_Pipeline :
         request = self._root.register_obj( User_Request( illust_url,
                                                          ip_address = ip_address ), None )
         self._requests[ illust_url ] = request # On passe ici l'URI de l'objet.
+        self._pending_requests_count += 1 # Augmenter le compteur du nombre de requêtes en cours de traitement
+        
         self._requests_sem.release() # Seulement ici !
         
         # Les requêtes sont initialisée au status -1
@@ -163,6 +172,7 @@ class User_Requests_Pipeline :
         # Créer et ajouter l'objet User_Request à notre système.
         request = self._root.register_obj( User_Request( image_url ), None )
         self._requests[ image_url ] = request
+        self._pending_requests_count += 1 # Augmenter le compteur du nombre de requêtes en cours de traitement
         
         self._requests_sem.release()
         
@@ -218,6 +228,13 @@ class User_Requests_Pipeline :
         
         if request.status == 6 :
             request.finished_date = datetime.datetime.now()
+            
+            # Descendre le compteur de requêtes en cours de traitement dans le
+            # pipeline
+            self._requests_sem.acquire()
+            self._pending_requests_count -= 1
+            self._requests_sem.release()
+            
             if request.ip_address != None :
                 Pyro4.Proxy( self._limit_per_ip_addresses ).remove_ip_address( request.ip_address )
     
