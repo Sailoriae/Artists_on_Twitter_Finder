@@ -57,9 +57,17 @@ def thread_step_D_TwitterAPI_index_account_tweets( thread_id : int, shared_memor
         shared_memory.scan_requests.queues_sem.release()
         
         # Si le compte est marqué comme introuvable par un des thread de
-        # listage, on peur arrêter là avec cette requête
+        # listage, on peut arrêter là avec cette requête
         if request.unfounded_account :
             request.finished_date = datetime.now()
+            continue
+        
+        # Si le listage des Tweets n'a pas commencé, on doit attendre un peu
+        if not request.started_TwitterAPI_listing :
+            if request.is_prioritary :
+                shared_memory.scan_requests.step_D_TwitterAPI_index_account_tweets_prior_queue.put( request )
+            else :
+                shared_memory.scan_requests.step_D_TwitterAPI_index_account_tweets_queue.put( request )
             continue
         
         # Dire qu'on est en train de traiter cette requête
@@ -84,13 +92,15 @@ def thread_step_D_TwitterAPI_index_account_tweets( thread_id : int, shared_memor
         # Si l'indexation est terminée, on met la date de fin dans la requête
         if request.finished_TwitterAPI_indexing and not request.has_failed :
             print( "[step_D_th" + str(thread_id) + "] Fin de l'indexation des Tweets de @" + request.account_name + " trouvés par l'API Twitter." )
-            request.finished_date = datetime.now()
             
             # Enregistrer l'ID du Tweet trouvé le plus récent
             twitterapi_indexer.save_last_tweet_id( request.account_id, request.TwitterAPI_last_tweet_id )
             
             # Si les deux indexations ont terminé
             if request.finished_GOT3_indexing :
+                # On indique la date de fin du scan
+                request.finished_date = datetime.now()
+                
                 # On peut Màj les statistiques mises en cache dans l'objet
                 # Shared_Memory
                 shared_memory.tweets_count, shared_memory.accounts_count = bdd_direct_access.get_stats()
