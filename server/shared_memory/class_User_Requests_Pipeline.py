@@ -302,10 +302,7 @@ class User_Requests_Pipeline :
         # Mais normalement le garbadge collector l'a fait avant nous
         # Oui : Pyro4 désenregistre les objets que le garbadge collector a viré
         for uri in to_unregister_list :
-            try :
-                self._root.unregister_obj( uri )
-            except Pyro4.errors.DaemonError : # Déjà désenregistré
-                pass
+            self._root.unregister_obj( uri )
         
         # On débloque l'accès à la liste des requêtes
         self._requests_sem.release()

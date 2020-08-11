@@ -293,7 +293,7 @@ class Scan_Requests_Pipeline :
             
             # On peut supprimer l'objet Common_Tweet_IDs_List() pour gagner de la
             # mémoire vive
-            self._root.unregister_obj( request.indexing_tweets )
+            self._root.unregister_obj( request.indexing_tweets._pyroUri )
             request.indexing_tweets = None
             
             # Enregistrer le temps complet pour traiter cette requête
@@ -342,10 +342,7 @@ class Scan_Requests_Pipeline :
         # Mais normalement le garbadge collector l'a fait avant nous
         # Oui : Pyro4 désenregistre les objets que le garbadge collector a viré
         for uri in to_unregister_list :
-            try :
-                self._root.unregister_obj( uri )
-            except Pyro4.errors.DaemonError : # Déjà désenregistré
-                pass
+            self._root.unregister_obj( uri )
         
         # On débloque l'accès à la liste des requêtes
         self._requests_sem.release()

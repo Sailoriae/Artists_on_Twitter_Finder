@@ -129,4 +129,4 @@ class Shared_Memory :
     @param L'URI vers cet objet.
     """
     def unregister_obj ( self, uri ) :
-        self._daemon.unregister( uri )
+        self._daemon.unregister( uri.object )
