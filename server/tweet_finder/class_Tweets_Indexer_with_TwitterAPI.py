@@ -8,9 +8,17 @@ from queue import Empty as Empty_Queue
 try :
     from database import SQLite_or_MySQL
     from class_CBIR_Engine_for_Tweets_Images import CBIR_Engine_for_Tweets_Images
+    from twitter import TweepyAbtraction
 except ModuleNotFoundError : # Si on a été exécuté en temps que module
     from .database import SQLite_or_MySQL
     from .class_CBIR_Engine_for_Tweets_Images import CBIR_Engine_for_Tweets_Images
+    from .twitter import TweepyAbtraction
+
+# Ajouter le répertoire parent au PATH pour pouvoir importer les paramètres
+from sys import path as sys_path
+from os import path as os_path
+sys_path.append(os_path.dirname(os_path.dirname(os_path.abspath(__file__))))
+import parameters as param
 
 
 """
@@ -23,6 +31,12 @@ class Tweets_Indexer_with_TwitterAPI :
         self.ENABLE_METRICS = ENABLE_METRICS
         self.bdd = SQLite_or_MySQL()
         self.engine = CBIR_Engine_for_Tweets_Images( DEBUG = DEBUG )
+        
+        # Nécessaire si on passe des ID de Tweets à index_tweet()
+        self.twitter = TweepyAbtraction( param.API_KEY,
+                                         param.API_SECRET,
+                                         param.OAUTH_TOKEN,
+                                         param.OAUTH_TOKEN_SECRET )
     
     """
     Enregistrer l'ID Tweet listé le plus récent dans la base de données.

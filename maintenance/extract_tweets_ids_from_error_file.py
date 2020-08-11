@@ -8,12 +8,13 @@ de traitement, et de retenter de les indexer.
 
 import os
 import sys
-# On s'éxécute dans le répetoire "server", et l'ajouter au PATH
-os.chdir(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "server"))
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "server"))
 
+# On s'éxécute dans le répetoire "server", et l'ajouter au PATH
+os.chdir(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "server"))
+
 import re
-from tweet_finder import CBIR_Engine_with_Database
+from tweet_finder import Tweets_Indexer_with_TwitterAPI
 
 
 """
@@ -55,6 +56,6 @@ else:
 """
 Tentative d'indexation des Tweets trouvés !
 """
-engine = CBIR_Engine_with_Database( DEBUG = True )
+engine = Tweets_Indexer_with_TwitterAPI( DEBUG = True )
 for tweet_id in founded_ids :
     engine.index_tweet( tweet_id, FORCE_INDEX = True )
