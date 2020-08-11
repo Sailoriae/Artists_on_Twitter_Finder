@@ -174,7 +174,7 @@ class SQLite_or_MySQL :
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
             try :
                 return self.conn.cursor( buffered = buffered )
-            except mysql.connector.errors.OperationalError :
+            except ( mysql.connector.errors.OperationalError, mysql.connector.errors.InternalError ) :
                 print( "Reconnexion à la base de données MySQL..." )
                 self.conn = mysql.connector.connect(
                     host = param.MYSQL_ADDRESS,
@@ -308,7 +308,7 @@ class SQLite_or_MySQL :
             
             # Sauvegarder la date d'utilisation de ce compte, et faire +1 au
             # compteur d'utilisations
-            c = self.get_cursor( buffered = True )
+            c = self.get_cursor() # Note : Ca ne sert à rien qu'il soit buffered
             c.execute( save_date, ( datetime.now().strftime('%Y-%m-%d %H:%M:%S'), account_id ) )
             c.execute( update_count, ( account_id, ) )
             self.conn.commit()
