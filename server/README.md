@@ -14,7 +14,8 @@ Lorsqu'il est démarré, il affiche une interface en ligne de commande. Tapez `h
 
 ## Utilisation
 
-1. Si vous êtes connecté en SSH sur un serveur, créez d'abord une fenêtre : `screen -S temp`
+1. Si vous êtes connecté en SSH sur un serveur, créez d'abord une fenêtre : `screen -S twitter`
+2. Augmentez la limite du nombre de descripteurs de fichiers ouvrables : `ulimit -n 10000`
 2. Lancez le serveur : `python3 app.py`
 
 Ceci lance le serveur et vous met en ligne de commande. Si vous souhaitez quitter la fenêtre en laissant le serveur tourner, faites `Crtl + A + D`.
