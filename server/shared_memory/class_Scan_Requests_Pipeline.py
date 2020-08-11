@@ -293,6 +293,7 @@ class Scan_Requests_Pipeline :
             
             # On peut supprimer l'objet Common_Tweet_IDs_List() pour gagner de la
             # mémoire vive
+            self._root.unregister_obj( request.indexing_tweets )
             request.indexing_tweets = None
             
             # Enregistrer le temps complet pour traiter cette requête
