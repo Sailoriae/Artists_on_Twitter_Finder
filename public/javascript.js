@@ -3,6 +3,7 @@ var tweetsDiv = document.getElementById("tweets");
 var displayErrorP = document.getElementById("display-error");
 var displayProcessStatusP = document.getElementById("display-process-status");
 var displayStatsP = document.getElementById("display-stats");
+var displayWarningP = document.getElementById("display-warning");
 var displayInfosP = document.getElementById("display-infos");
 var displaySupportedWebitesP = document.getElementById("supported-websites");
 
@@ -198,8 +199,11 @@ function displayStats() {
 					var json = JSON.parse( request.responseText );
 					console.log( json );
 					displayStatsP.textContent = parse( lang[ "STATS" ], numberWithSpaces( json["indexed_tweets_count"] ), numberWithSpaces( json["indexed_accounts_count"] ) );
-
 					displayInfosP.textContent = parse( lang[ "INFO" ], json["limit_per_ip_address"] )
+
+					if ( json["pending_user_requests_count"] > 20 ) {
+						displayWarningP.textContent = parse( lang[ "WARNING" ], numberWithSpaces( json["pending_user_requests_count"] ), numberWithSpaces( json["pending_scan_requests_count"] ) );
+					}
 				}
 			} else if ( request.status === 429 ) {
 				await new Promise(r => setTimeout(r, 1000));
