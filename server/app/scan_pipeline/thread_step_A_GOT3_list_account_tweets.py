@@ -21,7 +21,9 @@ GetOldTweets3.
 """
 def thread_step_A_GOT3_list_account_tweets( thread_id : int, shared_memory ) :
      # Initialisation du listeur de Tweets
-    getoldtweets3_lister = Tweets_Lister_with_GetOldTweets3( DEBUG = param.DEBUG, ENABLE_METRICS = param.ENABLE_METRICS )
+    getoldtweets3_lister = Tweets_Lister_with_GetOldTweets3( param.TWITTER_AUTH_TOKENS[ thread_id - 1 ],
+                                                             DEBUG = param.DEBUG,
+                                                             ENABLE_METRICS = param.ENABLE_METRICS )
     
     # Dire qu'on ne fait rien
     shared_memory.scan_requests.requests_in_thread.set_request( "thread_step_A_GOT3_list_account_tweets_number" + str(thread_id), None )

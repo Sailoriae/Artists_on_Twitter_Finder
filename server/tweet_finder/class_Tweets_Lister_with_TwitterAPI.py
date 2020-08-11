@@ -10,12 +10,6 @@ except ModuleNotFoundError : # Si on a été exécuté en temps que module
     from .database import SQLite_or_MySQL
     from .twitter import TweepyAbtraction
 
-# Ajouter le répertoire parent au PATH pour pouvoir importer les paramètres
-from sys import path as sys_path
-from os import path as os_path
-sys_path.append(os_path.dirname(os_path.dirname(os_path.abspath(__file__))))
-import parameters as param
-
 
 class Unfounded_Account_on_Lister_with_TwitterAPI ( Exception ) :
     pass
@@ -26,14 +20,15 @@ Classe permettant de lister les Tweets d'un compte Twitter avec l'API publique
 de Twitter via la librairie Tweepy.
 """
 class Tweets_Lister_with_TwitterAPI :
-    def __init__( self, DEBUG : bool = False, ENABLE_METRICS : bool = False ) :
+    def __init__( self, api_key, api_secret, oauth_token, oauth_token_secret,
+                        DEBUG : bool = False, ENABLE_METRICS : bool = False ) :
         self.DEBUG = DEBUG
         self.ENABLE_METRICS = ENABLE_METRICS
         self.bdd = SQLite_or_MySQL()
-        self.twitter = TweepyAbtraction( param.API_KEY,
-                                         param.API_SECRET,
-                                         param.OAUTH_TOKEN,
-                                         param.OAUTH_TOKEN_SECRET )
+        self.twitter = TweepyAbtraction( api_key,
+                                         api_secret,
+                                         oauth_token,
+                                         oauth_token_secret )
     
     """
     Lister les Tweets du compte Twitter @account_name.

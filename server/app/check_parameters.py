@@ -22,7 +22,11 @@ def check_parameters () :
         check_list.append( type( param.API_SECRET ) == str )
         check_list.append( type( param.OAUTH_TOKEN ) == str )
         check_list.append( type( param.OAUTH_TOKEN_SECRET ) == str )
-        check_list.append( type( param.TWITTER_AUTH_TOKEN ) == str )
+        for creds in param.TWITTER_API_KEYS :
+            check_list.append( type( creds["OAUTH_TOKEN"] ) == str )
+            check_list.append( type( creds["OAUTH_TOKEN_SECRET" ]) == str )
+        for key in param.TWITTER_AUTH_TOKENS :
+            check_list.append( type( key ) == str )
         check_list.append( type( param.PIXIV_USERNAME ) == str )
         check_list.append( type( param.PIXIV_PASSWORD ) == str )
         check_list.append( type( param.SQLITE_DATABASE_NAME ) == str )
@@ -62,41 +66,54 @@ def check_parameters () :
     print( "Verification de la connexion à l'API publique Twitter..." )
     from tweet_finder.twitter import TweepyAbtraction
     
+    def test_twitter ( api ) :
+        # On essaye d'avoir le premier Tweet sur Twitter
+        # https://twitter.com/jack/status/20
+        if twitter.get_tweet( 20 ) == None :
+            print( "Echec de connexion à l'API publique Twitter !")
+            print( "Veuillez vérifier votre fichier \"parameters.py\" !" )
+            print( "Notamment les clés suivantes : API_KEY, API_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET" )
+            print( "Et la liste de clés suivante : TWITTER_API_KEYS")
+            return False
+        else :
+            print( "Connexion à l'API publique Twitter réussie !")
+            return True
+    
     twitter = TweepyAbtraction( param.API_KEY,
                                 param.API_SECRET,
                                 param.OAUTH_TOKEN,
                                 param.OAUTH_TOKEN_SECRET )
-    
-    # On essaye d'avoir le premier Tweet sur Twitter
-    # https://twitter.com/jack/status/20
-    if twitter.get_tweet( 20 ) == None :
-        print( "Echec de connexion à l'API publique Twitter !")
-        print( "Veuillez vérifier votre fichier \"parameters.py\" !" )
-        print( "Notamment les clés suivantes : API_KEY, API_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET")
+    if not test_twitter( twitter ) :
         return False
-    else :
-        print( "Connexion à l'API publique Twitter réussie !")
+    
+    for creds in param.TWITTER_API_KEYS :
+        twitter = TweepyAbtraction( param.API_KEY,
+                                    param.API_SECRET,
+                                    creds["OAUTH_TOKEN"],
+                                    creds["OAUTH_TOKEN_SECRET"] )
+        if not test_twitter( twitter ) :
+            return False
     
     # ========================================================================
     
     print( "Verification de la connexion à l'API de recherche de GetOldTweets3..." )
     from tweet_finder.lib_GetOldTweets3 import manager as GetOldTweets3_manager
     
-    
-    tweetCriteria = GetOldTweets3_manager.TweetCriteria()\
-            .setQuerySearch( "from:jack" )\
-            .setSince( "2020-07-19" )\
-            .setUntil( "2020-07-20" )
-    
-    try :
-        GetOldTweets3_manager.TweetManager.getTweets( tweetCriteria, auth_token=param.TWITTER_AUTH_TOKEN )
-    except KeyError :
-        print( "Echec de connexion à l'API de recherche de GetOldTweets3...")
-        print( "Veuillez vérifier votre fichier \"parameters.py\" !" )
-        print( "Notamment la clé suivante : TWITTER_AUTH_TOKEN")
-        return False
-    else :
-        print( "Connexion à l'API de recherche de GetOldTweets3 réussie !")
+    for token in param.TWITTER_AUTH_TOKENS :
+        tweetCriteria = GetOldTweets3_manager.TweetCriteria()\
+                .setQuerySearch( "from:jack" )\
+                .setSince( "2020-07-19" )\
+                .setUntil( "2020-07-20" )
+        
+        try :
+            GetOldTweets3_manager.TweetManager.getTweets( tweetCriteria, auth_token = token )
+        except KeyError :
+            print( "Echec de connexion à l'API de recherche de GetOldTweets3...")
+            print( "Veuillez vérifier votre fichier \"parameters.py\" !" )
+            print( "Notamment la liste de clés suivante : TWITTER_AUTH_TOKENS" )
+            return False
+        else :
+            print( "Connexion à l'API de recherche de GetOldTweets3 réussie !")
     
     # ========================================================================
     

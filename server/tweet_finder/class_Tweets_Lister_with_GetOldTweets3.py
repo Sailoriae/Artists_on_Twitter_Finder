@@ -40,10 +40,11 @@ Classe permettant de lister les Tweets d'un compte Twitter avec la librairie
 GetOldTweets3.
 """
 class Tweets_Lister_with_GetOldTweets3 :
-    def __init__( self, DEBUG : bool = False, ENABLE_METRICS : bool = False ) :
+    def __init__( self, auth_token, DEBUG : bool = False, ENABLE_METRICS : bool = False ) :
         self.DEBUG = DEBUG
         self.ENABLE_METRICS = ENABLE_METRICS
         self.bdd = SQLite_or_MySQL()
+        self.auth_token = auth_token
         self.twitter = TweepyAbtraction( param.API_KEY,
                                          param.API_SECRET,
                                          param.OAUTH_TOKEN,
@@ -99,7 +100,7 @@ class Tweets_Lister_with_GetOldTweets3 :
         # les Tweets, par paquets de 100, puis le dernier paquet d'une taille
         # inférieure ou égale à 100.
         tweets_list_1 = GetOldTweets3_manager.TweetManager.getTweets( tweetCriteria,
-                                                                      auth_token=param.TWITTER_AUTH_TOKEN,
+                                                                      auth_token = self.auth_token,
                                                                       receiveBuffer = conversion_obj.insert )
         
         # Second scan en désactivant complètement le filtre "safe"
@@ -111,7 +112,7 @@ class Tweets_Lister_with_GetOldTweets3 :
             tweetCriteria.setSince( since_date )
             
         tweets_list_2 = GetOldTweets3_manager.TweetManager.getTweets( tweetCriteria,
-                                                                      auth_token=param.TWITTER_AUTH_TOKEN,
+                                                                      auth_token = self.auth_token,
                                                                       receiveBuffer = conversion_obj.insert )
         
         # Note : Le filtre "safe" filtre aussi les "gros-mots", par exemple :

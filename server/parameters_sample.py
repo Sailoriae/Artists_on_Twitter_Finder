@@ -22,21 +22,39 @@ OAUTH_TOKEN = ""
 OAUTH_TOKEN_SECRET = ""
 
 """
-Token de connexion à un compte Twitter.
+Liste de paramètres pour l'accès à l'API Twitter, idem à ci-dessus, mais en
+plusieurs exemplaires (Donc sur plusieurs comptes) pour paralléliser les
+listages de Tweets
+"""
+TWITTER_API_KEYS = [ {
+                       "OAUTH_TOKEN" : "",
+                       "OAUTH_TOKEN_SECRET" : ""
+                      }, {
+                       "OAUTH_TOKEN" : "",
+                       "OAUTH_TOKEN_SECRET" : ""
+                      }, {
+                       "OAUTH_TOKEN" : "",
+                       "OAUTH_TOKEN_SECRET" : ""
+                      } ]
+
+"""
+Token de connexion à des comptes Twitter.
 1. Ouvrir un compte Twitter dans un navigateur,
 2. Mettre ici la valeur du cookie "auth_token",
 3. Et ne surtout pas déconnecter ce compte, ni effacer la session !
    Effacer les cookies du navigateur plutôt.
 
-Ce compte utilisé doit pouvoir voir les médias sensibles dans les recherches !
-OPTION A DECOCHER :
+Ces comptes utilisés doivent pouvoir voir les médias sensibles dans les
+recherches ! OPTION A DECOCHER :
 Paramètres -> Confidentialité et sécurité -> Sécurité -> Filtres de recherche
 -> Masquer les contenus offensants
 
-Il est très recommandé d'utiliser ici un compte "inutile", en cas de piratage
-du serveur (Et de vol de l'"auth_token" ci-dessous).
+Il est très recommandé d'utiliser ici des comptes "inutiles", en cas de
+piratage du serveur (Et de vol des "auth_token" ci-dessous).
 """
-TWITTER_AUTH_TOKEN = ""
+TWITTER_AUTH_TOKENS = [ "",
+                        "",
+                        "" ]
 
 """
 Paramètres pour l'accès à l'API Pixiv.
@@ -75,18 +93,12 @@ HTTP_SERVER_PORT = 3301
 
 """
 Paramètrage du nombre de threads.
-
-Les valeurs NUMBER_OF_STEP_A_GOT3_LIST_ACCOUNT_TWEETS_THREADS et
-NUMBER_OF_STEP_B_TWITTERAPI_LIST_ACCOUNT_TWEETS_THREADS doivent rester à 1
-En effet, ces threads font beaucoup d'appels aux API Twitter, et donc peuvent
-recevoir des erreurs HTTP 429 "Too Many Requests".
-Les créer une seule fois permet de limiter les erreur 429.
 """
 NUMBER_OF_STEP_1_LINK_FINDER_THREADS = 5
 NUMBER_OF_STEP_2_TWEETS_INDEXER_THREADS = 5
 NUMBER_OF_STEP_3_REVERSE_SEARCH_THREADS = 5
-NUMBER_OF_STEP_A_GOT3_LIST_ACCOUNT_TWEETS_THREADS = 1 # Laisser à 1
-NUMBER_OF_STEP_B_TWITTERAPI_LIST_ACCOUNT_TWEETS_THREADS = 1 # Laisser à 1
+NUMBER_OF_STEP_A_GOT3_LIST_ACCOUNT_TWEETS_THREADS = len( TWITTER_AUTH_TOKENS ) # NE PAS TOUCHER
+NUMBER_OF_STEP_B_TWITTERAPI_LIST_ACCOUNT_TWEETS_THREADS = len( TWITTER_API_KEYS ) # NE PAS TOUCHER
 NUMBER_OF_STEP_C_GOT3_INDEX_ACCOUNT_TWEETS = 5
 NUMBER_OF_STEP_D_TWITTERAPI_INDEX_ACCOUNT_TWEETS = 5
 
