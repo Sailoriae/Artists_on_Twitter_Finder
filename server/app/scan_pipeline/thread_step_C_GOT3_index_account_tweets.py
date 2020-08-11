@@ -59,7 +59,7 @@ def thread_step_C_GOT3_index_account_tweets( thread_id : int, shared_memory ) :
         # listage, on peut arrêter là avec cette requête
         if request.unfounded_account :
             # On appelle la méthode qui termine la requête
-            shared_memory.scan_request.end_request( request, None )
+            shared_memory.scan_requests.end_request( request, None )
             continue
         
         # Si le listage des Tweets n'a pas commencé, on doit attendre un peu
@@ -99,7 +99,7 @@ def thread_step_C_GOT3_index_account_tweets( thread_id : int, shared_memory ) :
             # Si les deux indexations ont terminé
             if request.finished_TwitterAPI_indexing :
                 # On appelle la méthode qui termine la requête
-                shared_memory.scan_request.end_request( request, bdd_direct_access.get_stats() )
+                shared_memory.scan_requests.end_request( request, bdd_direct_access.get_stats() )
         
         # Sinon, il faut la remettre dans notre file d'attente, si elle n'a pas
         # été marquée comme "has_failed", car si c'est le cas, cela veut dire
