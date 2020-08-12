@@ -10,14 +10,16 @@ var displaySupportedWebitesP = document.getElementById("supported-websites");
 displayStats();
 displaySupportedWebites();
 
-function mainFunction () {
+function mainFunction ( new_loop = true ) {
 	document.getElementById("launch").style.display = "none";
 	document.getElementById("illust-url").readOnly = true;
 
-	twitterAccountsDiv.innerHTML = "";
-	tweetsDiv.innerHTML = "";
-	displayErrorP.innerHTML = "";
-	displayProcessStatusP.innerHTML = "";
+	if ( new_loop ) {
+		twitterAccountsDiv.innerHTML = "";
+		tweetsDiv.innerHTML = "";
+		displayErrorP.innerHTML = "";
+		displayProcessStatusP.innerHTML = "";
+	}
 
 	var illustURL = document.getElementById("illust-url").value;
 	var request = new XMLHttpRequest();
@@ -46,7 +48,7 @@ function mainFunction () {
 				}
 			} else if ( request.status === 429 ) {
 				await new Promise(r => setTimeout(r, 1000));
-				mainFunction();
+				mainFunction( new_loop = false );
 			} else {
 				displayErrorP.textContent = lang["CANNOT_CONTACT_SERVER"];
 			}
@@ -60,7 +62,7 @@ function mainFunction () {
 async function waitAndUpdate ( json ) {
 	if ( ! ( json["status"] === "END" ) ) {
 		await new Promise(r => setTimeout(r, 5000));
-		mainFunction();
+		mainFunction( new_loop = false );
 	} else {
 		document.getElementById("launch").style.display = "block";
 		document.getElementById("illust-url").readOnly = false;
@@ -104,6 +106,8 @@ function populateError ( json ) {
 }
 
 function populateStatus ( json ) {
+	displayProcessStatusP.innerHTML = "";
+
 	var p = document.createElement('p');
 	p.textContent = lang[ "STATUS" ];
 	p.textContent += lang[ json["status"] ]
@@ -111,6 +115,8 @@ function populateStatus ( json ) {
 }
 
 function populateTwitterAccounts ( json ) {
+	twitterAccountsDiv.innerHTML = "";
+
 	var twitterAccounts = json['twitter_accounts'];
 
 	if ( twitterAccounts.length === 0 ) {
@@ -137,6 +143,8 @@ function populateTwitterAccounts ( json ) {
 }
 
 function populateTweets ( json ) {
+	tweetsDiv.innerHTML = "";
+
 	var tweets = json["results"];
 
 	if ( tweets.length === 0 ) {
@@ -184,9 +192,6 @@ function parse(str) {
 }
 
 function displayStats() {
-	displayStatsP.innerHTML = "";
-	displayInfosP.innerHTML = "";
-
 	var request = new XMLHttpRequest();
 
 	request.addEventListener( "readystatechange", async function() {
@@ -204,6 +209,9 @@ function displayStats() {
 					if ( json["pending_user_requests_count"] > 20 ) {
 						displayWarningP.textContent = parse( lang[ "WARNING" ], numberWithSpaces( json["pending_user_requests_count"] ), numberWithSpaces( json["pending_scan_requests_count"] ) );
 					}
+
+					await new Promise(r => setTimeout(r, 30000));
+					displayStats();
 				}
 			} else if ( request.status === 429 ) {
 				await new Promise(r => setTimeout(r, 1000));
