@@ -53,7 +53,8 @@ class DeviantArt :
     def cache_or_get ( self, illust_url : str ) -> bool :
         if illust_url != self.cache_illust_url :
             
-            response = get_with_rate_limits( "https://backend.deviantart.com/oembed?url=" + illust_url )
+            response = get_with_rate_limits( "https://backend.deviantart.com/oembed?url=" + illust_url,
+                                             retry_on_those_http_errors = [ 403 ] )
             
             if response.status_code == 404 :
                 return False
@@ -105,7 +106,10 @@ class DeviantArt :
         # Sur DeviantArt, il faut aussi scanner la page où l'illustration a été
         # postée, car certains artistes mettent leur compte Twitter dans la
         # description de leur illustration.
-        scanner1 = Webpage_to_Twitter_Accounts( illust_url )
+        # On réessaye sur les erreurs 403 données par Cloudfront si on fait
+        # trop de requêtes.
+        scanner1 = Webpage_to_Twitter_Accounts( illust_url,
+                                                retry_on_those_http_errors = [ 403 ] )
         
         # PB : Si un petit malin met son compte Twitter en commentaire, il sera
         # considéré comme le compte Twitter de l'artiste.

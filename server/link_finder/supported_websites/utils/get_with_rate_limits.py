@@ -10,13 +10,22 @@ import urllib
 """
 Faire un GET HTTP en réessant de manière bourrin si jamais on a une erreur,
 comme par exemple une rate limit.
+@param retry_on_those_http_errors Liste d'erreurs HTTP sur lesquelles on
+                                  réessaye.
 """
-def get_with_rate_limits ( url, max_retry = 10 ):
+def get_with_rate_limits ( url, max_retry = 10, retry_on_those_http_errors = [] ):
     retry_count = 0
     while True : # Solution très bourrin pour gèrer les rate limits
         try :
-            return requests.get( url )
-            break
+            to_return = requests.get( url )
+            if to_return.status_code in retry_on_those_http_errors :
+                print( "Erreur", to_return.status_code, "pour :", url )
+                sleep( randrange( 5, 10 ) )
+                retry_count += 1
+                if retry_count > max_retry :
+                    raise Exception( "get_with_rate_limits() : Nombre maximal de tentatives pour un ré-essai sur une erreur HTTP." )
+            else :
+                return to_return
         
         except http.client.RemoteDisconnected as error :
             print( error )

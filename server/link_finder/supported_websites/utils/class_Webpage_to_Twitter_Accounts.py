@@ -38,12 +38,15 @@ class Webpage_to_Twitter_Accounts :
                    Si mis sur False, Régex est utilisé, ce qui permet de
                    trouver toutes les URL dans le code de la page.
                    (OPTIONNEL)
+    @param retry_on_those_http_errors Liste d'erreurs HTTP sur lesquelles on
+                                      réessaye.
     """
     def __init__ ( self,
                    url : str,
-                   USE_BS4 : bool = True ) :
+                   USE_BS4 : bool = True,
+                   retry_on_those_http_errors = [] ) :
         # Prendre le code HTML de la page
-        self.response = get_with_rate_limits( url )
+        self.response = get_with_rate_limits( url, retry_on_those_http_errors = retry_on_those_http_errors )
         
         # Initialiser BeautifulSoup si besoin
         if USE_BS4 :
