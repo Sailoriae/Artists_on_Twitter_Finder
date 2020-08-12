@@ -231,6 +231,18 @@ if __name__ == "__main__" :
                     print( "Status : " + str(request.status) + " " + request.get_status_string() )
                     if request.problem != None :
                         print( "Problème : " + request.problem )
+                    
+                    if request.scan_requests == None :
+                        print( "Cette requête n'a pas (encore ?) de requête de scan associée." )
+                    elif request.scan_requests == [] :
+                        print( "Cette requête n'a plus de requête de scan associée." )
+                    else :
+                        for scan_request_uri in request.scan_requests :
+                            scan_request = Pyro4.Proxy( scan_request_uri )
+                            print( "Scan @" + scan_request.account_name + " (ID " + str(scan_request.account_id) + "), prioritaire : " + str(scan_request.is_prioritary) )
+                            print( "A démarré le listage GOT3 : " + str(scan_request.started_GOT3_listing) + ", Twitter API : " + str(scan_request.started_GOT3_listing) )
+                            print( "A terminé l'indexation GOT3 : " + str(scan_request.finished_GOT3_indexing) + ", Twitter API : " + str(scan_request.finished_TwitterAPI_indexing) )
+                    
                     if request.finished_date != None :
                         print( "Fin du traitement : " + str(request.finished_date) )
                 else :
@@ -242,6 +254,7 @@ if __name__ == "__main__" :
             if len(args) == 2 :
                 request = shared_memory.user_requests.get_request( args[1] )
                 if request != None :
+                    print( "Comptes Twitter trouvés : " + ", ".join( [ "@" + account[0] + " (ID " + str(account[1]) + ")" for account in request.twitter_accounts_with_id ] ) )
                     print( "Résultat : " + str( [ (data.tweet_id, data.distance) for data in request.founded_tweets ] ) )
                 else :
                     print( "Requête inconnue pour cet URL !" )
