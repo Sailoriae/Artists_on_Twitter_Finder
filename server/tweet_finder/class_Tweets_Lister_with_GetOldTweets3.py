@@ -83,6 +83,9 @@ class Tweets_Lister_with_GetOldTweets3 :
         
         conversion_obj = GOT3_Tweet_List_to_Shared_Memory( queue_put )
         
+        # Notes résumant toutes les notes ci-dessous : Cette API, c'est
+        # n'importe quoi !
+        
         # Note importante : GOT3 ne peut pas voir les Tweets marqués comme
         # sensibles... Mais il peut voir les tweets non-sensibles de comptes
         # sensibles en désactivant le filtre "safe" et en étant connecté
@@ -91,29 +94,24 @@ class Tweets_Lister_with_GetOldTweets3 :
         # non-sensibles, il faut donc faire avec et sans !
         
         # On fait d'abord avec le filtre "safe"
+        query1 = "from:" + account_name + " filter:media -filter:retweets (filter:safe OR -filter:safe)"
+        
+        # Puis en désactivant complètement le filtre "safe"
+        query2 = "from:" + account_name + " filter:media -filter:retweets -filter:safe"
+        
+        query = "( (" + query1 + ") OR (" + query2 + ") )"
+        
         tweetCriteria = GetOldTweets3_manager.TweetCriteria()\
-            .setQuerySearch( "from:" + account_name + " filter:media -filter:retweets (filter:safe OR -filter:safe)" )
+            .setQuerySearch( query )
         if since_date != None :
             tweetCriteria.setSince( since_date )
         
         # Note : Pas besoin de préciser "bufferLength", on aura forcément tous
         # les Tweets, par paquets de 100, puis le dernier paquet d'une taille
         # inférieure ou égale à 100.
-        tweets_list_1 = GetOldTweets3_manager.TweetManager.getTweets( tweetCriteria,
-                                                                      auth_token = self.auth_token,
-                                                                      receiveBuffer = conversion_obj.insert )
-        
-        # Second scan en désactivant complètement le filtre "safe"
-        # Ce n'est pas grave si on scan deux fois, mais il vaut mieux le faire
-        # Twitter sont beaucoup trop flou pour qu'on puisse faire des "if"
-        tweetCriteria = GetOldTweets3_manager.TweetCriteria()\
-            .setQuerySearch( "from:" + account_name + " filter:media -filter:retweets -filter:safe" )
-        if since_date != None :
-            tweetCriteria.setSince( since_date )
-            
-        tweets_list_2 = GetOldTweets3_manager.TweetManager.getTweets( tweetCriteria,
-                                                                      auth_token = self.auth_token,
-                                                                      receiveBuffer = conversion_obj.insert )
+        tweets_list = GetOldTweets3_manager.TweetManager.getTweets( tweetCriteria,
+                                                                    auth_token = self.auth_token,
+                                                                    receiveBuffer = conversion_obj.insert )
         
         # Note : Le filtre "safe" filtre aussi les "gros-mots", par exemple :
         # "putain".
@@ -137,9 +135,9 @@ class Tweets_Lister_with_GetOldTweets3 :
         # Bref, ce système fonctionne.
         
         if self.DEBUG or self.ENABLE_METRICS :
-            print( "[List GOT3] Il a fallu", time() - start, "secondes pour lister", len(tweets_list_1 + tweets_list_2), "Tweets de @" + account_name + "." )
+            print( "[List GOT3] Il a fallu", time() - start, "secondes pour lister", len(tweets_list), "Tweets de @" + account_name + "." )
             if add_step_A_time != None :
-                count = len(tweets_list_1 + tweets_list_2)
+                count = len(tweets_list)
                 if count > 0 :
                     add_step_A_time( (time() - start) / count )
         
@@ -150,14 +148,7 @@ class Tweets_Lister_with_GetOldTweets3 :
         # dans la base de données si aucun Tweet n'a été trouvé
         # La BDD peut retourner None si elle ne connait pas le Tweet (Donc aucun
         # Tweet n'est enregistré pour ce compte), c'est pas grave
-        if len( tweets_list_1 ) > 0 :
-            if len( tweets_list_2 ) > 0 :
-                min_date = min( tweets_list_1[0].date, tweets_list_2[0].date )
-                return min_date.strftime('%Y-%m-%d')
-            else :
-                return tweets_list_1[0].date.strftime('%Y-%m-%d')
+        if len( tweets_list ) > 0 :
+            return tweets_list[0].date.strftime('%Y-%m-%d')
         else :
-            if len( tweets_list_2 ) > 0 :
-                return tweets_list_2[0].date.strftime('%Y-%m-%d')
-            else :
-                return self.bdd.get_account_GOT3_last_tweet_date( account_id )
+            return self.bdd.get_account_GOT3_last_tweet_date( account_id )
