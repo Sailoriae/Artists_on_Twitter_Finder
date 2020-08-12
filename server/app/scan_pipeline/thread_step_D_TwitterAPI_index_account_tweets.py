@@ -52,6 +52,9 @@ def thread_step_D_TwitterAPI_index_account_tweets( thread_id : int, shared_memor
                 sleep( 1 )
                 continue
         
+        # Dire qu'on est en train de traiter cette requête
+        request.is_in_TwitterAPI_indexing = True
+        
         # Lacher le sémaphore
         shared_memory.scan_requests.queues_sem.release()
         
@@ -106,10 +109,13 @@ def thread_step_D_TwitterAPI_index_account_tweets( thread_id : int, shared_memor
         # qu'un des deux threads de listage a planté, ou l'autre thread
         # d'indexation, et donc il vaut mieux arrêter.
         elif not request.has_failed :
+            shared_memory.scan_requests.queues_sem.acquire()
+            request.is_in_TwitterAPI_indexing = False
             if request.is_prioritary :
                 shared_memory.scan_requests.step_D_TwitterAPI_index_account_tweets_prior_queue.put( request )
             else :
                 shared_memory.scan_requests.step_D_TwitterAPI_index_account_tweets_queue.put( request )
+            shared_memory.scan_requests.queues_sem.release()
         
         # Dire qu'on n'est plus en train de traiter cette requête
         shared_memory.scan_requests.requests_in_thread.set_request( "thread_step_D_TwitterAPI_index_account_tweets_number" + str(thread_id), None )

@@ -209,6 +209,44 @@ class Scan_Requests_Pipeline :
                         # On met la requête dans la file d'attente prioritaire.
                         Pyro4.Proxy( self._step_B_TwitterAPI_list_account_tweets_prior_queue ).put( request )
                     
+                    # Si est dans une file d'attente d'indexation des Tweets avec
+                    # GetOldTweets3, on la sort, pour la mettre dans la même
+                    # file d'attente, mais prioritaire.
+                    if not request.is_in_GOT3_indexing :
+                        # On doit démonter et remonter la file en enlevant la
+                        # requête.
+                        temp_queue = remove_account_id_from_queue(
+                            Pyro4.Proxy( self._step_C_GOT3_index_account_tweets_queue ),
+                            account_id )
+                        
+                        # Désenregistrer l'ancienne file
+                        self._root.unregister_obj( self._step_C_GOT3_index_account_tweets_queue )
+                        
+                        # Enregistrer la nouvelle file
+                        self._step_C_GOT3_index_account_tweets_queue = self._root.register_obj( temp_queue, "scan_requests_step_C_GOT3_index_account_tweets_queue" )
+                        
+                        # On met la requête dans la file d'attente prioritaire.
+                        Pyro4.Proxy( self._step_C_GOT3_index_account_tweets_prior_queue ).put( request )
+                    
+                    # Si est dans une file d'attente d'indexation des Tweets avec
+                    # Twitter API, on la sort, pour la mettre dans la même
+                    # file d'attente, mais prioritaire.
+                    if not request.is_in_TwitterAPI_indexing :
+                        # On doit démonter et remonter la file en enlevant la
+                        # requête.
+                        temp_queue = remove_account_id_from_queue(
+                            Pyro4.Proxy( self._step_D_TwitterAPI_index_account_tweets_queue ),
+                            account_id )
+                        
+                        # Désenregistrer l'ancienne file
+                        self._root.unregister_obj( self._step_D_TwitterAPI_index_account_tweets_queue )
+                        
+                        # Enregistrer la nouvelle file
+                        self._step_D_TwitterAPI_index_account_tweets_queue = self._root.register_obj( temp_queue, "scan_requests_step_D_TwitterAPI_index_account_tweets_queue" )
+                        
+                        # On met la requête dans la file d'attente prioritaire.
+                        Pyro4.Proxy( self.step_D_TwitterAPI_index_account_tweets_prior_queue ).put( request )
+                    
                     # Comme les deux autres files d'attentes sont rapides à
                     # dérouler (Et surtout sont ralenties par les deux
                     # premières), il n'y a pas besoin de bouger les requêtes,

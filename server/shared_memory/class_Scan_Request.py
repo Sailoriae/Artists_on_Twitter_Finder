@@ -69,6 +69,8 @@ class Scan_Request :
         self._TwitterAPI_last_tweet_id = None
         
         # Deux variables de début de traitement de la requête
+        # Permet de savoir si, lors d'un éventuel passage de la requête en
+        # prioritaire, on doit démonter les files des étapes A et B ou pas
         self._started_GOT3_listing = False
         self._started_TwitterAPI_listing = False
         
@@ -82,6 +84,13 @@ class Scan_Request :
         # Permet de savoir si l'autre est en train ou a déjà traiter un Tweet,
         # sans avoir à faire un appel à la base de données
         self._indexing_tweets = self._root.register_obj( Common_Tweet_IDs_List(), None )
+        
+        # Cache pour les deux indexeurs (Etape C et D)
+        # Savoir si la requête est dans l'un des deux ou pas
+        # Permet de savoir si, lors d'un éventuel passage de la requête en
+        # prioritaire, on doit démonter les files des étapes C et D ou pas
+        self._is_in_GOT3_indexing = False
+        self._is_in_TwitterAPI_indexing = False
         
         # Deux variables de fin du traitement de la requête
         self._finished_GOT3_indexing = False
@@ -154,6 +163,16 @@ class Scan_Request :
     def indexing_tweets( self ) : return Pyro4.Proxy( self._indexing_tweets )
     @indexing_tweets.setter
     def indexing_tweets( self, value ) : self._indexing_tweets = value
+    
+    @property
+    def is_in_GOT3_indexing( self ) : return self._is_in_GOT3_indexing
+    @is_in_GOT3_indexing.setter
+    def is_in_GOT3_indexing( self, value ) : self._is_in_GOT3_indexing = value
+    
+    @property
+    def is_in_TwitterAPI_indexing( self ) : return self._is_in_TwitterAPI_indexing
+    @is_in_TwitterAPI_indexing.setter
+    def is_in_TwitterAPI_indexing( self, value ) : self._is_in_TwitterAPI_indexing = value
     
     @property
     def finished_GOT3_indexing( self ) : return self._finished_GOT3_indexing
