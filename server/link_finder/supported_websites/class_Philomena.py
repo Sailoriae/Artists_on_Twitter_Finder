@@ -17,7 +17,7 @@ except ImportError : # Si on a été exécuté en temps que module
 derpibooru_post_id_regex = re.compile(
     r"^http(?:s)?:\/\/(?:www\.)?derpibooru\.org\/(?:images\/)?([0-9]+)(?:\/)?" )
 furbooru_post_id_regex = re.compile(
-    r"^http(?:s)?:\/\/(?:www\.)?derpibooru\.org\/(?:images\/)?([0-9]+)(?:\/)?" )
+    r"^http(?:s)?:\/\/(?:www\.)?furbooru\.org\/(?:images\/)?([0-9]+)(?:\/)?" )
 
 
 """
