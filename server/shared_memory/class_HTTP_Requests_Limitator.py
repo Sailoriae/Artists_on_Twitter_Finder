@@ -36,7 +36,8 @@ class HTTP_Requests_Limitator :
                 to_return = False
         except KeyError :
             to_return = True
-        self._time_per_ip_address[ ip_address ] = now
+        if to_return : # Ne pas enregistrer la date lors d'une 429, sinon on bloque trop l'utilisateur
+            self._time_per_ip_address[ ip_address ] = now
         self._sem.release()
         return to_return
     
