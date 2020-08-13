@@ -20,7 +20,7 @@ def get_with_rate_limits ( url, max_retry = 10, retry_on_those_http_errors = [] 
             to_return = requests.get( url )
             if to_return.status_code in retry_on_those_http_errors :
                 print( "Erreur", to_return.status_code, "pour :", url )
-                sleep( randrange( 5, 10 ) )
+                sleep( randrange( 30, 60 ) )
                 retry_count += 1
                 if retry_count > max_retry :
                     raise Exception( "get_with_rate_limits() : Nombre maximal de tentatives pour un ré-essai sur une erreur HTTP." )
