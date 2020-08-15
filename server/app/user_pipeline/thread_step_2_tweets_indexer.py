@@ -3,7 +3,7 @@
 
 import queue
 from time import sleep, time
-from dateutil.tz import tzlocal
+from dateutil.tz import tzlocal, UTC
 import datetime
 import Pyro4
 
@@ -96,6 +96,11 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
                     # On a besoin de mettre le fuseau horaire dans la
                     # date minimale
                     min_date = min_date.replace( tzinfo = local_tz )
+                    
+                    # Si la date de l'image de requête n'a pas d'info sur sa
+                    # timezone, on la met en UTC
+                    if request.datetime.tzinfo == None :
+                        request.datetime = request.datetime.replace( tzinfo = UTC )
                     
                     # Si cette mise à jour moins 3 jours est plus
                     # vielle que la date de l'illustration, il faut MàJ
