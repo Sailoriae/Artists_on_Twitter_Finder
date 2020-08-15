@@ -74,18 +74,22 @@ class WebAPI_Client :
             raise Server_Connection_Not_Initialised
         try :
             while True :
-                response = requests.get( "http://localhost:3301/?url=" + illust_url )
+                response = requests.get( self.base_api_address + "?url=" + illust_url )
                 if response.status_code == 429 :
                     sleep(1)
                 else :
                     response = response.json()
                     if response["error"] == "YOUR_IP_HAS_MAX_PENDING_REQUESTS" :
-                        raise Max_Pending_Requests_On_Server
-                    return response
+                        to_raise = Max_Pending_Requests_On_Server
+                        break
+                    else :
+                        return response
         except Exception as error :
             print(error)
             print( "Problème de connexion avec le serveur." )
             return None
+        
+        raise to_raise
     
     """
     Obtenir la liste des comptes Twitter de l'artiste de cette illustration
