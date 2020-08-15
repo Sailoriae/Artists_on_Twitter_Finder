@@ -11,12 +11,6 @@ except ModuleNotFoundError : # Si on a été exécuté en temps que module
     from .class_ColorDescriptor import ColorDescriptor
 
 
-# Seuil de distance maximale (Calculé par la fonction "chi2_distance") entre
-# deux listes de caractéristiques d'images, pour dire que ces deux images sont
-# similaires ou sont les mêmes
-SEUIL = 1
-
-
 """
 Moteur de recherche d'image par le contenu ("content-based image retrieval",
 CBIR), généraliste, mais ne stocke rien !
@@ -76,12 +70,15 @@ class CBIR_Engine :
                                               de l'image
                            - distance : Un attribut pour stocker la distance
                              avec l'image de requête
+    @param SEUIL Seuil de distance entre deux images pour considérer qu'elles
+                 sont les mêmes (OPTIONNEL). Permet de réduire la taille de la
+                 liste retournée !
     @return Liste d'objets renvoyés par l'itérateur
             Cette liste ne contient pas toutes les images de la BDD, mais
             seulement celles qui ont une distance de l'image de requête
             inférieure à la variable SEUIL
     """
-    def search_cbir( self, image : np.ndarray, images_iterator ) :
+    def search_cbir( self, image : np.ndarray, images_iterator, SEUIL = None ) :
         # Liste d'identifiants d'images trouvées
         results = []
         
@@ -100,7 +97,7 @@ class CBIR_Engine :
             # Si la distance est inférieure à un certain seuil, on ajoute
             # l'identifiant de l'image en cours sur l'itérateur à notre liste
             # de résultatts
-            if d < SEUIL :
+            if SEUIL == None or d < SEUIL :
                 image.distance = d
                 results.append( image )
         

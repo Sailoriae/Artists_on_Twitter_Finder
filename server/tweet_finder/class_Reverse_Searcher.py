@@ -48,6 +48,9 @@ class Reverse_Searcher :
     def search_tweet ( self, image_url : str, account_name : str = None, add_step_3_times = None ) :
         if account_name != None :
             account_id = self.twitter.get_account_id( account_name )
+            if account_id == None :
+                print( "Compte @", account_name, "inexistant, ou désactivé, ou privé !" )
+                return None
         else :
             account_id = 0
         
@@ -65,7 +68,15 @@ class Reverse_Searcher :
         iterator.add_step_3_times = add_step_3_times
         
         try :
-            to_return = self.cbir_engine.search_cbir( image, iterator )
+            if account_name != None :
+                # On met un seuil élevé, car à cause de la compression de
+                # Twitter, des images identiques peut être très éloignées
+                to_return = self.cbir_engine.search_cbir( image, iterator, SEUIL = 10 )
+            else :
+                # On met un seuil plus bas dans le cas d'une recherche dans
+                # toute la base de données, sinon on fait exploser la mémoire
+                # vive
+                to_return =  self.cbir_engine.search_cbir( image, iterator, SEUL = 1 )
         # Si j'amais l'image passée a un format à la noix et fait planter notre
         # moteur CBIR
         except ErrorOpenCV :
