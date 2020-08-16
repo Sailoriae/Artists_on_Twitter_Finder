@@ -17,16 +17,16 @@ Dictionnaire des grosses requêtes SQL à ne pas recalculer à chaque fois.
 
 sql_requests_dict = {}
 
-insert_tweet_image_1 = "INSERT INTO tweets_images_1 VALUES ( ?," + " ?," * CBIR_LIST_LENGHT
+insert_tweet_image_1 = "INSERT INTO tweets_images_1 VALUES ( ?, ?," + " ?," * CBIR_LIST_LENGHT
 insert_tweet_image_1 = insert_tweet_image_1[:-1] # Suppression de la virgule finale
 
-insert_tweet_image_2 = "INSERT INTO tweets_images_2 VALUES ( ?," + " ?," * CBIR_LIST_LENGHT
+insert_tweet_image_2 = "INSERT INTO tweets_images_2 VALUES ( ?, ?," + " ?," * CBIR_LIST_LENGHT
 insert_tweet_image_2 = insert_tweet_image_2[:-1] # Suppression de la virgule finale
 
-insert_tweet_image_3 = "INSERT INTO tweets_images_3 VALUES ( ?," + " ?," * CBIR_LIST_LENGHT
+insert_tweet_image_3 = "INSERT INTO tweets_images_3 VALUES ( ?, ?," + " ?," * CBIR_LIST_LENGHT
 insert_tweet_image_3 = insert_tweet_image_3[:-1] # Suppression de la virgule finale
 
-insert_tweet_image_4 = "INSERT INTO tweets_images_4 VALUES ( ?," + " ?," * CBIR_LIST_LENGHT
+insert_tweet_image_4 = "INSERT INTO tweets_images_4 VALUES ( ?, ?," + " ?," * CBIR_LIST_LENGHT
 insert_tweet_image_4 = insert_tweet_image_4[:-1] # Suppression de la virgule finale
 
 

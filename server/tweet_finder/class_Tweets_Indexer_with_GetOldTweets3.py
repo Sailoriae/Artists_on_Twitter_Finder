@@ -128,6 +128,11 @@ class Tweets_Indexer_with_GetOldTweets3 :
             image_3 = None
             image_4 = None
             
+            image_name_1 = None
+            image_name_2 = None
+            image_name_3 = None
+            image_name_4 = None
+            
             length = len( tweet.images )
             
             if length == 0 :
@@ -143,18 +148,22 @@ class Tweets_Indexer_with_GetOldTweets3 :
                 image_1 = self.engine.get_image_features(
                               tweet.images[0],
                               tweet.id )
+                image_name_1 = tweet.images[0].replace("https://pbs.twimg.com/media/", "")
             if length > 1 :
                 image_2 = self.engine.get_image_features(
                               tweet.images[1],
                               tweet.id )
+                image_name_2 = tweet.images[1].replace("https://pbs.twimg.com/media/", "")
             if length > 2 :
                 image_3 = self.engine.get_image_features(
                               tweet.images[2],
                               tweet.id )
+                image_name_3 = tweet.images[2].replace("https://pbs.twimg.com/media/", "")
             if length > 3 :
                 image_4 = self.engine.get_image_features(
                               tweet.images[3],
                               tweet.id )
+                image_name_4 = tweet.images[3].replace("https://pbs.twimg.com/media/", "")
             
             # Si toutes les images du Tweet ont un problème
             if image_1 == None and image_2 == None and image_3 == None and image_4 == None :
@@ -180,6 +189,10 @@ class Tweets_Indexer_with_GetOldTweets3 :
                 image_2,
                 image_3,
                 image_4,
+                image_name_1,
+                image_name_2,
+                image_name_3,
+                image_name_4,
                 hashtags
             )
             

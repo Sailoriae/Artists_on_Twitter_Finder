@@ -65,13 +65,17 @@ class SQLite_or_MySQL :
                                   hashtags TEXT )"""
             
             tweets_images_1_table = """CREATE TABLE IF NOT EXISTS tweets_images_1 (
-                                           tweet_id BIGINT UNSIGNED PRIMARY KEY,"""
+                                           tweet_id BIGINT UNSIGNED PRIMARY KEY,
+                                           image_name TEXT,"""
             tweets_images_2_table = """CREATE TABLE IF NOT EXISTS tweets_images_2 (
-                                           tweet_id BIGINT UNSIGNED PRIMARY KEY,"""
+                                           tweet_id BIGINT UNSIGNED PRIMARY KEY,
+                                           image_name TEXT,"""
             tweets_images_3_table = """CREATE TABLE IF NOT EXISTS tweets_images_3 (
-                                           tweet_id BIGINT UNSIGNED PRIMARY KEY,"""
+                                           tweet_id BIGINT UNSIGNED PRIMARY KEY,
+                                           image_name TEXT,"""
             tweets_images_4_table = """CREATE TABLE IF NOT EXISTS tweets_images_4 (
-                                           tweet_id BIGINT UNSIGNED PRIMARY KEY,"""
+                                           tweet_id BIGINT UNSIGNED PRIMARY KEY,
+                                           image_name TEXT,"""
             
             # On stocker les listes de caractéristiques sur plusieurs colonnes
             # Cf. moteur CBIR, listes de 240 valeurs
@@ -91,13 +95,17 @@ class SQLite_or_MySQL :
                                   hashtags TEXT )"""
             
             tweets_images_1_table = """CREATE TABLE IF NOT EXISTS tweets_images_1 (
-                                           tweet_id UNSIGNED BIGINT PRIMARY KEY,"""
+                                           tweet_id UNSIGNED BIGINT PRIMARY KEY,
+                                           image_name TEXT,"""
             tweets_images_2_table = """CREATE TABLE IF NOT EXISTS tweets_images_2 (
-                                           tweet_id UNSIGNED BIGINT PRIMARY KEY,"""
+                                           tweet_id UNSIGNED BIGINT PRIMARY KEY,
+                                           image_name TEXT,"""
             tweets_images_3_table = """CREATE TABLE IF NOT EXISTS tweets_images_3 (
-                                           tweet_id UNSIGNED BIGINT PRIMARY KEY,"""
+                                           tweet_id UNSIGNED BIGINT PRIMARY KEY,
+                                           image_name TEXT,"""
             tweets_images_4_table = """CREATE TABLE IF NOT EXISTS tweets_images_4 (
-                                           tweet_id UNSIGNED BIGINT PRIMARY KEY,"""
+                                           tweet_id UNSIGNED BIGINT PRIMARY KEY,
+                                           image_name TEXT,"""
             
             # On stocker les listes de caractéristiques sur plusieurs colonnes
             # Cf. moteur CBIR, listes de 240 valeurs
@@ -193,6 +201,7 @@ class SQLite_or_MySQL :
     
     @param account_id L'ID du compte associé au tweet
     @param tweet_id L'ID du tweet à ajouter
+    
     @param cbir_features_1 La liste des caractéristiques issues de l'analyse
                            CBIR pour la première image du Tweet
                            240 VALEURS MAXIMUM
@@ -208,14 +217,33 @@ class SQLite_or_MySQL :
     @param cbir_features_4 La liste des caractéristiques issues de l'analyse
                            CBIR pour la quatrième image du Tweet
                            240 VALEURS MAXIMUM
-                           (OPTIONNEL)                    
+                           (OPTIONNEL)            
+    
+    @param image_name_1 Le "nom" de la première image, c'est à dire son ID,
+                        pour la retrouver directement avec un GET HTTP
+                        (OPTIONNEL)
+    @param image_name_2 Le "nom" de la seconde image, c'est à dire son ID,
+                        pour la retrouver directement avec un GET HTTP
+                        (OPTIONNEL)
+    @param image_name_3 Le "nom" de la troisième image, c'est à dire son ID,
+                        pour la retrouver directement avec un GET HTTP
+                        (OPTIONNEL)
+    @param image_name_4 Le "nom" de la quatrième image, c'est à dire son ID,
+                        pour la retrouver directement avec un GET HTTP
+                        (OPTIONNEL)
+    
     @param hashtags La liste des hashtags du Tweet (OPTIONNEL)
     """
-    def insert_tweet( self, account_id : int, tweet_id : int,
+    def insert_tweet( self, account_id : int,
+                      tweet_id : int,
                       cbir_features_1 : List[float] = None, # Peut être à None en fait si la première image est corrompue
                       cbir_features_2 : List[float] = None,
                       cbir_features_3 : List[float] = None,
                       cbir_features_4 : List[float] = None,
+                      image_name_1 : str = None,
+                      image_name_2 : str = None,
+                      image_name_3 : str = None,
+                      image_name_4 : str = None,
                       hashtags : List[str] = None ) :
          # Ne pas re-vérifier, la classe CBIR_Engine_with_Database le fait déjà
 #        if self.is_tweet_indexed( tweet_id ) :
@@ -234,28 +262,28 @@ class SQLite_or_MySQL :
 #            c.execute( sql_requests_dict["insert_tweet_image_1"],
 #                       tuple( [tweet_id] + cbir_features_1_formatted ) )
             c.execute( sql_requests_dict["insert_tweet_image_1"],
-                       tuple( [tweet_id] + [ float(v) for v in cbir_features_1 ] ) )
+                       tuple( [tweet_id, image_name_1] + [ float(v) for v in cbir_features_1 ] ) )
         
         if cbir_features_2 != None :
 #            cbir_features_2_formatted = features_list_for_db( cbir_features_2 )
 #            c.execute( sql_requests_dict["insert_tweet_image_2"],
 #                       tuple( [tweet_id] + cbir_features_2_formatted ) )
             c.execute( sql_requests_dict["insert_tweet_image_2"],
-                       tuple( [tweet_id] + [ float(v) for v in cbir_features_2 ] ) )
+                       tuple( [tweet_id, image_name_2] + [ float(v) for v in cbir_features_2 ] ) )
         
         if cbir_features_3 != None :
 #            cbir_features_3_formatted = features_list_for_db( cbir_features_3 )
 #            c.execute( sql_requests_dict["insert_tweet_image_3"],
 #                       tuple( [tweet_id] + cbir_features_3_formatted ) )
             c.execute( sql_requests_dict["insert_tweet_image_3"],
-                       tuple( [tweet_id] + [ float(v) for v in cbir_features_3 ] ) )
+                       tuple( [tweet_id, image_name_3] + [ float(v) for v in cbir_features_3 ] ) )
         
         if cbir_features_4 != None :
 #            cbir_features_4_formatted = features_list_for_db( cbir_features_4  )
 #            c.execute( sql_requests_dict["insert_tweet_image_4"],
 #                       tuple( [tweet_id] + cbir_features_4_formatted ) )
             c.execute( sql_requests_dict["insert_tweet_image_4"],
-                       tuple( [tweet_id] + [ float(v) for v in cbir_features_4 ] ) )
+                       tuple( [tweet_id, image_name_4] + [ float(v) for v in cbir_features_4 ] ) )
         
         if hashtags != None and hashtags != [] and hashtags != [""] :
             hashtags_str = ";".join( [ hashtag for hashtag in hashtags ] )

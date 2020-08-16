@@ -125,6 +125,7 @@ class Image_Features_Iterator :
         return Image_in_DB (
                    current_line[0], # ID du compte Twitter
                    current_line[1], # ID du Tweet
-                   current_line[ 4 : 4+CBIR_LIST_LENGHT ], # Features CBIR de l'image
+                   current_line[4], # Nom de l'image
+                   current_line[ 5 : 5+CBIR_LIST_LENGHT ], # Features CBIR de l'image
                    self.current_table
                )

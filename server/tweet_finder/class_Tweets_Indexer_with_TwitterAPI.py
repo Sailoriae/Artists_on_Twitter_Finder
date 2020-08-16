@@ -110,6 +110,11 @@ class Tweets_Indexer_with_TwitterAPI :
         image_3 = None
         image_4 = None
         
+        image_name_1 = None
+        image_name_2 = None
+        image_name_3 = None
+        image_name_4 = None
+        
         length = len( tweet_images_url )
         
         if length == 0 :
@@ -120,12 +125,16 @@ class Tweets_Indexer_with_TwitterAPI :
         # Traitement des images du Tweet
         if length > 0 :
             image_1 = self.engine.get_image_features( tweet_images_url[0], tweet_id )
+            image_name_1 = tweet_images_url[0].replace("https://pbs.twimg.com/media/", "")
         if length > 1 :
             image_2 = self.engine.get_image_features( tweet_images_url[1], tweet_id )
+            image_name_2 = tweet_images_url[1].replace("https://pbs.twimg.com/media/", "")
         if length > 2 :
             image_3 = self.engine.get_image_features( tweet_images_url[2], tweet_id )
+            image_name_3 = tweet_images_url[2].replace("https://pbs.twimg.com/media/", "")
         if length > 3 :
             image_4 = self.engine.get_image_features( tweet_images_url[3], tweet_id )
+            image_name_4 = tweet_images_url[3].replace("https://pbs.twimg.com/media/", "")
         
         # Si toutes les images du Tweet ont un problème
         if image_1 == None and image_2 == None and image_3 == None and image_4 == None :
@@ -153,6 +162,10 @@ class Tweets_Indexer_with_TwitterAPI :
             image_2,
             image_3,
             image_4,
+            image_name_1,
+            image_name_2,
+            image_name_3,
+            image_name_4,
             hashtags
         )
         
