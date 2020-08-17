@@ -45,6 +45,7 @@ Lorsqu'on parle d'un "site supporté" par le serveur, on parle de l'un des sites
 * `client` : Scripts du client à l'API du serveur.
 * `public` : Interface web pour utiliser l'API du serveur.
 * `doc` : Documentation.
+* `misc` : Sauvegarde de scripts divers.
 
 
 ## Installation et utilisation du serveur
