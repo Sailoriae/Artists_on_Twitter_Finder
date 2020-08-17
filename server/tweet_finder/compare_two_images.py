@@ -55,7 +55,7 @@ def compare_two_images ( url1, url2, PRINT_METRICS = True ) :
     difference = 100 - (dif / 255.0 * 100) / ncomponents
     
     if PRINT_METRICS :
-        print( "[compare_two_images] Temps de calcul:", time() - start )
+        print( "[compare_two_images] Temps de calcul :", time() - start )
     
     return difference
 

@@ -61,7 +61,7 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
         new_founded_tweets = []
         for image_in_db in request.founded_tweets :
             image_url = "https://pbs.twimg.com/media/" + image_in_db.image_name
-            similarity_percentage = compare_two_images( request_image, image_url )
+            similarity_percentage = compare_two_images( request_image, image_url, PRINT_METRICS = False )
             
             # Il faut que l'image trouvée et celle de requête se ressemblent à
             # au moins 85%
