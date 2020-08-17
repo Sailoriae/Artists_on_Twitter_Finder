@@ -2,7 +2,7 @@
 # coding: utf-8
 
 import queue
-from time import sleep
+from time import sleep, time
 
 from PIL import Image
 from io import BytesIO
@@ -13,6 +13,7 @@ from sys import path as sys_path
 from os import path as os_path
 sys_path.append(os_path.dirname(os_path.dirname(os_path.dirname(os_path.abspath(__file__)))))
 
+import parameters as param
 from tweet_finder import compare_two_images
 
 
@@ -49,6 +50,9 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
         # On passe la requête à l'étape suivante, c'est à dire notre étape
         shared_memory.user_requests.set_request_to_next_step( request )
         
+        if param.ENABLE_METRICS :
+            start = time()
+        
         # On télécharge l'image de requête (Même si on l'a déjà fait lors de
         # la recherche inversée)
         request_image = Image.open(BytesIO(requests.get( request.image_url ).content))
@@ -69,6 +73,9 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
         
         print( "[step_4_th" + str(thread_id) + "] Tweets trouvés après filtrage (Du plus au moins proche) :\n" +
                "[step_4_th" + str(thread_id) + "] " + str( [ data.tweet_id for data in request.founded_tweets ] ) )
+        
+        if param.ENABLE_METRICS :
+            shared_memory.execution_metrics.add_step_4_times( time() - start )
         
         # Dire qu'on n'est plus en train de traiter cette requête
         shared_memory.user_requests.requests_in_thread.set_request( "thread_step_4_filter_results_number" + str(thread_id), None )

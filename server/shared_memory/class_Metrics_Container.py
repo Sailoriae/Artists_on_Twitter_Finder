@@ -29,6 +29,9 @@ class Metrics_Container :
         self._step_3_iteration_times = []
         self._step_3_usage_times = []
         
+        # Fonction thread_step_4_filter_results
+        self._step_4_times = []
+        
         # Temps de traitement complet
         self._user_request_full_time = []
         self._scan_request_full_time = []
@@ -76,6 +79,12 @@ class Metrics_Container :
         self._step_3_usage_times += step_3_usage_times
     
     """
+    @param step_4_times Temps d'éxécution pour filtrer la liste des résultats.
+    """
+    def add_step_4_times ( self, step_4_times : float ) :
+        self._step_4_times.append( step_4_times )
+    
+    """
     Enregistrer le temps de traitement complet d'une requête utilisateur.
     @param scan_request_full_time Temps d'éxécution.
     """
@@ -95,21 +104,23 @@ class Metrics_Container :
     def get_metrics ( self ) :
         to_print = ""
         if self._step_A_times != [] :
-            to_print += "Temps moyen pour lister avec GOT3 : " + str(mean(self._step_A_times)) + "\n"
+            to_print += "Etape A : Temps moyen pour lister avec GOT3 : " + str(mean(self._step_A_times)) + "\n"
         if self._step_B_times != [] :
-            to_print += "Temps moyen pour lister avec TwitterAPI : " + str(mean(self._step_B_times)) + "\n"
+            to_print += "Etape B : Temps moyen pour lister avec TwitterAPI : " + str(mean(self._step_B_times)) + "\n"
         if self._step_C_times != [] :
-            to_print += "Temps moyen pour indexer avec GOT3 : " + str(mean(self._step_C_times)) + "\n"
+            to_print += "Etape C : Temps moyen pour indexer avec GOT3 : " + str(mean(self._step_C_times)) + "\n"
         if self._step_C_calculate_features_times != [] :
-            to_print += "Temps moyen pour indexer avec GOT3 : Calcul CBIR d'un Tweet : " + str(mean(self._step_C_calculate_features_times)) + "\n"
+            to_print += " - Dont : Calcul CBIR d'un Tweet : " + str(mean(self._step_C_calculate_features_times)) + "\n"
         if self._step_C_insert_into_times != [] :
-            to_print += "Temps moyen pour indexer avec GOT3 : INSERT INTO d'un Tweet : " + str(mean(self._step_C_insert_into_times)) + "\n"
+            to_print += " - Dont : INSERT INTO d'un Tweet : " + str(mean(self._step_C_insert_into_times)) + "\n"
         if self._step_D_times != [] :
-            to_print += "Temps moyen pour indexer avec TwitterAPI : " + str(mean(self._step_D_times)) + "\n"
+            to_print += "Etape D : Temps moyen pour indexer avec TwitterAPI : " + str(mean(self._step_D_times)) + "\n"
         if self._step_3_iteration_times != [] :
-            to_print += "Temps moyen pour itérer lors de la recherche : " + str(mean(self._step_3_iteration_times)) + "\n"
+            to_print += "Etape 3 : Temps moyen pour itérer lors de la recherche : " + str(mean(self._step_3_iteration_times)) + "\n"
         if self._step_3_usage_times != [] :
-            to_print += "Temps moyen pour comparer lors de la recherche : " + str(mean(self._step_3_usage_times)) + "\n"
+            to_print += "Etape 3 : Temps moyen pour comparer lors de la recherche : " + str(mean(self._step_3_usage_times)) + "\n"
+        if self._step_4_times != [] :
+            to_print += "Etape 4 : Temps moyen pour filtrer la liste des résultats : " + str(mean(self._step_4_times)) + "\n"
         if self._user_request_full_time != [] :
             to_print += "Temps moyen pour traiter une requête utilisateur : " + str(mean(self._user_request_full_time)) + "\n"
         if self._scan_request_full_time != [] :
