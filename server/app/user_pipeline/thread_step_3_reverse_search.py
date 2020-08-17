@@ -98,7 +98,7 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
         # Dire qu'on n'est plus en train de traiter cette requête
         shared_memory.user_requests.requests_in_thread.set_request( "thread_step_3_reverse_search_number" + str(thread_id), None )
         
-        # On passe la requête à l'étape suivante, fin du traitement
+        # On passe la requête à l'étape suivante
         # C'est la procédure shared_memory.user_requests.set_request_to_next_step
         # qui vérifie si elle peut
         shared_memory.user_requests.set_request_to_next_step( request )

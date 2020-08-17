@@ -13,6 +13,7 @@ from .thread_http_server import thread_http_server
 from .user_pipeline import thread_step_1_link_finder
 from .user_pipeline import thread_step_2_tweets_indexer
 from .user_pipeline import thread_step_3_reverse_search
+from .user_pipeline import thread_step_4_filter_results
 
 from .scan_pipeline import thread_step_A_GOT3_list_account_tweets
 from .scan_pipeline import thread_step_B_TwitterAPI_list_account_tweets

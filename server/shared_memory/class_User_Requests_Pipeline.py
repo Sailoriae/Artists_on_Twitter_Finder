@@ -59,6 +59,9 @@ class User_Requests_Pipeline :
         # inversée.
         self._step_3_reverse_search_queue = self._root.register_obj( Pyro_Queue( convert_uri = True ), "user_requests_step_3_reverse_search_queue" )
         
+        # File d'attente à l'étape 3 du traitement : Le filtrage des résultats.
+        self._step_4_filter_results_queue = self._root.register_obj( Pyro_Queue( convert_uri = True ), "user_requests_step_4_filter_results_queue" )
+        
         # Conteneur des adresses IP, associé à leur nombre de requêtes en cours
         # de traitement.
         self._limit_per_ip_addresses = self._root.register_obj( Limit_per_IP_Address(), "user_requests_limit_per_ip_addresses" )
@@ -90,6 +93,9 @@ class User_Requests_Pipeline :
     
     @property
     def step_3_reverse_search_queue( self ) : return Pyro4.Proxy( self._step_3_reverse_search_queue )
+    
+    @property
+    def step_4_filter_results_queue( self ) : return Pyro4.Proxy( self._step_4_filter_results_queue )
     
     @property
     def limit_per_ip_addresses( self ) : return Pyro4.Proxy( self._limit_per_ip_addresses )
@@ -213,8 +219,8 @@ class User_Requests_Pipeline :
     """
     def set_request_to_next_step ( self, request : User_Request, force_end : bool = False ) :
         if force_end :
-            request.status = 6
-        elif request.status < 6 :
+            request.status = 8
+        elif request.status < 8 :
             request.status += 1
         
         if request.status == 0 :
@@ -227,6 +233,9 @@ class User_Requests_Pipeline :
             Pyro4.Proxy( self._step_3_reverse_search_queue ).put( request )
         
         if request.status == 6 :
+            Pyro4.Proxy( self._step_4_filter_results_queue ).put( request )
+        
+        if request.status == 8 :
             request.finished_date = datetime.datetime.now()
             
             # Descendre le compteur de requêtes en cours de traitement dans le

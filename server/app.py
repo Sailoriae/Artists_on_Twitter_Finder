@@ -139,6 +139,14 @@ if __name__ == "__main__" :
         thread.start()
         threads_step_3_reverse_search.append( thread )
     
+    threads_step_4_filter_results = []
+    for i in range( param.NUMBER_OF_STEP_4_FILTER_RESULTS_THREADS ) :
+        thread = threading.Thread( name = "step_4_filter_results_th" + str(i+1),
+                                   target = error_collector,
+                                   args = ( thread_step_4_filter_results, i+1, shared_memory_uri, ) )
+        thread.start()
+        threads_step_4_filter_results.append( thread )
+    
     threads_step_A_GOT3_list_account_tweets = []
     for i in range( param.NUMBER_OF_STEP_A_GOT3_LIST_ACCOUNT_TWEETS_THREADS ) :
         thread = threading.Thread( name = "step_A_GOT3_list_account_tweets_th" + str(i+1),
@@ -312,6 +320,7 @@ if __name__ == "__main__" :
                 print( "step_1_link_finder_queue :", shared_memory.user_requests.step_1_link_finder_queue.qsize() )
                 print( "step_2_tweets_indexer_queue :", shared_memory.user_requests.step_2_tweets_indexer_queue.qsize() )
                 print( "step_3_reverse_search_queue :", shared_memory.user_requests.step_3_reverse_search_queue.qsize() )
+                print( "step_4_filter_results_queue :", shared_memory.user_requests.step_4_filter_results_queue.qsize() )
                 print( "step_A_GOT3_list_account_tweets_prior_queue :", shared_memory.scan_requests.step_A_GOT3_list_account_tweets_prior_queue.qsize() )
                 print( "step_A_GOT3_list_account_tweets_queue :", shared_memory.scan_requests.step_A_GOT3_list_account_tweets_queue.qsize() )
                 print( "step_B_TwitterAPI_list_account_tweets_prior_queue :", shared_memory.scan_requests.step_B_TwitterAPI_list_account_tweets_prior_queue.qsize() )
@@ -388,6 +397,8 @@ if __name__ == "__main__" :
     for thread in threads_step_2_tweets_indexer :
         thread.join()
     for thread in threads_step_3_reverse_search :
+        thread.join()
+    for thread in threads_step_4_filter_results :
         thread.join()
     for thread in threads_step_A_GOT3_list_account_tweets :
         thread.join()
