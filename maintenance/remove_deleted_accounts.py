@@ -9,9 +9,10 @@ enregistrement dans la base.
 
 import os
 import sys
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "server"))
+
 # On s'éxécute dans le répetoire "server", et l'ajouter au PATH
 os.chdir(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "server"))
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "server"))
 
 import tweepy
 import time
@@ -24,7 +25,11 @@ Connexion à l'API Twitter.
 """
 auth = tweepy.OAuthHandler(param.API_KEY, param.API_SECRET)
 auth.set_access_token(param.OAUTH_TOKEN, param.OAUTH_TOKEN_SECRET)
-api = tweepy.API(auth)
+
+# Tweepy gère l'attente lors d'une rate limit !
+api = tweepy.API( auth, 
+                  wait_on_rate_limit = True,
+                  wait_on_rate_limit_notify  = True )
 
 
 """
@@ -60,18 +65,12 @@ def check_account ( account_id : int ) -> bool :
         try :
             api.get_user( account_id )
             return True
-        except tweepy.error.RateLimitError as error :
-            print( "Limite atteinte en récupérant le nom du compte " + str(account_id) + "." )
-            print( error.reason )
-            print( "On va réessayer dans 60 secondes... ", end='' )
-            time.sleep( 60 )
-            print( "On réessaye !" )
-            retry = True
         except tweepy.TweepError as error :
-            print( "Erreur en récupérant le nom du compte " + str(account_id) + "." )
-            print( error.reason )
             if error.api_code == 50 : # 50 = User not found
+                print( "Le compte ID " + str(account_id) + " n'existe plus !" )
                 return False
+            print( "Erreur en récupérant le nom du compte ID " + str(account_id) + "." )
+            print( error.reason )
             return None
 
 """
@@ -83,6 +82,7 @@ accounts_list = c.fetchall()
 
 to_remove = []
 
+print( "Recherche de tous les comptes Twitter enregistrés dans la base de données..." )
 for account_id in accounts_list :
     if check_account( account_id[0] ) == False :
         to_remove.append( account_id[0] )
