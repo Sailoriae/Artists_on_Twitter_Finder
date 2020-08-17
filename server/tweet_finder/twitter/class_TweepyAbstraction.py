@@ -104,7 +104,7 @@ class TweepyAbtraction :
                 retry = True
             except tweepy.TweepError as error :
                 if invert_mode :
-                    print( "Erreur en récupérant le nom du compte" + str(account_name) + "." )
+                    print( "Erreur en récupérant le nom du compte " + str(account_name) + "." )
                 else :
                     print( "Erreur en récupérant l'ID du compte @" + str(account_name) + "." )
                 print( error.reason )
