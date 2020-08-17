@@ -4,7 +4,7 @@
 
 Permet de supprimer les comptes de la base de données qui n'existent plus sur Twitter. Supprime aussi leurs Tweets.
 
-Les comptes privés, suspendus, ou désactivés, ne sont pas supprimés !
+Attention : Ce script supprime les comptes supprimés, suspendus ou passés en privé / protégé.
 
 
 ## Script `extract_tweets_ids_from_error_file.py`

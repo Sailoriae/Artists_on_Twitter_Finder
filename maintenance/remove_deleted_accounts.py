@@ -5,7 +5,15 @@
 Ce script vérifie tous les ID de comptes enregistrés dans la base de données.
 Si il y en a qui n'existent plus, tous leur Tweets sont supprimés, puis leur
 enregistrement dans la base.
+Attention : Ce script supprime aussi les comptes suspendus.
+Sinon il vaut vérifier l'existence des compte un par uns, et c'est trop long.
+Ce script ne supprime pas les comptes qui ont étés passés en privés.
+Et aucune idée des comptes désactivés.
+API utilisée : "GET users/lookup", documentation :
+https://developer.twitter.com/en/docs/twitter-api/v1/accounts-and-users/follow-search-get-users/api-reference/get-users-lookup
 """
+
+import tweepy
 
 import os
 import sys
@@ -13,9 +21,6 @@ sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__f
 
 # On s'éxécute dans le répetoire "server", et l'ajouter au PATH
 os.chdir(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "server"))
-
-import tweepy
-import time
 
 import parameters as param
 
@@ -52,41 +57,54 @@ else :
 
 
 """
-Vérifie l'existence d'un compte Twitter.
-@param account_id L'ID du compte Twitter à vérifier.
-@return True si le compte existe (Même si il est privé, désactivé, ou suspendu).
-        False si il est introuvable.
-        None si on en sait rien.
-"""
-def check_account ( account_id : int ) -> bool :
-    retry = True
-    while retry :
-        retry = False
-        try :
-            api.get_user( account_id )
-            return True
-        except tweepy.TweepError as error :
-            if error.api_code == 50 : # 50 = User not found
-                print( "Le compte ID " + str(account_id) + " n'existe plus !" )
-                return False
-            print( "Erreur en récupérant le nom du compte ID " + str(account_id) + "." )
-            print( error.reason )
-            return None
-
-"""
-Parcours de tous les ID de comptes dans la base.
+Listage des ID de comptes Twitter enregistrés dans la base de données.
 """
 c = conn.cursor()
 c.execute( "SELECT account_id FROM accounts" )
 accounts_list = c.fetchall()
 
+accounts_in_db = []
+for account_id in accounts_list :
+    accounts_in_db.append( account_id[0] )
+
+print( "Il y a", len(accounts_in_db), "comptes Twitter dans la base de données." )
+
+
+"""
+Listage des ID de comptes Twitter qui existent encore.
+"""
+print( "Listage des ID de comptes Twitter qui existent encore." )
+
+cursor = 0 # Curseur de parcours de la liste accounts_in_db
+
+accounts_on_twitter = []
+while True :
+    hundred_accounts = accounts_in_db[ cursor : cursor + 100 ]
+    if hundred_accounts == [] : # On est arrivés au bout
+        print( "Fin du listage des ID de comptes Twitter qui existent encore." )
+        break
+    
+    for account in api.lookup_users( user_ids = hundred_accounts ) :
+        accounts_on_twitter.append( account.id )
+    
+    print( "Comptes analysés :", cursor, "/", str(len(accounts_in_db)) + ", valides :", len(accounts_on_twitter) )
+    cursor += 100
+
+
+"""
+Comparaison de la liste des ID de comptes Twitter enregistrés dans la base de
+données, avec la liste des ID de comptes Twitter qui existent encore.
+"""
 to_remove = []
 
-print( "Recherche de tous les comptes Twitter enregistrés dans la base de données..." )
-for account_id in accounts_list :
-    if check_account( account_id[0] ) == False :
-        to_remove.append( account_id[0] )
+for account_id in accounts_in_db :
+    if not account_id in accounts_on_twitter :
+        to_remove.append( account_id )
 
+
+"""
+Suppression des comptes trouvés comme à supprimer.
+"""
 if to_remove == [] :
     print( "Aucun compte à supprimer !" )
     sys.exit(0)
