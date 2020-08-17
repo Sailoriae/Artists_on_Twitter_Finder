@@ -18,6 +18,8 @@ La classe `Reverse_Searcher` permet de rechercher un Tweet à partir d'une image
 3. Calcul la distance entre l'image de requête et chaque image de l'itérateur, module `cbir_engine`,
 4. Retourne le ou les Tweets correspondant.
 
+La fonction `compare_two_images` permet de comparer deux images d'une méthode complétement différence de celle utilisée par le moteur CBIR. Cela permet de vérifier que les images trouvées par la recherche inversée sont bien les bonnes.
+
 
 ## Sous-modules
 

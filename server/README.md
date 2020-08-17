@@ -26,12 +26,13 @@ Ceci lance le serveur et vous met en ligne de commande. Si vous souhaitez quitte
 * Base de données stockant les comptes et les Tweets.
 * Moteur de calcul de caractéristiques d'une image (Moteur CBIR).
 * Parallélisme : 2 pipelines de traitement, divisés en étapes séparés dans des threads de traitement, avec files d'attentes :
-  - Traitement des requêtes des utilisateurs, en 3 étapes, exécutées l'une après l'autres. Voir `app/user_pipeline`.
+  - Traitement des requêtes des utilisateurs, en 4 étapes, exécutées l'une après l'autres. Voir `app/user_pipeline`.
   - Traitement des requêtes d'indexation / de scan d'un comte Twitter, en 4 étapes paralléles. Voir `app/scan_pipeline`.
-* Traitement des requêtes des utilisateurs en 3 étapes :
+* Traitement des requêtes des utilisateurs en 4 étapes :
   - Link Finder : Recherche des comptes Twitter de l'artiste, et recherche du fichier de l'illustration. Classe principale : `Link_Finder`, dans le module `link_finder`.
   - Tweets Indexer : Lancement de l'indexation / du scan des comptes Twitter trouvés dans l'autre pipeline, et surveillance de l'avancement de ce traitement.
   - Recherche inversée d'image. Classe principale : `Reverse_Searcher`, dans le module `tweet_finder`.
+  - Filtrage des résultats de la recherche inversée, car il peut y avoir des faux positifs.
 * Traitement des requêtes de scan en 4 étapes paralléles (Module `tweet_finder`) :
   - GetOldTweets3 : Listage des Tweets des comptes Twitter trouvés. Classe principale : `Tweets_Lister_with_GetOldTweets3`.
   - GetOldTweets3 : Analyse et indexation des Tweets trouvés. L'analyse consiste au calcul des caractéristiques de l'image avec le moteur CBIR. Classe principale : `Tweets_Indexer_with_GetOldTweets3`.
@@ -51,7 +52,7 @@ Ceci lance le serveur et vous met en ligne de commande. Si vous souhaitez quitte
 Script `app.py` : Script central, crée et gère les threads de traitement, la ligne de commande, les files d'attentes des requêtes, et le serveur HTTP.
 
 * Module `app` : Dépendances du script `app.py`. Contient les procédures de ses threads, et ses classes. Voir le `README.md` de ce module pour plus de détails.
-  - Module `user_pipeline` : Pipeline de traitement des requêtes utilisateurs, en 3 étapes : Link Finder, lancement si nécessaire et suivi du scan du ou des comptes Twitter dans l'autre pipeline, et recherche inversée de l'image de requête.
+  - Module `user_pipeline` : Pipeline de traitement des requêtes utilisateurs, en 4 étapes : Link Finder, lancement si nécessaire et suivi du scan du ou des comptes Twitter dans l'autre pipeline, recherche inversée de l'image de requête, et filtrage des résultats de cette recherche.
   - Module `scan_pipeline` : Pipeline de traitement des requêtes de scan d'un compte Twitter, en 4 étapes paralléles.
 
 * Module `shared_memory` : Mémoire partagée dans un serveur, permet le multi-processing et de faire potentiellement un système distribué.
