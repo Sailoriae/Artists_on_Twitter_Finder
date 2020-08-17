@@ -83,11 +83,13 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
         
         # Pour les 4 Tweets les moins proches, on les gardes que si ils sont
         # suffisemment proches du premier
-        SEUIL = 1 # Proximité maximale avec le premier Tweet trouvé pour être conservé
-        for i in range( 1, len(request.founded_tweets) ) :
-            if ( request.founded_tweets[i].distance - request.founded_tweets[0].distance ) > SEUIL :
-                request.founded_tweets = request.founded_tweets[:i]
-                break
+#        SEUIL = 1 # Proximité maximale avec le premier Tweet trouvé pour être conservé
+#        for i in range( 1, len(request.founded_tweets) ) :
+#            if ( request.founded_tweets[i].distance - request.founded_tweets[0].distance ) > SEUIL :
+#                request.founded_tweets = request.founded_tweets[:i]
+#                break
+        # Désactivé, car le thread 4 fait désormais le même travail, mais en
+        # beaucoup plus précis et efficace !
         
         print( "[step_3_th" + str(thread_id) + "] Tweets trouvés (Du plus au moins proche) :\n" +
                "[step_3_th" + str(thread_id) + "] " + str( [ data.tweet_id for data in request.founded_tweets ] ) )
