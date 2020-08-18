@@ -1,4 +1,4 @@
-# Artist on Twitter Finder : Index de la Documentation
+# Artists on Twitter Finder : Index de la Documentation
 
 Veuillez d'abord lire le `README.md` du répertoire parent à celui-ci.
 

@@ -1,6 +1,6 @@
 # GetOldTweets3
 
-Ceci est une librairie Python indépendante du serveur "Artist on Twitter Finder".
+Ceci est une librairie Python indépendante du serveur "Artists on Twitter Finder".
 
 Plus d'informations ici :
 https://github.com/Mottl/GetOldTweets3

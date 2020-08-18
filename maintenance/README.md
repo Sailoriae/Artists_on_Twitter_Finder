@@ -1,4 +1,4 @@
-# Artist on Twitter Finder : Scripts de maintenance
+# Artists on Twitter Finder : Scripts de maintenance
 
 ## Script `remove_deleted_accounts.py`
 

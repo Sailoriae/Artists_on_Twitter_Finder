@@ -4,7 +4,7 @@ La mémoire partagée consiste en un serveur tournant avec la librairie Pytho `P
 
 Documentation : https://pyro4.readthedocs.io/en/stable/index.html
 
-Cette librairie permet de partager des objets entre des processus (Car nous sommes obligés de faire du multi-processus et non du multi-threading à cause du GIL). De plus, elle permet aussi de faire des systèmes distribués. "Artist on Twitter Finder" peut donc être distribué sur plusieurs serveurs (En modifiant un peu le code).
+Cette librairie permet de partager des objets entre des processus (Car nous sommes obligés de faire du multi-processus et non du multi-threading à cause du GIL). De plus, elle permet aussi de faire des systèmes distribués. "Artists on Twitter Finder" peut donc être distribué sur plusieurs serveurs (En modifiant un peu le code).
 
 
 ## Origine de ce module

@@ -1,6 +1,6 @@
-# Artist on Twitter Finder
+# Artists on Twitter Finder
 
-"Artist on Twitter Finder" est un moteur de recherche inversé d'image, spécialisé dans les illustrations postées par des artistes sur Twitter.
+"Artists on Twitter Finder" est un moteur de recherche inversé d'image, spécialisé dans les illustrations postées par des artistes sur Twitter.
 
 Contrairement aux moteurs de recherche inversé d'image généralistes, comme Google Images ou TinEye, celui-ci est très spécialisé : A partir d'une illustration postée sur un des sites supportés, il va chercher si l'artiste de cette illustration possède un compte Twitter, et, si oui, va chercher son ou ses Tweets contenant cette illustration.
 
@@ -23,7 +23,7 @@ En donnant cette URL au serveur, celui-ci va :
 Dans notre exemple, le serveur a trouvé le Tweet suivant :
 https://twitter.com/DarkerEve/status/1237323900410789899
 
-Grace à l'API HTTP, envoyer une requête au serveur et recevoir sa réponse peut être fait de manière automatique. Ainsi, "Artist on Twitter Finder" peut être très intéressant pour des robots postant des illustrations sur Twitter, afin de pouvoir Retweeter l'artiste au lieu de reposter son illustration.
+Grace à l'API HTTP, envoyer une requête au serveur et recevoir sa réponse peut être fait de manière automatique. Ainsi, "Artists on Twitter Finder" peut être très intéressant pour des robots postant des illustrations sur Twitter, afin de pouvoir Retweeter l'artiste au lieu de reposter son illustration.
 
 
 ## Sites actuellement supportés
@@ -39,7 +39,7 @@ Lorsqu'on parle d'un "site supporté" par le serveur, on parle de l'un des sites
 
 ## Répertoires
 
-* `server` : Serveur "Artist on Twitter Finder". Pour chaque requête, trouve les comptes Twitter des artistes, indexe leurs Tweets, et recherche l'illustration de requête. Il contient une API sous la forme d'un serveur HTTP pour recevoir des requêtes et renvoyer leurs status et leurs résultats en JSON.
+* `server` : Serveur "Artists on Twitter Finder". Pour chaque requête, trouve les comptes Twitter des artistes, indexe leurs Tweets, et recherche l'illustration de requête. Il contient une API sous la forme d'un serveur HTTP pour recevoir des requêtes et renvoyer leurs status et leurs résultats en JSON.
 * `configs` : Fichier de configuration Apache2, pour faire un proxy depuis l'extérieur vers le serveur HTTP du serveur.
 * `maintenance` : Scripts de maintenance de la base de données du serveur.
 * `client` : Scripts du client à l'API du serveur.
@@ -61,4 +61,4 @@ Si vous souhaitez faire l'opération inverse, c'est à dire à partir d'un Tweet
 * SauceNAO : Un moteur de recherche inversée d'images spécialisé dans les animes, supporte Pixiv et pleins d'autres sites : https://saucenao.com/
 * Twitter-SauceNAO : Un robot qui permet à partir d'un Tweet de retrouver sa source via SauceNAO.
 
-SauceNAO est l'inverse de "Artist on Twitter Finder", car il indexe les images sur les sites sources. Ici, on indexe les images sur Twitter.
+SauceNAO est l'inverse de "Artists on Twitter Finder", car il indexe les images sur les sites sources. Ici, on indexe les images sur Twitter.

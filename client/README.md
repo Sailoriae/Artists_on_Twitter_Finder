@@ -1,8 +1,8 @@
-# Artist on Twitter Finder : Client
+# Artists on Twitter Finder : Client
 
 ## Classe `WebAPI_Client`
 
-Cette classe gère la connexion au serveur "Artist on Twitter Finder".
+Cette classe gère la connexion au serveur "Artists on Twitter Finder".
 Après son utilisation, il faut vérifier que son attribut `ready` soit à `True`. Il indique que la connexion au serveur a réussi.
 
 Elle contient les mèthode publique suivantes :

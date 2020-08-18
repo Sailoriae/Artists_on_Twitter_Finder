@@ -1,14 +1,14 @@
-# Artist on Twitter Finder : Configurations
+# Artists on Twitter Finder : Configurations
 
 ## `apache2_example.conf` : Hôte virtuel Apache2
 
 Ce fichier est à modifier ! Remplacez :
-* `/path/to/Artist_on_Twitter_Finder/public` par le chemin vers le répetoire `public` de "Artist on Twitter Finder",
+* `/path/to/Artists_on_Twitter_Finder/public` par le chemin vers le répetoire `public` de "Artists on Twitter Finder",
 * Et `sub.domain.tld` par le nom de domaine utilisé.
 
 Activer cet hôte virtuel Apache2 :
 ```
-sudo ln -s /path/to/Artist_on_Twitter_Finder/configs/apache.conf /etc/apache2/sites-enabled/sub.domain.tld.conf
+sudo ln -s /path/to/Artists_on_Twitter_Finder/configs/apache.conf /etc/apache2/sites-enabled/sub.domain.tld.conf
 ```
 
 Activer les modules Apache2 nécessaires :
@@ -27,7 +27,7 @@ sudo service apache2 restart
 ```
 sudo a2dismod ssl
 sudo service apache2 restart
-sudo letsencrypt certonly --webroot -w /path/to/Artist_on_Twitter_Finder/public -d sub.domain.tld --email name@domain.tld --text --rsa-key-size 4096
+sudo letsencrypt certonly --webroot -w /path/to/Artists_on_Twitter_Finder/public -d sub.domain.tld --email name@domain.tld --text --rsa-key-size 4096
 sudo a2enmod ssl
 sudo service apache2 restart
 ```
@@ -35,10 +35,10 @@ sudo service apache2 restart
 ## `artist-on-twitter_example.service` : Service
 
 Ce fichier est à modifier ! Remplacez :
-* `/path/to/Artist_on_Twitter_Finder/server` par le chemin vers le répetoire `server` de "Artist on Twitter Finder",
+* `/path/to/Artists_on_Twitter_Finder/server` par le chemin vers le répetoire `server` de "Artists on Twitter Finder",
 * Et `username` par le nom d'utilisateur qui aura le processus.
 
 Puis activez ce service, et démarrez-le :
 ```
-sudo systemctl enable /path/to/Artist_on_Twitter_Finder/configs/artist-on-twitter.service
+sudo systemctl enable /path/to/Artists_on_Twitter_Finder/configs/artist-on-twitter.service
 ```

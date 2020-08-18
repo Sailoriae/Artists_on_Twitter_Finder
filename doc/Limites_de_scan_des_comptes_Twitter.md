@@ -48,7 +48,7 @@ En cherchant sur GitHub des scripts Python pour faire ce travail, je n'ai trouv�
    * Attention : API à ne pas confondre avec sa version limité à 30 jours, Premium ("Search Tweets: 30-day endpoint") ou Entreprise ("Full-archive Search API").
 
 
-## Moyens retenues pour Artist on Twitter Finder
+## Moyens retenues pour Artists on Twitter Finder
 
 Deux moyens on étés retenus, et fonctionnent indépendemment sur le serveur :
 * La mèthode de l'API publique Twitter `GET statuses/user_timeline`,

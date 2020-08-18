@@ -1,4 +1,4 @@
-# Artist on Twitter Finder : Scripts divers
+# Artists on Twitter Finder : Scripts divers
 
 ## Script `get_oauth_token.py`
 

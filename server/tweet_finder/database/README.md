@@ -61,7 +61,7 @@ Contient les attributs suivants :
 
 ### Classe `SQLite_or_MySQL`
 
-Classe d'accès et de gestion de la base de données. Supporte SQLite ou MySQL. Utilise `parameters.py` pour choisir. Contient une multitude de mèthodes qu'on utilise dans "Artist on Twitter Finder".
+Classe d'accès et de gestion de la base de données. Supporte SQLite ou MySQL. Utilise `parameters.py` pour choisir. Contient une multitude de mèthodes qu'on utilise dans "Artists on Twitter Finder".
 
 ### Classe `Image_Features_Iterator`
 

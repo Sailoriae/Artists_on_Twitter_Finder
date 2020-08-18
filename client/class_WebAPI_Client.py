@@ -17,7 +17,7 @@ class Max_Pending_Requests_On_Server ( Exception ) :
 
 
 """
-Classe de client à un serveur "Artist_on_Twitter_Finder". Permet d'utiliser
+Classe de client à un serveur "Artists on Twitter Finder". Permet d'utiliser
 son API.
 """
 class WebAPI_Client :
@@ -47,11 +47,11 @@ class WebAPI_Client :
         
         try :
             if json[ "error" ] != "NO_URL_FIELD" :
-                print( "Ceci n'est pas un serveur \"Artist on Twitter Finder\".")
+                print( "Ceci n'est pas un serveur \"Artists on Twitter Finder\".")
                 self.ready = False
                 return
         except ( KeyError, TypeError ) :
-            print( "Ceci n'est pas un serveur \"Artist on Twitter Finder\".")
+            print( "Ceci n'est pas un serveur \"Artists on Twitter Finder\".")
             self.ready = False
             return
         

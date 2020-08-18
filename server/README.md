@@ -1,6 +1,6 @@
-# Artist on Twitter Finder : Serveur
+# Artists on Twitter Finder : Serveur
 
-Le serveur de "Artist on Twitter Finder" exécute tout le traitement des requêtes, et gère sa base de données.
+Le serveur de "Artists on Twitter Finder" exécute tout le traitement des requêtes, et gère sa base de données.
 Il possède une API HTTP pour recevoir les requêtes, et y répondre.
 Lorsqu'il est démarré, il affiche une interface en ligne de commande. Tapez `help` dans cette interface pour avoir la liste des commandes disponibles.
 

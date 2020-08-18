@@ -1,6 +1,6 @@
 # Module Tweet Finder
 
-Le Tweet Finder est l'une des deux grandes parties du serveur "Artist on Twitter Finder", avec le Link Finder.
+Le Tweet Finder est l'une des deux grandes parties du serveur "Artists on Twitter Finder", avec le Link Finder.
 
 Les classes `Tweets_Indexer_with_GetOldTweets3` et `Tweets_Indexer_with_TwitterAPI` listent les Tweets de comptes Twitter à partir du dernier scan (Ou tous les Tweet si le compte n'a pas été encore scanné) :
 * `Tweets_Indexer_with_GetOldTweets3` utilise la librairie GetOldTweets3, module `lib_GetOldTweets3`,
