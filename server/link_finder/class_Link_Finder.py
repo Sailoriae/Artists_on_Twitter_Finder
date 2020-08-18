@@ -77,6 +77,8 @@ class Link_Finder :
     """
     @param illust_url L'URL d'une illustration postée sur l'un des sites
                       supportés.
+    @param TWITTER_ONLY Ne retourner dans l'objet que les comptes Twitter
+                        (OPTIONNEL).
     
     @return Un objet "Link_Finder_Result" contenant les attributs suivants :
             - image_url : L'URL de l'image.
@@ -91,7 +93,7 @@ class Link_Finder :
     Attention : Cette méthode émet des exceptions Unsupported_Website si le
     site n'est pas supporté !
     """
-    def get_data ( self, illust_url : str ) -> str :
+    def get_data ( self, illust_url : str, TWITTER_ONLY = False ) -> str :
         # Ce sont les clases qui analysent les URL et vont dire si elles
         # mènent bien vers des illustrations.
         # Ici, on vérifie juste le domaine.
@@ -104,24 +106,24 @@ class Link_Finder :
         # DEVIANTART
         # ====================================================================
         elif re.search( deviantart_url, illust_url ) != None :
-            image_url = self.deviantart.get_image_url( illust_url )
             twitter_accounts = self.deviantart.get_twitter_accounts( illust_url )
-            publish_date = self.deviantart.get_datetime( illust_url )
+            if not TWITTER_ONLY :
+                image_url = self.deviantart.get_image_url( illust_url )
+                publish_date = self.deviantart.get_datetime( illust_url )
         
         # ====================================================================
         # PIXIV
         # ====================================================================
         elif re.search( pixiv_url, illust_url ) != None :
-            image_url = self.pixiv.get_image_url( illust_url )
             twitter_accounts = self.pixiv.get_twitter_accounts( illust_url )
-            publish_date = self.pixiv.get_datetime( illust_url )
+            if not TWITTER_ONLY :
+                image_url = self.pixiv.get_image_url( illust_url )
+                publish_date = self.pixiv.get_datetime( illust_url )
         
         # ====================================================================
         # DANBOORU
         # ====================================================================
         elif re.search( danbooru_url, illust_url ) != None :
-            image_url = self.danbooru.get_image_url( illust_url )
-            
             twitter_accounts = self.danbooru.get_twitter_accounts( illust_url )
             
             # Si l'URL n'est pas invalide
@@ -137,15 +139,15 @@ class Link_Finder :
                         if accounts != None :
                             twitter_accounts += accounts
             
-            publish_date = self.danbooru.get_datetime( illust_url )
+            if not TWITTER_ONLY :
+                image_url = self.danbooru.get_image_url( illust_url )
+                publish_date = self.danbooru.get_datetime( illust_url )
         
         # ====================================================================
         # DERPIBOORU
         # ====================================================================
         elif re.search( derpibooru_url, illust_url ) != None :
-            image_url = self.derpibooru.get_image_url( illust_url )
             twitter_accounts = self.derpibooru.get_twitter_accounts( illust_url )
-            publish_date = self.derpibooru.get_datetime( illust_url )
             
             # Comme les Boorus sont des sites de reposts, on peut trouver la
             # source de l'illustration. Si c'est sur un site que l'on supporte,
@@ -153,20 +155,22 @@ class Link_Finder :
             source = self.derpibooru.get_source( illust_url )
             if source != None and source != "" :
                 try :
-                    data = self.get_data( source )
+                    data = self.get_data( source, TWITTER_ONLY = True )
                 except ( Unsupported_Website, Not_an_URL ) :
                     pass
                 else :
                     if data != None :
                         twitter_accounts += data.twitter_accounts
+            
+            if not TWITTER_ONLY :
+                image_url = self.derpibooru.get_image_url( illust_url )
+                publish_date = self.derpibooru.get_datetime( illust_url )
         
         # ====================================================================
         # FURBOORU
         # ====================================================================
         elif re.search( furbooru_url, illust_url ) != None :
-            image_url = self.furbooru.get_image_url( illust_url )
             twitter_accounts = self.furbooru.get_twitter_accounts( illust_url )
-            publish_date = self.furbooru.get_datetime( illust_url )
             
             # Comme les Boorus sont des sites de reposts, on peut trouver la
             # source de l'illustration. Si c'est sur un site que l'on supporte,
@@ -174,12 +178,16 @@ class Link_Finder :
             source = self.furbooru.get_source( illust_url )
             if source != None and source != "" :
                 try :
-                    data = self.get_data( source )
+                    data = self.get_data( source, TWITTER_ONLY = True )
                 except ( Unsupported_Website, Not_an_URL ) :
                     pass
                 else :
                     if data != None :
                         twitter_accounts += data.twitter_accounts
+            
+            if not TWITTER_ONLY :
+                image_url = self.furbooru.get_image_url( illust_url )
+                publish_date = self.furbooru.get_datetime( illust_url )
         
         # ====================================================================
         # Site non supporté
@@ -190,12 +198,20 @@ class Link_Finder :
         # ====================================================================
         # Retourner
         # ====================================================================
-        if image_url == None :
+        
+        # Le site est supporté mais l'URL ne mène pas à une illustration
+        if twitter_accounts == None :
             return None
-        else :
-            return Link_Finder_Result( image_url,
-                                       filter_twitter_accounts_list( twitter_accounts ),
-                                       publish_date )
+        
+        if TWITTER_ONLY :
+            image_url = None
+            publish_date = None
+        
+        # Le site est supporté et l'URL mène à une illustration
+        # La liste des comptes Twitter trouvés peut alors être vide
+        return Link_Finder_Result( image_url,
+                                   filter_twitter_accounts_list( twitter_accounts ),
+                                   publish_date )
 
 
 """
