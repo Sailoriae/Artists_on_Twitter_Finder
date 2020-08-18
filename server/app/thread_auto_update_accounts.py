@@ -65,9 +65,15 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
                 # ça ne sert à rien de MàJ, ni de continuer l'itération, car
                 # après, les comptes seront moins vieux
                 # On peut donc arrêter l'itération !
-                if now - min_date < datetime.timedelta( days = param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE ) :
-                    # Retest dans (now - min_date) en secondes
-                    for i in range( int( (now - min_date).total_seconds() / 3 ) ) :
+                update_period = datetime.timedelta( days = param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE )
+                
+                if now - min_date < update_period :
+                    # Retest dans (update_period - (now - min_date))
+                    wait_time = int( (update_period - (now - min_date)).total_seconds() / 3 )
+                    
+                    print( "[auto_update_th" + str(thread_id) + "] Reprise dans " + str(wait_time*3) + " secondes, pour lancer le scan du compte ID " + str(oldest_updated_account[0]) + "." )
+                    
+                    for i in range( wait_time ) :
                         sleep( 3 )
                         if not shared_memory.keep_service_alive :
                             break
@@ -100,12 +106,12 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
         # Si il n'y avait aucun compte dans l'itérateur
         if count == 0 :
             print( "[auto_update_th" + str(thread_id) + "] La base de données n'a pas de comptes Twitter enregistrés !" )
-        
-        # Retest dans une heure (1200*3 = 3600)
-        for i in range( 1200 ) :
-            sleep( 3 )
-            if not shared_memory.keep_service_alive :
-                break
+            
+            # Retest dans une heure (1200*3 = 3600)
+            for i in range( 1200 ) :
+                sleep( 3 )
+                if not shared_memory.keep_service_alive :
+                    break
     
     print( "[auto_update_th" + str(thread_id) + "] Arrêté !" )
     return
