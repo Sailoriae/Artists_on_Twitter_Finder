@@ -5,10 +5,9 @@ displayStats();
 displaySupportedWebites();
 
 function mainFunction ( new_loop = true ) {
-	document.getElementById("launch").style.display = "none";
-	document.getElementById("illust-url").readOnly = true;
-
 	if ( new_loop ) {
+		lockUI();
+
 		twitterAccountsDiv.innerHTML = "";
 		tweetsDiv.innerHTML = "";
 		errorP.innerHTML = "";
@@ -37,6 +36,9 @@ function mainFunction ( new_loop = true ) {
 			} else if ( request.status === 429 ) {
 				await new Promise(r => setTimeout(r, 1000));
 				mainFunction( new_loop = false );
+			} else if ( request.status === 414 ) {
+				errorP.textContent = lang["REQUEST_URI_TOO_LONG"];
+				unlockUI()
 			} else {
 				errorP.textContent = lang["CANNOT_CONTACT_SERVER"];
 			}
@@ -47,13 +49,22 @@ function mainFunction ( new_loop = true ) {
 	request.send();
 }
 
+function lockUI () {
+	document.getElementById("launch").style.display = "none";
+	document.getElementById("illust-url").readOnly = true;
+}
+
+function unlockUI () {
+	document.getElementById("launch").style.display = "block";
+	document.getElementById("illust-url").readOnly = false;
+}
+
 async function waitAndUpdate ( json ) {
 	if ( ! ( json["status"] === "END" ) ) {
 		await new Promise(r => setTimeout(r, 5000));
 		mainFunction( new_loop = false );
 	} else {
-		document.getElementById("launch").style.display = "block";
-		document.getElementById("illust-url").readOnly = false;
+		unlockUI();
 	}
 }
 

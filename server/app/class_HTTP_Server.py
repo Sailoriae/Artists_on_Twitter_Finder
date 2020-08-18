@@ -30,6 +30,17 @@ def http_server_container ( shared_memory_uri_arg ) :
             return
         
         def do_GET( self ) :
+            # Vérifier la longueur de l'URL de requête, pour éviter que des
+            # petits malins viennent nous innonder notre mémoire vive
+            if len( self.path ) > 200 :
+                self.send_response(414)
+                self.send_header("Content-type", "text/plain")
+                self.end_headers()
+                
+                self.wfile.write( "414 Request-URI Too Long\n".encode("utf-8") )
+                return
+            
+            # Analyser le chemin du GET HTTP
             page = urlsplit( self.path ).path
             if page[0] == "/" :
                 page = page[1:] # On enlève le premier "/"
