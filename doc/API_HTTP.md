@@ -34,7 +34,9 @@ Liste des status possibles (Dans l'ordre de traitement) :
 - `WAIT_LINK_FINDER` : En attente de traitement par un thread de Link Finder.
 - `LINK_FINDER` : En cours de traitement par un thread de Link Finder.
 - `WAIT_INDEX_ACCOUNTS_TWEETS` : En attente de traitement par un thread de lancement de l'indexation ou de la mise à jour de l'indexation des Tweets des comptes Twitter de l'artiste.
-- `INDEX_ACCOUNTS_TWEETS`: En cours de traitement par les threads d'indexation ou de la mise à jour de l'indexation des Tweets des comptes Twitter de l'artiste. **Cette étape peut être très très longue.**
+- En cours de traitement par les threads d'indexation des Tweets des comptes Twitter de l'artiste :
+  - `INDEX_ACCOUNTS_TWEETS` :  Seulement pour une mise à jour des comptes.
+  - `FIRST_TIME_INDEX_ACCOUNTS_TWEETS` : Il y a un ou plusieurs comptes qui étaient inconnus dans la base de données. Cette étape va donc être longue.
 - `WAIT_IMAGE_REVERSE_SEARCH` : En attente de traitement par un thread de recherche d'image inversée.
 - `IMAGE_REVERSE_SEARCH` : En cours de traitement par un thread de recherche d'image inversée.
 - `WAIT_FILTER_RESULTS` : En attente du filtrage des résultats de la recherche inversée.

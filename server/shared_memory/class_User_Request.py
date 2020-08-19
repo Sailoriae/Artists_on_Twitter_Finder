@@ -57,6 +57,11 @@ class User_Request :
         # afin de ne pas trop itérer dessus
         self._last_seen_indexer = 0
         
+        # Résultat de l'indexer (Etape 2)
+        # Est ce que la requête a des comptes qui sont inconnus de la base de
+        # données, et donc vont être indexés pour la première fois
+        self._has_first_time_scan = False
+        
         # Résultat de la recherche inversée (Etape 3)
         # Résultats de la recherche inversée de l'image
         # Est une liste d'objets Image_in_DB
@@ -118,6 +123,11 @@ class User_Request :
     def last_seen_indexer( self, value ) : self._last_seen_indexer = value
     
     @property
+    def has_first_time_scan( self ) : return self._has_first_time_scan
+    @has_first_time_scan.setter
+    def has_first_time_scan( self, value ) : self._has_first_time_scan = value
+    
+    @property
     def founded_tweets( self ) : return self._founded_tweets
     @founded_tweets.setter
     def founded_tweets( self, value ) : self._founded_tweets = value
@@ -143,7 +153,10 @@ class User_Request :
         if self._status == 2 :
             return "WAIT_INDEX_ACCOUNTS_TWEETS"
         if self._status == 3 :
-            return "INDEX_ACCOUNTS_TWEETS"
+            if self._has_first_time_scan :
+                return "FIRST_TIME_INDEX_ACCOUNTS_TWEETS"
+            else :
+                return "INDEX_ACCOUNTS_TWEETS"
         if self._status == 4 :
             return "WAIT_IMAGE_REVERSE_SEARCH"
         if self._status == 5 :
