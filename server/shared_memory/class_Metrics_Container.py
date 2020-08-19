@@ -104,27 +104,27 @@ class Metrics_Container :
     def get_metrics ( self ) :
         to_print = ""
         if self._step_A_times != [] :
-            to_print += "Etape A : Temps moyen pour lister avec GOT3 : " + str(mean(self._step_A_times)) + "\n"
+            to_print += "Etape A : Temps moyen pour lister avec GOT3 : " + str(mean(self._step_A_times)) + " (" + str(len(self._step_A_times)) + " valeurs)\n"
         if self._step_B_times != [] :
-            to_print += "Etape B : Temps moyen pour lister avec TwitterAPI : " + str(mean(self._step_B_times)) + "\n"
+            to_print += "Etape B : Temps moyen pour lister avec TwitterAPI : " + str(mean(self._step_B_times)) + " (" + str(len(self._step_B_times)) + " valeurs)\n"
         if self._step_C_times != [] :
-            to_print += "Etape C : Temps moyen pour indexer avec GOT3 : " + str(mean(self._step_C_times)) + "\n"
+            to_print += "Etape C : Temps moyen pour indexer avec GOT3 : " + str(mean(self._step_C_times)) + " (" + str(len(self._step_C_times)) + " valeurs)\n"
         if self._step_C_calculate_features_times != [] :
-            to_print += " - Dont : Calcul CBIR d'un Tweet : " + str(mean(self._step_C_calculate_features_times)) + "\n"
+            to_print += " - Dont : Calcul CBIR d'un Tweet : " + str(mean(self._step_C_calculate_features_times)) + " (" + str(len(self._step_C_calculate_features_times)) + " valeurs)\n"
         if self._step_C_insert_into_times != [] :
-            to_print += " - Dont : INSERT INTO d'un Tweet : " + str(mean(self._step_C_insert_into_times)) + "\n"
+            to_print += " - Dont : INSERT INTO d'un Tweet : " + str(mean(self._step_C_insert_into_times)) + " (" + str(len(self._step_C_insert_into_times)) + " valeurs)\n"
         if self._step_D_times != [] :
-            to_print += "Etape D : Temps moyen pour indexer avec TwitterAPI : " + str(mean(self._step_D_times)) + "\n"
+            to_print += "Etape D : Temps moyen pour indexer avec TwitterAPI : " + str(mean(self._step_D_times)) + " (" + str(len(self._step_D_times)) + " valeurs)\n"
         if self._step_3_iteration_times != [] :
-            to_print += "Etape 3 : Temps moyen pour itérer lors de la recherche : " + str(mean(self._step_3_iteration_times)) + "\n"
+            to_print += "Etape 3 : Temps moyen pour itérer lors de la recherche : " + str(mean(self._step_3_iteration_times)) + " (" + str(len(self._step_3_iteration_times)) + " valeurs)\n"
         if self._step_3_usage_times != [] :
-            to_print += "Etape 3 : Temps moyen pour comparer lors de la recherche : " + str(mean(self._step_3_usage_times)) + "\n"
+            to_print += "Etape 3 : Temps moyen pour comparer lors de la recherche : " + str(mean(self._step_3_usage_times)) + " (" + str(len(self._step_3_usage_times)) + " valeurs)\n"
         if self._step_4_times != [] :
-            to_print += "Etape 4 : Temps moyen pour filtrer la liste des résultats : " + str(mean(self._step_4_times)) + "\n"
+            to_print += "Etape 4 : Temps moyen pour filtrer la liste des résultats : " + str(mean(self._step_4_times)) + " (" + str(len(self._step_4_times)) + " valeurs)\n"
         if self._user_request_full_time != [] :
-            to_print += "Temps moyen pour traiter une requête utilisateur : " + str(mean(self._user_request_full_time)) + "\n"
+            to_print += "Temps moyen pour traiter une requête utilisateur : " + str(mean(self._user_request_full_time)) + " (" + str(len(self._user_request_full_time)) + " valeurs)\n"
         if self._scan_request_full_time != [] :
-            to_print += "Temps moyen pour traiter une requête de scan : " + str(mean(self._scan_request_full_time)) + "\n"
+            to_print += "Temps moyen pour traiter une requête de scan : " + str(mean(self._scan_request_full_time)) + " (" + str(len(self._scan_request_full_time)) + " valeurs)\n"
         if to_print == "" :
             to_print = "Aucune statistique disponible ! Aucune requête n'a été lancée, ou le paramètre \"ENABLE_METRICS\" est à \"False\"."
         return to_print
