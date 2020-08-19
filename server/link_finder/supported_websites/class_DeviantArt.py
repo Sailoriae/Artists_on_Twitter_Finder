@@ -125,7 +125,7 @@ class DeviantArt :
             self.cache_illust_url_json["author_url"] + "/about" )
         
         # PB : Idem, il y a une section commentaires !
-        scanner2.soup = scanner2.soup.find("div", {"id": "about"})
+        scanner2.soup = scanner2.soup.find("section", {"id": "about"})
         
         twitter_accounts += scanner2.scan()
         

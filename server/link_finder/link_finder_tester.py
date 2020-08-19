@@ -79,6 +79,11 @@ test( "https://www.deviantart.com/nopeys/art/Azula-847851539",
       ['nopeys1'],
       datetime.fromisoformat( "2020-07-06 06:59:43-07:00" ) )
 
+test( "https://www.deviantart.com/lifeisafiction/art/Miku-Hatsune-Cosplay-844482485",
+      "Un truc qui change c'est chiant, vérifier à la main.",
+      ['xlifeisafiction'],
+      datetime.fromisoformat( "2020-06-05T10:31:38-07:00" ) )
+
 # Attention, test de NSFW
 test( "https://www.deviantart.com/dandonfuga/art/Harley-x-Ivy-YURI-NUDITY-warning-674880884",
       "Un truc qui change c'est chiant, vérifier à la main.",
