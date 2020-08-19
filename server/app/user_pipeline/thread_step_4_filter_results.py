@@ -69,8 +69,23 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
             continue
         
         # On filtre la liste des images trouvées
-        new_founded_tweets = []
+        # Rappel : Cette liste est triée par distance durant l'étape 3
+        # Rappel : Les distances sont dans l'ordre croissant
+        new_founded_tweets = [] # Nouvelle liste
+        last_founded_distance = None # Distance de la dernière image ajoutée à
+                                     # la liste ci-dessus dans l'itérateur
+                                     # ci-dessous
         for image_in_db in request.founded_tweets :
+            if last_founded_distance != None :
+                # Si on s'éloigne de 0.5 de la precédente image ajoutée à la
+                # liste, on peut arrêter là
+                # On a déjà trouvé un Tweet avec l'image de toutes manières,
+                # d'autres Tweets contenant l'image devraient être proches
+                # A moins que Twitter aient changés leur algo de compression,
+                # mais c'est pas grave
+                if image_in_db.distance - last_founded_distance > 0.5 :
+                    break
+                
             image_url = "https://pbs.twimg.com/media/" + image_in_db.image_name
             similarity_percentage = compare_two_images( request_image, image_url, PRINT_METRICS = False )
             
@@ -78,6 +93,7 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
             # au moins 85%
             if similarity_percentage > 85 :
                 new_founded_tweets.append( image_in_db )
+                last_founded_distance = image_in_db.distance
         
         # On installe la nouvelle liste de résultats
         request.founded_tweets = new_founded_tweets
