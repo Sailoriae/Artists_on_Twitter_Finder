@@ -2,16 +2,20 @@
 # coding: utf-8
 
 import requests
-from time import sleep
 
 from class_WebAPI_Client import WebAPI_Client
 
 
 """
 Fonction permettant de populer la base de données à partir de la page d'accueil
-de DeviantArt.
+de DeviantArt, ou d'une recherche.
+Pour la recherche, les résultats sont triés par "Popular all times".
+
+@param NUMBER_OF_ILLUST_TO_SEND Nombre d'illustrations à envoyer au serveur.
+@param SEARCH Recherche DeviantArt à scanner, si ce n'est pas un scan de la
+              page d'accueil. Laisser à "None" pour scanner la page d'accueil.
 """
-def scan_deviantart_hoome ( NUMBER_OF_ILLUST_TO_SEND ) :
+def scan_deviantart_home_or_search ( NUMBER_OF_ILLUST_TO_SEND = 150, SEARCH = None ) :
     server = WebAPI_Client()
     if not server.ready :
         return
@@ -19,7 +23,10 @@ def scan_deviantart_hoome ( NUMBER_OF_ILLUST_TO_SEND ) :
     page_number = 0
     deviations_count = 0
     while True :
-        request = "https://www.deviantart.com/_napi/da-browse/api/faceted?init=false&page_type=browse_home&order=recommended&include_scraps=false&offset=" + str( page_number * 48 )
+        if SEARCH != None:
+            request = "https://www.deviantart.com/_napi/da-browse/api/faceted?init=false&page_type=browse_home&order=popular-all-time&include_scraps=false&offset=" + str( page_number * 48 ) + "&q=" + SEARCH
+        else :
+            request = "https://www.deviantart.com/_napi/da-browse/api/faceted?init=false&page_type=browse_home&order=recommended&include_scraps=false&offset=" + str( page_number * 48 )
         print( "On demande à DeviantArt : " + request )
         response = requests.get( request )
         
@@ -40,4 +47,5 @@ def scan_deviantart_hoome ( NUMBER_OF_ILLUST_TO_SEND ) :
 
 
 if __name__ == "__main__" :
-    scan_deviantart_hoome( 150 )
+    # Scan de la page d'acceuil de DeviantArt
+    scan_deviantart_home_or_search()
