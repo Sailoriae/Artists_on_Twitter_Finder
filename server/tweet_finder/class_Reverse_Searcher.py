@@ -71,7 +71,7 @@ class Reverse_Searcher :
             # On met un seuil élevé, car à cause de la compression de Twitter,
             # des images identiques peut être très éloignées
             # Et le laisser élevé, car c'est le thread 4 qui filtre derrière
-            to_return = self.cbir_engine.search_cbir( image, iterator, SEUIL = 10 )
+            to_return = self.cbir_engine.search_cbir( image, iterator, SEUIL = 15 )
         # Si j'amais l'image passée a un format à la noix et fait planter notre
         # moteur CBIR
         except ErrorOpenCV :

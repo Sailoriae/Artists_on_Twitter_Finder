@@ -79,7 +79,7 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
                                          reverse = False )
         
         # On ne garde que les 5 Tweets les plus proches
-        request.founded_tweets = request.founded_tweets[:5]
+#        request.founded_tweets = request.founded_tweets[:5]
         
         # Pour les 4 Tweets les moins proches, on les gardes que si ils sont
         # suffisemment proches du premier
