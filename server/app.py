@@ -31,7 +31,7 @@ if __name__ == "__main__" :
     else :
         # Augmenter le nombre de descripteurs de fichiers ouvrables.
         # 1024 par défaut, c'est trop peu pour nous !
-        resource.setrlimit( resource.RLIMIT_NOFILE, (10000, 10000) )
+        resource.setrlimit( resource.RLIMIT_NOFILE, (20000, 20000) )
     
     """
     Script principal. NE PAS LE LANCER PLUSIEURS FOIS !
