@@ -24,6 +24,14 @@ if __name__ == "__main__" :
 #        ssl._create_default_https_context = _create_unverified_https_context
     # EDIT : Ce problème semble résolu, mais je ne sais pas pourquoi.
     
+    try :
+        import resource
+    except ModuleNotFoundError : # On n'est pas sous un système UNIX
+        pass
+    else :
+        # Augmenter le nombre de descripteurs de fichiers ouvrables.
+        # 1024 par défaut, c'est trop peu pour nous !
+        resource.setrlimit( resource.RLIMIT_NOFILE, (10000, 10000) )
     
     """
     Script principal. NE PAS LE LANCER PLUSIEURS FOIS !
