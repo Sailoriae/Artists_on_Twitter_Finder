@@ -70,6 +70,7 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
                 if now - min_date < update_period :
                     # Retest dans (update_period - (now - min_date))
                     wait_time = int( (update_period - (now - min_date)).total_seconds() / 3 )
+                    wait_time += 1 # Ajout de 3*1 = 3 secondes pour l'arrondi ci-dessus
                     
                     print( "[auto_update_th" + str(thread_id) + "] Reprise dans " + str(wait_time*3) + " secondes, pour lancer le scan du compte ID " + str(oldest_updated_account[0]) + "." )
                     
