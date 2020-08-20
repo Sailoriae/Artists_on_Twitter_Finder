@@ -68,6 +68,11 @@ Script `app.py` : Script central, crée et gère les threads de traitement, la l
     - Module `utils` : Contient des outils pour les classes ci-dessus.
 
 
+## Architecture à l'exécution
+
+![Architecture du serveur](../doc/Architecture_du_serveur.png)
+
+
 ## Notes
 
 * Les requêtes sur le serveur sont identifiées par l'URL de l'illustration de requête.
