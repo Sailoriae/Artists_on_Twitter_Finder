@@ -20,7 +20,7 @@ else :
 if not USE_OPENCV :
     from PIL import Image, UnidentifiedImageError
     from io import BytesIO
-    import requests
+    import urllib
 
 # Ajouter le répertoire parent du répertoire parent au PATH pour pouvoir importer
 from sys import path as sys_path
@@ -87,8 +87,16 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
                 continue
         
         else :
+            # Construire la requête
+            http_request = urllib.request.Request( request.image_url )
+            # Problème : Pour télécharger une image sur Pixiv, il faut que le
+            # champs Referer de la requête soit Pixiv. Oui c'est nul. Donc on
+            # fait simple avec cette petite bidouille, sans régex :
+            if request.image_url[:20] == "https://i.pximg.net/" :
+                http_request.add_header('Referer', 'https://www.pixiv.net/')
+            
             try :
-                request_image = Image.open(BytesIO(requests.get( request.image_url ).content))
+                request_image = Image.open(BytesIO( urllib.request.urlopen( http_request ).read() ))
             
             # Si l'image a un format à la noix
             except UnidentifiedImageError :
@@ -97,7 +105,7 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
                 # plutôt une erreur de réseau
                 sleep( 10 )
                 try :
-                    request_image = Image.open(BytesIO(requests.get( request.image_url ).content))
+                    request_image = Image.open(BytesIO( urllib.request.urlopen( http_request ).read() ))
                 
                 # Si ça veut pas, on arrête là
                 except UnidentifiedImageError as error:
