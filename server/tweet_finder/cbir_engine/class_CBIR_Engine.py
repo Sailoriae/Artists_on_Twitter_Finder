@@ -10,6 +10,20 @@ try :
 except ModuleNotFoundError : # Si on a été exécuté en temps que module
     from .class_ColorDescriptor import ColorDescriptor
 
+# On met un seuil élevé, car à cause de la compression de Twitter, des images
+# identiques peut être très éloignées
+# Et le laisser élevé, car c'est le thread 4 qui filtre derrière
+# (Et aussi le test de Bhattacharyya)
+# Exemple d'image qui met une grosse distance (11,9) :
+# https://danbooru.donmai.us/posts/4057141
+# 0 = Les images sont les mêmes, puis tend vers l'infini
+SEUIL_CHI2 = 15
+
+# Idem pour ce seuil, mais le laisser par trop haut non plus, car ce test de
+# distance filtre très bien les sketchs et dessins en noir et blanc
+# 0 = Les images sont les mêmes, 1 = ne sont absolument pas les mêmes
+SEUIL_BHATTACHARYYA = 0.2
+
 
 """
 Moteur de recherche d'image par le contenu ("content-based image retrieval",
@@ -50,9 +64,6 @@ class CBIR_Engine :
     Plus précisemment, il s'agit du test du khi-deux de Pearson
     https://fr.wikipedia.org/wiki/Test_du_%CF%87%C2%B2_de_Pearson
     
-    Puis on multiplie cette valeur par la distance de Bhattacharyya
-    https://fr.wikipedia.org/wiki/Distance_de_Bhattacharyya
-    
     @return La différence entre les deux images
             Plus elle est faible, plus les images sont similaires
     """
@@ -61,12 +72,20 @@ class CBIR_Engine :
         # Documentation : https://docs.opencv.org/2.4/modules/imgproc/doc/histograms.html#comparehist
         d = cv2.compareHist( np.float32(histA), np.float32(histB), cv2.HISTCMP_CHISQR )
         
-        # On calcul ausi la distance de Bhattacharyya (Qui est la même que la
-        # distance de Hellinger dans OpenCV)
-        # Permet d'être plus certain du résultat
-        # Ce résultat est compris entre 0 et 1, avec 0 les images sont les
-        # mêmes, et 1 les images sont complétement différentes
-        d = d * cv2.compareHist( np.float32(histA), np.float32(histB), cv2.HISTCMP_BHATTACHARYYA )
+        # Retourner cette distance
+        return d
+    
+    """
+    Calcul de la distance de Bhattacharyya
+    https://fr.wikipedia.org/wiki/Distance_de_Bhattacharyya
+    
+    @return La différence entre les deux images, comprise entre 0 et 1
+            Plus elle est faible, plus les images sont similaires
+    """
+    def bhattacharyya_distance( self, histA, histB ):
+        # Calculer la distance de Bhattacharyya
+        # Documentation : https://docs.opencv.org/2.4/modules/imgproc/doc/histograms.html#comparehist
+        d = cv2.compareHist( np.float32(histA), np.float32(histB), cv2.HISTCMP_BHATTACHARYYA )
         
         # Retourner cette distance
         return d
@@ -80,15 +99,12 @@ class CBIR_Engine :
                                               de l'image
                            - distance : Un attribut pour stocker la distance
                              avec l'image de requête
-    @param SEUIL Seuil de distance entre deux images pour considérer qu'elles
-                 sont les mêmes (OPTIONNEL). Permet de réduire la taille de la
-                 liste retournée !
     @return Liste d'objets renvoyés par l'itérateur
             Cette liste ne contient pas toutes les images de la BDD, mais
             seulement celles qui ont une distance de l'image de requête
             inférieure à la variable SEUIL
     """
-    def search_cbir( self, image : np.ndarray, images_iterator, SEUIL = None ) :
+    def search_cbir( self, image : np.ndarray, images_iterator ) :
         # Liste d'identifiants d'images trouvées
         results = []
         
@@ -99,16 +115,21 @@ class CBIR_Engine :
         
         # On itére sur toutes les images que nous propose l'itérateur
         for image in images_iterator :
+            features = image.image_features
+            
             # Calculer la distance avec le test du khi-deux entre l'image de
             # requête et l'image en cours sur l'itérateur
-            features = image.image_features
-            d = self.chi2_distance(features, query_features)
+            d1 = self.chi2_distance(features, query_features)
             
-            # Si la distance est inférieure à un certain seuil, on ajoute
+            # Calculer la distance de Bhattacharyya entre l'image de requête et
+            # l'image en cours sur l'itérateur
+            d2 = self.bhattacharyya_distance(features, query_features)
+            
+            # Si les distances sont inférieures à un certain seuil, on ajoute
             # l'identifiant de l'image en cours sur l'itérateur à notre liste
-            # de résultatts
-            if SEUIL == None or d < SEUIL :
-                image.distance = d
+            # de résultats
+            if d1 < SEUIL_CHI2 and d2 < SEUIL_BHATTACHARYYA :
+                image.distance = d1 * d2 # On multiplie les deux ensembles
                 results.append( image )
         
         # Retourner  la liste des résultats
