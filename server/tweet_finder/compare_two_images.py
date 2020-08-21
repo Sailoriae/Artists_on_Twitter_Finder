@@ -39,26 +39,36 @@ def get_tweet_image ( url ) :
                 if error.code == 502 : # Il suffit d'attendre pour ce genre d'erreurs
                     if retry_count < 3 : # Essayer d'attendre, au maximum 3 coups
                         print( "[compare_two_images] On essaye d'attendre 10 secondes..." )
+                        print( "[compare_two_images] URL :", url )
+                        print( error )
                         sleep( 10 )
                         retry_count += 1
                         continue
                 
                 elif retry_count < 1 : # Essayer un coup d'attendre
                     print( "[compare_two_images] On essaye d'attendre 10 secondes..." )
+                    print( "[compare_two_images] URL :", url )
+                    print( error )
                     sleep( 10 )
                     retry_count += 1
                     continue
                 
+                print( "[compare_two_images] Abandon de l'image :", url )
+                print( error )
                 raise error
         
         except UnidentifiedImageError as error :
             if retry_count < 1 : # Essayer un coup d'attendre
                 print( "[compare_two_images] On essaye d'attendre 10 secondes..." )
+                print( "[compare_two_images] URL :", url )
+                print( error )
                 sleep( 10 )
                 retry_count += 1
                 continue
             
-            raise error
+            print( "[compare_two_images] Abandon de l'image :", url )
+            print( error )
+            return None
 
 
 """

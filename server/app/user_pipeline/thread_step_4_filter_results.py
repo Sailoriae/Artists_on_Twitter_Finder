@@ -78,7 +78,7 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
             try :
                 request_image = url_to_cv2_image( request.image_url )
             except Exception as error :
-                print( "[step_4_th" + str(thread_id) + "] Erreur lors du filtrage des résultats." )
+                print( "[step_4_th" + str(thread_id) + "] Erreur lors du filtrage des résultats. Impossible d'obtenir l'image :", request.image_url )
                 print( error )
                 request.problem = "ERROR_DURING_REVERSE_SEARCH"
                 
@@ -95,12 +95,13 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
                 # On attend pour réessayer un coup
                 # Mais vraiment, je ne sais pas pourquoi ça ne me sort pas
                 # plutôt une erreur de réseau
+                sleep( 10 )
                 try :
                     request_image = Image.open(BytesIO(requests.get( request.image_url ).content))
                 
                 # Si ça veut pas, on arrête là
                 except UnidentifiedImageError as error:
-                    print( "[step_4_th" + str(thread_id) + "] Erreur lors du filtrage des résultats." )
+                    print( "[step_4_th" + str(thread_id) + "] Erreur lors du filtrage des résultats. Impossible d'obtenir l'image :", request.image_url )
                     print( error )
                     request.problem = "ERROR_DURING_REVERSE_SEARCH"
                     
