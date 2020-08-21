@@ -114,13 +114,13 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
         new_founded_tweets = [] # Nouvelle liste
         for image_in_db in request.founded_tweets :
             if len(new_founded_tweets) > 0 :
-                # Si on s'éloigne de 1 de la première image ajoutée à la liste,
+                # Si on s'éloigne de 0.1 de la première image ajoutée à la liste,
                 # on peut arrêter là
                 # On a déjà trouvé un Tweet avec l'image de toutes manières,
                 # d'autres Tweets contenant l'image devraient être proches
                 # A moins que Twitter aient changés leur algo de compression,
-                # mais c'est pas grave
-                if image_in_db.distance - new_founded_tweets[0].distance > 1 :
+                # mais c'est pas grave (Ce qu'ils ont fait en 2019)
+                if image_in_db.distance - new_founded_tweets[0].distance > 0.1 :
                     break
             
             # Si a déjà trouvé quelque chose et que 

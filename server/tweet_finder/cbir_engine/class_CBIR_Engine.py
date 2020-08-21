@@ -50,6 +50,9 @@ class CBIR_Engine :
     Plus précisemment, il s'agit du test du khi-deux de Pearson
     https://fr.wikipedia.org/wiki/Test_du_%CF%87%C2%B2_de_Pearson
     
+    Puis on multiplie cette valeur par la distance de Bhattacharyya
+    https://fr.wikipedia.org/wiki/Distance_de_Bhattacharyya
+    
     @return La différence entre les deux images
             Plus elle est faible, plus les images sont similaires
     """
@@ -57,6 +60,13 @@ class CBIR_Engine :
         # Calculer la distance avec le test du khi-deux
         # Documentation : https://docs.opencv.org/2.4/modules/imgproc/doc/histograms.html#comparehist
         d = cv2.compareHist( np.float32(histA), np.float32(histB), cv2.HISTCMP_CHISQR )
+        
+        # On calcul ausi la distance de Bhattacharyya (Qui est la même que la
+        # distance de Hellinger dans OpenCV)
+        # Permet d'être plus certain du résultat
+        # Ce résultat est compris entre 0 et 1, avec 0 les images sont les
+        # mêmes, et 1 les images sont complétement différentes
+        d = d * cv2.compareHist( np.float32(histA), np.float32(histB), cv2.HISTCMP_BHATTACHARYYA )
         
         # Retourner cette distance
         return d
