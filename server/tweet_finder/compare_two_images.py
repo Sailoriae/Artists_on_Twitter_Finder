@@ -117,15 +117,23 @@ def compare_two_images ( url1, url2, PRINT_METRICS = True ) :
 
 """
 Même fonction que la précédente, mais avec OpenCV.
-Dure le même temps de traitement en moyenne !
-@param url1 L'URL de la première image.
-@param url1 L'URL de la seconde image.
+ATTENTION ! Plus rapide, plus précise, mais éloigne très facilement les images
+trop transformées par la compression Twitter.
+@param url1 L'URL de la première image, OU un objet sorti par "url_to_cv2_image()".
+@param url1 L'URL de la seconde image, OU un objet sorti par "url_to_cv2_image()".
 @return Le pourcentage de similitude entre les deux images. Plus il est élevé,
         plus les images sont proches.
 """
 def compare_two_images_with_opencv ( url1 : str, url2 : str, PRINT_METRICS = True ) :
-    img1 = url_to_cv2_image( url1 )
-    img2 = url_to_cv2_image( url2 )
+    if isinstance( url1, str ) :
+        img1 = url_to_cv2_image( url1 )
+    else :
+        img1 = url1
+    
+    if isinstance( url2, str ) :
+        img2 = url_to_cv2_image( url2 )
+    else :
+        img2 = url2
     
     if PRINT_METRICS :
         start = time()
