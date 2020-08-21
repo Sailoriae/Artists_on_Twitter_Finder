@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 from io import BytesIO
 import requests
 import urllib
@@ -22,28 +22,43 @@ rencontrer.
 """
 def get_tweet_image ( url ) :
     retry_count = 0
-    try :
-        return Image.open(BytesIO(requests.get( url ).content))
-    
-    except urllib.error.HTTPError as error :
-        if error.code == 404 or error.code == 500 or error.code == 403 : # Erreurs insolvables
-            print( "[compare_two_images] Erreur avec l'image de Tweet suivante :", url )
-            print( error )
-            return None
-        else :
-            print( "[compare_two_images] Erreur avec l'image de Tweet suivante :", url )
-            print( error )
-            if error.code == 502 : # Il suffit d'attendre pour ce genre d'erreurs
-                if retry_count < 20 : # Essayer un coup d'attendre
+    while True :
+        try :
+            return Image.open(BytesIO(requests.get( url ).content))
+        
+        except urllib.error.HTTPError as error :
+            if error.code == 404 or error.code == 500 or error.code == 403 : # Erreurs insolvables
+                print( "[compare_two_images] Erreur avec l'image de Tweet suivante :", url )
+                print( error )
+                return None
+            
+            else :
+                print( "[compare_two_images] Erreur avec l'image de Tweet suivante :", url )
+                print( error )
+                
+                if error.code == 502 : # Il suffit d'attendre pour ce genre d'erreurs
+                    if retry_count < 3 : # Essayer d'attendre, au maximum 3 coups
+                        print( "[compare_two_images] On essaye d'attendre 10 secondes..." )
+                        sleep( 10 )
+                        retry_count += 1
+                        continue
+                
+                elif retry_count < 1 : # Essayer un coup d'attendre
                     print( "[compare_two_images] On essaye d'attendre 10 secondes..." )
                     sleep( 10 )
                     retry_count += 1
-            elif retry_count < 1 : # Essayer un coup d'attendre
+                    continue
+                
+                raise error
+        
+        except UnidentifiedImageError as error :
+            if retry_count < 1 : # Essayer un coup d'attendre
                 print( "[compare_two_images] On essaye d'attendre 10 secondes..." )
                 sleep( 10 )
                 retry_count += 1
-            else :
-                raise error
+                continue
+            
+            raise error
 
 
 """

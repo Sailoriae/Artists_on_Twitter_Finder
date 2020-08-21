@@ -4,7 +4,7 @@
 import queue
 from time import sleep, time
 
-import PIL
+from PIL import Image, UnidentifiedImageError
 from io import BytesIO
 import requests
 
@@ -56,17 +56,25 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
         # On télécharge l'image de requête (Même si on l'a déjà fait lors de
         # la recherche inversée)
         try :
-            request_image = PIL.Image.open(BytesIO(requests.get( request.image_url ).content))
+            request_image = Image.open(BytesIO(requests.get( request.image_url ).content))
         
         # Si l'image a un format à la noix
-        except PIL.UnidentifiedImageError as error:
-            print( "[step_4_th" + str(thread_id) + "] Erreur lors du filtrage des résultats." )
-            print( error )
-            request.problem = "ERROR_DURING_REVERSE_SEARCH"
+        except UnidentifiedImageError :
+            # On attend pour réessayer un coup
+            # Mais vraiment, je ne sais pas pourquoi ça ne me sort pas plutôt
+            # une erreur de réseau
+            try :
+                request_image = Image.open(BytesIO(requests.get( request.image_url ).content))
             
-            shared_memory.user_requests.requests_in_thread.set_request( "thread_step_4_filter_results_number" + str(thread_id), None )
-            shared_memory.user_requests.set_request_to_next_step( request )
-            continue
+            # Si ça veut pas, on arrête là
+            except UnidentifiedImageError as error:
+                print( "[step_4_th" + str(thread_id) + "] Erreur lors du filtrage des résultats." )
+                print( error )
+                request.problem = "ERROR_DURING_REVERSE_SEARCH"
+                
+                shared_memory.user_requests.requests_in_thread.set_request( "thread_step_4_filter_results_number" + str(thread_id), None )
+                shared_memory.user_requests.set_request_to_next_step( request )
+                continue
         
         # On filtre la liste des images trouvées
         # Rappel : Cette liste est triée par distance durant l'étape 3
