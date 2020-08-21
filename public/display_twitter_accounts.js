@@ -26,13 +26,16 @@ function displayTwitterAccounts ( json ) {
 	}
 
 	var twitterAccounts = json['twitter_accounts'];
+	var p = document.createElement('p');
 
 	if ( twitterAccounts.length === 0 ) {
-		var p = document.createElement('p');
 		p.textContent = lang[ "NO_TWITTER_ACCOUNT_FOUNDED" ];
 	} else {
-		var p = document.createElement('p');
-		p.textContent = lang[ "FOUNDED_TWITTER_ACCOUNTS" ];
+		if ( twitterAccounts.length === 1 ) {
+			p.textContent = lang[ "FOUNDED_TWITTER_ACCOUNT" ];
+		} else {
+			p.textContent = lang[ "FOUNDED_TWITTER_ACCOUNTS" ];
+		}
 
 		for ( var i = 0; i < twitterAccounts.length; i++ ) {
 			var a = document.createElement('a');
