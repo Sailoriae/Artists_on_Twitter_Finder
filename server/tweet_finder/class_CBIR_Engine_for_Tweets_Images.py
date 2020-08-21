@@ -47,7 +47,7 @@ class CBIR_Engine_for_Tweets_Images :
                     print( error )
                     print( "On essaye d'attendre 10 secondes..." )
                     if error.code == 502 : # Il suffit d'attendre pour ce genre d'erreurs
-                        if retry_count < 20 : # Essayer un coup d'attendre
+                        if retry_count < 5 : # Essayer d'attendre, au maximum 5 coups
                             sleep( 10 )
                             retry_count += 1
                     elif retry_count < 1 : # Essayer un coup d'attendre
