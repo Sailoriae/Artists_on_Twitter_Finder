@@ -73,23 +73,13 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
                 print( "[step_3_th" + str(thread_id) + "] Erreur lors de la recherche d'image inversée." )
         
         # Trier la liste des résultats
-        # On trie une liste d'objets par rapport à leur attribut "distance"
+        # On trie une liste d'objets par rapport à leur attribut "distance_chi2"
         request.founded_tweets = sorted( request.founded_tweets,
-                                         key = lambda x: x.distance,
+                                         key = lambda x: x.distance_chi2,
                                          reverse = False )
         
         # On ne garde que les 5 Tweets les plus proches
 #        request.founded_tweets = request.founded_tweets[:5]
-        
-        # Pour les 4 Tweets les moins proches, on les gardes que si ils sont
-        # suffisemment proches du premier
-#        SEUIL = 1 # Proximité maximale avec le premier Tweet trouvé pour être conservé
-#        for i in range( 1, len(request.founded_tweets) ) :
-#            if ( request.founded_tweets[i].distance - request.founded_tweets[0].distance ) > SEUIL :
-#                request.founded_tweets = request.founded_tweets[:i]
-#                break
-        # Désactivé, car le thread 4 fait désormais le même travail, mais en
-        # beaucoup plus précis et efficace !
         
         print( "[step_3_th" + str(thread_id) + "] Tweets trouvés (Du plus au moins proche) :\n" +
                "[step_3_th" + str(thread_id) + "] " + str( [ data.tweet_id for data in request.founded_tweets ] ) )

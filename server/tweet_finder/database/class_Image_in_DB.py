@@ -30,4 +30,5 @@ class Image_in_DB :
         
         # Utilisé par le module "cbir_engine" pour stocker la distance entre
         # l'image de requête et cette image dans la base de données
-        self.distance : int = None
+        self.distance_chi2 : int = None
+        self.distance_bhattacharyya : int = None

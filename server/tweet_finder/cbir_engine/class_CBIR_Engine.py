@@ -129,7 +129,8 @@ class CBIR_Engine :
             # l'identifiant de l'image en cours sur l'itérateur à notre liste
             # de résultats
             if d1 < SEUIL_CHI2 and d2 < SEUIL_BHATTACHARYYA :
-                image.distance = d1 * d2 # On multiplie les deux ensembles
+                image.distance_chi2 = d1
+                image.distance_bhattacharyya = d2
                 results.append( image )
         
         # Retourner  la liste des résultats

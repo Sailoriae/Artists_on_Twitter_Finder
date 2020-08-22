@@ -110,7 +110,8 @@ def http_server_container ( shared_memory_uri_arg ) :
                             tweet_dict = { "tweet_id" : str(result.tweet_id),
                                            "account_id" : str(result.account_id),
                                            "image_position" : result.image_position,
-                                           "distance" : result.distance }
+                                           "distance_chi2" : result.distance_chi2,
+                                           "distance_bhattacharyya" : result.distance_bhattacharyya }
                             response_dict["results"].append( tweet_dict )
                         
                         response_dict["error"] = request.problem
