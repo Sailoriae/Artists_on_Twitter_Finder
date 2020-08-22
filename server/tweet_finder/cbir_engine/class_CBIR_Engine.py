@@ -21,9 +21,15 @@ SEUIL_CHI2 = 20 # L'image doit être en dessous
 # https://danbooru.donmai.us/posts/4059649
 
 # Idem pour ce seuil, mais le laisser par trop haut non plus, car ce test de
-# distance filtre très bien les sketchs et dessins en noir et blanc
+# distance filtre très bien les sketchs et dessins en noir et blanc lors de
+# la recherche d'une image en couleur
 # 0 = Les images sont les mêmes, 1 = ne sont absolument pas les mêmes
 SEUIL_BHATTACHARYYA = 0.2 # L'image doit être en dessous
+
+# Note importante : Ca ne sert à rien d'ajouter d'autres algorithmes de
+# comparaison des histogrammes, ils se vautrent tous sur les images très
+# claires, comme par exemple les linearts
+# Exemple : https://danbooru.donmai.us/posts/3544450
 
 
 """
