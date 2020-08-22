@@ -4,6 +4,7 @@
 import Pyro4
 from http.server import BaseHTTPRequestHandler
 from urllib.parse import parse_qs, urlsplit
+import json
 
 # Ajouter le répertoire parent au PATH pour pouvoir importer
 from sys import path as sys_path
@@ -71,16 +72,18 @@ def http_server_container ( shared_memory_uri_arg ) :
                 self.send_header("Access-Control-Allow-Origin", "*")
                 self.end_headers()
                 
-                response = "{"
+                response_dict = {
+                    "status" : "",
+                    "twitter_accounts" : [],
+                    "results" : [],
+                    "error" : None }
                 
                 # On envoit forcément les mêmes champs, même si ils sont vides !
                 try :
                     illust_url = parameters["url"][0]
                 except KeyError :
-                    response += "\"status\" : \"END\""
-                    response += ", \"twitter_accounts\" : [ ]"
-                    response += ", \"results\" : [ ]"
-                    response += ", \"error\" : \"NO_URL_FIELD\""
+                    response_dict["status"] = "END"
+                    response_dict["error"] = "NO_URL_FIELD"
                 else :
                     # Lance une nouvelle requête, ou donne la requête déjà existante
                     request = self.shared_memory.user_requests.launch_request( illust_url,
@@ -91,45 +94,29 @@ def http_server_container ( shared_memory_uri_arg ) :
                     # cours de traitement, donc on renvoit l'erreur
                     # YOUR_IP_HAS_MAX_PENDING_REQUESTS
                     if request == None :
-                        response += "\"status\" : \"END\""
-                        response += ", \"twitter_accounts\" : [ ]"
-                        response += ", \"results\" : [ ]"
-                        response += ", \"error\" : \"YOUR_IP_HAS_MAX_PENDING_REQUESTS\""
+                        response_dict["status"] = "END"
+                        response_dict["error"] = "YOUR_IP_HAS_MAX_PENDING_REQUESTS"
                     
                     # Sinon, on envoit les informations sur la requête
                     else :
-                        response += "\"status\" : \"" + request.get_status_string() + "\""
+                        response_dict["status"] = request.get_status_string()
                         
-                        response += ", \"twitter_accounts\" : ["
                         for account in request.twitter_accounts_with_id :
-                            response += " { "
-                            response += "\"account_name\" : \"" + str(account[0]) + "\", "
-                            response += "\"account_id\" : \"" + str(account[1]) + "\""  # Envoyer en string et non en int
-                            response += " },"
-                        if response[-1] == "," : # Supprimer la dernière virgule
-                            response = response[:-1]
-                        response += " ]"
+                            account_dict = { "account_name" : account[0],
+                                             "account_id" : str(account[1]) }
+                            response_dict["twitter_accounts"].append( account_dict )
                         
-                        response += ", \"results\" : ["
                         for result in request.founded_tweets :
-                            response += " { "
-                            response += "\"tweet_id\" : \"" + str(result.tweet_id) + "\", " # Envoyer en string et non en int
-                            response += "\"account_id\" : \"" + str(result.account_id) + "\", " # Envoyer en string et non en int
-                            response += "\"image_position\" : " + str(result.image_position) + ", "
-                            response += "\"distance\" : " + str(result.distance)
-                            response += " },"
-                        if response[-1] == "," : # Supprimer la dernière virgule
-                            response = response[:-1]
-                        response += " ]"
+                            tweet_dict = { "tweet_id" : str(result.tweet_id),
+                                           "account_id" : str(result.account_id),
+                                           "image_position" : result.image_position,
+                                           "distance" : result.distance }
+                            response_dict["results"].append( tweet_dict )
                         
-                        if request.problem != None :
-                            response += ", \"error\" : \"" + request.problem + "\""
-                        else :
-                            response += ", \"error\" : \"\""
-                    
-                response += "}\n"
+                        response_dict["error"] = request.problem
                 
-                self.wfile.write( response.encode("utf-8") )
+                json_text = json.dumps( response_dict )
+                self.wfile.write( json_text.encode("utf-8") )
             
             # Si on demande les stats
             # GET /stats
@@ -139,18 +126,17 @@ def http_server_container ( shared_memory_uri_arg ) :
                 self.send_header("Access-Control-Allow-Origin", "*")
                 self.end_headers()
                 
-                response = "{"
+                response_dict = {
+                    "indexed_tweets_count" : self.shared_memory.tweets_count,
+                    "indexed_accounts_count" : self.shared_memory.accounts_count,
+                    "pending_user_requests_count" : self.shared_memory.user_requests.pending_requests_count,
+                    "pending_scan_requests_count" : self.shared_memory.scan_requests.pending_requests_count,
+                    "limit_per_ip_address" : param.MAX_PENDING_REQUESTS_PER_IP_ADDRESS,
+                    "update_accounts_frequency" : param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE
+                }
                 
-                response += "\"indexed_tweets_count\" : " + str(self.shared_memory.tweets_count) + ", "
-                response += "\"indexed_accounts_count\" : " + str(self.shared_memory.accounts_count) + ", "
-                response += "\"pending_user_requests_count\" : " + str(self.shared_memory.user_requests.pending_requests_count) + ", "
-                response += "\"pending_scan_requests_count\" : " + str(self.shared_memory.scan_requests.pending_requests_count) + ", "
-                response += "\"limit_per_ip_address\" : " + str(param.MAX_PENDING_REQUESTS_PER_IP_ADDRESS) + ", "
-                response += "\"update_accounts_frequency\" : " + str(param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE)
-                
-                response += "}\n"
-                
-                self.wfile.write( response.encode("utf-8") )
+                json_text = json.dumps( response_dict )
+                self.wfile.write( json_text.encode("utf-8") )
             
             # Sinon, page inconnue, erreur 404
             else :
