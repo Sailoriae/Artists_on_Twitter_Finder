@@ -13,16 +13,17 @@ except ModuleNotFoundError : # Si on a été exécuté en temps que module
 # On met un seuil élevé, car à cause de la compression de Twitter, des images
 # identiques peut être très éloignées
 # Et le laisser élevé, car c'est le thread 4 qui filtre derrière
-# (Et aussi le test de Bhattacharyya)
+# 0 = Les images sont les mêmes, puis tend vers l'infini
+SEUIL_CHI2 = 20 # L'image doit être en dessous
 # Exemple d'image qui met une grosse distance (11,9) :
 # https://danbooru.donmai.us/posts/4057141
-# 0 = Les images sont les mêmes, puis tend vers l'infini
-SEUIL_CHI2 = 15
+# Autre exemple (16,8) :
+# https://danbooru.donmai.us/posts/4059649
 
 # Idem pour ce seuil, mais le laisser par trop haut non plus, car ce test de
 # distance filtre très bien les sketchs et dessins en noir et blanc
 # 0 = Les images sont les mêmes, 1 = ne sont absolument pas les mêmes
-SEUIL_BHATTACHARYYA = 0.2
+SEUIL_BHATTACHARYYA = 0.2 # L'image doit être en dessous
 
 
 """
@@ -56,39 +57,6 @@ class CBIR_Engine :
     """
     def index_cbir( self, image : np.ndarray ) -> List[float] :  
         return self.cd.describe( image )
-
-    """
-    Test du khi-deux / khi carré
-    https://fr.wikipedia.org/wiki/Test_du_%CF%87%C2%B2
-    
-    Plus précisemment, il s'agit du test du khi-deux de Pearson
-    https://fr.wikipedia.org/wiki/Test_du_%CF%87%C2%B2_de_Pearson
-    
-    @return La différence entre les deux images
-            Plus elle est faible, plus les images sont similaires
-    """
-    def chi2_distance( self, histA, histB ):
-        # Calculer la distance avec le test du khi-deux
-        # Documentation : https://docs.opencv.org/2.4/modules/imgproc/doc/histograms.html#comparehist
-        d = cv2.compareHist( np.float32(histA), np.float32(histB), cv2.HISTCMP_CHISQR )
-        
-        # Retourner cette distance
-        return d
-    
-    """
-    Calcul de la distance de Bhattacharyya
-    https://fr.wikipedia.org/wiki/Distance_de_Bhattacharyya
-    
-    @return La différence entre les deux images, comprise entre 0 et 1
-            Plus elle est faible, plus les images sont similaires
-    """
-    def bhattacharyya_distance( self, histA, histB ):
-        # Calculer la distance de Bhattacharyya
-        # Documentation : https://docs.opencv.org/2.4/modules/imgproc/doc/histograms.html#comparehist
-        d = cv2.compareHist( np.float32(histA), np.float32(histB), cv2.HISTCMP_BHATTACHARYYA )
-        
-        # Retourner cette distance
-        return d
     
     """
     Recherche d'image inversé
@@ -111,19 +79,29 @@ class CBIR_Engine :
         # On commence par calculer la liste des caractéristiques de l'image de
         # requête, afin de la comparer à celles de la base de données (Ou
         # plutôt celles proposées par l'itérateur)
-        query_features = self.cd.describe(image)
+        query_features = np.float32( self.cd.describe(image) )
         
         # On itére sur toutes les images que nous propose l'itérateur
         for image in images_iterator :
-            features = image.image_features
+            features = np.float32( image.image_features)
             
-            # Calculer la distance avec le test du khi-deux entre l'image de
-            # requête et l'image en cours sur l'itérateur
-            d1 = self.chi2_distance(features, query_features)
+            # Calculer les distances entre l'image de requête et l'image en
+            # cours sur l'itérateur
+            # Documentation :
+            # https://docs.opencv.org/2.4/modules/imgproc/doc/histograms.html#comparehist
             
-            # Calculer la distance de Bhattacharyya entre l'image de requête et
-            # l'image en cours sur l'itérateur
-            d2 = self.bhattacharyya_distance(features, query_features)
+            # - Test du khi-deux
+            #   https://fr.wikipedia.org/wiki/Test_du_%CF%87%C2%B2
+            # Plus la distance est faible, plus les images sont proches
+            # Compris entre 0 et l'infini
+            d1 = cv2.compareHist( query_features, features, cv2.HISTCMP_CHISQR )
+            
+            # - Distance de Bhattacharyya (Qui est aussi la distance de
+            #   Hellinger dans OpenCV)
+            #   https://fr.wikipedia.org/wiki/Distance_de_Bhattacharyya
+            # Plus la distance est faible, plus les images sont proches
+            # Compris entre 0 et 1
+            d2 = cv2.compareHist( query_features, features, cv2.HISTCMP_BHATTACHARYYA )
             
             # Si les distances sont inférieures à un certain seuil, on ajoute
             # l'identifiant de l'image en cours sur l'itérateur à notre liste
