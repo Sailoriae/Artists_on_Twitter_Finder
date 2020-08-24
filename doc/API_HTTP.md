@@ -10,13 +10,23 @@ Le serveur répond par un JSON qui contient toujours les mêmes champs :
 ```
 {
 	"status" : "END",
+	"has_first_time_scan" : true,
 	"twitter_accounts" : [
-		{ "account_name" : "serafleur", "account_id" : "3064686505" }
+		{
+			"account_name" : "serafleur",
+			"account_id" : "3064686505"
+		}
 	],
 	"results" : [
-		{ "tweet_id" : 797039787534262272, "account_id" : 3064686505, "image_position" : 1, "distance" : 0.4124855017771303 }
+		{
+			"tweet_id" : 797039787534262272,
+			"account_id" : 3064686505,
+			"image_position" : 1,
+			"distance_chi2" : 0.3721612622771086,
+			"distance_bhattacharyya" : 0.07053401976537564
+		}
 	],
-	"error" : ""
+	"error" : null
 }
 ```
 
@@ -35,9 +45,9 @@ Liste des status possibles (Dans l'ordre de traitement) :
 - `WAIT_LINK_FINDER` : En attente de traitement par un thread de Link Finder.
 - `LINK_FINDER` : En cours de traitement par un thread de Link Finder.
 - `WAIT_INDEX_ACCOUNTS_TWEETS` : En attente de traitement par un thread de lancement de l'indexation ou de la mise à jour de l'indexation des Tweets des comptes Twitter de l'artiste.
-- En cours de traitement par les threads d'indexation des Tweets des comptes Twitter de l'artiste :
-  - `INDEX_ACCOUNTS_TWEETS` :  Seulement pour une mise à jour des comptes.
-  - `FIRST_TIME_INDEX_ACCOUNTS_TWEETS` : Il y a un ou plusieurs comptes qui étaient inconnus dans la base de données. Cette étape va donc être longue.
+- `INDEX_ACCOUNTS_TWEETS` : En cours de traitement par les threads d'indexation des Tweets des comptes Twitter de l'artiste.
+  - Si le champs `has_first_time_scan` est à `false`, c'est seulement pour une mise à jour des comptes, car l'illustration est trop récente.
+  - Sinon, c'est qu'il y a un ou plusieurs comptes qui étaient inconnus dans la base de données. Cette étape va donc être longue.
 - `WAIT_IMAGE_REVERSE_SEARCH` : En attente de traitement par un thread de recherche d'image inversée.
 - `IMAGE_REVERSE_SEARCH` : En cours de traitement par un thread de recherche d'image inversée.
 - `WAIT_FILTER_RESULTS` : En attente du filtrage des résultats de la recherche inversée.
