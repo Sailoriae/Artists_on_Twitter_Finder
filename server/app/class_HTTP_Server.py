@@ -74,6 +74,7 @@ def http_server_container ( shared_memory_uri_arg ) :
                 
                 response_dict = {
                     "status" : "",
+                    "has_first_time_scan" : False,
                     "twitter_accounts" : [],
                     "results" : [],
                     "error" : None }
@@ -100,6 +101,9 @@ def http_server_container ( shared_memory_uri_arg ) :
                     # Sinon, on envoit les informations sur la requête
                     else :
                         response_dict["status"] = request.get_status_string()
+                        
+                        if request.has_first_time_scan :
+                            response_dict["has_first_time_scan"] = True
                         
                         for account in request.twitter_accounts_with_id :
                             account_dict = { "account_name" : account[0],

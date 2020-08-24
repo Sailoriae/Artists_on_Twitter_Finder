@@ -73,10 +73,10 @@ function displayError ( json ) {
 }
 
 function displayStatus ( json ) {
-	processStatusP.innerHTML = "";
-
-	var p = document.createElement('p');
-	p.textContent = lang[ "STATUS" ];
-	p.textContent += lang[ json["status"] ]
-	processStatusP.appendChild(p);
+	processStatusP.textContent = lang[ "STATUS" ];
+	processStatusP.textContent += lang[ json["status"] ]
+	
+	if ( json[ "has_first_time_scan" ] ) {
+		processStatusP.textContent += " " + lang[ "WARNING_FIRST_TIME_INDEX_ACCOUNTS_TWEETS" ];
+	}
 }

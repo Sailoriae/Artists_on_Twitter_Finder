@@ -153,10 +153,7 @@ class User_Request :
         if self._status == 2 :
             return "WAIT_INDEX_ACCOUNTS_TWEETS"
         if self._status == 3 :
-            if self._has_first_time_scan :
-                return "FIRST_TIME_INDEX_ACCOUNTS_TWEETS"
-            else :
-                return "INDEX_ACCOUNTS_TWEETS"
+            return "INDEX_ACCOUNTS_TWEETS"
         if self._status == 4 :
             return "WAIT_IMAGE_REVERSE_SEARCH"
         if self._status == 5 :
