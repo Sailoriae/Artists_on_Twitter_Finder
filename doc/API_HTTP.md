@@ -28,7 +28,8 @@ Liste des attributs d'un résultat dans la liste `results` :
 - `tweet_id` : L'ID du Tweet.
 - `account_id`: L'ID du compte Twitter.
 - `image_position` : La position de l'image dans le tweet, entre 1 et 4.
-- `distance` : La distance calculée entre l'image de requête et cette image.
+- `distance_chi2` : La distance calculée par le test du khi-deux entre l'image de requête et cette image. La liste est triée en fonction de cette distance.
+- `distance_bhattacharyya` : La distance calculée par Bhattacharyya (Identique à Hellinger dans OpenCV) entre l'image de requête et cette image.
 
 Liste des status possibles (Dans l'ordre de traitement) :
 - `WAIT_LINK_FINDER` : En attente de traitement par un thread de Link Finder.
