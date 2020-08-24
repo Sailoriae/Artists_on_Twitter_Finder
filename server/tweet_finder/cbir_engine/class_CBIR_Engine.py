@@ -31,6 +31,16 @@ SEUIL_BHATTACHARYYA = 0.2 # L'image doit être en dessous
 # claires, comme par exemple les linearts
 # Exemple : https://danbooru.donmai.us/posts/3544450
 
+# Autre tests essayés, mais ça ne sert à rien :
+# - Corrélation (Attention : Plus est haut, plus les images sont proches) :
+# d = cv2.compareHist( query_features, features, cv2.HISTCMP_CORREL )
+# - Intersection (Attention : Plus est haut, plus les images sont proches) :
+# d = cv2.compareHist( query_features, features, cv2.HISTCMP_INTERSECT )
+# - Distance euclidienne :
+# d = cv2.norm( query_features, features, cv2.NORM_L2 )
+# - Distance de Manhattan / Taxicab :
+# d = cv2.norm( query_features, features, cv2.NORM_L1 )
+
 
 """
 Moteur de recherche d'image par le contenu ("content-based image retrieval",
