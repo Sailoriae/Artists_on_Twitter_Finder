@@ -101,12 +101,12 @@ def check_parameters () :
     
     for token in param.TWITTER_AUTH_TOKENS :
         tweetCriteria = GetOldTweets3_manager.TweetCriteria()\
-                .setQuerySearch( "from:jack" )\
-                .setSince( "2020-07-19" )\
-                .setUntil( "2020-07-20" )
+                .setQuerySearch( "from:Twitter" )\
+                .setSince( "2020-08-11" )\
+                .setUntil( "2020-08-12" )
         
         try :
-            GetOldTweets3_manager.TweetManager.getTweets( tweetCriteria, auth_token = token )
+            tweets = GetOldTweets3_manager.TweetManager.getTweets( tweetCriteria, auth_token = token )
         except KeyError :
             print( "Echec de connexion à l'API de recherche de GetOldTweets3...")
             print( "Veuillez vérifier votre fichier \"parameters.py\" !" )
@@ -114,6 +114,21 @@ def check_parameters () :
             return False
         else :
             print( "Connexion à l'API de recherche de GetOldTweets3 réussie !")
+    
+    print( "Verification de l'accès aux images avec GetOldTweets3..." )
+    ok = False
+    for tweet in tweets :
+        if tweet.id == "1293239745695211520" : # On test avec un seul tweet
+            if tweet.images == ["https://pbs.twimg.com/media/EfJ-C-JU0AAQL_C.jpg",
+                                "https://pbs.twimg.com/media/EfJ-aHlU0AAU1kq.jpg"] :
+                ok = True
+                print( "GetOldTweets a bien accès aux images des Tweets !" )
+    
+    if not ok :
+        print( "GetOldTweets n'a pas accès aux images des Tweets !" )
+        print( "Il faut modifier son code !" )
+        print( "Ou alors le Tweet ID 1293239745695211520 n'existe plus." )
+        return False
     
     # ========================================================================
     
