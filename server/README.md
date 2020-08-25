@@ -7,9 +7,12 @@ Lorsqu'il est démarré, il affiche une interface en ligne de commande. Tapez `h
 
 ## Installation
 
-1. Configurer le fichier `parametres.py` avec vos clés d'accès aux API.
-2. Sous Linux, installer D'ABORD les dépendances de la librairie OpenCV-Python : `sudo apt install libsm6 libxext6 libxrender-dev`
-3. Installer les librairies nécessaires : `pip install -r requirements.txt`
+1. Dupliquez le fichier `parameters_sample.py` vers `parametres.py`, et configurez-le avec vos clés d'accès aux API. Il vous faut :
+   - Un compte Twitter, avec accès à leur API publique. Pour se faire, créez un compte Twitter, et demandez un accès développeur sur le site suivant : https://developer.twitter.com
+   - Un compte Pixiv, il suffit juste d'un créer un.
+   - Et optionnellement un serveur MySQL (Sinon, le programme utilise SQLite).
+2. Sous Linux, installez D'ABORD les dépendances de la librairie OpenCV-Python : `sudo apt install libsm6 libxext6 libxrender-dev`
+3. Installez les librairies Python nécessaires : `pip install -r requirements.txt`
 
 
 ## Utilisation
