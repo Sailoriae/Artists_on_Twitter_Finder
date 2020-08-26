@@ -101,7 +101,9 @@ class Danbooru :
             return None
         
         # On retourne le résultat voulu
-        return self.cache_illust_url_json["file_url"]
+        # Prendre en large, parce que ça fait un peu de compression, ce qui
+        # aide un peu à rapprocher de Twitter, héhé
+        return self.cache_illust_url_json["large_file_url"]
     
     """
     Retourne les noms des comptes Twitter trouvés.
