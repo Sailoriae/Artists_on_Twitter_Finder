@@ -3,7 +3,11 @@
 
 import requests
 from time import sleep
+from json import JSONDecodeError
 
+
+class Error_During_Server_Connection_Init ( Exception ) :
+	pass
 
 class Server_Connection_Not_Initialised ( Exception ) :
     def __init__ ( self ) :
@@ -29,31 +33,29 @@ class WebAPI_Client :
     def __init__ ( self, 
                    base_api_address : str = "http://localhost:3301/" ) :
         self.base_api_address = base_api_address
+        self.ready = True # Car on utilise get_request() pour gérer les 429
         
         # Test de contact avec le serveur
         try :
-            response = requests.get( base_api_address )
+            response_json = self.get_request( "" )
+        except JSONDecodeError :
+            print( "Ce serveur ne renvoit pas de JSON." )
+            self.ready = False
+            raise Error_During_Server_Connection_Init( "Ce serveur ne renvoit pas de JSON." )
         except Exception :
             print( "Impossible de contacter le serveur !" )
             self.ready = False
-            return
+            raise Error_During_Server_Connection_Init( "Impossible de contacter le serveur !" )
         
         try :
-            json = response.json()
-        except Exception :
-            print( "Ce serveur ne renvoit pas de JSON.")
-            self.ready = False
-            return
-        
-        try :
-            if json[ "error" ] != "NO_URL_FIELD" :
-                print( "Ceci n'est pas un serveur \"Artists on Twitter Finder\".")
+            if response_json[ "error" ] != "NO_URL_FIELD" :
+                print( "Ceci n'est pas un serveur \"Artists on Twitter Finder\"." )
                 self.ready = False
-                return
+                raise Error_During_Server_Connection_Init( "Ceci n'est pas un serveur \"Artists on Twitter Finder\"." )
         except ( KeyError, TypeError ) :
-            print( "Ceci n'est pas un serveur \"Artists on Twitter Finder\".")
+            print( "Ceci n'est pas un serveur \"Artists on Twitter Finder\"." )
             self.ready = False
-            return
+            raise Error_During_Server_Connection_Init( "Ceci n'est pas un serveur \"Artists on Twitter Finder\"." )
         
         print( "Connexion réussie !" )
         self.ready = True
@@ -72,24 +74,17 @@ class WebAPI_Client :
         if not self.ready :
             print( "La connexion au serveur n'a pas été initialisée correctement." )
             raise Server_Connection_Not_Initialised
-        try :
-            while True :
-                response = requests.get( self.base_api_address + "?url=" + illust_url )
-                if response.status_code == 429 :
-                    sleep(1)
+        while True :
+            response = requests.get( self.base_api_address + "?url=" + illust_url )
+            if response.status_code == 429 :
+                sleep(1)
+            else :
+                response = response.json()
+                if response["error"] == "YOUR_IP_HAS_MAX_PENDING_REQUESTS" :
+                    raise Max_Pending_Requests_On_Server
+                    break
                 else :
-                    response = response.json()
-                    if response["error"] == "YOUR_IP_HAS_MAX_PENDING_REQUESTS" :
-                        to_raise = Max_Pending_Requests_On_Server
-                        break
-                    else :
-                        return response
-        except Exception as error :
-            print(error)
-            print( "Problème de connexion avec le serveur." )
-            return None
-        
-        raise to_raise
+                    return response
     
     """
     Obtenir la liste des comptes Twitter de l'artiste de cette illustration
