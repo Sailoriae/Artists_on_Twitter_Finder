@@ -80,8 +80,18 @@ class DeviantArt :
         if not self.cache_or_get( illust_url ) :
             return None
         
+        # On prend l'URL
+        url = self.cache_illust_url_json["url"]
+        
+        # Bidouille pour avoir une meilleure qualité d'image
+        url = url.split("/v1/fill/")
+        if len( url ) > 1 : # Si l'API nous donne une preview
+            url = url[0] + "?token=" + url[1].split("?token=")[1]
+        else : # Si l'API ne nous donne pas une preview
+            url = url[0]
+        
         # On retourne le résultat voulu
-        return self.cache_illust_url_json["url"]
+        return url
     
     """
     Retourne les noms des comptes Twitter trouvés.
