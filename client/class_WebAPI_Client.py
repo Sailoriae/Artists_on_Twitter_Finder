@@ -111,7 +111,7 @@ class WebAPI_Client :
             response = self.get_request( illust_url )
             if response == None :
                 return None
-            if response["error"] != "" :
+            if response["error"] != None :
                 print( "Erreur : " + response["error"] )
                 return None
             if response["status"] != "WAIT_LINK_FINDER" and response["status"] != "LINK_FINDER" :
@@ -144,7 +144,7 @@ class WebAPI_Client :
             response = self.get_request( illust_url )
             if response == None :
                 return None
-            if response["error"] != "" :
+            if response["error"] != None :
                 print( "Erreur : " + response["error"] )
                 return None
             if response["status"] == "END" :
