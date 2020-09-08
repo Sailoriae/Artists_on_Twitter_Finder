@@ -87,7 +87,7 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
                                                                                is_prioritary = True )
                     
                     # On suit la progression de cette requête
-                    request.scan_requests += [ scan_request._pyroUri ] # Ne peut pas faire de append avec Pyro
+                    request.scan_requests += [ scan_request._pyroUri.asString() ] # Ne peut pas faire de append avec Pyro
                     
                     # On indique qu'on a des indexations pour la première fois
                     request.has_first_time_scan = True
@@ -117,7 +117,7 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
                                                                                is_prioritary = True )
                         
                         # On suit la progression de cette requête
-                        request.scan_requests += [ scan_request._pyroUri ] # Ne peut pas faire de append avec Pyro
+                        request.scan_requests += [ scan_request._pyroUri.asString() ] # Ne peut pas faire de append avec Pyro
                     
                     else :
                         print( "[step_2_th" + str(thread_id) + "] @" + account_name + " est déjà dans la BDD, et on peut sauter son scan !" )

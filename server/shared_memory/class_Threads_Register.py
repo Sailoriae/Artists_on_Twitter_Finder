@@ -24,7 +24,7 @@ class Threads_Register :
         if request == None :
             self._dict[ thread_name ] = None
         else :
-            self._dict[ thread_name ] = request._pyroUri
+            self._dict[ thread_name ] = request._pyroUri.asString()
     
     """
     @param thread_name L'identifiant du thread.

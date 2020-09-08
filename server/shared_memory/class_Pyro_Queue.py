@@ -27,7 +27,7 @@ class Pyro_Queue :
     
     def put ( self, item ) :
         if self._convert_uri :
-            self._queue.put( item._pyroUri )
+            self._queue.put( item._pyroUri.asString() )
         else :
             self._queue.put( item )
     

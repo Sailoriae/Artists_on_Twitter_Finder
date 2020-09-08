@@ -119,14 +119,14 @@ class Shared_Memory :
     
     @param obj L'objet Python à partager.
     @param name Le nom à lui donner pour le partage.
-    @return L'URI vers cet objet.
+    @return L'URI vers cet objet, sous la forme d'une string.
     """
     def register_obj ( self, obj, name ) :
-        return self._daemon.register( obj, name )
+        return self._daemon.register( obj, name ).asString()
     
     """
     Dé-enregistrer un objet.
     @param L'URI vers cet objet.
     """
     def unregister_obj ( self, uri ) :
-        self._daemon.unregister( uri.object )
+        self._daemon.unregister( uri )
