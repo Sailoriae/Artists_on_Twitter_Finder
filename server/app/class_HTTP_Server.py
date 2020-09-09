@@ -63,10 +63,10 @@ def http_server_container ( shared_memory_uri_arg ) :
                 self.wfile.write( "429 Too Many Requests\n".encode("utf-8") )
                 return
             
-            # Si on est à la racine
-            # GET /
-            # GET /?url=[URL de l'illustration de requête]
-            if len(page) == 1 and page[0] == "" :
+            # Si on veut lancer une requête ou obtenir son résultat
+            # GET /query
+            # GET /query?url=[URL de l'illustration de requête]
+            if len(page) == 1 and page[0] == "query" : 
                 self.send_response(200)
                 self.send_header("Content-type", "application/json")
                 self.send_header("Access-Control-Allow-Origin", "*")

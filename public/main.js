@@ -45,7 +45,7 @@ function mainFunction ( new_loop = true ) {
 		}
 	});
 
-	request.open("GET", "./api/?url=" + illustURL); // self.send_header("Access-Control-Allow-Origin", "*")
+	request.open("GET", "./api/query?url=" + illustURL); // self.send_header("Access-Control-Allow-Origin", "*")
 	request.send();
 }
 

@@ -2,9 +2,9 @@
 
 Le serveur est utilisable via son serveur HTTP, depuis la même machine, ou l'extérieur, en faisant un proxy depuis Apache ou Nginx. Ne pas ouvrir le port du serveur !
 
-Les requêtes sont indentifiées par leur URL (C'est à dire l'URL de l'illustration sur un des sites supportés). La méthode pour lancer une procédure ou obtenir le résultat est la même : `GET /url=[URL de l'illustration de requête]`
+Les requêtes sont indentifiées par leur URL (C'est à dire l'URL de l'illustration sur un des sites supportés). La méthode pour lancer une procédure ou obtenir le résultat est la même : `GET /query?url=[URL de l'illustration de requête]`
 
-Par exemple : `GET /?url=https://www.deviantart.com/serafleur/art/Sailor-Moon-604185347`
+Par exemple : `GET /query?url=https://www.deviantart.com/serafleur/art/Sailor-Moon-604185347`
 
 Le serveur répond par un JSON qui contient toujours les mêmes champs :
 ```

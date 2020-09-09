@@ -75,7 +75,7 @@ class WebAPI_Client :
             print( "La connexion au serveur n'a pas été initialisée correctement." )
             raise Server_Connection_Not_Initialised
         while True :
-            response = requests.get( self.base_api_address + "?url=" + illust_url )
+            response = requests.get( self.base_api_address + "query?url=" + illust_url )
             if response.status_code == 429 :
                 sleep(1)
             else :
