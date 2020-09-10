@@ -36,3 +36,7 @@ input#illust-url {
 div.twitter-tweet {
 	margin:auto;
 }
+
+code {
+	font-size: 140%;
+}
