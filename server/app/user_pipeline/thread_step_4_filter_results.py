@@ -31,7 +31,7 @@ import parameters as param
 
 if USE_OPENCV :
     from tweet_finder import compare_two_images_with_opencv
-    from tweet_finder.utils import url_to_cv2_image
+    from tweet_finder.utils import binary_image_to_cv2_image
 else :
     from tweet_finder import compare_two_images
 
@@ -76,7 +76,7 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
         # la recherche inversée)
         if USE_OPENCV :
             try :
-                request_image = url_to_cv2_image( request.image_url )
+                request_image = binary_image_to_cv2_image( request.query_image_as_bytes )
             except Exception as error :
                 print( "[step_4_th" + str(thread_id) + "] Erreur lors du filtrage des résultats. Impossible d'obtenir l'image :", request.image_url )
                 print( error )
@@ -87,35 +87,18 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
                 continue
         
         else :
-            # Construire la requête
-            http_request = urllib.request.Request( request.image_url )
-            # Problème : Pour télécharger une image sur Pixiv, il faut que le
-            # champs Referer de la requête soit Pixiv. Oui c'est nul. Donc on
-            # fait simple avec cette petite bidouille, sans régex :
-            if request.image_url[:20] == "https://i.pximg.net/" :
-                http_request.add_header('Referer', 'https://www.pixiv.net/')
-            
             try :
-                request_image = Image.open(BytesIO( urllib.request.urlopen( http_request ).read() ))
+                request_image = Image.open(BytesIO( request.query_image_as_bytes ))
             
             # Si l'image a un format à la noix
-            except UnidentifiedImageError :
-                # On attend pour réessayer un coup
-                # Mais vraiment, je ne sais pas pourquoi ça ne me sort pas
-                # plutôt une erreur de réseau
-                sleep( 10 )
-                try :
-                    request_image = Image.open(BytesIO( urllib.request.urlopen( http_request ).read() ))
+            except UnidentifiedImageError as error:
+                print( "[step_4_th" + str(thread_id) + "] Erreur lors du filtrage des résultats. Impossible d'obtenir l'image :", request.image_url )
+                print( error )
+                request.problem = "ERROR_DURING_REVERSE_SEARCH"
                 
-                # Si ça veut pas, on arrête là
-                except UnidentifiedImageError as error:
-                    print( "[step_4_th" + str(thread_id) + "] Erreur lors du filtrage des résultats. Impossible d'obtenir l'image :", request.image_url )
-                    print( error )
-                    request.problem = "ERROR_DURING_REVERSE_SEARCH"
-                    
-                    shared_memory.user_requests.requests_in_thread.set_request( "thread_step_4_filter_results_number" + str(thread_id), None )
-                    shared_memory.user_requests.set_request_to_next_step( request )
-                    continue
+                shared_memory.user_requests.requests_in_thread.set_request( "thread_step_4_filter_results_number" + str(thread_id), None )
+                shared_memory.user_requests.set_request_to_next_step( request )
+                continue
         
         # On filtre la liste des images trouvées
         # Rappel : Cette liste est triée par distance durant l'étape 3

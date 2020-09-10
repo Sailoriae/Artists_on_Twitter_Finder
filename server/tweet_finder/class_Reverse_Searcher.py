@@ -8,12 +8,12 @@ try :
     from cbir_engine import CBIR_Engine
     from database import SQLite_or_MySQL
     from twitter import TweepyAbtraction
-    from utils import url_to_cv2_image
+    from utils import url_to_cv2_image, binary_image_to_cv2_image
 except ModuleNotFoundError : # Si on a été exécuté en temps que module
     from .cbir_engine import CBIR_Engine
     from .database import SQLite_or_MySQL
     from .twitter import TweepyAbtraction
-    from .utils import url_to_cv2_image
+    from .utils import url_to_cv2_image, binary_image_to_cv2_image
 
 # Ajouter le répertoire parent au PATH pour pouvoir importer les paramètres
 from sys import path as sys_path
@@ -38,6 +38,8 @@ class Reverse_Searcher :
     @param image_url L'URL de l'image à chercher
     @param account_name Le nom du compte Twitter dans lequel chercher, c'est à
                         dire ce qu'il y a après le @ (OPTIONNEL)
+    @param query_image_binary Ne pas faire de GET à l'URL passée, mais prendre
+                              plutôt cette image déjà téléchargée (OPTIONNEL)
     @return Liste d'objets Image_in_DB, contenant les attributs suivants :
             - account_id : L'ID du compte Twitter
             - tweet_id : L'ID du Tweet contenant l'image
@@ -45,7 +47,10 @@ class Reverse_Searcher :
             - image_position : La position de l'image dans le Tweet (1-4)
             None si il y a eu un problème
     """
-    def search_tweet ( self, image_url : str, account_name : str = None, add_step_3_times = None ) :
+    def search_tweet ( self, image_url : str,
+                             account_name : str = None,
+                             add_step_3_times = None,
+                             query_image_binary : bytes = None ) :
         if account_name != None :
             account_id = self.twitter.get_account_id( account_name )
             if account_id == None :
@@ -55,7 +60,10 @@ class Reverse_Searcher :
             account_id = 0
         
         try :
-            image = url_to_cv2_image( image_url )
+            if query_image_binary == None :
+                image = url_to_cv2_image( image_url )
+            else :
+                image = binary_image_to_cv2_image( query_image_binary )
         except Exception as error :
             print( "L'URL \"" + str(image_url) + "\" ne mène pas à une image !" )
             print( error )
