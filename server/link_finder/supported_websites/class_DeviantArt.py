@@ -92,6 +92,14 @@ class DeviantArt :
         # dans sa qualité maximale
         objet = soup.find("link", {"rel": "preload", "as": "image"})
         
+        # Si on ne trouve rien, c'est que l'image est "mature content" / NSFW,
+        # marquée sensible quoi / "adulte"
+        # On retourne donc l'image dans le JSON, donc en moins bonne qualité
+        # Note : On pourrait faire un système où on passe un jeton d'auth en
+        # cookie, comme on le fait avec GetOldTweets3
+        if objet == None :
+            return self.cache_illust_url_json["url"]
+        
         # On retourne le résultat voulu
         return objet.get("href")
     
