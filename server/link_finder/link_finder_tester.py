@@ -80,13 +80,13 @@ print( "" )
 print( "TEST DE DEVIANTART :" )
 
 test( "https://www.deviantart.com/nopeys/art/Azula-847851539",
-      "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/7e24a021-fa9f-40d2-b7f7-f6b9cfe1802e/de0sefn-dd065062-dd21-4dd5-a46c-402336be1a42.jpg?token=",
+      "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/7e24a021-fa9f-40d2-b7f7-f6b9cfe1802e/de0sefn-dd065062-dd21-4dd5-a46c-402336be1a42.jpg/v1/fill/w_800,h_1237,q_75,strp/azula_by_nopeys_de0sefn-fullview.jpg?token=",
       ['nopeys1'],
       datetime.fromisoformat( "2020-07-06 06:59:43-07:00" ),
       image_url_contains_mode = True )
 
 test( "https://www.deviantart.com/lifeisafiction/art/Miku-Hatsune-Cosplay-844482485",
-      "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/0c0cb37c-d32a-4d6e-bd8b-eca7649b1e38/ddys6ut-4baf136e-de68-4211-94c5-278176db8f25.jpg?token=",
+      "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/0c0cb37c-d32a-4d6e-bd8b-eca7649b1e38/ddys6ut-4baf136e-de68-4211-94c5-278176db8f25.jpg/v1/fill/w_1280,h_854,q_75,strp/miku_hatsune___cosplay_by_lifeisafiction_ddys6ut-fullview.jpg?token=",
       ['xlifeisafiction'],
       datetime.fromisoformat( "2020-06-05T10:31:38-07:00" ),
       image_url_contains_mode = True )
