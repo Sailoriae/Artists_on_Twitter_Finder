@@ -3,6 +3,7 @@
 
 from typing import List
 from datetime import datetime
+from bs4 import BeautifulSoup
 
 try :
     from utils import Webpage_to_Twitter_Accounts
@@ -13,9 +14,11 @@ except ImportError : # Si on a été exécuté en temps que module
 
 
 """
-On ne peut pas utiliser directement l'API DeviantArt parce qu'il faut une
-"OAuth2 Redirect URI". Donc que l'app soit connectée à Internet.
-https://stackoverflow.com/questions/39858027/oauth-and-redirect-uri-in-offline-python-script
+On ne peut pas utiliser directement l'API DeviantArt parce qu'elle est naze.
+On ne peut pas retrouver l'objet sur l'API d'une illustration, car il faut son
+UUID, et donc forcément analyser la page HTML.
+Il y a une librairie sinon :
+https://github.com/neighbordog/deviantart
 
 Ceci n'est donc pas vraiment une couche d'abstraction à l'API DeviantArt, mais
 plutôt une "bidouille" qui fait parfaitement le travail.
@@ -80,18 +83,17 @@ class DeviantArt :
         if not self.cache_or_get( illust_url ) :
             return None
         
-        # On prend l'URL
-        url = self.cache_illust_url_json["url"]
+        # On va faire de l'analyse HTML avec BeautifulSoup, pour trouver l'URL
+        # de l'image en bonne qualité
+        response = get_with_rate_limits( illust_url, retry_on_those_http_errors = [ 403 ] )
+        soup = BeautifulSoup( response.text, "html.parser" )
         
-        # Bidouille pour avoir une meilleure qualité d'image
-        url = url.split("/v1/fill/")
-        if len( url ) > 1 : # Si l'API nous donne une preview
-            url = url[0] + "?token=" + url[1].split("?token=")[1]
-        else : # Si l'API ne nous donne pas une preview
-            url = url[0]
+        # Coup de bol, la page HTML demande au navigateur de preload l'image
+        # dans sa qualité maximale
+        objet = soup.find("link", {"rel": "preload", "as": "image"})
         
         # On retourne le résultat voulu
-        return url
+        return objet.get("href")
     
     """
     Retourne les noms des comptes Twitter trouvés.
