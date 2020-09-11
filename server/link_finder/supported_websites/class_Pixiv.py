@@ -75,7 +75,7 @@ class Pixiv :
     @return True si l'URL donné est utilisable.
             False sinon.
     """
-    def cache_or_get ( self, illust_url : int ) -> bool :
+    def cache_or_get ( self, illust_url : int, RECONNECT = True ) -> bool :
         if illust_url != self.cache_illust_url :
             illust_id = self.artwork_url_to_id( illust_url )
             
@@ -99,6 +99,10 @@ class Pixiv :
                 self.cache_illust_url_json = json
                 return True
             else :
+                if RECONNECT and  "invalid_grant" in json["error"]["message"] :
+                    print( "[Pixiv] Reconnexion à l'API..." )
+                    self.api.auth()
+                    return self.cache_or_get( illust_url, RECONNECT = False )
                 return False
         
         return True
