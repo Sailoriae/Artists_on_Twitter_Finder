@@ -78,6 +78,7 @@ class Danbooru :
             # Si il y a une clé "success" à False, c'est que ce n'est pas bon
             try :
                 if json["success"] == False :
+                    print( "[Danbooru] Erreur :", json["message"] )
                     return False
             except KeyError :
                 pass
