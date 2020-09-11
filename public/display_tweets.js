@@ -46,13 +46,19 @@ function displayTweets ( json ) {
 				p.appendChild(a);
 				div1.appendChild(p);
 
-				twttr.widgets.createTweet( tweets[i].tweet_id, div2, {
-					conversation : "none",
-					cards : "visible",
-					linkColor : "#cc0000",
-					theme : "light",
-					dnt : "true"
-				})
+				try {
+					twttr.widgets.createTweet( tweets[i].tweet_id, div2, {
+						conversation : "none",
+						cards : "visible",
+						linkColor : "#cc0000",
+						theme : "light",
+						dnt : "true"
+					})
+				} catch ( ReferenceError ) { // Si la JS de Twitter n'a pas été chargée
+					var p = document.createElement('p');
+					p.textContent = lang[ "CANNOT_DISPLAY_TWEET" ];
+					div2.appendChild(p);
+				}
 
 				tweetsDiv.appendChild(div1);
 				tweetsDiv.appendChild(div2);
