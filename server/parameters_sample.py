@@ -130,3 +130,13 @@ MAX_PENDING_REQUESTS_PER_IP_ADDRESS = 10
 Liste des addresses IP non-soumises à la limitation.
 """
 UNLIMITED_IP_ADDRESSES = [ "127.0.0.1" ]
+
+"""
+Activer la journalisation des résultats.
+Les résultats sont alors écrits dans le fichier "results.log". Chaque résultat
+est au format JSON, un JSON par ligne car une ligne par résultat.
+Le JSON est identique à celui renvoyé par l'API.
+Attention ! Les résultats sont journalisés uniquement si il n'y a pas eu de
+problème ou d'erreur.
+"""
+ENABLE_LOGGING = False

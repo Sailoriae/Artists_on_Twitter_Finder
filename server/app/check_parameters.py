@@ -49,6 +49,7 @@ def check_parameters () :
         check_list.append( type( param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE ) == int and param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE >= 0 )
         check_list.append( type( param.MAX_PENDING_REQUESTS_PER_IP_ADDRESS ) == int and param.MAX_PENDING_REQUESTS_PER_IP_ADDRESS > 0 )
         check_list.append( type( param.UNLIMITED_IP_ADDRESSES ) == list )
+        check_list.append( type( param.ENABLE_LOGGING ) == bool )
         
         if all( check_list ) :
             print( "Vérification réussie !" )

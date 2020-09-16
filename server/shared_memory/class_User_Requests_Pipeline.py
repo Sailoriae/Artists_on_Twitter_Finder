@@ -4,6 +4,7 @@
 import Pyro4
 import threading
 import datetime
+import json
 
 try :
     from class_User_Request import User_Request
@@ -17,6 +18,14 @@ except ModuleNotFoundError :
     from .class_Pyro_Semaphore import Pyro_Semaphore
     from .class_Pyro_Queue import Pyro_Queue
     from .class_Threads_Register import Threads_Register
+
+# Ajouter le répertoire parent au PATH pour pouvoir importer
+from sys import path as sys_path
+from os import path as os_path
+sys_path.append(os_path.dirname(os_path.dirname(os_path.abspath(__file__))))
+
+import parameters as param
+from app.user_pipeline import generate_user_request_json
 
 
 """
@@ -249,6 +258,17 @@ class User_Requests_Pipeline :
             
             if request.ip_address != None :
                 Pyro4.Proxy( self._limit_per_ip_addresses ).remove_ip_address( request.ip_address )
+            
+            # Journaliser / Logger, uniquement si il n'y a pas eu d'erreur ou
+            # de problème lors du traitement
+            if param.ENABLE_LOGGING :
+                if request.problem == None :
+                    response_dict = generate_user_request_json( request )
+                    response_dict["input"] = request.input_url
+                    response_dict["ip_address"] = request.ip_address
+                    file = open( "results.log", "a" )
+                    file.write( json.dumps( response_dict ) + " " + "\n" )
+                    file.close()
     
     """
     Délester les anciennes requêtes.
