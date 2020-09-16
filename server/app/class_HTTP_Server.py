@@ -42,10 +42,7 @@ def http_server_container ( shared_memory_uri_arg ) :
                 return
             
             # Analyser le chemin du GET HTTP
-            page = urlsplit( self.path ).path
-            if page[0] == "/" :
-                page = page[1:] # On enlève le premier "/"
-            page = page.split("/")
+            endpoint = urlsplit( self.path ).path
             parameters = dict( parse_qs( urlsplit( self.path ).query ) )
             
             client_ip = self.headers["X-Forwarded-For"]
@@ -66,7 +63,7 @@ def http_server_container ( shared_memory_uri_arg ) :
             # Si on veut lancer une requête ou obtenir son résultat
             # GET /query
             # GET /query?url=[URL de l'illustration de requête]
-            if len(page) == 1 and page[0] == "query" : 
+            if endpoint == "/query" : 
                 self.send_response(200)
                 self.send_header("Content-type", "application/json")
                 self.send_header("Access-Control-Allow-Origin", "*")
@@ -125,7 +122,7 @@ def http_server_container ( shared_memory_uri_arg ) :
             
             # Si on demande les stats
             # GET /stats
-            elif len(page) == 1 and page[0] == "stats" : 
+            elif endpoint == "/stats" : 
                 self.send_response(200)
                 self.send_header("Content-type", "application/json")
                 self.send_header("Access-Control-Allow-Origin", "*")
