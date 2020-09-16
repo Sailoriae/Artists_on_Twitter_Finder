@@ -121,26 +121,29 @@ class Danbooru :
         if not self.cache_or_get( illust_url ) :
             return None
         
-        artist_tag = self.cache_illust_url_json["tag_string_artist"]
+        # Il peut y avoir plusieurs artistes
+        # Dans ce cas, on cherche les comptes Twitter de tous les artistes
+        artists_tags = self.cache_illust_url_json["tag_string_artist"].split(" ")
         
-        if artist_tag == "" :
+        if artists_tags == [""] :
             return []
         
         twitter_accounts = []
         
         # SCAN PAGE DU TAG DE L'ARTISTE
         
-        # Problème Danbooru : Le JSON d'une page sur un tag ne donne pas les
-        # URL qu'ils ont trouvés. Donc on doit le faire sur une page HTML.
-        scanner = Webpage_to_Twitter_Accounts(
-            "https://danbooru.donmai.us/artists/show_or_new?name=" + artist_tag,
-            )
-        
-        # Se concentrer que sur la div contenant les données.
-        scanner.soup = scanner.soup.find("div", {"id": "c-artists"})
-        
-        # On met en mode STRICT
-        twitter_accounts += scanner.scan( STRICT = True )
+        for artist_tag in artists_tags :
+            # Problème Danbooru : Le JSON d'une page sur un tag ne donne pas les
+            # URL qu'ils ont trouvés. Donc on doit le faire sur une page HTML.
+            scanner = Webpage_to_Twitter_Accounts(
+                "https://danbooru.donmai.us/artists/show_or_new?name=" + artist_tag,
+                )
+            
+            # Se concentrer que sur la div contenant les données.
+            scanner.soup = scanner.soup.find("div", {"id": "c-artists"})
+            
+            # On met en mode STRICT
+            twitter_accounts += scanner.scan( STRICT = True )
         
         return twitter_accounts
     
