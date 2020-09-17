@@ -17,7 +17,9 @@ def get_user_request_json_model () :
 """
 Générer le JSON d'une requête utilisateur.
 """
-def generate_user_request_json ( request, response_dict = get_user_request_json_model() ) -> dict :
+def generate_user_request_json ( request, response_dict = None ) -> dict :
+    if response_dict == None :
+        response_dict = get_user_request_json_model()
     response_dict["status"] = request.get_status_string()
     
     if request.has_first_time_scan :
