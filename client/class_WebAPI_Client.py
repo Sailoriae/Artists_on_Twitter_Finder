@@ -7,7 +7,7 @@ from json import JSONDecodeError
 
 
 class Error_During_Server_Connection_Init ( Exception ) :
-	pass
+    pass
 
 class Server_Connection_Not_Initialised ( Exception ) :
     def __init__ ( self ) :
@@ -58,7 +58,6 @@ class WebAPI_Client :
             raise Error_During_Server_Connection_Init( "Ceci n'est pas un serveur \"Artists on Twitter Finder\"." )
         
         print( "Connexion réussie !" )
-        self.ready = True
     
     """
     Obtenir le résultat JSON d'un appel sur l'API.
@@ -100,7 +99,7 @@ class WebAPI_Client :
             OU None s'il y a eu un problème, ou que le temps "timeout" s'est
             écoulé.
     """
-    def get_twitter_accounts ( self, illust_url : str, timeout = 300 ) :
+    def get_twitter_accounts ( self, illust_url : str, timeout : int = 300 ) :
         sleep_count = 0
         while True :
             response = self.get_request( illust_url )
@@ -133,7 +132,7 @@ class WebAPI_Client :
             OU None s'il y a eu un problème, ou que le temps "timeout" s'est
             écoulé.
     """
-    def get_tweets ( self, illust_url : str, timeout = 3600 ) :
+    def get_tweets ( self, illust_url : str, timeout : int = 3600 ) :
         sleep_count = 0
         while True :
             response = self.get_request( illust_url )
