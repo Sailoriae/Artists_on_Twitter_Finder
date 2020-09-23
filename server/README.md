@@ -5,6 +5,9 @@ Il possède une API HTTP pour recevoir les requêtes, et y répondre.
 Lorsqu'il est démarré, il affiche une interface en ligne de commande. Tapez `help` dans cette interface pour avoir la liste des commandes disponibles.
 
 
+**Note importante :** La librairie GetOldTweets3 a été remplacée par SNScrape ! Elles permettent d'indexer des comptes Twitter via une API de recherche. En effet, il y a deux indexations : Via l'API de timeline des comptes, qui limite aux 3 200 premiers Tweets de chaque comptes, et via une API de recherche.
+
+
 ## Installation
 
 1. Dupliquez le fichier `parameters_sample.py` vers `parametres.py`, et configurez-le avec vos clés d'accès aux API. Il vous faut :
@@ -64,7 +67,6 @@ Script `app.py` : Script central, crée et gère les threads de traitement, la l
   - Module `cbir_engine` : Contient les classes du moteur de recherche d'image par le contenu. Voir le `README.md` de ce module pour plus de détails.
   - Module `database` : Contient les classes de gestion et d'accès à la base de données.
   - Module `twitter` : Contient la classe d'accès à l'API Twitter.
-  - Librairie `GetOldTweets3` : Permet d'obtenir les tweets d'un compte. Incluse car elle a été modifiée.
 
 * Module `link_finder`, classe `Link_Finder` : Classe centrale de la partie Link Finder. Permet de trouver les URL des images et les noms des comptes Twitter des artistes.
   - Module `supported_websites` : Contient une classe pour chaque site supporté. Voir le `README.md` de ce module pour plus de détails.

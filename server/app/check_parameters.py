@@ -97,6 +97,9 @@ def check_parameters () :
     
     # ========================================================================
     
+    # TODO : MàJ pour SNScraper en utilisant la classe Tweets_Lister_with_GetOldTweets3
+    # Mettre un mode test à cette classe, afin de mettre une query custom
+    """
     print( "Verification de la connexion à l'API de recherche de GetOldTweets3..." )
     from tweet_finder.lib_GetOldTweets3 import manager as GetOldTweets3_manager
     
@@ -130,6 +133,7 @@ def check_parameters () :
         print( "Il faut modifier son code !" )
         print( "Ou alors le Tweet ID 1293239745695211520 n'existe plus." )
         return False
+    """
     
     # ========================================================================
     

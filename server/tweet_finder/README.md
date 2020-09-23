@@ -3,7 +3,7 @@
 Le Tweet Finder est l'une des deux grandes parties du serveur "Artists on Twitter Finder", avec le Link Finder.
 
 Les classes `Tweets_Indexer_with_GetOldTweets3` et `Tweets_Indexer_with_TwitterAPI` listent les Tweets de comptes Twitter à partir du dernier scan (Ou tous les Tweet si le compte n'a pas été encore scanné) :
-* `Tweets_Indexer_with_GetOldTweets3` utilise la librairie GetOldTweets3, module `lib_GetOldTweets3`,
+* `Tweets_Indexer_with_GetOldTweets3` utilise la librairie SNScraper pour l'API Twitter utilisée par l'UI web `twitter.com/search`,
 * Et `Tweets_Indexer_with_TwitterAPI` utilise la librairie Tweepy pour l'API Twitter publique, module `twitter`.
 
 Les classes `Tweets_Lister_with_GetOldTweets3` et `Tweets_Lister_with_TwitterAPI` indexent les Tweets trouvés par leur classe de listage respectives :

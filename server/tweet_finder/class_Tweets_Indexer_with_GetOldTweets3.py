@@ -176,7 +176,7 @@ class Tweets_Indexer_with_GetOldTweets3 :
             # Prendre les hashtags du Tweet
             # Fonctionne avec n'importe quel Tweet, même ceux entre 160 et 280
             # caractères (GOT3 les voit en entier)
-            hashtags = tweet.hashtags.split(" ")
+            hashtags = tweet.hashtags
             
             if self.DEBUG or self.ENABLE_METRICS :
                 start_insert_into = time()

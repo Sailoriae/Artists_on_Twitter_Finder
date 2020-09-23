@@ -3,12 +3,20 @@
 
 from time import time
 
+"""
+NOTE TRES IMPORTANTE
+On n'utilise plus GetOldTweets3, car il ne fonctionne plus
+SNScrape est son remplaçant
+Il utilise l'API utilisée par l'UI web https://twitter.com/search
+https://api.twitter.com/2/search/adaptive.json
+"""
+import snscrape.modules.twitter
+import re
+
 try :
-    from lib_GetOldTweets3 import manager as GetOldTweets3_manager
     from database import SQLite_or_MySQL
     from twitter import TweepyAbtraction
 except ModuleNotFoundError : # Si on a été exécuté en temps que module
-    from .lib_GetOldTweets3 import manager as GetOldTweets3_manager
     from .database import SQLite_or_MySQL
     from .twitter import TweepyAbtraction
 
@@ -24,15 +32,18 @@ class Unfounded_Account_on_Lister_with_GetOldTweets3 ( Exception ) :
 
 
 """
-Envoyer un liste d'objets Tweet de GOT3 dans la mémoire partagée.
-Permet de sortir de la liste donnée par GOT3 et de mettre dans la file.
+Faire un deep-copy d'une fonction Python.
+Source : https://stackoverflow.com/a/6528148
 """
-class GOT3_Tweet_List_to_Shared_Memory :
-    def __init__ ( self, queue_put_function ) :
-        self.queue_put_function = queue_put_function
-    def insert ( self, GOT3_Tweets_list ) :
-        for tweet in GOT3_Tweets_list :
-            self.queue_put_function( tweet.id, tweet.author_id, tweet.images, tweet.hashtags )
+import types
+import functools
+def copy_func(f):
+    g = types.FunctionType(f.__code__, f.__globals__, name=f.__name__,
+                           argdefs=f.__defaults__,
+                           closure=f.__closure__)
+    g = functools.update_wrapper(g, f)
+    g.__kwdefaults__ = f.__kwdefaults__
+    return g
 
 
 """
@@ -81,63 +92,96 @@ class Tweets_Lister_with_GetOldTweets3 :
         
         since_date = self.bdd.get_account_GOT3_last_tweet_date( account_id )
         
-        conversion_obj = GOT3_Tweet_List_to_Shared_Memory( queue_put )
         
-        # Notes résumant toutes les notes ci-dessous : Cette API, c'est
-        # n'importe quoi !
-        
-        # Note importante : GOT3 ne peut pas voir les Tweets marqués comme
-        # sensibles... Mais il peut voir les tweets non-sensibles de comptes
-        # sensibles en désactivant le filtre "safe" et en étant connecté
-        # à une session !
-        # Cependant, désactiver le filtre "safe" masque les tweets de comptes
-        # non-sensibles, il faut donc faire avec et sans !
-        
-        # On fait d'abord avec le filtre "safe"
-        query1 = "from:" + account_name + " filter:media -filter:retweets (filter:safe OR -filter:safe)"
-        
-        # Puis en désactivant complètement le filtre "safe"
-        query2 = "from:" + account_name + " filter:media -filter:retweets -filter:safe"
-        
-        query = "( (" + query1 + ") OR (" + query2 + ") )"
-        
-        tweetCriteria = GetOldTweets3_manager.TweetCriteria()\
-            .setQuerySearch( query )
+        # Note : Plus besoin de faire de bidouille avec "filter:safe"
+        query = "from:" + account_name + " filter:media"
         if since_date != None :
-            tweetCriteria.setSince( since_date )
+            query += " since:" + since_date
+        scraper = snscrape.modules.twitter.TwitterSearchScraper( query )
         
-        # Note : Pas besoin de préciser "bufferLength", on aura forcément tous
-        # les Tweets, par paquets de 100, puis le dernier paquet d'une taille
-        # inférieure ou égale à 100.
-        tweets_list = GetOldTweets3_manager.TweetManager.getTweets( tweetCriteria,
-                                                                    auth_token = self.auth_token,
-                                                                    receiveBuffer = conversion_obj.insert )
         
-        # Note : Le filtre "safe" filtre aussi les "gros-mots", par exemple :
-        # "putain".
-        # Ainsi, "(filter:safe OR -filter:safe)" permet de voir ces tweets,
-        # mais pas les tweets de comptes marqués sensibles.
-        # C'est pour cela qu'il y a le "if" avec une deuxième passe.
-        #
-        # Exemple de compte marqué sensible : "@rikatantan2nd"
-        # (Compte pris au hasard pour tester, désolé)
+        # ====================================================================
+        # MODIFIER SNSCRAPER POUR QU'IL PUISSE FAIRE EXACTEMENT CE QU'ON VEUT
+        # ====================================================================
         
-        # Note 2 : J'y comprend plus rien, j'ai réussi à scanner les tweets de
-        # "@Lewdlestia", qui est pourtant un compte marqué comme sensible, et
-        # qui tweet que des médias sensibles (Complètement NSFW, ne pas aller
-        # voir).
-        # GOT3 en retourne 12 000 sur les 16 000 actuels. Normal que tous ne
-        # soient pas indexés car c'est un bot qui Tweet toutes les heures.
+        # Hack : Donner en douce à SNScraper des tokens pour s'authentifier
+        # comme le serait un utilisateur sur l'UI web
+        # Permet de recevoir les Tweets marqués sensibles
+        scraper._session.cookies.set("auth_token", 
+                                     self.auth_token,
+                                     domain = '.twitter.com',
+                                     path = '/',
+                                     secure = True,
+                                     expires = None)
         
-        # Le problème c'est que Twitter sont très flous sur le sujet des
-        # comptes et des tweets marqués sensibles...
+        # Hack : Remplacer l'obtention du guest token pour l'obtention du token
+        # ct0, qui chante tout le temps
+        def ensure_guest_token ( self = scraper, url = None ) :
+            if self._guestToken is not None:
+                return
+            r = self._get(self._baseUrl if url is None else url, headers = {'User-Agent': self._userAgent})
+            match = re.search(r'document\.cookie = decodeURIComponent\("ct0=(\d+); Max-Age=10800; Domain=\.twitter\.com; Path=/; Secure"\);', r.text)
+            if match:
+                self._guestToken = match.group(1)
+            if 'ct0' in r.cookies:
+                self._guestToken = r.cookies['ct0']
+            if self._guestToken:
+                self._session.cookies.set('ct0', self._guestToken, domain = '.twitter.com', path = '/', secure = True, expires = None)
+                self._apiHeaders['x-csrf-token'] = self._guestToken
+                self._apiHeaders["x-twitter-auth-type"] = "OAuth2Session"
+                return
+            raise snscrape.base.ScraperException('Unable to find ct0 token')
+        scraper._ensure_guest_token = ensure_guest_token
         
-        # Bref, ce système fonctionne.
+        # Deep-copy de la fonction tweet_to_tweet
+        tweet_to_tweet_old = copy_func( scraper._tweet_to_tweet )
+        
+        # Hack : Comme SNScraper ne récupére pas les URL des images et les
+        # hashtags des Tweets, on remplace sa fonction pour le faire nous-même
+        def tweet_to_tweet_new  ( tweet, obj ) :
+            tweet_id = tweet['id_str'] # ID du Tweet
+            
+            images = [] # Liste des URLs des images dans ce Tweet
+            try :
+                for tweet_media in tweet["extended_entities"]["media"] :
+                    if tweet_media["type"] == "photo" :
+                        images.append( tweet_media["media_url_https"] )
+            except KeyError : # Tweet sans média
+                pass
+            
+            hashtags = [] # Liste des hashtags dans ce Tweet
+            try :
+                for hashtag in tweet["entities"]["hashtags"] :
+                    hashtags.append( "#" + hashtag["text"] )
+            except KeyError :
+                pass
+            
+            if len(images) > 0 : # Sinon ça ne sert à rien
+                queue_put( tweet_id, account_id, images, hashtags )
+            
+            # On appel quand même sa fonction et on retourne ce qu'elle doit
+            # normalement retourner
+            return tweet_to_tweet_old( scraper, tweet, obj )
+        
+        scraper._tweet_to_tweet = tweet_to_tweet_new
+        
+        
+        # ====================================================================
+        # LANCER LA RECHERCHE ET RETOURNER
+        # ====================================================================
+        
+        # Obtenir les Tweets
+        count = 0
+        first_tweet_date = None # Le premier Tweet est forcément le plus récent
+        for tweet in scraper.get_items() :
+            count += 1
+            if first_tweet_date == None :
+                first_tweet_date = tweet.date
+        
         
         if self.DEBUG or self.ENABLE_METRICS :
-            print( "[List GOT3] Il a fallu", time() - start, "secondes pour lister", len(tweets_list), "Tweets de @" + account_name + "." )
+            print( "[List GOT3] Il a fallu", time() - start, "secondes pour lister", count, "Tweets de @" + account_name + "." )
             if add_step_A_time != None :
-                count = len(tweets_list)
                 if count > 0 :
                     add_step_A_time( (time() - start) / count )
         
@@ -148,7 +192,15 @@ class Tweets_Lister_with_GetOldTweets3 :
         # dans la base de données si aucun Tweet n'a été trouvé
         # La BDD peut retourner None si elle ne connait pas le Tweet (Donc aucun
         # Tweet n'est enregistré pour ce compte), c'est pas grave
-        if len( tweets_list ) > 0 :
-            return tweets_list[0].date.strftime('%Y-%m-%d')
+        if count > 0 :
+            return first_tweet_date.strftime('%Y-%m-%d')
         else :
             return self.bdd.get_account_GOT3_last_tweet_date( account_id )
+
+
+"""
+Test du bon fonctionnement de cette classe
+"""
+if __name__ == '__main__' :
+    engine = Tweets_Lister_with_GetOldTweets3( param.TWITTER_AUTH_TOKENS[0], DEBUG = True )
+    engine.list_getoldtweets3_tweets( "rikatantan2nd", print )
