@@ -81,7 +81,7 @@ class Link_Finder :
     Attention : Cette méthode émet des exceptions Unsupported_Website si le
     site n'est pas supporté !
     """
-    def get_data ( self, illust_url : str, TWITTER_ONLY = False ) -> str :
+    def get_data ( self, illust_url : str, TWITTER_ONLY = False ) -> Link_Finder_Result :
         # Ce sont les clases qui analysent les URL et vont dire si elles
         # mènent bien vers des illustrations.
         # Ici, on vérifie juste le domaine.
