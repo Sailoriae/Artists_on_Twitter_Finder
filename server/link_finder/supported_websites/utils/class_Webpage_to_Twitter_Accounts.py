@@ -7,11 +7,9 @@ from typing import List
 
 try :
     from validate_twitter_account_url import validate_twitter_account_url
-    from filter_twitter_accounts_list import filter_twitter_accounts_list
     from get_with_rate_limits import get_with_rate_limits
 except ModuleNotFoundError : # Si on a été exécuté en temps que module
     from .validate_twitter_account_url import validate_twitter_account_url
-    from .filter_twitter_accounts_list import filter_twitter_accounts_list
     from .get_with_rate_limits import get_with_rate_limits
 
 
@@ -33,6 +31,10 @@ Exemple :
 class Webpage_to_Twitter_Accounts :
     """
     @param url L'URL de la page web à scanner.
+    @param response Si vous avez déjo fait le GET, donnez-moi la réponse.
+                    Même format que ce que retourne la fonction
+                    get_with_rate_limits().
+                    (OPTIONNEL)
     @param USE_BS4 Scanner uniquement les balises HTML <a href=""> avec
                    BeautifulSoup4.
                    Si mis sur False, Régex est utilisé, ce qui permet de
@@ -43,10 +45,14 @@ class Webpage_to_Twitter_Accounts :
     """
     def __init__ ( self,
                    url : str,
+                   response = None,
                    USE_BS4 : bool = True,
                    retry_on_those_http_errors = [] ) :
         # Prendre le code HTML de la page
-        self.response = get_with_rate_limits( url, retry_on_those_http_errors = retry_on_those_http_errors )
+        if response == None :
+            self.response = get_with_rate_limits( url, retry_on_those_http_errors = retry_on_those_http_errors )
+        else :
+            self.response = response
         
         # Initialiser BeautifulSoup si besoin
         if USE_BS4 :
@@ -54,11 +60,6 @@ class Webpage_to_Twitter_Accounts :
         self.USE_BS4 = USE_BS4
     
     """
-    @param STRICT True pour que l'URL corresponde exactement.
-                  False si l'URL peut-être contenue dans la chaine passée
-                  Cela peut être intéressant si on veut scanner une URL de
-                  redirection, contenant l'URL du compte Twitter.
-                  (OPTIONNEL)
     @param validator_function Fonction valide une URL comme l'URL d'un compte,
                               et retourne l'identifiant de ce compte.
                               Permet de chercher autre chose que des comptes
@@ -69,23 +70,22 @@ class Webpage_to_Twitter_Accounts :
             Peut retourner une liste vide si aucun compte Twitter n'a été
             trouvé.
     """
-    def scan ( self, STRICT : bool = False,
-               validator_function = validate_twitter_account_url ) -> List[str] :
+    def scan ( self, validator_function = validate_twitter_account_url ) -> List[str] :
         # Scan avec BeautifulSoup4
         if self.USE_BS4  :
-            accounts_founded = self.scan_beautifulsoup( STRICT, validator_function )
+            accounts_founded = self.scan_beautifulsoup( validator_function )
         
         # Scan avec Regex
         else :
-            accounts_founded = self.scan_regex( STRICT, validator_function )
+            accounts_founded = self.scan_regex( validator_function )
         
         # Filtrer (Supprimer les doublons et les comptes officiels) et retourner
-        return filter_twitter_accounts_list( accounts_founded )
+        return accounts_founded
     
     """
     Méthode privée, appelée par la méthode "scan()".
     """
-    def scan_beautifulsoup ( self, STRICT : bool, validator_function ) -> List[str] :
+    def scan_beautifulsoup ( self, validator_function ) -> List[str] :
         # Initialiser la liste que l'on va retourner
         accounts_founded : List[str] = []
         
@@ -95,7 +95,7 @@ class Webpage_to_Twitter_Accounts :
                 href = link.get("href")
                 if href == None :
                     continue
-                result = validator_function( link.get("href"), STRICT = STRICT )
+                result = validator_function( link.get("href") )
                 if result != None :
                     accounts_founded.append( result )
         
@@ -105,7 +105,7 @@ class Webpage_to_Twitter_Accounts :
     """
     Méthode privée, appelée par la méthode "scan()".
     """
-    def scan_regex ( self, STRICT : bool, validator_function ) -> List[str] :
+    def scan_regex ( self, validator_function ) -> List[str] :
         # Initialiser la liste que l'on va retourner
         accounts_founded : List[str] = []
         
@@ -113,7 +113,7 @@ class Webpage_to_Twitter_Accounts :
         for link in re.findall( r"(https?://[^\s]+)", self.response.text) :
             if link == None :
                 continue
-            result = validator_function( link, STRICT = STRICT )
+            result = validator_function( link )
             if result != None :
                 accounts_founded.append( result )
         
@@ -136,7 +136,7 @@ if __name__ == '__main__' :
     scanner = Webpage_to_Twitter_Accounts(
         "https://www.deviantart.com/sniffsniffs/about" )
     # Pour une page "About" d'un compte DeviantArt
-    scanner.soup = scanner.soup.find("div", {"id": "about"})
+    scanner.soup = scanner.soup.find("section", {"id": "about"})
     test.append( scanner.scan() )
     
     scanner = Webpage_to_Twitter_Accounts(

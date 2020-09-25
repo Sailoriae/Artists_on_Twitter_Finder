@@ -7,40 +7,38 @@ import re
 # ^ = Début de la chaine, $ = Fin de la chaine
 
 # Nouveau format : deviantart.com/artiste
-new_deviantart_account_name_regex = re.compile(
-    r"http(?:s)?:\/\/(?:www\.)?deviantart\.com\/([a-zA-Z0-9]+)(?:\/)?" )
-new_deviantart_account_name_regex_strict = re.compile(
-    r"^http(?:s)?:\/\/(?:www\.)?deviantart\.com\/([a-zA-Z0-9]+)(?:\/)?$" )
+deviantart_account_name_regex_new = re.compile(
+    r"http(?:s)?:\/\/(?:www\.)?deviantart\.com\/([a-zA-Z0-9]+)" )
 
 # Ancien format : artiste.deviantart.com
-old_deviantart_account_name_regex = re.compile(
-    r"http(?:s)?:\/\/(?:([a-zA-Z0-9]+)\.)deviantart\.com(?:\/)?" )
-old_deviantart_account_name_regex_strict = re.compile(
-    r"^http(?:s)?:\/\/(?:([a-zA-Z0-9]+)\.)deviantart\.com(?:\/)?$" )
+deviantart_account_name_regex_old = re.compile(
+    r"http(?:s)?:\/\/(?:([a-zA-Z0-9]+)\.)deviantart\.com" )
+
+
+# Attention : Certaines URL peuvent être des URL de redirection. Ainsi, la
+# chaine peut être plus grande et contenir l'URL en tant que sous-chaine.
+# On ne marque donc pas le début ni la fin de la chaine, et on utilise
+# la fonction re.search() !
+
 
 """
 Est ce que cet URL est l'URL d'un compte DeviantArt ?
+
 @param url L'URL à examiner
-@param STRICT True pour que l'URL corresponde exactement
-              False si l'URL peut-être contenue dans la chaine passée
-              Cela peut être intéressant si on veut scanner une URL de
-              redirection, contenant l'URL du compte Twitter
-              (OPTIONNEL)
 @return Le nom d'utilisateur du compte DeviantArt
         Ou None si ce n'est pas un compte DeviantArt
 """
-def validate_deviantart_account_url ( url : str, STRICT : bool = True ) -> str :
-    if STRICT :
-        result_new = re.match( new_deviantart_account_name_regex_strict, url )
-        result_old = re.match( old_deviantart_account_name_regex_strict, url )
+def validate_deviantart_account_url ( url : str ) -> str :
+    result_new = re.search( deviantart_account_name_regex_new, url )
+    result_old = re.search( deviantart_account_name_regex_old, url )
+    if result_new != None : result = result_new.group( 1 )
+    elif result_old != None : result = result_old.group( 1 )
+    else : return None
+    
+    if result in [ "tag", "art", "users" ] : # Supprimer les faux-positifs connus
+        return None
     else :
-        result_new = re.match( new_deviantart_account_name_regex, url )
-        result_old = re.match( old_deviantart_account_name_regex, url )
-    if result_new != None :
-        return result_new.group( 1 )
-    if result_old != None :
-        return result_old.group( 1 )
-    return None
+        return result
 
 
 """

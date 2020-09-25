@@ -8,9 +8,11 @@ from datetime import datetime
 try :
     from utils import Webpage_to_Twitter_Accounts
     from utils import get_with_rate_limits
+    from utils import validate_url
 except ImportError : # Si on a été exécuté en temps que module
     from .utils import Webpage_to_Twitter_Accounts
     from .utils import get_with_rate_limits
+    from .utils import validate_url
 
 
 # ^ = Début de la chaine
@@ -122,13 +124,17 @@ class Philomena :
     
     @param illust_id L'URL de l'illustration postée sur un Booru utilisant
                      Philomena.
+    @param multiplexer Méthode "link_mutiplexer()" de la classe "Link_Finder"
+                       (OPTIONNEL).
+    
     @return Une liste de comptes Twitter.
             Ou une liste vide si aucun URL de compte Twitter valide n'a été
             trouvé.
             Ou None si il y a eu un problème, c'est à dire que l'ID donné n'est
             pas une illustration sur un Booru utilisant Philomena.
     """
-    def get_twitter_accounts ( self, illust_url : int ) -> List[str] :
+    def get_twitter_accounts ( self, illust_url : int,
+                                     multiplexer = None ) -> List[str] :
         # On met en cache si ce n'est pas déjà fait
         if not self.cache_or_get( illust_url ) :
             return None
@@ -156,8 +162,16 @@ class Philomena :
             # Se concentrer que sur la div contenant les données.
             scanner.soup = scanner.soup.find("div", {"class": "tag-info__more"})
             
-            # On met en mode STRICT
-            twitter_accounts += scanner.scan( STRICT = True )
+            # Rechercher (Désactiver car le multiplexeur les cherche aussi)
+            if multiplexer == None :
+                twitter_accounts += scanner.scan()
+            
+            # Envoyer dans le multiplexer les autres URL qu'on peut trouver
+            if multiplexer != None :
+                for link in scanner.scan( validator_function = validate_url ) :
+                    get_multiplex = multiplexer( link )
+                    if get_multiplex != None :
+                        twitter_accounts += get_multiplex
         
         return twitter_accounts
     

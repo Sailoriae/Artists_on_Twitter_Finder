@@ -8,9 +8,11 @@ from bs4 import BeautifulSoup
 try :
     from utils import Webpage_to_Twitter_Accounts
     from utils import get_with_rate_limits
+    from utils import validate_url
 except ImportError : # Si on a été exécuté en temps que module
     from .utils import Webpage_to_Twitter_Accounts
     from .utils import get_with_rate_limits
+    from .utils import validate_url
 
 
 """
@@ -41,6 +43,7 @@ class DeviantArt :
         # URLs des comptes Twitter sont souvent ensembles.
         self.cache_illust_url = None
         self.cache_illust_url_json = None
+        self.cache_illust_url_html = None
     
     
     """
@@ -67,6 +70,11 @@ class DeviantArt :
             
             self.cache_illust_url = illust_url
             self.cache_illust_url_json = json
+            
+            response = get_with_rate_limits( illust_url,
+                                             retry_on_those_http_errors = [ 403 ] )
+            
+            self.cache_illust_url_html = response
         
         return True
     
@@ -85,8 +93,7 @@ class DeviantArt :
         
         # On va faire de l'analyse HTML avec BeautifulSoup, pour trouver l'URL
         # de l'image en bonne qualité
-        response = get_with_rate_limits( illust_url, retry_on_those_http_errors = [ 403 ] )
-        soup = BeautifulSoup( response.text, "html.parser" )
+        soup = BeautifulSoup( self.cache_illust_url_html.text, "html.parser" )
         
         # Coup de bol, la page HTML demande au navigateur de preload l'image
         # dans sa qualité maximale
@@ -108,47 +115,78 @@ class DeviantArt :
     Retourne les noms des comptes Twitter trouvés.
     
     @param illust_url L'URL de l'illustration DeviantArt.
+    @param force_deviantart_account_name Forcer le nom du compte DeviantArt
+                                         (OPTIONNEL).
+    @param multiplexer Méthode "link_mutiplexer()" de la classe "Link_Finder"
+                       (OPTIONNEL).
+    
     @return Une liste de comptes Twitter.
             Ou une liste vide si aucun URL de compte Twitter valide n'a été
             trouvé.
             Ou None si il y a  eu un problème, c'est à dire que l'URL donnée
             ne mène pas à une illustration sur DeviantArt.
     """
-    def get_twitter_accounts ( self, illust_url ) -> List[str] :
-        # On met en cache si ce n'est pas déjà fait
-        if not self.cache_or_get( illust_url ) :
-            return None
-        
+    def get_twitter_accounts ( self, illust_url,
+                                     force_deviantart_account_name = None,
+                                     multiplexer = None ) -> List[str] :
         twitter_accounts = []
         
+        if force_deviantart_account_name == None :
+            # On met en cache si ce n'est pas déjà fait
+            if not self.cache_or_get( illust_url ) :
+                return None
+            
+            
+            # SCAN PAGE DE L'ILLUSTRATION
+            
+            # Sur DeviantArt, il faut aussi scanner la page où l'illustration a été
+            # postée, car certains artistes mettent leur compte Twitter dans la
+            # description de leur illustration.
+            # On réessaye sur les erreurs 403 données par Cloudfront si on fait
+            # trop de requêtes.
+            scanner1 = Webpage_to_Twitter_Accounts( illust_url,
+                                                    response = self.cache_illust_url_html,
+                                                    retry_on_those_http_errors = [ 403 ] )
+            
+            # PB : Si un petit malin met son compte Twitter en commentaire, il sera
+            # considéré comme le compte Twitter de l'artiste.
+            # On scan donc qu'une partie de la page !
+            scanner1.soup = scanner1.soup.find("div", {"data-hook": "deviation_meta"}).parent
+            
+            # Rechercher (Désactiver car le multiplexeur les cherche aussi)
+            if multiplexer == None :
+                twitter_accounts += scanner1.scan()
+            
+            # Envoyer dans le multiplexer les autres URL qu'on peut trouver
+            if multiplexer != None :
+                for link in scanner1.scan( validator_function = validate_url ) :
+                    get_multiplex = multiplexer( link, source = "deviantart" )
+                    if get_multiplex != None :
+                        twitter_accounts += get_multiplex
         
-        # SCAN PAGE DE L'ILLUSTRATION
         
-        # Sur DeviantArt, il faut aussi scanner la page où l'illustration a été
-        # postée, car certains artistes mettent leur compte Twitter dans la
-        # description de leur illustration.
-        # On réessaye sur les erreurs 403 données par Cloudfront si on fait
-        # trop de requêtes.
-        scanner1 = Webpage_to_Twitter_Accounts( illust_url,
-                                                retry_on_those_http_errors = [ 403 ] )
+            # SCAN PAGE "ABOUT" DE L'ARTISTE
+            
+            scanner2 = Webpage_to_Twitter_Accounts(
+                self.cache_illust_url_json["author_url"] + "/about" )
         
-        # PB : Si un petit malin met son compte Twitter en commentaire, il sera
-        # considéré comme le compte Twitter de l'artiste.
-        # On scan donc qu'une partie de la page !
-        scanner1.soup = scanner1.soup.find("div", {"data-hook": "deviation_meta"}).parent
-        
-        twitter_accounts += scanner1.scan()
-        
-        
-        # SCAN PAGE "ABOUT" DE L'ARTISTE
-        
-        scanner2 = Webpage_to_Twitter_Accounts(
-            self.cache_illust_url_json["author_url"] + "/about" )
+        else :
+            scanner2 = Webpage_to_Twitter_Accounts(
+                "https://deviantart.com/" + force_deviantart_account_name + "/about" )
         
         # PB : Idem, il y a une section commentaires !
         scanner2.soup = scanner2.soup.find("section", {"id": "about"})
         
-        twitter_accounts += scanner2.scan()
+        # Rechercher (Désactiver car le multiplexeur les cherche aussi)
+        if multiplexer == None :
+            twitter_accounts += scanner2.scan()
+        
+        # Envoyer dans le multiplexer les autres URL qu'on peut trouver
+        if multiplexer != None :
+            for link in scanner2.scan( validator_function = validate_url ) :
+                get_multiplex = multiplexer( link, source = "deviantart" )
+                if get_multiplex != None :
+                    twitter_accounts += get_multiplex
         
         
         return twitter_accounts

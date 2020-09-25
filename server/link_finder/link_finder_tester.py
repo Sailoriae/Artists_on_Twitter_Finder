@@ -130,6 +130,12 @@ test( "https://www.derpibooru.org/images/2043814",
       ['kingkakapo'],
       datetime.fromisoformat( "2019-05-19T22:59:22" ) )
 
+# Test intéressant, où il est obligé de passer dans le multiplexeur
+test( "https://derpibooru.org/images/2234605",
+      "https://derpicdn.net/img/2019/12/31/2234605/large.png",
+      ['sinrinf', 'avrameow'],
+      datetime.fromisoformat( "2019-12-31T09:22:36" ) )
+
 
 print( "" )
 print( "TEST DE FURBOORU :" )
