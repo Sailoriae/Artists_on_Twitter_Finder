@@ -97,7 +97,11 @@ class Tweets_Lister_with_SearchAPI :
         query = "from:" + account_name + " filter:media"
         if since_date != None :
             query += " since:" + since_date
-        scraper = snscrape.modules.twitter.TwitterSearchScraper( query )
+        scraper = snscrape.modules.twitter.TwitterSearchScraper( query, retries = 9 )
+        # Peut réessayer 9 fois, car il fait des attentes exponentielles
+        # La somme de toutes ces attentes sera donc la suivante (en secondes):
+        # 2**0 + 2**1 + 2**2 + 2**3 + 2**4 + 2**5 + 2**6 + 2**7 + 2**8 + 2**9
+        # Ce qui fait 17 minutes > 15 minutes pour se débloquer d'une HTTP 429
         
         
         # ====================================================================
