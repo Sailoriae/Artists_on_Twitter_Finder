@@ -13,7 +13,7 @@ except ModuleNotFoundError : # Si on a été exécuté en temps que module
     from .class_CBIR_Engine_for_Tweets_Images import CBIR_Engine_for_Tweets_Images
 
 # Note importante :
-# On peut télécharger les images des tweets donnés par GetOldTweets3 en
+# On peut télécharger les images des tweets donnés par l'API de recherche en
 # meilleure qualité. Cependant, cela n'améliore pas de beaucoup la précision du
 # calcul de la distance entre les images indexées et l'image de requête.
 # En effet, il y a 4 niveaux de qualité sur Twitter : "thumb", "small",
@@ -26,10 +26,10 @@ except ModuleNotFoundError : # Si on a été exécuté en temps que module
 
 
 """
-Classe permettant d'indexer les Tweets d'un compte Twitter trouvés avec la
-librairie GetOldTweets3.
+Classe permettant d'indexer les Tweets d'un compte Twitter trouvés avec l'API
+de recherche de Twitter, via la librairie SNScrape.
 """
-class Tweets_Indexer_with_GetOldTweets3 :
+class Tweets_Indexer_with_SearchAPI :
     def __init__( self, DEBUG : bool = False, ENABLE_METRICS : bool = False ) :
         self.DEBUG = DEBUG
         self.ENABLE_METRICS = ENABLE_METRICS
@@ -39,32 +39,32 @@ class Tweets_Indexer_with_GetOldTweets3 :
     """
     Enregistrer la date du Tweet listé le plus récent dans la base de données.
     Cette date est renvoyée par la méthode
-    Tweet_Lister_with_GetOldTweets3.list_GOT3_tweets().
+    Tweet_Lister_with_SearchAPI.list_SearchAPI_tweets().
     
     @param last_tweet_date Date à enregistrer.
     @param account_id L'ID du compte Twitter.
     """
     def save_last_tweet_date ( self, account_id, last_tweet_date ) :
-        self.bdd.set_account_GOT3_last_tweet_date( account_id, last_tweet_date )
+        self.bdd.set_account_SearchAPI_last_tweet_date( account_id, last_tweet_date )
     
     """
     Scanner tous les tweets d'un compte (Les retweets ne comptent pas).
     Seuls les tweets avec des médias seront scannés.
     Et parmis eux, seuls les tweets avec 1 à 4 images seront indexés.
-    Cette méthode n'utilise pas l'API publique de Twitter, mais la librairie
-    GetOldTweets3, qui utilise l'API de https://twitter.com/search.
+    Cette méthode n'utilise pas l'API de timeline de Twitter, mais l'API de recherche,
+    la même que pour https://twitter.com/search.
     
     Cette méthode ne recanne pas les tweets déjà scannés.
     En effet, elle commence sont analyse à la date du dernier scan.
     Si le compte n'a pas déjà été scanné, tous ses tweets le seront.
     
-    C'est la méthode Tweets_Lister_with_GetOldTweets3.list_GOT3_tweets() qui
+    C'est la méthode Tweets_Lister_with_SearchAPI.list_SearchAPI_tweets() qui
     vérifie si le nom de compte Twitter entré ici est valide !
     
     @param account_name Le nom d'utilisateur du compte à scanner, ne sert que à
                         faire des "print()".
     @param queue Fonction à appeler pour sortie les Tweets trouvés par
-                 Tweet_Lister_with_GetOldTweets3.list_GOT3_tweets().
+                 Tweet_Lister_with_SearchAPI.list_SearchAPI_tweets().
     @param indexing_tweets Objet "Common_Tweet_IDs_List" permettant d'éviter de
                            traiter le même Tweet en même temps quand on tourne
                            en parallèle de l'autre classe d'indexation.
@@ -73,9 +73,9 @@ class Tweets_Indexer_with_GetOldTweets3 :
             False si il faut attendre un peu et rappeler cette méthode.
     """
     
-    def index_or_update_with_GOT3 ( self, account_name, queue_get, indexing_tweets, add_step_C_times = None ) -> bool :
+    def index_or_update_with_SearchAPI ( self, account_name, queue_get, indexing_tweets, add_step_C_times = None ) -> bool :
 #        if self.DEBUG :
-#            print( "Indexation / scan des Tweets de @" + account_name + " avec GetOldTweets3." )
+#            print( "Indexation / scan des Tweets de @" + account_name + " avec SearchAPI." )
         if self.DEBUG or self.ENABLE_METRICS :
             times = [] # Liste des temps pour indexer un Tweet
             calculate_features_times = [] # Liste des temps pour calculer les caractéristiques des images du Tweet
@@ -87,9 +87,9 @@ class Tweets_Indexer_with_GetOldTweets3 :
             except Empty_Queue : # Si la queue est vide
                 if self.DEBUG or self.ENABLE_METRICS :
                     if len(times) > 0 :
-                        print( "[Index GOT3]", len(times), "Tweets indexés avec une moyenne de", mean(times), "secondes par Tweet." )
-                        print( "[Index GOT3] Temps moyens de calcul des caractéristiques :", mean( calculate_features_times ) )
-                        print( "[Index GOT3] Temps moyens d'enregistrement dans la BDD :", mean( insert_into_times ) )
+                        print( "[Index SearchAPI]", len(times), "Tweets indexés avec une moyenne de", mean(times), "secondes par Tweet." )
+                        print( "[Index SearchAPI] Temps moyens de calcul des caractéristiques :", mean( calculate_features_times ) )
+                        print( "[Index SearchAPI] Temps moyens d'enregistrement dans la BDD :", mean( insert_into_times ) )
                         if add_step_C_times != None :
                             add_step_C_times( times, calculate_features_times, insert_into_times )
                 return False
@@ -98,15 +98,15 @@ class Tweets_Indexer_with_GetOldTweets3 :
             if tweet.id == None :
                 if self.DEBUG or self.ENABLE_METRICS :
                     if len(times) > 0 :
-                        print( "[Index GOT3]", len(times), "Tweets indexés avec une moyenne de", mean(times), "secondes par Tweet." )
-                        print( "[Index GOT3] Temps moyens de calcul des caractéristiques :", mean( calculate_features_times ) )
-                        print( "[Index GOT3] Temps moyens d'enregistrement dans la BDD :", mean( insert_into_times ) )
+                        print( "[Index SearchAPI]", len(times), "Tweets indexés avec une moyenne de", mean(times), "secondes par Tweet." )
+                        print( "[Index SearchAPI] Temps moyens de calcul des caractéristiques :", mean( calculate_features_times ) )
+                        print( "[Index SearchAPI] Temps moyens d'enregistrement dans la BDD :", mean( insert_into_times ) )
                         if add_step_C_times != None :
                             add_step_C_times( times, calculate_features_times, insert_into_times )
                 return True
             
             if self.DEBUG :
-                print( "[Index GOT3] Indexation Tweet " + str(tweet.id) + " de @" + account_name + "." )
+                print( "[Index SearchAPI] Indexation Tweet " + str(tweet.id) + " de @" + account_name + "." )
             if self.DEBUG or self.ENABLE_METRICS :
                 start = time()
             
@@ -114,7 +114,7 @@ class Tweets_Indexer_with_GetOldTweets3 :
             # traiter, on n'a pas déjà traité, ce Tweet
             if not indexing_tweets.add( tweet.id ) :
                 if self.DEBUG :
-                    print( "[Index GOT3] Tweet déjà indexé par l'autre indexeur !" )
+                    print( "[Index SearchAPI] Tweet déjà indexé par l'autre indexeur !" )
                 continue
             
             # Tester avant d'indexer si le tweet n'est pas déjà dans la BDD
@@ -175,7 +175,7 @@ class Tweets_Indexer_with_GetOldTweets3 :
             
             # Prendre les hashtags du Tweet
             # Fonctionne avec n'importe quel Tweet, même ceux entre 160 et 280
-            # caractères (GOT3 les voit en entier)
+            # caractères (SearchAPI les voit en entier)
             hashtags = tweet.hashtags
             
             if self.DEBUG or self.ENABLE_METRICS :

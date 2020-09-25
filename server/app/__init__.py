@@ -15,7 +15,7 @@ from .user_pipeline import thread_step_2_tweets_indexer
 from .user_pipeline import thread_step_3_reverse_search
 from .user_pipeline import thread_step_4_filter_results
 
-from .scan_pipeline import thread_step_A_GOT3_list_account_tweets
-from .scan_pipeline import thread_step_B_TwitterAPI_list_account_tweets
-from .scan_pipeline import thread_step_C_GOT3_index_account_tweets
-from .scan_pipeline import thread_step_D_TwitterAPI_index_account_tweets
+from .scan_pipeline import thread_step_A_SearchAPI_list_account_tweets
+from .scan_pipeline import thread_step_B_TimelineAPI_list_account_tweets
+from .scan_pipeline import thread_step_C_SearchAPI_index_account_tweets
+from .scan_pipeline import thread_step_D_TimelineAPI_index_account_tweets

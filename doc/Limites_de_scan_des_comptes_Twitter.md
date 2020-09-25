@@ -28,14 +28,16 @@ En cherchant sur GitHub des scripts Python pour faire ce travail, je n'ai trouv�
      - Certains comptes sont mal indexés, voir pas du tout indexés.
    * Documentation : https://developer.twitter.com/en/docs/tweets/search/overview/standard
 
-4. Utiliser la librairie Python GetOldTweets3.
+4. Utiliser l'API de recherche utilisée par l'UI web : https://twitter.com/search
+   Par exemple avec la librairie GetOldTweets3 (Mais qui ne fonctionne plus aujourd'hui) ou la librairie SNScrape.
    * Avantages :
      - Peut trouver tous les Teets d'un compte, aussi loin dans le passé que possible,
      - Peut filtrer les Retweets et les Tweets sans médias.
    * Inconvénients :
      - Certains comptes sont mal indexés, voir pas du tout indexés,
      - On ne peut pas voir les Tweets d'un compte marqué "sensible".
-   * Github : https://github.com/Mottl/GetOldTweets3
+   * Github GetOldTweets3 : https://github.com/Mottl/GetOldTweets3
+   * Github SNScrape : https://github.com/JustAnotherArchivist/snscrape
 
 5. Payer une API de recherche illimité ("Full-archive") dans le temps, Premium ("Search Tweets: Full-archive endpoint") ou Entreprise ("Full-archive Search API"), de l'API publique de Twitter.
    * Avantages :
@@ -52,7 +54,7 @@ En cherchant sur GitHub des scripts Python pour faire ce travail, je n'ai trouv�
 
 Deux moyens on étés retenus, et fonctionnent indépendemment sur le serveur :
 * La mèthode de l'API publique Twitter `GET statuses/user_timeline`,
-* Et la librairie Python GetOldTweets3.
+* Et les API de recherche de l'UI web. On utilisait avant GetOldTweets3 (Mais l'API qu'il utilisait a été supprimée), et on utilise actuellement SNScrape.
 
 Leur implémentation est complètement indépendante, ce qui permet d'être certain de récupérer le maximum de Tweets avec médias possibles des comptes Twitter scannés.
 
@@ -61,36 +63,9 @@ Note : Avant d'analyser un Tweet, le système vérifie qu'il n'est pas déjà pr
 
 ## Limites de scan des comptes Twitter
 
-### Premier problème de GetOldTweets3 : Les tweets sensibles
+En modifiant un peu GetOldTweets3 ou aujourd'hui SNScrape, on lui passe un token d'authentification (`auth_token`), permettant de se montrer comme connecté avec un compte à l'API de Twitter, et non comme invité.
+Ainsi, on peut récupérer les Tweets marqués sensibles, et les Tweets des comptes marqués sensibles. C'est pour cela qu'il est précisé dans le fichier `parameters.py` qui les `auth_token` doivent être ceux de comptes ayant le filtrage de la recherche désactivé.
 
-Sur Twitter, certains comptes, et certains Tweets contenant des médias, sont marqués comme "sensibles". Ce sont par exemple des Tweets contenant des images érotiques, ou des comptes qui en postent beaucoup.
-Il y a aussi des Tweets marqués "semi-sensibles" (Ce n'est pas exactement le cas, mais considérons la chose ainsi pour l'explication qui va suivre), comme par exemple les Tweets contenant des jurons.
+Cependant, il y a toujours la limitation de l'indexation de Twitter : Certains comptes, notamment les comptes marqués sensibles, ou les comptes Tweetant beaucoup trop, sont mal indexés.
 
-L'API utilisée par GetOldTweet3 est une API de recherche, et ne retourne pas les Tweets marqués comme sensibles, ni l'intégralité des Tweets des comptes marqués sensibles.
-
-Cependant, nous avons implémenté deux améliorations à la recherche par GetOldTweets3 :
-* Modifier un peu la librairie GOT3 pour qu'on puisse s'y connecter avec un utilisateur Twitter (Via le Cookie `auth_token`), ce qui permet d'utiliser les deux améliorations qui vont suivre,
-* Ajouter ` (filter:safe OR -filter:safe)` à la recherche, ce qui permet de récupérer les Tweets "semi-sensibles" de comptes non-marqués "sensibles",
-* Faire une seconde recherche avec ` -filter:safe` si la première n'a rien donné, ce qui permet de récupérer les Tweets non-marqués "sensibles" d'un compte marqué "sensible".
-
-Ces deux améliorations permettent d'utiliser pleinement l'API Twitter utilisée par GetOldTweets3.
-
-Cependant, ce système a été testé sur un compte marqué "sensible", postant uniquement des Tweet avec médias marqués "sensibles" (@Lewdlestia), et il a récupéré 12 000 Tweets sur les 16 000 Tweetés par ce compte (juillet 2020), grace à la première recherche ! La différence du nombre de Tweets est expliquable par le faire que ce compte soit un robot et est donc mal indexé, car il poste beaucoup de Tweets.
-
-Nous ne pouvons pas expliquer ce comportement, car Twitter laissent beaucoup d'ombre sur leur système d'indexation et le marquage des Tweets en "sensibles".
-
-Voir la méthode `get_GOT3_list()` de la classe `CBIR_Engine_with_Database` pour l'utilisation de la désactivation du filtre "safe" la plus optimisée.
-
-### Second problème de GetOldTweets3 : La mauvaise indexation
-
-Certains comptes, notamment ceux postant beaucoup (Souvent des robots), sont mal indexés dans la recherche Twitter. Donc, comme GetOldTweet3 utilise une API de recherche, l'historique des Tweets de ces comptes seront forcément incomplets.
-
-Par exemple : Le compte @MayoRiyo a 17 000 Tweets avec médias (juillet 2020), et aucun problème de Tweets "sensibles", mais GetOldTweets3 n'en trouve que 171... Aie ! Parce que cet artiste est mal indexé dans la recherche !
-
-### Solution : Rescanner le compte avec la mèthode de l'API publique Twitter `GET statuses/user_timeline`
-
-Une deuxième passe (En vérité une troisième puisque GOT3 fait deux recherches) de scan est faite (Dans un thread séparé) via la librairie Tweepy sur la mèthode de l'API publique Twitter `GET statuses/user_timeline`.
-
-Cette passe permet d'être certain des 3 200 Tweets les plus récents d'un compte. Dans le cas de @MayoRiyo, avec 90 000 Tweets (juillet 2020), cette passe ne sert pas à grand chose.
-
-D'où la nécéssité de mettre souvent à jour les comptes dans la base de données ! C'est pour cela qu'il y a un tread qui lance une mise à jour automatique des comptes qui n'ont pas étés scannés depuis plus de 10 jours (Paramètre modifiable dans `parameters.py`, mais 10 jours est la valeur recommandée).
+C'est pour cela qu'afin d'être le plus exhaustif possible, "Artists on Twitter Finder" utilise aussi l'API de timeline. Mais il est impossible de récupérer tous les Tweets de tous les comptes. Ainsi, les gros comptes, c'est à dire avec beaucoup de Tweets, peuvent être mal indexés.

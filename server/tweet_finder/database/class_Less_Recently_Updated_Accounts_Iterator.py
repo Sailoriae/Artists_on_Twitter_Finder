@@ -25,19 +25,19 @@ class Less_Recently_Updated_Accounts_Iterator :
     """
     @return Un triplet contenant :
             - L'ID du compte Twitter,
-            - Sa date de dernière MàJ avec GetOldTweets3,
-            - Et sa date dernière MàJ avec l'API Twitter publique.
+            - Sa date de dernière MàJ avec l'API de recherche,
+            - Et sa date dernière MàJ avec l'API de timeline.
     """
     def __next__( self ) :
         triplet = self.cursor.fetchone()
         if triplet == None :
             raise StopIteration
-        last_GOT3_indexing_local_date = triplet[1]
-        last_TwitterAPI_indexing_local_date = triplet[2]
-        if last_GOT3_indexing_local_date != None :
+        last_SearchAPI_indexing_local_date = triplet[1]
+        last_TimelineAPI_indexing_local_date = triplet[2]
+        if last_SearchAPI_indexing_local_date != None :
             if not param.USE_MYSQL_INSTEAD_OF_SQLITE :
-                last_GOT3_indexing_local_date = datetime.strptime( last_GOT3_indexing_local_date, '%Y-%m-%d %H:%M:%S' )
-        if last_TwitterAPI_indexing_local_date != None :
+                last_SearchAPI_indexing_local_date = datetime.strptime( last_SearchAPI_indexing_local_date, '%Y-%m-%d %H:%M:%S' )
+        if last_TimelineAPI_indexing_local_date != None :
             if not param.USE_MYSQL_INSTEAD_OF_SQLITE :
-                last_TwitterAPI_indexing_local_date = datetime.strptime( last_TwitterAPI_indexing_local_date, '%Y-%m-%d %H:%M:%S' )
-        return ( triplet[0], last_GOT3_indexing_local_date, last_TwitterAPI_indexing_local_date )
+                last_TimelineAPI_indexing_local_date = datetime.strptime( last_TimelineAPI_indexing_local_date, '%Y-%m-%d %H:%M:%S' )
+        return ( triplet[0], last_SearchAPI_indexing_local_date, last_TimelineAPI_indexing_local_date )

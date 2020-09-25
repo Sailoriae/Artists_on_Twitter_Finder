@@ -11,18 +11,18 @@ Conteneur des mesures des temps d'exécutions.
 @Pyro4.expose
 class Metrics_Container :
     def __init__ ( self ) :
-        # Classe Tweets_Lister_with_GetOldTweets3
+        # Classe Tweets_Lister_with_SearchAPI
         self._step_A_times = []
         
-        # Classe Tweets_Lister_with_TwitterAPI
+        # Classe Tweets_Lister_with_TimelineAPI
         self._step_B_times = []
         
-        # Classe Tweets_Indexer_with_GetOldTweets3
+        # Classe Tweets_Indexer_with_SearchAPI
         self._step_C_times = []
         self._step_C_calculate_features_times = []
         self._step_C_insert_into_times = []
         
-        # Classe Tweets_Indexer_with_TwitterAPI
+        # Classe Tweets_Indexer_with_TimelineAPI
         self._step_D_times = []
         
         # Classe Image_Features_Iterator
@@ -38,7 +38,7 @@ class Metrics_Container :
     
     """
     @param step_A_time Temps d'éxécution MOYEN pour le listage des Tweets avec
-                       la librairie GetOldTweets3.
+                       la librairie SearchAPI.
     """
     def add_step_A_time ( self, step_A_time ) :
         self._step_A_times.append( step_A_time )
@@ -104,17 +104,17 @@ class Metrics_Container :
     def get_metrics ( self ) :
         to_print = ""
         if self._step_A_times != [] :
-            to_print += "Etape A : Temps moyen pour lister avec GOT3 : " + str(mean(self._step_A_times)) + " (" + str(len(self._step_A_times)) + " valeurs)\n"
+            to_print += "Etape A : Temps moyen pour lister avec SearchAPI : " + str(mean(self._step_A_times)) + " (" + str(len(self._step_A_times)) + " valeurs)\n"
         if self._step_B_times != [] :
-            to_print += "Etape B : Temps moyen pour lister avec TwitterAPI : " + str(mean(self._step_B_times)) + " (" + str(len(self._step_B_times)) + " valeurs)\n"
+            to_print += "Etape B : Temps moyen pour lister avec TimelineAPI : " + str(mean(self._step_B_times)) + " (" + str(len(self._step_B_times)) + " valeurs)\n"
         if self._step_C_times != [] :
-            to_print += "Etape C : Temps moyen pour indexer avec GOT3 : " + str(mean(self._step_C_times)) + " (" + str(len(self._step_C_times)) + " valeurs)\n"
+            to_print += "Etape C : Temps moyen pour indexer avec SearchAPI : " + str(mean(self._step_C_times)) + " (" + str(len(self._step_C_times)) + " valeurs)\n"
         if self._step_C_calculate_features_times != [] :
             to_print += " - Dont : Calcul CBIR d'un Tweet : " + str(mean(self._step_C_calculate_features_times)) + " (" + str(len(self._step_C_calculate_features_times)) + " valeurs)\n"
         if self._step_C_insert_into_times != [] :
             to_print += " - Dont : INSERT INTO d'un Tweet : " + str(mean(self._step_C_insert_into_times)) + " (" + str(len(self._step_C_insert_into_times)) + " valeurs)\n"
         if self._step_D_times != [] :
-            to_print += "Etape D : Temps moyen pour indexer avec TwitterAPI : " + str(mean(self._step_D_times)) + " (" + str(len(self._step_D_times)) + " valeurs)\n"
+            to_print += "Etape D : Temps moyen pour indexer avec TimelineAPI : " + str(mean(self._step_D_times)) + " (" + str(len(self._step_D_times)) + " valeurs)\n"
         if self._step_3_iteration_times != [] :
             to_print += "Etape 3 : Temps moyen pour itérer lors de la recherche : " + str(mean(self._step_3_iteration_times)) + " (" + str(len(self._step_3_iteration_times)) + " valeurs)\n"
         if self._step_3_usage_times != [] :

@@ -11,15 +11,15 @@ except ModuleNotFoundError : # Si on a été exécuté en temps que module
     from .twitter import TweepyAbtraction
 
 
-class Unfounded_Account_on_Lister_with_TwitterAPI ( Exception ) :
+class Unfounded_Account_on_Lister_with_TimelineAPI ( Exception ) :
     pass
 
 
 """
-Classe permettant de lister les Tweets d'un compte Twitter avec l'API publique
-de Twitter via la librairie Tweepy.
+Classe permettant de lister les Tweets d'un compte Twitter avec l'API
+de timeline de Twitter, via la librairie Tweepy.
 """
-class Tweets_Lister_with_TwitterAPI :
+class Tweets_Lister_with_TimelineAPI :
     def __init__( self, api_key, api_secret, oauth_token, oauth_token_secret,
                         DEBUG : bool = False, ENABLE_METRICS : bool = False ) :
         self.DEBUG = DEBUG
@@ -46,21 +46,21 @@ class Tweets_Lister_with_TwitterAPI :
             "NULL" pour ce compte dans la base de données si le compte était
             déjà dans la base.
     
-    Peut émettre une exception "Unfounded_Account_on_Lister_with_TwitterAPI" si
+    Peut émettre une exception "Unfounded_Account_on_Lister_with_TimelineAPI" si
     le compte est introuvable.
     """
-    def list_TwitterAPI_tweets ( self, account_name, queue, add_step_B_time = None ) :
+    def list_TimelineAPI_tweets ( self, account_name, queue, add_step_B_time = None ) :
         account_id = self.twitter.get_account_id( account_name )
         if account_id == None :
-            print( "[List TwiAPI] Compte @" + account_name + " introuvable !" )
-            raise Unfounded_Account_on_Lister_with_TwitterAPI
+            print( "[List TimelineAPI] Compte @" + account_name + " introuvable !" )
+            raise Unfounded_Account_on_Lister_with_TimelineAPI
         
         if self.DEBUG :
-            print( "[List TwiAPI] Listage des Tweets de @" + account_name + "." )
+            print( "[List TimelineAPI] Listage des Tweets de @" + account_name + "." )
         if self.DEBUG or self.ENABLE_METRICS :
             start = time()
         
-        since_tweet_id = self.bdd.get_account_TwitterAPI_last_tweet_id( account_id )
+        since_tweet_id = self.bdd.get_account_TimelineAPI_last_tweet_id( account_id )
         last_tweet_id = None
         count = 0
         
@@ -74,7 +74,7 @@ class Tweets_Lister_with_TwitterAPI :
             count += 1
         
         if self.DEBUG or self.ENABLE_METRICS :
-            print( "[List TwitterAPI] Il a fallu", time() - start, "secondes pour lister", count, "Tweets de @" + account_name + "." )
+            print( "[List TimelineAPI] Il a fallu", time() - start, "secondes pour lister", count, "Tweets de @" + account_name + "." )
             if add_step_B_time != None :
                 if count > 0 :
                     add_step_B_time( (time() - start) / count )
@@ -87,6 +87,6 @@ class Tweets_Lister_with_TwitterAPI :
         # La BDD peut retourner None si elle ne connait pas le Tweet (Donc aucun
         # Tweet n'est enregistré pour ce compte), c'est pas grave
         if last_tweet_id == None :
-            return self.bdd.get_account_TwitterAPI_last_tweet_id( account_id )
+            return self.bdd.get_account_TimelineAPI_last_tweet_id( account_id )
         else :
             return last_tweet_id

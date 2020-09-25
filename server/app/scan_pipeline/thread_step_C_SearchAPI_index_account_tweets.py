@@ -10,26 +10,26 @@ from os import path as os_path
 sys_path.append(os_path.dirname(os_path.dirname(os_path.dirname(os_path.abspath(__file__)))))
 
 import parameters as param
-from tweet_finder import Tweets_Indexer_with_TwitterAPI
+from tweet_finder import Tweets_Indexer_with_SearchAPI
 from tweet_finder.database import SQLite_or_MySQL
 
 
 """
-ETAPE D du traitement de l'indexation ou de la mise à jour de l'indexation d'un
+ETAPE C du traitement de l'indexation ou de la mise à jour de l'indexation d'un
 compte Twitter.
 Thread d'indexation des tweets d'un compte Twitter trouvés par le listage avec
-GetOldTweets3.
+l'API de recherche de Twitter.
 """
-def thread_step_D_TwitterAPI_index_account_tweets( thread_id : int, shared_memory ) :
+def thread_step_C_SearchAPI_index_account_tweets( thread_id : int, shared_memory ) :
     # Initialisation de l'indexeur de Tweets
-    twitterapi_indexer = Tweets_Indexer_with_TwitterAPI( DEBUG = param.DEBUG, ENABLE_METRICS = param.ENABLE_METRICS )
+    searchAPI_indexer = Tweets_Indexer_with_SearchAPI( DEBUG = param.DEBUG, ENABLE_METRICS = param.ENABLE_METRICS )
     
     # Accès direct à la base de données
     # N'UTILISER QUE DES METHODES QUI FONT SEULEMENT DES SELECT !
     bdd_direct_access = SQLite_or_MySQL()
     
     # Dire qu'on ne fait rien
-    shared_memory.scan_requests.requests_in_thread.set_request( "thread_step_D_TwitterAPI_index_account_tweets_number" + str(thread_id), None )
+    shared_memory.scan_requests.requests_in_thread.set_request( "thread_step_C_SearchAPI_index_account_tweets_number" + str(thread_id), None )
     
     # Tant que on ne nous dit pas de nous arrêter
     while shared_memory.keep_service_alive :
@@ -40,12 +40,12 @@ def thread_step_D_TwitterAPI_index_account_tweets( thread_id : int, shared_memor
         
         # On tente de sortir une requête de la file d'attente prioritaire
         try :
-            request = shared_memory.scan_requests.step_D_TwitterAPI_index_account_tweets_prior_queue.get( block = False )
+            request = shared_memory.scan_requests.step_C_SearchAPI_index_account_tweets_prior_queue.get( block = False )
         # Si la queue est vide
         except queue.Empty :
             # On tente de sortir une requête de la file d'attente normale
             try :
-                request = shared_memory.scan_requests.step_D_TwitterAPI_index_account_tweets_queue.get( block = False )
+                request = shared_memory.scan_requests.step_C_SearchAPI_index_account_tweets_queue.get( block = False )
             # Si la queue est vide, on attend une seconde et on réessaye
             except queue.Empty :
                 shared_memory.scan_requests.queues_sem.release()
@@ -53,7 +53,7 @@ def thread_step_D_TwitterAPI_index_account_tweets( thread_id : int, shared_memor
                 continue
         
         # Dire qu'on est en train de traiter cette requête
-        request.is_in_TwitterAPI_indexing = True
+        request.is_in_SearchAPI_indexing = True
         
         # Lacher le sémaphore
         shared_memory.scan_requests.queues_sem.release()
@@ -66,41 +66,41 @@ def thread_step_D_TwitterAPI_index_account_tweets( thread_id : int, shared_memor
             continue
         
         # Si le listage des Tweets n'a pas commencé, on doit attendre un peu
-        if not request.started_TwitterAPI_listing :
+        if not request.started_SearchAPI_listing :
             if request.is_prioritary :
-                shared_memory.scan_requests.step_D_TwitterAPI_index_account_tweets_prior_queue.put( request )
+                shared_memory.scan_requests.step_C_SearchAPI_index_account_tweets_prior_queue.put( request )
             else :
-                shared_memory.scan_requests.step_D_TwitterAPI_index_account_tweets_queue.put( request )
+                shared_memory.scan_requests.step_C_SearchAPI_index_account_tweets_queue.put( request )
             continue
         
         # Dire qu'on est en train de traiter cette requête
-        shared_memory.scan_requests.requests_in_thread.set_request( "thread_step_D_TwitterAPI_index_account_tweets_number" + str(thread_id), request )
+        shared_memory.scan_requests.requests_in_thread.set_request( "thread_step_C_SearchAPI_index_account_tweets_number" + str(thread_id), request )
         
         # Si on a vu cette requête il y a moins de 5 secondes, c'est qu'il n'y
         # a pas beaucoup de requêtes dans le pipeline, on peut donc dormir
         # 3 secondes, pour éviter de trop itérer dessus
-        if time() - request.last_seen_TwitterAPI_indexer < 5 :
+        if time() - request.last_seen_SearchAPI_indexer < 5 :
             sleep( 3 )
-        request.last_seen_TwitterAPI_indexer = time()
+        request.last_seen_SearchAPI_indexer = time()
         
-        # On index / scan les comptes Twitter de la requête avec l'API Twitter
+        # On index / scan les comptes Twitter de la requête avec l'API de recherche
         if param.DEBUG :
-            print( "[step_D_th" + str(thread_id) + "] Indexation des Tweets de @" + request.account_name + " trouvés par l'API Twitter." )
-        request.finished_TwitterAPI_indexing = twitterapi_indexer.index_or_update_with_TwitterAPI(
-                                                   request.account_name,
-                                                   request.TwitterAPI_tweets_queue,
-                                                   request.indexing_tweets,
-                                                   add_step_D_times = shared_memory.execution_metrics.add_step_D_times )
+            print( "[step_C_th" + str(thread_id) + "] Indexation des Tweets de @" + request.account_name + " trouvés avec l'API de recherche." )
+        request.finished_SearchAPI_indexing = searchAPI_indexer.index_or_update_with_SearchAPI(
+                                                  request.account_name,
+                                                  request.SearchAPI_tweets_queue_get,
+                                                  request.indexing_tweets,
+                                                  add_step_C_times = shared_memory.execution_metrics.add_step_C_times )
         
         # Si l'indexation est terminée, on met la date de fin dans la requête
-        if request.finished_TwitterAPI_indexing and not request.has_failed :
-            print( "[step_D_th" + str(thread_id) + "] Fin de l'indexation des Tweets de @" + request.account_name + " trouvés par l'API Twitter." )
+        if request.finished_SearchAPI_indexing and not request.has_failed :
+            print( "[step_C_th" + str(thread_id) + "] Fin de l'indexation des Tweets de @" + request.account_name + " trouvés avec l'API de recherche." )
             
-            # Enregistrer l'ID du Tweet trouvé le plus récent
-            twitterapi_indexer.save_last_tweet_id( request.account_id, request.TwitterAPI_last_tweet_id )
+            # Enregistrer la date du Tweet trouvé le plus récent
+            searchAPI_indexer.save_last_tweet_date( request.account_id, request.SearchAPI_last_tweet_date )
             
             # Si les deux indexations ont terminé
-            if request.finished_GOT3_indexing :
+            if request.finished_TimelineAPI_indexing :
                 # On appelle la méthode qui termine la requête
                 shared_memory.scan_requests.end_request( request, bdd_direct_access.get_stats() )
         
@@ -110,15 +110,15 @@ def thread_step_D_TwitterAPI_index_account_tweets( thread_id : int, shared_memor
         # d'indexation, et donc il vaut mieux arrêter.
         elif not request.has_failed :
             shared_memory.scan_requests.queues_sem.acquire()
-            request.is_in_TwitterAPI_indexing = False
+            request.is_in_SearchAPI_indexing = False
             if request.is_prioritary :
-                shared_memory.scan_requests.step_D_TwitterAPI_index_account_tweets_prior_queue.put( request )
+                shared_memory.scan_requests.step_C_SearchAPI_index_account_tweets_prior_queue.put( request )
             else :
-                shared_memory.scan_requests.step_D_TwitterAPI_index_account_tweets_queue.put( request )
+                shared_memory.scan_requests.step_C_SearchAPI_index_account_tweets_queue.put( request )
             shared_memory.scan_requests.queues_sem.release()
         
         # Dire qu'on n'est plus en train de traiter cette requête
-        shared_memory.scan_requests.requests_in_thread.set_request( "thread_step_D_TwitterAPI_index_account_tweets_number" + str(thread_id), None )
+        shared_memory.scan_requests.requests_in_thread.set_request( "thread_step_C_SearchAPI_index_account_tweets_number" + str(thread_id), None )
     
-    print( "[step_D_th" + str(thread_id) + "] Arrêté !" )
+    print( "[step_C_th" + str(thread_id) + "] Arrêté !" )
     return

@@ -5,10 +5,10 @@ import Pyro4
 
 
 """
-Pour pouvoir insérer et sortir de la file des Tweets trouvés avec GOT3.
+Pour pouvoir insérer et sortir de la file des Tweets trouvés avec l'API de recherche.
 """
 @Pyro4.expose
-class Pyro_GOT3_Tweet :
+class Pyro_SearchAPI_Tweet :
     def __init__ ( self, tweet_id, author_id, images_urls, hashtags ):
         self._id = tweet_id
         self._author_id = author_id

@@ -143,20 +143,20 @@ class SQLite_or_MySQL :
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
             account_table = """CREATE TABLE IF NOT EXISTS accounts (
                                    account_id BIGINT UNSIGNED PRIMARY KEY,
-                                   last_GOT3_indexing_api_date CHAR(10),
-                                   last_GOT3_indexing_local_date DATETIME,
-                                   last_TwitterAPI_indexing_tweet_id BIGINT UNSIGNED,
-                                   last_TwitterAPI_indexing_local_date DATETIME,
+                                   last_SearchAPI_indexing_api_date CHAR(10),
+                                   last_SearchAPI_indexing_local_date DATETIME,
+                                   last_TimelineAPI_indexing_tweet_id BIGINT UNSIGNED,
+                                   last_TimelineAPI_indexing_local_date DATETIME,
                                    last_use DATETIME,
                                    uses_count BIGINT UNSIGNED DEFAULT 0 )"""
         
         else :
             account_table = """CREATE TABLE IF NOT EXISTS accounts (
                                    account_id UNSIGNED BIGINT PRIMARY KEY,
-                                   last_GOT3_indexing_api_date CHAR(10),
-                                   last_GOT3_indexing_local_date DATETIME,
-                                   last_TwitterAPI_indexing_tweet_id UNSIGNED BIGINT,
-                                   last_TwitterAPI_indexing_local_date DATETIME,
+                                   last_SearchAPI_indexing_api_date CHAR(10),
+                                   last_SearchAPI_indexing_local_date DATETIME,
+                                   last_TimelineAPI_indexing_tweet_id UNSIGNED BIGINT,
+                                   last_TimelineAPI_indexing_local_date DATETIME,
                                    last_use DATETIME,
                                    uses_count UNSIGNED BIGINT DEFAULT 0  )"""
         
@@ -344,22 +344,23 @@ class SQLite_or_MySQL :
         return Image_Features_Iterator( self.conn, account_id, request_1, request_2, request_3, request_4, ENABLE_METRICS = param.ENABLE_METRICS )
     
     """
-    Stocker la date du dernier scan d'un compte Twitter
+    API DE RECHERCHE
+    Stocker la date du Tweet le plus récent d'un compte Twitter
     Si le compte Twitter est déjà dans la base de données, sa date de dernier
     scan sera mise à jour
     
     @param account_id ID du compte Twitter
-    @param last_scan Date du dernier scan, au format YYYY-MM-DD
+    @param last_scan Date du Tweet indexé le plus récent, au format YYYY-MM-DD
     """
-    def set_account_GOT3_last_tweet_date( self, account_id : int, last_update : str ) :
+    def set_account_SearchAPI_last_tweet_date( self, account_id : int, last_update : str ) :
         now = datetime.now()
         
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
-            request = """INSERT INTO accounts ( account_id, last_GOT3_indexing_api_date, last_GOT3_indexing_local_date ) VALUES ( %s, %s, %s )
-                         ON DUPLICATE KEY UPDATE last_GOT3_indexing_api_date = %s, last_GOT3_indexing_local_date = %s"""
+            request = """INSERT INTO accounts ( account_id, last_SearchAPI_indexing_api_date, last_SearchAPI_indexing_local_date ) VALUES ( %s, %s, %s )
+                         ON DUPLICATE KEY UPDATE last_SearchAPI_indexing_api_date = %s, last_SearchAPI_indexing_local_date = %s"""
         else :
-            request = """INSERT INTO accounts ( account_id, last_GOT3_indexing_api_date, last_GOT3_indexing_local_date ) VALUES ( ?, ?, ? )
-                         ON CONFLICT ( account_id ) DO UPDATE SET last_GOT3_indexing_api_date = ?, last_GOT3_indexing_local_date = ?"""
+            request = """INSERT INTO accounts ( account_id, last_SearchAPI_indexing_api_date, last_SearchAPI_indexing_local_date ) VALUES ( ?, ?, ? )
+                         ON CONFLICT ( account_id ) DO UPDATE SET last_SearchAPI_indexing_api_date = ?, last_SearchAPI_indexing_local_date = ?"""
         
         c = self.get_cursor()
         c.execute( request,
@@ -367,42 +368,43 @@ class SQLite_or_MySQL :
         self.conn.commit()
     
     """
-    Stocker l'ID du Tweet le plus récent scanné d'un compte Twitter, via l'API
-    publique de Twitter
+    API DE TIMELINE
+    Stocker l'ID du Tweet le plus récent d'un compte Twitter
     Si le compte Twitter est déjà dans la base de données, sa date de dernier
     scan sera mise à jour
     
     @param account_id ID du compte Twitter
-    @param tweet_id ID du Tweet scanné le plus récent
+    @param tweet_id ID du Tweet indexé le plus récent
     """
-    def set_account_TwitterAPI_last_tweet_id( self, account_id : int, tweet_id : int ) :
+    def set_account_TimelineAPI_last_tweet_id( self, account_id : int, tweet_id : int ) :
         now = datetime.now()
         c = self.get_cursor()
         
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
-            request = """INSERT INTO accounts ( account_id, last_TwitterAPI_indexing_tweet_id, last_TwitterAPI_indexing_local_date ) VALUES ( %s, %s, %s )
-                         ON DUPLICATE KEY UPDATE last_TwitterAPI_indexing_tweet_id = %s, last_TwitterAPI_indexing_local_date = %s"""
+            request = """INSERT INTO accounts ( account_id, last_TimelineAPI_indexing_tweet_id, last_TimelineAPI_indexing_local_date ) VALUES ( %s, %s, %s )
+                         ON DUPLICATE KEY UPDATE last_TimelineAPI_indexing_tweet_id = %s, last_TimelineAPI_indexing_local_date = %s"""
         else :
-            request = """INSERT INTO accounts ( account_id, last_TwitterAPI_indexing_tweet_id, last_TwitterAPI_indexing_local_date ) VALUES ( ?, ?, ? )
-                         ON CONFLICT ( account_id ) DO UPDATE SET last_TwitterAPI_indexing_tweet_id = ?, last_TwitterAPI_indexing_local_date = ?"""
+            request = """INSERT INTO accounts ( account_id, last_TimelineAPI_indexing_tweet_id, last_TimelineAPI_indexing_local_date ) VALUES ( ?, ?, ? )
+                         ON CONFLICT ( account_id ) DO UPDATE SET last_TimelineAPI_indexing_tweet_id = ?, last_TimelineAPI_indexing_local_date = ?"""
         
         c.execute( request,
                    ( account_id, tweet_id, now.strftime('%Y-%m-%d %H:%M:%S'), tweet_id, now.strftime('%Y-%m-%d %H:%M:%S') ) )
         self.conn.commit()
     
     """
-    Récupérer la date du dernier scan d'un compte Twitter
+    API DE RECHERCHE
+    Récupérer la date du Tweet le plus récent d'un compte Twitter
     @param account_id ID du compte Twitter
-    @return Date du dernier scan, au format YYYY-MM-DD
+    @return Date du Tweet indexé le plus récent, au format YYYY-MM-DD
             Ou None si le compte est inconnu
     """
-    def get_account_GOT3_last_tweet_date( self, account_id : int ) -> str :
+    def get_account_SearchAPI_last_tweet_date( self, account_id : int ) -> str :
         c = self.get_cursor()
         
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
-            request = "SELECT last_GOT3_indexing_api_date FROM accounts WHERE account_id = %s"
+            request = "SELECT last_SearchAPI_indexing_api_date FROM accounts WHERE account_id = %s"
         else :
-            request = "SELECT last_GOT3_indexing_api_date FROM accounts WHERE account_id = ?"
+            request = "SELECT last_SearchAPI_indexing_api_date FROM accounts WHERE account_id = ?"
         
         c.execute( request,
                    ( account_id, ) )
@@ -413,18 +415,19 @@ class SQLite_or_MySQL :
             return None
     
     """
-    Récupérer l'ID du dernier Tweet scanné avec l'API Twitter.
+    API DE TIMELINE
+    Récupérer l'ID du Tweet le plus récent d'un compte Twitter
     @param account_id ID du compte Twitter
-    @return L'ID du dernier Tweet scanné
+    @return ID du Tweet indexé le plus récent
             Ou None si le compte est inconnu
     """
-    def get_account_TwitterAPI_last_tweet_id( self, account_id : int ) -> int :
+    def get_account_TimelineAPI_last_tweet_id( self, account_id : int ) -> int :
         c = self.get_cursor()
         
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
-            request = "SELECT last_TwitterAPI_indexing_tweet_id FROM accounts WHERE account_id = %s"
+            request = "SELECT last_TimelineAPI_indexing_tweet_id FROM accounts WHERE account_id = %s"
         else :
-            request = "SELECT last_TwitterAPI_indexing_tweet_id FROM accounts WHERE account_id = ?"
+            request = "SELECT last_TimelineAPI_indexing_tweet_id FROM accounts WHERE account_id = ?"
         
         c.execute( request,
                    ( account_id, ) )
@@ -435,18 +438,22 @@ class SQLite_or_MySQL :
             return None
     
     """
-    Récupérer la date de l'enregistrement du dernier scan d'un compte Twitter
+    API DE RECHERCHE
+    Récupérer la date de l'enregistrement de la date du tweet le plus récent
+    d'un compte Twitter
+    C'est à dire la date du dernier appel à la fonction
+    set_account_SearchAPI_last_tweet_date()
     @param account_id ID du compte Twitter
     @return Objet datetime
             Ou None si le compte est inconnu
     """
-    def get_account_GOT3_last_scan_local_date( self, account_id : int ) -> str :
+    def get_account_SearchAPI_last_scan_local_date( self, account_id : int ) -> str :
         c = self.get_cursor()
         
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
-            request = "SELECT last_GOT3_indexing_local_date FROM accounts WHERE account_id = %s"
+            request = "SELECT last_SearchAPI_indexing_local_date FROM accounts WHERE account_id = %s"
         else :
-            request = "SELECT last_GOT3_indexing_local_date FROM accounts WHERE account_id = ?"
+            request = "SELECT last_SearchAPI_indexing_local_date FROM accounts WHERE account_id = ?"
         
         c.execute( request,
                    ( account_id, ) )
@@ -460,19 +467,22 @@ class SQLite_or_MySQL :
             return None
     
     """
-    Récupérer la date de l'enregistrement de l'ID du dernier Tweet scanné avec
-    l'API Twitter.
+    API DE TIMELINE
+    Récupérer la date de l'enregistrement de l'ID du Tweet le plus récent d'u
+    compte Twitter
+    C'est à dire la date du dernier appel à la fonction
+    set_account_TimelineAPI_last_tweet_date()
     @param account_id ID du compte Twitter
     @return Objet datetime
             Ou None si le compte est inconnu
     """
-    def get_account_TwitterAPI_last_scan_local_date( self, account_id : int ) -> int :
+    def get_account_TimelineAPI_last_scan_local_date( self, account_id : int ) -> int :
         c = self.get_cursor()
         
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
-            request = "SELECT last_TwitterAPI_indexing_local_date FROM accounts WHERE account_id = %s"
+            request = "SELECT last_TimelineAPI_indexing_local_date FROM accounts WHERE account_id = %s"
         else :
-            request = "SELECT last_TwitterAPI_indexing_local_date FROM accounts WHERE account_id = ?"
+            request = "SELECT last_TimelineAPI_indexing_local_date FROM accounts WHERE account_id = ?"
         
         c.execute( request,
                    ( account_id, ) )
@@ -536,14 +546,14 @@ class SQLite_or_MySQL :
     triés dans l'ordre du moins récemment mise à jour au plus récemment mis à
     jour.
     La date de mise à jour la plus vielle est calculée avec la valeur minimum
-    de la date du dernier scan avec GetOldTweets3 et du dernier scan avec l'API
-    Twitter publique.
+    de la date du dernier scan avec l'API de recherche et du dernier scan avec
+    l'API de timeline.
     
     @return Un itérateur sur le résultat
             Voir le fichier "class_Less_Recently_Updated_Accounts_Iterator.py"
     """
     def get_oldest_updated_account( self ) -> int :
-        # IL faut que ce curseur soit buffered car on peut être amené à faire
+        # Il faut que ce curseur soit buffered car on peut être amené à faire
         # d'autres requêtes sur la BDD lors de l'utilisation de l'itérateur,
         # ce qui provoque des erreurs "mysql.connector.errors.InternalError:
         # Unread result found"
@@ -563,15 +573,15 @@ class SQLite_or_MySQL :
             # Le "ORDER BY LEAST()" considère bien la valeur NULL comme
             # inférieure à toutes les autres valeurs, et la place en tête.
             # C'est parfait pour nous !
-            c.execute( """SELECT account_id, last_GOT3_indexing_local_date, last_TwitterAPI_indexing_local_date
+            c.execute( """SELECT account_id, last_SearchAPI_indexing_local_date, last_TimelineAPI_indexing_local_date
                           FROM accounts
-                          ORDER BY LEAST( last_GOT3_indexing_local_date,
-                                          last_TwitterAPI_indexing_local_date ) ASC""" )
+                          ORDER BY LEAST( last_SearchAPI_indexing_local_date,
+                                          last_TimelineAPI_indexing_local_date ) ASC""" )
         else :
-            c.execute( """SELECT account_id, last_GOT3_indexing_local_date, last_TwitterAPI_indexing_local_date
+            c.execute( """SELECT account_id, last_SearchAPI_indexing_local_date, last_TimelineAPI_indexing_local_date
                           FROM accounts
-                          ORDER BY MIN( last_GOT3_indexing_local_date,
-                                        last_TwitterAPI_indexing_local_date ) ASC""" )
+                          ORDER BY MIN( last_SearchAPI_indexing_local_date,
+                                        last_TimelineAPI_indexing_local_date ) ASC""" )
         return Less_Recently_Updated_Accounts_Iterator( c )
 
 """
@@ -583,7 +593,7 @@ if __name__ == '__main__' :
     bdd.insert_tweet( 12, 42, [10.01, 1.1] )
     bdd.get_images_in_db_iterator( 12 )
     
-    bdd.set_account_GOT3_last_tweet_date( 12, "2020-07-02" )
-    bdd.get_account_GOT3_last_tweet_date( 13 )
+    bdd.set_account_SearchAPI_last_tweet_date( 12, "2020-07-02" )
+    bdd.get_account_SearchAPI_last_tweet_date( 13 )
     
     bdd.conn.close()

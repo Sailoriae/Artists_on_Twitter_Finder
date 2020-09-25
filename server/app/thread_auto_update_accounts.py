@@ -40,8 +40,8 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
         count = 0
         
         # oldest_updated_account[0] : L'ID du compte Twitter
-        # oldest_updated_account[1] : Sa date de dernière MàJ avec GetOldTweets3
-        # oldest_updated_account[2] : Sa date dernière MàJ avec l'API Twitter publique
+        # oldest_updated_account[1] : Sa date de dernière MàJ avec l'API de recherche
+        # oldest_updated_account[2] : Sa date dernière MàJ avec l'API de timeline
         for oldest_updated_account in oldest_updated_account_iterator  :
             count += 1
             
@@ -92,10 +92,10 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
                 # On peut faire ce INSERT INTO, pusiqu'il n'y a que ce thread qui
                 # utilise la date locale de dernière MàJ, et que ce thread est
                 # unique
-                bdd_direct_access.set_account_GOT3_last_tweet_date( oldest_updated_account[0],
-                                                                    bdd_direct_access.get_account_GOT3_last_tweet_date( oldest_updated_account[0] ) )
-                bdd_direct_access.set_account_TwitterAPI_last_tweet_id( oldest_updated_account[0],
-                                                                        bdd_direct_access.get_account_TwitterAPI_last_tweet_id( oldest_updated_account[0] ) )
+                bdd_direct_access.set_account_SearchAPI_last_tweet_date( oldest_updated_account[0],
+                                                                    bdd_direct_access.get_account_SearchAPI_last_tweet_date( oldest_updated_account[0] ) )
+                bdd_direct_access.set_account_TimelineAPI_last_tweet_id( oldest_updated_account[0],
+                                                                        bdd_direct_access.get_account_TimelineAPI_last_tweet_id( oldest_updated_account[0] ) )
             
             # Sinon, on lance le scan pour ce compte
             else :

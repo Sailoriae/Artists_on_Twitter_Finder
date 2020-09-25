@@ -6,24 +6,6 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 # Protection pour le multiprocessing
 if __name__ == "__main__" :
-    
-    # Problème étrange : Les tests de la classe CBIR_Engine_with_Database
-    # fonctionnent avec MySQL... Mais lorsqu'on démarre l'app complète, l'erreur
-    # suivant apparait au listage des Tweets par GOT3 : 
-    # <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed:
-    # unable to get local issuer certificate (_ssl.c:1108)>
-    # Très très étrange.
-    # Les lignes ci-dessous règles ces problèmes, mais désactivent la vérification
-    # SSL, ce qui est pas mal dangereux !
-#    import ssl
-#    try:
-#        _create_unverified_https_context = ssl._create_unverified_context
-#    except AttributeError:
-#        pass
-#    else:
-#        ssl._create_default_https_context = _create_unverified_https_context
-    # EDIT : Ce problème semble résolu, mais je ne sais pas pourquoi.
-    
     try :
         import resource
     except ModuleNotFoundError : # On n'est pas sous un système UNIX
@@ -155,37 +137,37 @@ if __name__ == "__main__" :
         thread.start()
         launched_threads_step_4_filter_results.append( thread )
     
-    launched_threads_step_A_GOT3_list_account_tweets = []
-    for i in range( param.NUMBER_OF_STEP_A_GOT3_LIST_ACCOUNT_TWEETS_THREADS ) :
-        thread = threading.Thread( name = "step_A_GOT3_list_account_tweets_th" + str(i+1),
+    launched_threads_step_A_SearchAPI_list_account_tweets = []
+    for i in range( param.NUMBER_OF_STEP_A_SEARCHAPI_LIST_ACCOUNT_TWEETS_THREADS ) :
+        thread = threading.Thread( name = "step_A_SearchAPI_list_account_tweets_th" + str(i+1),
                                    target = error_collector,
-                                   args = ( thread_step_A_GOT3_list_account_tweets, i+1, shared_memory_uri, ) )
+                                   args = ( thread_step_A_SearchAPI_list_account_tweets, i+1, shared_memory_uri, ) )
         thread.start()
-        launched_threads_step_A_GOT3_list_account_tweets.append( thread )
+        launched_threads_step_A_SearchAPI_list_account_tweets.append( thread )
     
-    launched_threads_step_B_TwitterAPI_list_account_tweets = []
-    for i in range( param.NUMBER_OF_STEP_B_TWITTERAPI_LIST_ACCOUNT_TWEETS_THREADS ) :
-        thread = threading.Thread( name = "step_B_TwitterAPI_list_account_tweets_th" + str(i+1),
+    launched_threads_step_B_TimelineAPI_list_account_tweets = []
+    for i in range( param.NUMBER_OF_STEP_B_TIMELINEAPI_LIST_ACCOUNT_TWEETS_THREADS ) :
+        thread = threading.Thread( name = "step_B_TimelineAPI_list_account_tweets_th" + str(i+1),
                                    target = error_collector,
-                                   args = ( thread_step_B_TwitterAPI_list_account_tweets, i+1, shared_memory_uri, ) )
+                                   args = ( thread_step_B_TimelineAPI_list_account_tweets, i+1, shared_memory_uri, ) )
         thread.start()
-        launched_threads_step_B_TwitterAPI_list_account_tweets.append( thread )
+        launched_threads_step_B_TimelineAPI_list_account_tweets.append( thread )
     
-    launched_threads_step_C_GOT3_index_account_tweets = []
-    for i in range( param.NUMBER_OF_STEP_C_GOT3_INDEX_ACCOUNT_TWEETS ) :
-        thread = threading.Thread( name = "step_C_GOT3_index_account_tweets_th" + str(i+1),
+    launched_threads_step_C_SearchAPI_index_account_tweets = []
+    for i in range( param.NUMBER_OF_STEP_C_SEARCHAPI_INDEX_ACCOUNT_TWEETS ) :
+        thread = threading.Thread( name = "step_C_SearchAPI_index_account_tweets_th" + str(i+1),
                                    target = error_collector,
-                                   args = ( thread_step_C_GOT3_index_account_tweets, i+1, shared_memory_uri, ) )
+                                   args = ( thread_step_C_SearchAPI_index_account_tweets, i+1, shared_memory_uri, ) )
         thread.start()
-        launched_threads_step_C_GOT3_index_account_tweets.append( thread )
+        launched_threads_step_C_SearchAPI_index_account_tweets.append( thread )
     
-    launched_threads_step_D_TwitterAPI_index_account_tweets = []
-    for i in range( param.NUMBER_OF_STEP_D_TWITTERAPI_INDEX_ACCOUNT_TWEETS ) :
-        thread = threading.Thread( name = "step_D_TwitterAPI_index_account_tweets_th" + str(i+1),
+    launched_threads_step_D_TimelineAPI_index_account_tweets = []
+    for i in range( param.NUMBER_OF_STEP_D_TIMELINEAPI_INDEX_ACCOUNT_TWEETS ) :
+        thread = threading.Thread( name = "step_D_TimelineAPI_index_account_tweets_th" + str(i+1),
                                    target = error_collector,
-                                   args = ( thread_step_D_TwitterAPI_index_account_tweets, i+1, shared_memory_uri, ) )
+                                   args = ( thread_step_D_TimelineAPI_index_account_tweets, i+1, shared_memory_uri, ) )
         thread.start()
-        launched_threads_step_D_TwitterAPI_index_account_tweets.append( thread )
+        launched_threads_step_D_TimelineAPI_index_account_tweets.append( thread )
     
     
     # On ne crée qu'un seul thread du serveur HTTP
@@ -256,8 +238,8 @@ if __name__ == "__main__" :
                         for scan_request_uri in request.scan_requests :
                             scan_request = Pyro4.Proxy( scan_request_uri )
                             print( "Scan @" + scan_request.account_name + " (ID " + str(scan_request.account_id) + "), prioritaire : " + str(scan_request.is_prioritary) )
-                            print( "A démarré le listage GOT3 : " + str(scan_request.started_GOT3_listing) + ", Twitter API : " + str(scan_request.started_GOT3_listing) )
-                            print( "A terminé l'indexation GOT3 : " + str(scan_request.finished_GOT3_indexing) + ", Twitter API : " + str(scan_request.finished_TwitterAPI_indexing) )
+                            print( "A démarré le listage SearchAPI : " + str(scan_request.started_SearchAPI_listing) + ", TimelineAPI : " + str(scan_request.started_SearchAPI_listing) )
+                            print( "A terminé l'indexation SearchAPI : " + str(scan_request.finished_SearchAPI_indexing) + ", TimelineAPI : " + str(scan_request.finished_TimelineAPI_indexing) )
                     
                     if request.finished_date != None :
                         print( "Fin du traitement : " + str(request.finished_date) )
@@ -329,14 +311,14 @@ if __name__ == "__main__" :
                 print( "step_2_tweets_indexer_queue :", shared_memory.user_requests.step_2_tweets_indexer_queue.qsize() )
                 print( "step_3_reverse_search_queue :", shared_memory.user_requests.step_3_reverse_search_queue.qsize() )
                 print( "step_4_filter_results_queue :", shared_memory.user_requests.step_4_filter_results_queue.qsize() )
-                print( "step_A_GOT3_list_account_tweets_prior_queue :", shared_memory.scan_requests.step_A_GOT3_list_account_tweets_prior_queue.qsize() )
-                print( "step_A_GOT3_list_account_tweets_queue :", shared_memory.scan_requests.step_A_GOT3_list_account_tweets_queue.qsize() )
-                print( "step_B_TwitterAPI_list_account_tweets_prior_queue :", shared_memory.scan_requests.step_B_TwitterAPI_list_account_tweets_prior_queue.qsize() )
-                print( "step_B_TwitterAPI_list_account_tweets_queue :", shared_memory.scan_requests.step_B_TwitterAPI_list_account_tweets_queue.qsize() )
-                print( "step_C_GOT3_index_account_tweets_prior_queue :", shared_memory.scan_requests.step_C_GOT3_index_account_tweets_prior_queue.qsize() )
-                print( "step_C_GOT3_index_account_tweets_queue :", shared_memory.scan_requests.step_C_GOT3_index_account_tweets_queue.qsize() )
-                print( "step_D_TwitterAPI_index_account_tweets_prior_queue :", shared_memory.scan_requests.step_D_TwitterAPI_index_account_tweets_prior_queue.qsize() )
-                print( "step_D_TwitterAPI_index_account_tweets_queue :", shared_memory.scan_requests.step_D_TwitterAPI_index_account_tweets_queue.qsize() )
+                print( "step_A_SearchAPI_list_account_tweets_prior_queue :", shared_memory.scan_requests.step_A_SearchAPI_list_account_tweets_prior_queue.qsize() )
+                print( "step_A_SearchAPI_list_account_tweets_queue :", shared_memory.scan_requests.step_A_SearchAPI_list_account_tweets_queue.qsize() )
+                print( "step_B_TimelineAPI_list_account_tweets_prior_queue :", shared_memory.scan_requests.step_B_TimelineAPI_list_account_tweets_prior_queue.qsize() )
+                print( "step_B_TimelineAPI_list_account_tweets_queue :", shared_memory.scan_requests.step_B_TimelineAPI_list_account_tweets_queue.qsize() )
+                print( "step_C_SearchAPI_index_account_tweets_prior_queue :", shared_memory.scan_requests.step_C_SearchAPI_index_account_tweets_prior_queue.qsize() )
+                print( "step_C_SearchAPI_index_account_tweets_queue :", shared_memory.scan_requests.step_C_SearchAPI_index_account_tweets_queue.qsize() )
+                print( "step_D_TimelineAPI_index_account_tweets_prior_queue :", shared_memory.scan_requests.step_D_TimelineAPI_index_account_tweets_prior_queue.qsize() )
+                print( "step_D_TimelineAPI_index_account_tweets_queue :", shared_memory.scan_requests.step_D_TimelineAPI_index_account_tweets_queue.qsize() )
             else :
                 print( "Utilisation : queues")
         
@@ -408,13 +390,13 @@ if __name__ == "__main__" :
         thread.join()
     for thread in launched_threads_step_4_filter_results :
         thread.join()
-    for thread in launched_threads_step_A_GOT3_list_account_tweets :
+    for thread in launched_threads_step_A_SearchAPI_list_account_tweets :
         thread.join()
-    for thread in launched_threads_step_B_TwitterAPI_list_account_tweets :
+    for thread in launched_threads_step_B_TimelineAPI_list_account_tweets :
         thread.join()
-    for thread in launched_threads_step_C_GOT3_index_account_tweets :
+    for thread in launched_threads_step_C_SearchAPI_index_account_tweets :
         thread.join()
-    for thread in launched_threads_step_D_TwitterAPI_index_account_tweets :
+    for thread in launched_threads_step_D_TimelineAPI_index_account_tweets :
         thread.join()
     launched_thread_http_server.join()
     launched_thread_auto_update_accounts.join()

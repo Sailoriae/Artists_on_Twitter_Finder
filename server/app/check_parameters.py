@@ -40,10 +40,10 @@ def check_parameters () :
         check_list.append( type( param.NUMBER_OF_STEP_1_LINK_FINDER_THREADS ) == int and param.NUMBER_OF_STEP_1_LINK_FINDER_THREADS > 0 )
         check_list.append( type( param.NUMBER_OF_STEP_2_TWEETS_INDEXER_THREADS ) == int and param.NUMBER_OF_STEP_2_TWEETS_INDEXER_THREADS > 0 )
         check_list.append( type( param.NUMBER_OF_STEP_3_REVERSE_SEARCH_THREADS ) == int and param.NUMBER_OF_STEP_3_REVERSE_SEARCH_THREADS > 0 )
-        check_list.append( type( param.NUMBER_OF_STEP_A_GOT3_LIST_ACCOUNT_TWEETS_THREADS ) == int and param.NUMBER_OF_STEP_A_GOT3_LIST_ACCOUNT_TWEETS_THREADS > 0 )
-        check_list.append( type( param.NUMBER_OF_STEP_B_TWITTERAPI_LIST_ACCOUNT_TWEETS_THREADS ) == int and param.NUMBER_OF_STEP_B_TWITTERAPI_LIST_ACCOUNT_TWEETS_THREADS > 0 )
-        check_list.append( type( param.NUMBER_OF_STEP_C_GOT3_INDEX_ACCOUNT_TWEETS ) == int and param.NUMBER_OF_STEP_C_GOT3_INDEX_ACCOUNT_TWEETS > 0 )
-        check_list.append( type( param.NUMBER_OF_STEP_D_TWITTERAPI_INDEX_ACCOUNT_TWEETS ) == int and param.NUMBER_OF_STEP_D_TWITTERAPI_INDEX_ACCOUNT_TWEETS > 0 )
+        check_list.append( type( param.NUMBER_OF_STEP_A_SEARCHAPI_LIST_ACCOUNT_TWEETS_THREADS ) == int and param.NUMBER_OF_STEP_A_SEARCHAPI_LIST_ACCOUNT_TWEETS_THREADS > 0 )
+        check_list.append( type( param.NUMBER_OF_STEP_B_TIMELINEAPI_LIST_ACCOUNT_TWEETS_THREADS ) == int and param.NUMBER_OF_STEP_B_TIMELINEAPI_LIST_ACCOUNT_TWEETS_THREADS > 0 )
+        check_list.append( type( param.NUMBER_OF_STEP_C_SEARCHAPI_INDEX_ACCOUNT_TWEETS ) == int and param.NUMBER_OF_STEP_C_SEARCHAPI_INDEX_ACCOUNT_TWEETS > 0 )
+        check_list.append( type( param.NUMBER_OF_STEP_D_TIMELINEAPI_INDEX_ACCOUNT_TWEETS ) == int and param.NUMBER_OF_STEP_D_TIMELINEAPI_INDEX_ACCOUNT_TWEETS > 0 )
         check_list.append( type( param.DEBUG ) == bool )
         check_list.append( type( param.ENABLE_METRICS ) == bool )
         check_list.append( type( param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE ) == int and param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE >= 0 )
@@ -57,7 +57,7 @@ def check_parameters () :
             print( "Veuillez réinitialiser votre fichier \"parameters.py\" et le re-configurer !")
             return False
     
-    except NameError :
+    except (NameError, AttributeError) :
         print( "Il y a un paramètre manquant !" )
         print( "Veuillez réinitialiser votre fichier \"parameters.py\" et le re-configurer !")
         return False
@@ -97,43 +97,8 @@ def check_parameters () :
     
     # ========================================================================
     
-    # TODO : MàJ pour SNScraper en utilisant la classe Tweets_Lister_with_GetOldTweets3
+    # TODO : Vérification de SNScraper en utilisant la classe Tweets_Lister_with_SearchAPI
     # Mettre un mode test à cette classe, afin de mettre une query custom
-    """
-    print( "Verification de la connexion à l'API de recherche de GetOldTweets3..." )
-    from tweet_finder.lib_GetOldTweets3 import manager as GetOldTweets3_manager
-    
-    for token in param.TWITTER_AUTH_TOKENS :
-        tweetCriteria = GetOldTweets3_manager.TweetCriteria()\
-                .setQuerySearch( "from:Twitter" )\
-                .setSince( "2020-08-11" )\
-                .setUntil( "2020-08-12" )
-        
-        try :
-            tweets = GetOldTweets3_manager.TweetManager.getTweets( tweetCriteria, auth_token = token )
-        except KeyError :
-            print( "Echec de connexion à l'API de recherche de GetOldTweets3...")
-            print( "Veuillez vérifier votre fichier \"parameters.py\" !" )
-            print( "Notamment la liste de clés suivante : TWITTER_AUTH_TOKENS" )
-            return False
-        else :
-            print( "Connexion à l'API de recherche de GetOldTweets3 réussie !")
-    
-    print( "Verification de l'accès aux images avec GetOldTweets3..." )
-    ok = False
-    for tweet in tweets :
-        if tweet.id == "1293239745695211520" : # On test avec un seul tweet
-            if tweet.images == ["https://pbs.twimg.com/media/EfJ-C-JU0AAQL_C.jpg",
-                                "https://pbs.twimg.com/media/EfJ-aHlU0AAU1kq.jpg"] :
-                ok = True
-                print( "GetOldTweets a bien accès aux images des Tweets !" )
-    
-    if not ok :
-        print( "GetOldTweets n'a pas accès aux images des Tweets !" )
-        print( "Il faut modifier son code !" )
-        print( "Ou alors le Tweet ID 1293239745695211520 n'existe plus." )
-        return False
-    """
     
     # ========================================================================
     

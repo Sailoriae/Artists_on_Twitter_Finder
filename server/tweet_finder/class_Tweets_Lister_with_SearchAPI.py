@@ -27,7 +27,7 @@ sys_path.append(os_path.dirname(os_path.dirname(os_path.abspath(__file__))))
 import parameters as param
 
 
-class Unfounded_Account_on_Lister_with_GetOldTweets3 ( Exception ) :
+class Unfounded_Account_on_Lister_with_SearchAPI ( Exception ) :
     pass
 
 
@@ -47,10 +47,10 @@ def copy_func(f):
 
 
 """
-Classe permettant de lister les Tweets d'un compte Twitter avec la librairie
-GetOldTweets3.
+Classe permettant de lister les Tweets d'un compte Twitter avec l'API
+de recherche de Twittern, via la librairie SNScrape.
 """
-class Tweets_Lister_with_GetOldTweets3 :
+class Tweets_Lister_with_SearchAPI :
     def __init__( self, auth_token, DEBUG : bool = False, ENABLE_METRICS : bool = False ) :
         self.DEBUG = DEBUG
         self.ENABLE_METRICS = ENABLE_METRICS
@@ -76,21 +76,21 @@ class Tweets_Lister_with_GetOldTweets3 :
             "NULL" pour ce compte dans la base de données si le compte était
             déjà dans la base.
     
-    Peut émettre une exception "Unfounded_Account_on_Lister_with_TwitterAPI" si
+    Peut émettre une exception "Unfounded_Account_on_Lister_with_TimelineAPI" si
     le compte est introuvable.
     """
-    def list_getoldtweets3_tweets ( self, account_name, queue_put, add_step_A_time = None ) :
+    def list_searchAPI_tweets ( self, account_name, queue_put, add_step_A_time = None ) :
         account_id = self.twitter.get_account_id( account_name )
         if account_id == None :
-            print( "[List GOT3] Compte @" + account_name + " introuvable !" )
-            raise Unfounded_Account_on_Lister_with_GetOldTweets3
+            print( "[List SearchAPI] Compte @" + account_name + " introuvable !" )
+            raise Unfounded_Account_on_Lister_with_SearchAPI
         
         if self.DEBUG :
-            print( "[List GOT3] Listage des Tweets de @" + account_name + "." )
+            print( "[List SearchAPI] Listage des Tweets de @" + account_name + "." )
         if self.DEBUG or self.ENABLE_METRICS :
             start = time()
         
-        since_date = self.bdd.get_account_GOT3_last_tweet_date( account_id )
+        since_date = self.bdd.get_account_SearchAPI_last_tweet_date( account_id )
         
         
         # Note : Plus besoin de faire de bidouille avec "filter:safe"
@@ -180,7 +180,7 @@ class Tweets_Lister_with_GetOldTweets3 :
         
         
         if self.DEBUG or self.ENABLE_METRICS :
-            print( "[List GOT3] Il a fallu", time() - start, "secondes pour lister", count, "Tweets de @" + account_name + "." )
+            print( "[List SearchAPI] Il a fallu", time() - start, "secondes pour lister", count, "Tweets de @" + account_name + "." )
             if add_step_A_time != None :
                 if count > 0 :
                     add_step_A_time( (time() - start) / count )
@@ -195,12 +195,12 @@ class Tweets_Lister_with_GetOldTweets3 :
         if count > 0 :
             return first_tweet_date.strftime('%Y-%m-%d')
         else :
-            return self.bdd.get_account_GOT3_last_tweet_date( account_id )
+            return self.bdd.get_account_SearchAPI_last_tweet_date( account_id )
 
 
 """
 Test du bon fonctionnement de cette classe
 """
 if __name__ == '__main__' :
-    engine = Tweets_Lister_with_GetOldTweets3( param.TWITTER_AUTH_TOKENS[0], DEBUG = True )
-    engine.list_getoldtweets3_tweets( "rikatantan2nd", print )
+    engine = Tweets_Lister_with_SearchAPI( param.TWITTER_AUTH_TOKENS[0], DEBUG = True )
+    engine.list_searchAPI_tweets( "rikatantan2nd", print )

@@ -51,10 +51,10 @@ Stocke les comptes Twitter analysés.
 
 Contient les attributs suivants :
 * `account_id BIGINT UNSIGNED PRIMARY KEY` : L'ID du compte Twitter,
-* `last_GOT3_indexing_api_date CHAR(10)` : La date du dernier scan avec GetOldTweets3 de ce compte, au format YYYY-MM-DD (A donner au prochain scan pour éviter de rescanner tous les Tweets du compte),
-* `last_GOT3_indexing_local_date DATETIME` : La date locale de la dernière mise à jour avec GetOldTweets3t, utilisé uniquement par le thread de mise à jour automatique,
-* `last_TwitterAPI_indexing_tweet_id BIGINT UNSIGNED` : L'ID du tweet le plus récent de ce compte scanné avec Tweepy / l'API Twitter publique (A donner au prochain scan pour éviter de rescanner tous les Tweets du compte),
-* `last_TwitterAPI_indexing_local_date DATETIME` : La date locale de la dernière mise à jour avec Tweepy / l'API Twitter publique, utilisé uniquement par le thread de mise à jour automatique.
+* `last_SearchAPI_indexing_api_date CHAR(10)` : La date du dernier scan de ce compte avec l'API de recherche, au format YYYY-MM-DD (A donner au prochain scan pour éviter de rescanner tous les Tweets du compte),
+* `last_SearchAPI_indexing_local_date DATETIME` : La date locale de la dernière mise à jour avec l'API de recherche, utilisé uniquement par le thread de mise à jour automatique,
+* `last_TimelineAPI_indexing_tweet_id BIGINT UNSIGNED` : L'ID du tweet le plus récent de ce compte scanné avec l'API de timeline (A donner au prochain scan pour éviter de rescanner tous les Tweets du compte),
+* `last_TimelineAPI_indexing_local_date DATETIME` : La date locale de la dernière mise à jour avec l'API de timeline, utilisé uniquement par le thread de mise à jour automatique.
 
 
 ## Objets dans ce module
@@ -85,8 +85,8 @@ Renvoyé par la méthode `get_images_in_db_iterator()` de la classe `SQLite_or_M
 
 Itère des triplets contenant dans cet ordre :
 * L'ID du compte Twitter,
-* La date locale de la dernière mise à jour avec GetOldTweets3,
-* La date locale de la dernière mise à jour avec Tweepy / l'API Twitter publique.
+* La date locale de la dernière mise à jour avec l'API de recherche,
+* La date locale de la dernière mise à jour avec l'API de timeline.
 
 Utilisé par le thread de mise à jour automatique (Procédure `thread_auto_update_accounts`).
 

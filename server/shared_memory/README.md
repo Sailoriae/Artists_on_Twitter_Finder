@@ -56,8 +56,8 @@ Arbre des objets :
 
   - Attribut `scan_requests` : URI vers objet `Scan_Requests_Pipeline` : Mémoire partagée pour les threads de traitement des requêtes de scan.
     - Liste `requests` (Privé) : Liste d'URI vers objets `Scan_Request` : Requêtes des utilisateuts.
-      - Attribut `GetOldTweets3_tweets_queue` (Privé) : URIs vers objet `Pyro_Queue` : File d'attente des Tweets trouvés par GOT3.
-      - Attribut `TwitterAPI_tweets_queue` : URIs vers objet `Pyro_Queue` : File d'attente d'attente des Tweets trouvés par l'API Twitter.
+      - Attribut `SearchAPI_tweets_queue` (Privé) : URIs vers objet `Pyro_Queue` : File d'attente des Tweets trouvés avec l'API de recherche.
+      - Attribut `TimelineAPI_tweets_queue` : URIs vers objet `Pyro_Queue` : File d'attente d'attente des Tweets trouvés avec l'API de timeline.
     - Attribut `requests_sem` (Privé) : URI vers objet `Pyro_Semaphore` : Vérrouillage de la liste précédente.
     - Attributs `*_queue` : URIs vers objets `Pyro_Queue` : Files d'attente des différentes threads de traitement. Peuvent contenir des URI de la liste `requests`.
     - Attribut `requests_in_thread` : URI vers objet `Threads_Register` : Objet auquel les threads de traitement déclarent les requêtes qu'ils sont en train de traiter (En donnent l'URI de la requête concernée).

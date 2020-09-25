@@ -96,7 +96,8 @@ class DeviantArt :
         # marquée sensible quoi / "adulte"
         # On retourne donc l'image dans le JSON, donc en moins bonne qualité
         # Note : On pourrait faire un système où on passe un jeton d'auth en
-        # cookie, comme on le fait avec GetOldTweets3
+        # cookie, comme on le faisait avec GetOldTweets3 et comme on le fait
+        # avec SNScrape
         if objet == None :
             return self.cache_illust_url_json["url"]
         

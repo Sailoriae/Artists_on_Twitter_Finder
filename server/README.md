@@ -5,9 +5,6 @@ Il possède une API HTTP pour recevoir les requêtes, et y répondre.
 Lorsqu'il est démarré, il affiche une interface en ligne de commande. Tapez `help` dans cette interface pour avoir la liste des commandes disponibles.
 
 
-**Note importante :** La librairie GetOldTweets3 a été remplacée par SNScrape ! Elles permettent d'indexer des comptes Twitter via une API de recherche. En effet, il y a deux indexations : Via l'API de timeline des comptes, qui limite aux 3 200 premiers Tweets de chaque comptes, et via une API de recherche.
-
-
 ## Installation
 
 1. Dupliquez le fichier `parameters_sample.py` vers `parametres.py`, et configurez-le avec vos clés d'accès aux API. Il vous faut :
@@ -39,10 +36,10 @@ Ceci lance le serveur et vous met en ligne de commande. Si vous souhaitez quitte
   - Recherche inversée d'image. Classe principale : `Reverse_Searcher`, dans le module `tweet_finder`.
   - Filtrage des résultats de la recherche inversée, car il peut y avoir des faux positifs.
 * Traitement des requêtes de scan en 4 étapes paralléles (Module `tweet_finder`) :
-  - GetOldTweets3 : Listage des Tweets des comptes Twitter trouvés. Classe principale : `Tweets_Lister_with_GetOldTweets3`.
-  - GetOldTweets3 : Analyse et indexation des Tweets trouvés. L'analyse consiste au calcul des caractéristiques de l'image avec le moteur CBIR. Classe principale : `Tweets_Indexer_with_GetOldTweets3`.
-  - API Twitter publique via Tweepy : Listage des Tweets des comptes Twitter trouvés. Classe principale : `Tweets_Lister_with_TwitterAPI`.
-  - API Twitter publique via Tweepy : Analyse et indexation des Tweets des comptes Twitter trouvés. Classe principale : `Tweets_Indexer_with_TwitterAPI`.
+  - API de recherche : Listage des Tweets des comptes Twitter trouvés. Classe principale : `Tweets_Lister_with_SearchAPI`.
+  - API de recherche : Analyse et indexation des Tweets trouvés. L'analyse consiste au calcul des caractéristiques de l'image avec le moteur CBIR. Classe principale : `Tweets_Indexer_with_SearchAPI`.
+  - API de timeline : Listage des Tweets des comptes Twitter trouvés. Classe principale : `Tweets_Lister_with_TimelineAPI`.
+  - API de timeline : Analyse et indexation des Tweets des comptes Twitter trouvés. Classe principale : `Tweets_Indexer_with_TimelineAPI`.
   - Voir pourquoi il y a deux systèmes d'indexation dans `../doc/Limites_de_scan_des_comptes_Twitter.md`.
 * Serveur web pour l'API HTTP qui renvoit les status des requêtes, avec les éventuels résultats, ou une erreur s'il y a un problème. Voir `doc/API_HTTP.md`.
 * Mémoire partagée entre tous les threads dans l'objet `Shared_Memory` du module `shared_memory` (Avec la librairie Pyro4).
@@ -87,4 +84,4 @@ Script `app.py` : Script central, crée et gère les threads de traitement, la l
   - Ceci est une URL d'illustration, elle peut être traitée par le serveur : https://danbooru.donmai.us/posts/3991989
   - Ceci est une URL menant directement à l'image, elle sera rejetée par serveur : https://danbooru.donmai.us/data/__hatsune_miku_vocaloid_drawn_by_bibboss39__cac99a60fa84a778d5b048daec05e7b1.jpg
 
-* La date de dernière mise à jour d'un compte Twitter est mise dans la base de données à la fin des 2 étapes d'indexation (Indexation GOT3 et indexation Twitter API). Si l'un des threads de traitement plante, la requête est mise en erreur, et aucune date n'est enregistrée. Ainsi, l'intégralité des Tweets qu'il est possible de récupérer ont étés analysés et ceux avec une ou plusieurs image sont dans la base de données.
+* La date de dernière mise à jour d'un compte Twitter est mise dans la base de données à la fin des 2 étapes d'indexation (Indexation avec l'API de recherche et indexation avec l'API de timeline). Si l'un des threads de traitement plante, la requête est mise en erreur, et aucune date n'est enregistrée. Ainsi, l'intégralité des Tweets qu'il est possible de récupérer ont étés analysés et ceux avec une ou plusieurs image sont dans la base de données.

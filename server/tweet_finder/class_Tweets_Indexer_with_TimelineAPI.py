@@ -23,9 +23,9 @@ import parameters as param
 
 """
 Classe permettant d'indexer les Tweets d'un compte Twitter trouvés avec l'API
-publique de Twitter via la librairie Tweepy.
+de timeline de Twitter, via la librairie Tweepy.
 """
-class Tweets_Indexer_with_TwitterAPI :
+class Tweets_Indexer_with_TimelineAPI :
     def __init__( self, DEBUG : bool = False, ENABLE_METRICS : bool = False ) :
         self.DEBUG = DEBUG
         self.ENABLE_METRICS = ENABLE_METRICS
@@ -40,14 +40,14 @@ class Tweets_Indexer_with_TwitterAPI :
     
     """
     Enregistrer l'ID Tweet listé le plus récent dans la base de données.
-    Cet ID est renvoyée par la méthode
-    Tweets_Lister_with_TwitterAPI.list_TwitterAPI_tweets().
+    Cet ID est renvoyé par la méthode
+    Tweets_Lister_with_TimelineAPI.list_TimelineAPI_tweets().
     
     @param last_tweet_id ID de Tweet à enregistrer.
     @param account_id L'ID du compte Twitter.
     """
     def save_last_tweet_id ( self, account_id, last_tweet_id ) :
-        self.bdd.set_account_TwitterAPI_last_tweet_id( account_id, last_tweet_id )
+        self.bdd.set_account_TimelineAPI_last_tweet_id( account_id, last_tweet_id )
     
     """
     Indexer les images d'un tweet dans la base de données.
@@ -145,8 +145,7 @@ class Tweets_Indexer_with_TwitterAPI :
         try :
             hashtags = []
             for hashtag in tweet._json["entities"]["hashtags"] :
-                # On ajoute le "#" car GOT3 le laisse, et l'API Twitter l'enlève
-                # Donc on fait comme GOT3
+                # On ajoute le "#" car cette API de nous le met pas
                 hashtags.append( "#" + hashtag["text"] )
         except KeyError as error :
             if self.DEBUG :
@@ -175,20 +174,20 @@ class Tweets_Indexer_with_TwitterAPI :
     Scanner tous les tweets d'un compte (Les retweets ne comptent pas).
     Seuls les tweets avec des médias seront scannés.
     Et parmis eux, seuls les tweets avec 1 à 4 images seront indexés.
-    Cette méthode utilise l'API publique de Twitter, et est donc limitée au
+    Cette méthode utilise l'API de timeline de Twitter, et est donc limitée au
     3200 premiers tweets (RT compris) d'un compte.
     
     Cette méthode ne recanne pas les tweets déjà scannés.
     En effet, elle commence sont analyse à la date du dernier scan.
     Si le compte n'a pas déjà été scanné, tous ses tweets le seront.
     
-    C'est la méthode Tweets_Lister_with_TwitterAPI.list_TwitterAPI_tweets() qui
+    C'est la méthode Tweets_Lister_with_TimelineAPI.list_TimelineAPI_tweets() qui
     vérifie si le nom de compte Twitter entré ici est valide !
     
     @param account_name Le nom d'utilisateur du compte à scanner, ne sert que à
                         faire des "print()".
     @param queue La file d'attente donnée à la méthode
-                 Tweet_Lister_with_TwitterAPI.list_TwitterAPI_tweets().
+                 Tweet_Lister_with_TimelineAPI.list_TimelineAPI_tweets().
     @param indexing_tweets Objet "Common_Tweet_IDs_List" permettant d'éviter de
                            traiter le même Tweet en même temps quand on tourne
                            en parallèle de l'autre classe d'indexation.
@@ -196,9 +195,9 @@ class Tweets_Indexer_with_TwitterAPI :
     @return True si la file d'attente est terminée.
             False si il faut attendre un peu et rappeler cette méthode.
     """
-    def index_or_update_with_TwitterAPI ( self, account_name : str, queue, indexing_tweets, add_step_D_times = None ) -> bool :
+    def index_or_update_with_TimelineAPI ( self, account_name : str, queue, indexing_tweets, add_step_D_times = None ) -> bool :
 #        if self.DEBUG :
-#            print( "[Index TwiAPI] Indexation de Tweets de @" + account_name + "." )
+#            print( "[Index TLAPI] Indexation de Tweets de @" + account_name + "." )
         if self.DEBUG  or self.ENABLE_METRICS :
             times = [] # Liste des temps pour indexer un Tweet
         
@@ -208,7 +207,7 @@ class Tweets_Indexer_with_TwitterAPI :
             except Empty_Queue : # Si la queue est vide
                 if self.DEBUG or self.ENABLE_METRICS :
                     if len(times) > 0 :
-                        print( "[Index TwitAPI]", len(times), "Tweets indexés avec une moyenne de", mean(times), "secondes par Tweet." )
+                        print( "[Index TimelineAPI]", len(times), "Tweets indexés avec une moyenne de", mean(times), "secondes par Tweet." )
                         if add_step_D_times != None :
                             add_step_D_times( times )
                 return False
@@ -217,13 +216,13 @@ class Tweets_Indexer_with_TwitterAPI :
             if tweet == None :
                 if self.DEBUG or self.ENABLE_METRICS :
                     if len(times) > 0 :
-                        print( "[Index TwitAPI]", len(times), "Tweets indexés avec une moyenne de", mean(times), "secondes par Tweet." )
+                        print( "[Index TimelineAPI]", len(times), "Tweets indexés avec une moyenne de", mean(times), "secondes par Tweet." )
                         if add_step_D_times != None :
                             add_step_D_times( times )
                 return True
             
             if self.DEBUG :
-                print( "[Index TwitAPI] Indexation Tweet " + str(tweet.id) + " de @" + account_name + "." )
+                print( "[Index TimelineAPI] Indexation Tweet " + str(tweet.id) + " de @" + account_name + "." )
             if self.DEBUG or self.ENABLE_METRICS :
                 start = time()
             
@@ -238,7 +237,7 @@ class Tweets_Indexer_with_TwitterAPI :
             # traiter, on n'a pas déjà traité, ce Tweet
             if not indexing_tweets.add( tweet.id ) :
                 if self.DEBUG :
-                    print( "[Index TwitAPI] Tweet déjà indexé par l'autre indexeur !" )
+                    print( "[Index TimelineAPI] Tweet déjà indexé par l'autre indexeur !" )
                 continue
             
             # Cela ne sert à rien tester avant d'indexer si le tweet n'est pas
