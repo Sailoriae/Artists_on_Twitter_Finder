@@ -11,7 +11,7 @@ sys_path.append(os_path.dirname(os_path.dirname(os_path.abspath(__file__))))
 
 import parameters as param
 from tweet_finder.database import SQLite_or_MySQL
-from tweet_finder.twitter import TweepyAbtraction
+from tweet_finder.twitter import TweepyAbstraction
 
 
 """
@@ -25,7 +25,7 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
     bdd_direct_access = SQLite_or_MySQL()
     
     # Initialisation de notre couche d'abstraction à l'API Twitter
-    twitter = TweepyAbtraction( param.API_KEY,
+    twitter = TweepyAbstraction( param.API_KEY,
                                 param.API_SECRET,
                                 param.OAUTH_TOKEN,
                                 param.OAUTH_TOKEN_SECRET )

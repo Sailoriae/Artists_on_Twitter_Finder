@@ -16,7 +16,7 @@ Couche d'abstraction à la librairie Tweepy.
 Permet d'utiliser sur l'API publique de Twitter avec la librairie Tweepy.
 Gère les limites de l'API Twitter et attend d'être débloqué en cas de bloquage.
 """
-class TweepyAbtraction :
+class TweepyAbstraction :
     def __init__ ( self,
                    api_key,
                    api_secret,

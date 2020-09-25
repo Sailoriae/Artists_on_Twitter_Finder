@@ -5,10 +5,10 @@ from time import time
 
 try :
     from database import SQLite_or_MySQL
-    from twitter import TweepyAbtraction
+    from twitter import TweepyAbstraction
 except ModuleNotFoundError : # Si on a été exécuté en temps que module
     from .database import SQLite_or_MySQL
-    from .twitter import TweepyAbtraction
+    from .twitter import TweepyAbstraction
 
 
 class Unfounded_Account_on_Lister_with_TimelineAPI ( Exception ) :
@@ -25,7 +25,7 @@ class Tweets_Lister_with_TimelineAPI :
         self.DEBUG = DEBUG
         self.ENABLE_METRICS = ENABLE_METRICS
         self.bdd = SQLite_or_MySQL()
-        self.twitter = TweepyAbtraction( api_key,
+        self.twitter = TweepyAbstraction( api_key,
                                          api_secret,
                                          oauth_token,
                                          oauth_token_secret )

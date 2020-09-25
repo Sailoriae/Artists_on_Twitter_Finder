@@ -8,11 +8,11 @@ from queue import Empty as Empty_Queue
 try :
     from database import SQLite_or_MySQL
     from class_CBIR_Engine_for_Tweets_Images import CBIR_Engine_for_Tweets_Images
-    from twitter import TweepyAbtraction
+    from twitter import TweepyAbstraction
 except ModuleNotFoundError : # Si on a été exécuté en temps que module
     from .database import SQLite_or_MySQL
     from .class_CBIR_Engine_for_Tweets_Images import CBIR_Engine_for_Tweets_Images
-    from .twitter import TweepyAbtraction
+    from .twitter import TweepyAbstraction
 
 # Ajouter le répertoire parent au PATH pour pouvoir importer les paramètres
 from sys import path as sys_path
@@ -33,7 +33,7 @@ class Tweets_Indexer_with_TimelineAPI :
         self.engine = CBIR_Engine_for_Tweets_Images( DEBUG = DEBUG )
         
         # Nécessaire si on passe des ID de Tweets à index_tweet()
-        self.twitter = TweepyAbtraction( param.API_KEY,
+        self.twitter = TweepyAbstraction( param.API_KEY,
                                          param.API_SECRET,
                                          param.OAUTH_TOKEN,
                                          param.OAUTH_TOKEN_SECRET )

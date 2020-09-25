@@ -65,7 +65,7 @@ def check_parameters () :
     # ========================================================================
     
     print( "Verification de la connexion à l'API publique Twitter..." )
-    from tweet_finder.twitter import TweepyAbtraction
+    from tweet_finder.twitter import TweepyAbstraction
     
     def test_twitter ( api ) :
         # On essaye d'avoir le premier Tweet sur Twitter
@@ -80,7 +80,7 @@ def check_parameters () :
             print( "Connexion à l'API publique Twitter réussie !")
             return True
     
-    twitter = TweepyAbtraction( param.API_KEY,
+    twitter = TweepyAbstraction( param.API_KEY,
                                 param.API_SECRET,
                                 param.OAUTH_TOKEN,
                                 param.OAUTH_TOKEN_SECRET )
@@ -88,7 +88,7 @@ def check_parameters () :
         return False
     
     for creds in param.TWITTER_API_KEYS :
-        twitter = TweepyAbtraction( param.API_KEY,
+        twitter = TweepyAbstraction( param.API_KEY,
                                     param.API_SECRET,
                                     creds["OAUTH_TOKEN"],
                                     creds["OAUTH_TOKEN_SECRET"] )

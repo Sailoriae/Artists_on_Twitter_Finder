@@ -7,12 +7,12 @@ from time import time
 try :
     from cbir_engine import CBIR_Engine
     from database import SQLite_or_MySQL
-    from twitter import TweepyAbtraction
+    from twitter import TweepyAbstraction
     from utils import url_to_cv2_image, binary_image_to_cv2_image
 except ModuleNotFoundError : # Si on a été exécuté en temps que module
     from .cbir_engine import CBIR_Engine
     from .database import SQLite_or_MySQL
-    from .twitter import TweepyAbtraction
+    from .twitter import TweepyAbstraction
     from .utils import url_to_cv2_image, binary_image_to_cv2_image
 
 # Ajouter le répertoire parent au PATH pour pouvoir importer les paramètres
@@ -28,7 +28,7 @@ class Reverse_Searcher :
         self.ENABLE_METRICS = ENABLE_METRICS
         self.cbir_engine = CBIR_Engine()
         self.bdd = SQLite_or_MySQL()
-        self.twitter = TweepyAbtraction( param.API_KEY,
+        self.twitter = TweepyAbstraction( param.API_KEY,
                                          param.API_SECRET,
                                          param.OAUTH_TOKEN,
                                          param.OAUTH_TOKEN_SECRET )

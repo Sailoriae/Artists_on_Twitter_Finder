@@ -15,10 +15,10 @@ import re
 
 try :
     from database import SQLite_or_MySQL
-    from twitter import TweepyAbtraction
+    from twitter import TweepyAbstraction
 except ModuleNotFoundError : # Si on a été exécuté en temps que module
     from .database import SQLite_or_MySQL
-    from .twitter import TweepyAbtraction
+    from .twitter import TweepyAbstraction
 
 # Ajouter le répertoire parent au PATH pour pouvoir importer les paramètres
 from sys import path as sys_path
@@ -56,7 +56,7 @@ class Tweets_Lister_with_SearchAPI :
         self.ENABLE_METRICS = ENABLE_METRICS
         self.bdd = SQLite_or_MySQL()
         self.auth_token = auth_token
-        self.twitter = TweepyAbtraction( param.API_KEY,
+        self.twitter = TweepyAbstraction( param.API_KEY,
                                          param.API_SECRET,
                                          param.OAUTH_TOKEN,
                                          param.OAUTH_TOKEN_SECRET )

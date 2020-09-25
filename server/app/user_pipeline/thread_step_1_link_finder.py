@@ -11,7 +11,7 @@ sys_path.append(os_path.dirname(os_path.dirname(os_path.dirname(os_path.abspath(
 
 import parameters as param
 from link_finder import Link_Finder, Not_an_URL, Unsupported_Website
-from tweet_finder.twitter import TweepyAbtraction
+from tweet_finder.twitter import TweepyAbstraction
 
 
 """
@@ -25,7 +25,7 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
     finder_engine = Link_Finder()
     
     # Initialisation de notre couche d'abstraction à l'API Twitter
-    twitter = TweepyAbtraction( param.API_KEY,
+    twitter = TweepyAbstraction( param.API_KEY,
                                 param.API_SECRET,
                                 param.OAUTH_TOKEN,
                                 param.OAUTH_TOKEN_SECRET )

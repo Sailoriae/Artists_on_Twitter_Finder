@@ -195,8 +195,8 @@ if __name__ == "__main__" :
     Entrée en ligne de commande (CLI).
     """
     # Initialisation de notre couche d'abstraction à l'API Twitter
-    from tweet_finder.twitter import TweepyAbtraction
-    twitter = TweepyAbtraction( param.API_KEY,
+    from tweet_finder.twitter import TweepyAbstraction
+    twitter = TweepyAbstraction( param.API_KEY,
                                 param.API_SECRET,
                                 param.OAUTH_TOKEN,
                                 param.OAUTH_TOKEN_SECRET )
