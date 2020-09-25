@@ -99,13 +99,13 @@ class Link_Finder :
         # Ici, on vérifie juste le domaine.
         
         # Vérification que ce soit bien une URL
-        if re.search( url, illust_url ) == None :
+        if re.match( url, illust_url ) == None :
             raise Not_an_URL
         
         # ====================================================================
         # DEVIANTART
         # ====================================================================
-        elif re.search( deviantart_url, illust_url ) != None :
+        elif re.match( deviantart_url, illust_url ) != None :
             twitter_accounts = self.deviantart.get_twitter_accounts( illust_url )
             if not TWITTER_ONLY :
                 image_url = self.deviantart.get_image_url( illust_url )
@@ -114,7 +114,7 @@ class Link_Finder :
         # ====================================================================
         # PIXIV
         # ====================================================================
-        elif re.search( pixiv_url, illust_url ) != None :
+        elif re.match( pixiv_url, illust_url ) != None :
             twitter_accounts = self.pixiv.get_twitter_accounts( illust_url )
             if not TWITTER_ONLY :
                 image_url = self.pixiv.get_image_url( illust_url )
@@ -123,7 +123,7 @@ class Link_Finder :
         # ====================================================================
         # DANBOORU
         # ====================================================================
-        elif re.search( danbooru_url, illust_url ) != None :
+        elif re.match( danbooru_url, illust_url ) != None :
             twitter_accounts = self.danbooru.get_twitter_accounts( illust_url )
             
             # Si l'URL n'est pas invalide
@@ -146,7 +146,7 @@ class Link_Finder :
         # ====================================================================
         # DERPIBOORU
         # ====================================================================
-        elif re.search( derpibooru_url, illust_url ) != None :
+        elif re.match( derpibooru_url, illust_url ) != None :
             twitter_accounts = self.derpibooru.get_twitter_accounts( illust_url )
             
             # Comme les Boorus sont des sites de reposts, on peut trouver la
@@ -169,7 +169,7 @@ class Link_Finder :
         # ====================================================================
         # FURBOORU
         # ====================================================================
-        elif re.search( furbooru_url, illust_url ) != None :
+        elif re.match( furbooru_url, illust_url ) != None :
             twitter_accounts = self.furbooru.get_twitter_accounts( illust_url )
             
             # Comme les Boorus sont des sites de reposts, on peut trouver la
