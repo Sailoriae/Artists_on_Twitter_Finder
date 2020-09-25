@@ -3,22 +3,12 @@
 
 from time import time
 
-"""
-NOTE TRES IMPORTANTE
-On n'utilise plus GetOldTweets3, car il ne fonctionne plus
-SNScrape est son remplaçant
-Il utilise l'API utilisée par l'UI web https://twitter.com/search
-https://api.twitter.com/2/search/adaptive.json
-"""
-import snscrape.modules.twitter
-import re
-
 try :
     from database import SQLite_or_MySQL
-    from twitter import TweepyAbstraction
+    from twitter import TweepyAbstraction, SNScrapeAbstraction
 except ModuleNotFoundError : # Si on a été exécuté en temps que module
     from .database import SQLite_or_MySQL
-    from .twitter import TweepyAbstraction
+    from .twitter import TweepyAbstraction, SNScrapeAbstraction
 
 # Ajouter le répertoire parent au PATH pour pouvoir importer les paramètres
 from sys import path as sys_path
@@ -32,21 +22,6 @@ class Unfounded_Account_on_Lister_with_SearchAPI ( Exception ) :
 
 
 """
-Faire un deep-copy d'une fonction Python.
-Source : https://stackoverflow.com/a/6528148
-"""
-import types
-import functools
-def copy_func(f):
-    g = types.FunctionType(f.__code__, f.__globals__, name=f.__name__,
-                           argdefs=f.__defaults__,
-                           closure=f.__closure__)
-    g = functools.update_wrapper(g, f)
-    g.__kwdefaults__ = f.__kwdefaults__
-    return g
-
-
-"""
 Classe permettant de lister les Tweets d'un compte Twitter avec l'API
 de recherche de Twittern, via la librairie SNScrape.
 """
@@ -55,7 +30,7 @@ class Tweets_Lister_with_SearchAPI :
         self.DEBUG = DEBUG
         self.ENABLE_METRICS = ENABLE_METRICS
         self.bdd = SQLite_or_MySQL()
-        self.auth_token = auth_token
+        self.snscrape = SNScrapeAbstraction( auth_token )
         self.twitter = TweepyAbstraction( param.API_KEY,
                                          param.API_SECRET,
                                          param.OAUTH_TOKEN,
@@ -93,61 +68,15 @@ class Tweets_Lister_with_SearchAPI :
         since_date = self.bdd.get_account_SearchAPI_last_tweet_date( account_id )
         
         
-        # Note : Plus besoin de faire de bidouille avec "filter:safe"
-        query = "from:" + account_name + " filter:media"
-        if since_date != None :
-            query += " since:" + since_date
-        scraper = snscrape.modules.twitter.TwitterSearchScraper( query, retries = 9 )
-        # Peut réessayer 9 fois, car il fait des attentes exponentielles
-        # La somme de toutes ces attentes sera donc la suivante (en secondes):
-        # 2**0 + 2**1 + 2**2 + 2**3 + 2**4 + 2**5 + 2**6 + 2**7 + 2**8 + 2**9
-        # Ce qui fait 17 minutes > 15 minutes pour se débloquer d'une HTTP 429
-        
-        
-        # ====================================================================
-        # MODIFIER SNSCRAPER POUR QU'IL PUISSE FAIRE EXACTEMENT CE QU'ON VEUT
-        # ====================================================================
-        
-        # Hack : Donner en douce à SNScraper des tokens pour s'authentifier
-        # comme le serait un utilisateur sur l'UI web
-        # Permet de recevoir les Tweets marqués sensibles
-        scraper._session.cookies.set("auth_token", 
-                                     self.auth_token,
-                                     domain = '.twitter.com',
-                                     path = '/',
-                                     secure = True,
-                                     expires = None)
-        
-        # Hack : Remplacer l'obtention du guest token pour l'obtention du token
-        # ct0, qui chante tout le temps
-        def ensure_guest_token ( self = scraper, url = None ) :
-            if self._guestToken is not None:
-                return
-            r = self._get(self._baseUrl if url is None else url, headers = {'User-Agent': self._userAgent})
-            match = re.search(r'document\.cookie = decodeURIComponent\("ct0=(\d+); Max-Age=10800; Domain=\.twitter\.com; Path=/; Secure"\);', r.text)
-            if match:
-                self._guestToken = match.group(1)
-            if 'ct0' in r.cookies:
-                self._guestToken = r.cookies['ct0']
-            if self._guestToken:
-                self._session.cookies.set('ct0', self._guestToken, domain = '.twitter.com', path = '/', secure = True, expires = None)
-                self._apiHeaders['x-csrf-token'] = self._guestToken
-                self._apiHeaders["x-twitter-auth-type"] = "OAuth2Session"
-                return
-            raise snscrape.base.ScraperException('Unable to find ct0 token')
-        scraper._ensure_guest_token = ensure_guest_token
-        
-        # Deep-copy de la fonction tweet_to_tweet
-        tweet_to_tweet_old = copy_func( scraper._tweet_to_tweet )
-        
-        # Hack : Comme SNScraper ne récupére pas les URL des images et les
-        # hashtags des Tweets, on remplace sa fonction pour le faire nous-même
-        def tweet_to_tweet_new  ( tweet, obj ) :
-            tweet_id = tweet['id_str'] # ID du Tweet
+        # Fonction de converstion vers la fonction queue_put()
+        # Permet de filtre les Tweets sans images, et de les formater pour la
+        # fonction queue_put()
+        def output_function ( tweet_json ) :
+            tweet_id = tweet_json['id_str'] # ID du Tweet
             
             images = [] # Liste des URLs des images dans ce Tweet
             try :
-                for tweet_media in tweet["extended_entities"]["media"] :
+                for tweet_media in tweet_json["extended_entities"]["media"] :
                     if tweet_media["type"] == "photo" :
                         images.append( tweet_media["media_url_https"] )
             except KeyError : # Tweet sans média
@@ -155,32 +84,22 @@ class Tweets_Lister_with_SearchAPI :
             
             hashtags = [] # Liste des hashtags dans ce Tweet
             try :
-                for hashtag in tweet["entities"]["hashtags"] :
+                for hashtag in tweet_json["entities"]["hashtags"] :
                     hashtags.append( "#" + hashtag["text"] )
             except KeyError :
                 pass
             
             if len(images) > 0 : # Sinon ça ne sert à rien
                 queue_put( tweet_id, account_id, images, hashtags )
-            
-            # On appel quand même sa fonction et on retourne ce qu'elle doit
-            # normalement retourner
-            return tweet_to_tweet_old( scraper, tweet, obj )
-        
-        scraper._tweet_to_tweet = tweet_to_tweet_new
         
         
-        # ====================================================================
-        # LANCER LA RECHERCHE ET RETOURNER
-        # ====================================================================
+        # Note : Plus besoin de faire de bidouille avec "filter:safe"
+        query = "from:" + account_name + " filter:media"
+        if since_date != None :
+            query += " since:" + since_date
         
-        # Obtenir les Tweets
-        count = 0
-        first_tweet_date = None # Le premier Tweet est forcément le plus récent
-        for tweet in scraper.get_items() :
-            count += 1
-            if first_tweet_date == None :
-                first_tweet_date = tweet.date
+        # Lancer la recherche
+        first_tweet_date, count = self.snscrape.search( query, output_function )
         
         
         if self.DEBUG or self.ENABLE_METRICS :
