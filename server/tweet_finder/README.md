@@ -25,7 +25,7 @@ La fonction `compare_two_images` permet de comparer deux images d'une méthode c
 
 * `cbir_engine` : Moteur de recherche d'image par le contenu ("Content-Based Image Retrieval", CBIR), mais ne gère pas de base de données. Ce moteur est généraliste, il peut donc être réutilisé dans un autre projet, à condition de réécrire un accès à une base de données et l'itération sur cette base (Pour la recherche).
 * `database` : Couche d'abstraction à l'utilisation de la base de données. Cette couche est spécialisée pour notre projet.
-* `twitter` : Couche d'abstraction à l'utilisation de l'API Twitter via la librairie Python Tweepy. Est spécialisé, contient uniquement les fonctions dont nous avons besoin.
+* `twitter` : Couche d'abstraction à l'utilisation des librairies Python qui permettent d'accéder aux API de Twitter. Est spécialisée, contient uniquement les fonctions dont nous avons besoin.
 * `utils` : Divers fonctions utiles.
 
 Les classes présentes ici font le lien entre le moteur CBIR et la base de données, mais est spécialisé pour les images dans des Tweets.

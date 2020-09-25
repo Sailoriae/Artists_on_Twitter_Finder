@@ -40,7 +40,7 @@ Ceci lance le serveur et vous met en ligne de commande. Si vous souhaitez quitte
   - API de recherche : Analyse et indexation des Tweets trouvés. L'analyse consiste au calcul des caractéristiques de l'image avec le moteur CBIR. Classe principale : `Tweets_Indexer_with_SearchAPI`.
   - API de timeline : Listage des Tweets des comptes Twitter trouvés. Classe principale : `Tweets_Lister_with_TimelineAPI`.
   - API de timeline : Analyse et indexation des Tweets des comptes Twitter trouvés. Classe principale : `Tweets_Indexer_with_TimelineAPI`.
-  - Voir pourquoi il y a deux systèmes d'indexation dans `../doc/Limites_de_scan_des_comptes_Twitter.md`.
+  - Voir pourquoi il y a deux systèmes d'indexation, soit deux API utilisées, dans `../doc/Limites_de_scan_des_comptes_Twitter.md`. Pour faire simple : L'API de timeline est limitée aux 3 200 Tweets les plus récents des comptes à indexer (Retweets inclus), et l'API de recherche est limité à ce que Twitter indexent dans leur recherche. Utiliser les deux API permet d'être le plus exhaustif possible lors de l'indexation des comptes qui ont plus de 3 200 Tweets.
 * Serveur web pour l'API HTTP qui renvoit les status des requêtes, avec les éventuels résultats, ou une erreur s'il y a un problème. Voir `doc/API_HTTP.md`.
 * Mémoire partagée entre tous les threads dans l'objet `Shared_Memory` du module `shared_memory` (Avec la librairie Pyro4).
 * Limite du nombre de requête en cours de traitement par adresse IP.
@@ -63,7 +63,7 @@ Script `app.py` : Script central, crée et gère les threads de traitement, la l
   - Module `utils`: Contient un outil pour la classe ci-dessus.
   - Module `cbir_engine` : Contient les classes du moteur de recherche d'image par le contenu. Voir le `README.md` de ce module pour plus de détails.
   - Module `database` : Contient les classes de gestion et d'accès à la base de données.
-  - Module `twitter` : Contient la classe d'accès à l'API Twitter.
+  - Module `twitter` : Contient les classe d'abstraction aux librairies qui permettent d'utiliser les API Twitter.
 
 * Module `link_finder`, classe `Link_Finder` : Classe centrale de la partie Link Finder. Permet de trouver les URL des images et les noms des comptes Twitter des artistes.
   - Module `supported_websites` : Contient une classe pour chaque site supporté. Voir le `README.md` de ce module pour plus de détails.

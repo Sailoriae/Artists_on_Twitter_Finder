@@ -1,4 +1,6 @@
-# Module de couche d'abstraction à la librairie Tweepy
+# Module de couche d'abstraction à l'utilisation des API de Twitter
+
+## Couche d'abstraction à la librairie Tweepy
 
 Tweepy est la librairie utilisée pour accèder à l'API publique de Twitter.
 
@@ -17,3 +19,14 @@ Fonctions disponibles :
   Retourne l'itérateur des Tweets du compte Twitter dont l'ID est celui passé en paramètre. Cette itération commence au Tweet le plus récent, est va jusqu'au Tweet avec l'ID `since_tweet_id`, ou jusqu'à 3 200 Tweets maximum.
   En effet, aucune API Twitter ne peut retourner plus de 3 200 Tweets vers le passé pour un utilisateur.
   Cette fonction filtre les Retweets, mais ils sont quand même comptés dans les 3 200 Tweets maximum.
+
+## Couche d'abstraction à la librairie SNScrape
+
+SNSCrape est la librairie utilisée pour accèder à l'API de recherche de Twitter, celle qui ne nous limite pas à 7 jours et ne nous demande pas de payer. Pour faire simple : Celle qui est utilisable pour un projet qui ne rapporte rien et a besoin d'avoir plus de 3 200 Tweets par comptes.
+
+L'objet `SNScrapeAbstraction` est une couche d'abstraction adaptée à l'utilisation du serveur de cette API. Elle permet aussi dé gérer les erreurs HTTP 429, c'est à dire les limites de taux.
+
+Fonctions disponibles :
+
+* `search( self, query : str, output_function = print )` :
+  Execute la recherche `query`, et donne les JSON des Tweets à la fonction `output_function`. Tous les Tweets de cette recherche sont retournés !
