@@ -72,6 +72,11 @@ class Tweets_Lister_with_SearchAPI :
         # Permet de filtre les Tweets sans images, et de les formater pour la
         # fonction queue_put()
         def output_function ( tweet_json ) :
+            # Si il y a le champs "retweeted_status" dans le JSON
+            if "retweeted_status" in tweet_json : # Le Tweet est un RT
+                print( "[List SearchAPI] RT trouvé ! La recherche a donc renvoyé un RT, c'est pas normal !" )
+                return
+            
             tweet_id = tweet_json['id_str'] # ID du Tweet
             
             images = [] # Liste des URLs des images dans ce Tweet
@@ -80,7 +85,7 @@ class Tweets_Lister_with_SearchAPI :
                     if tweet_media["type"] == "photo" :
                         images.append( tweet_media["media_url_https"] )
             except KeyError : # Tweet sans média
-                pass
+                return # Sinon ça ne sert à rien
             
             hashtags = [] # Liste des hashtags dans ce Tweet
             try :

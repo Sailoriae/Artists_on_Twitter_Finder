@@ -226,11 +226,8 @@ class Tweets_Indexer_with_TimelineAPI :
             if self.DEBUG or self.ENABLE_METRICS :
                 start = time()
             
-            try :
-                tweet.retweeted_status
-            except AttributeError : # Le Tweet n'est pas un RT
-                pass
-            else : # Le Tweet est un RT
+            # Si il y a le champs "retweeted_status" dans le JSON
+            if "retweeted_status" in tweet._json : # Le Tweet est un RT
                 continue
             
             # Tester si l'autre classe d'indexation n'est pas déjà en train de
