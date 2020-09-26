@@ -3,6 +3,7 @@
 
 import queue
 from time import sleep, time
+import urllib
 
 # Ajouter le répertoire parent du répertoire parent au PATH pour pouvoir importer
 from sys import path as sys_path
@@ -53,7 +54,17 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
         
         # Obtenir l'image et la stocker dans la mémoire partagée
         # Permet ensuite d'être réutilisée par l'étape 4
-        request.query_image_as_bytes = url_to_content( request.image_url )
+        try :
+            # ATTENTION : Bien utiliser url_to_content(), car elle contient
+            # une bidouille pour GET les image sur Pixiv
+            request.query_image_as_bytes = url_to_content( request.image_url )
+        except urllib.error.HTTPError as error : # On réessaye qu'une seule fois
+            print( error )
+            if error.code == 502 : # Et uniquement sur certaines erreurs
+                sleep(10)
+                request.query_image_as_bytes = url_to_content( request.image_url )
+            else :
+                raise error
         
         # On recherche les Tweets contenant l'image de requête
         # Et on les stocke dans l'objet de requête
