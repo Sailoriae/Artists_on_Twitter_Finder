@@ -3,3 +3,4 @@
 
 from .url_to_cv2_image import url_to_cv2_image, binary_image_to_cv2_image
 from .url_to_content import url_to_content
+from .get_tweet_image import get_tweet_image
