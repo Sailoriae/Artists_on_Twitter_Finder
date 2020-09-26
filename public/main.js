@@ -52,11 +52,13 @@ function mainFunction ( new_loop = true ) {
 function lockUI () {
 	document.getElementById("launch").style.display = "none";
 	document.getElementById("illust-url").readOnly = true;
+	document.getElementById("loader").style.display = "inline-block";
 }
 
 function unlockUI () {
 	document.getElementById("launch").style.display = "block";
 	document.getElementById("illust-url").readOnly = false;
+	document.getElementById("loader").style.display = "none";
 }
 
 async function waitAndUpdate ( json ) {

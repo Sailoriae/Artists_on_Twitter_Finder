@@ -10,6 +10,7 @@
 	<title>Artists on Twitter Finder</title>
 
 	<link href="stylesheet.css" rel="stylesheet">
+	<link href="loader.css" rel="stylesheet">
 	<script async src="display_stats.js" charset="utf-8"></script>
 	<script async src="display_supported_websites.js" charset="utf-8"></script>
 	<script async src="display_tweets.js" charset="utf-8"></script>
@@ -32,6 +33,8 @@
 		<label for="illust-url">URL de l'illustration :</label>
 		<input type="text" id="illust-url" name="illust-url" placeholder="Par exemple : https://www.pixiv.net/en/artworks/83378073" required />
 		<input id="launch" type="button" value="Rechercher les Tweets de l'artiste" onclick="mainFunction();" />
+
+		<div id="loader" class="lds-ellipsis" style="display: none;"><div></div><div></div><div></div><div></div></div>
 
 		<p id="display-error"></p>
 		<p id="display-process-status"></p>
