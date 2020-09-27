@@ -21,6 +21,9 @@ Obtenir le contenu d'une image d'un Tweet disponible à une URL.
 Attention : Cette fonction retourne le contenu binaire !
 
 @param image_url L'URL de l'image du Tweet.
+
+@return L'image sous forme de bits, à décoder !
+        Ou None si il y a eu une erreur connue comme insolvable !
 """
 def get_tweet_image ( url : str ) -> bytes :
     retry_count = 0

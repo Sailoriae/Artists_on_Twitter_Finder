@@ -31,7 +31,10 @@ class CBIR_Engine_for_Tweets_Images :
         retry_count = 0
         while True : # Solution très bourrin pour gèrer les rate limits
             try :
-                return self.cbir_engine.index_cbir( binary_image_to_cv2_image( get_tweet_image( image_url ) ) )
+                image = get_tweet_image( image_url )
+                if image == None : # Erreurs insolvables, 404 par exemple
+                    return None
+                return self.cbir_engine.index_cbir( binary_image_to_cv2_image( image ) )
             
             # Envoyé par la fonction get_tweet_image() qui n'a pas réussi
             except urllib.error.HTTPError as error :
