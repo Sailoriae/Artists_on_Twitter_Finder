@@ -49,7 +49,7 @@
 		<ul>
 			<li><code>status</code><br>A string describing the current status of the request. See the list of possible statuses below.</li>
 			<li><code>has_first_time_scan</code><br>A boolean set to <code>true</code> if one of the founded Twitter accounts is not indexed. The processing will therefore be longer.</li>
-			<li><code>twitter_accounts</code><br>List of founded Twitter accounts. Each Twitter account contains the following fields&nbsp;:
+			<li><code>twitter_accounts</code><br>List of founded Twitter accounts and validated (i.e. they are existing, public, and not suspended or deactivated). Each Twitter account contains the following fields&nbsp;:
 				<ul>
 					<li><code>account_name</code><br>The "screen name" of the Twitter account.</li>
 					<li><code>account_id</code><br>The Twitter account ID.</li>
@@ -89,7 +89,7 @@
 			<li><code>NO_URL_FIELD</code><br>There is no <code>url</code> parameter / argument in the HTTP request URL.</li>
 			<li><code>NOT_AN_URL</code><br>The input to the <code>url</code> parameter / argument is not a URL.</li>
 			<li><code>UNSUPPORTED_WEBSITE</code><br>The site of the inputted URL is not supported, or the URL is invalid.</li>
-			<li><code>INVALID_URL</code><br>The site is supported, but the input URL does not lead to an illustration.</li>
+			<li><code>INVALID_URL</code><br>The site is supported, but the input URL does not lead to an illustration (They can be non-existent, private, suspended or deactivated).</li>
 			<li><code>NO_TWITTER_ACCOUNT_FOR_THIS_ARTIST</code><br>No Twitter account found for the illustration artist.</li>
 			<li><code>NO_VALID_TWITTER_ACCOUNT_FOR_THIS_ARTIST</code><br>Twitter accounts were found, but they are invalid.</li>
 			<li><code>ERROR_DURING_REVERSE_SEARCH</code><br>Error during reverse image search. Doesn't the illustration have a nutty format ? For example animated GIF ?

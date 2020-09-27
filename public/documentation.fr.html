@@ -49,7 +49,7 @@
 		<ul>
 			<li><code>status</code><br>Une chaine de caractères décrivant l'état actuel de la requête. Voir la liste des status possibles ci-dessous.</li>
 			<li><code>has_first_time_scan</code><br>Un booléen mis à <code>true</code> si un des compte Twitter trouvé n'est pas indexé. Le traitement va donc être plus long.</li>
-			<li><code>twitter_accounts</code><br>Liste de comptes Twitter trouvés. Chaque compte Twitter contient les champs suivants&nbsp;:
+			<li><code>twitter_accounts</code><br>Liste de comptes Twitter trouvés et validés (C'est à dire qu'ils sont existants, publiques, et non suspendus ou désactivés). Chaque compte Twitter contient les champs suivants&nbsp;:
 				<ul>
 					<li><code>account_name</code><br>Le "screen name" du compte Twitter.</li>
 					<li><code>account_id</code><br>L'ID du compte Twitter.</li>
@@ -91,7 +91,7 @@
 			<li><code>UNSUPPORTED_WEBSITE</code><br>Le site l'URL entrée n'est pas supporté, ou l'URL est invalide.</li>
 			<li><code>INVALID_URL</code><br>Le site est supporté, mais l'URL entrée ne mène pas à une illustration.</li>
 			<li><code>NO_TWITTER_ACCOUNT_FOR_THIS_ARTIST</code><br>Aucun compte Twitter trouvé pour l'artiste de l'illustration.</li>
-			<li><code>NO_VALID_TWITTER_ACCOUNT_FOR_THIS_ARTIST</code><br>Des comptes Twitter ont étés trouvés, mais ils sont invalides.</li>
+			<li><code>NO_VALID_TWITTER_ACCOUNT_FOR_THIS_ARTIST</code><br>Des comptes Twitter ont étés trouvés, mais ils sont invalides (Ils peuvent être inexistants, privés, suspendus ou désactivés).</li>
 			<li><code>ERROR_DURING_REVERSE_SEARCH</code><br>Erreur durant la recherche d'image inversée. Est-ce que l'illustration n'a pas un format à la noix ? Par exemple GIF animé ?</li>
 			<li><code>PROCESSING_ERROR</code><br>Un thread de traitement a planté durant son traitement de cette requête. Il est donc impossible de terminer cette requête !</li>
 			<li><code>YOUR_IP_HAS_MAX_PENDING_REQUESTS</code><br>L'adresse IP qui a envoyé la requête a atteint son quota maximum de requêtes en cours de traitement. Il faut donc attendre que les autres requêtes envoyées par cette adresse IP finissent leur traitement.</li>
