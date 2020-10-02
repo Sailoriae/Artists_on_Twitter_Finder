@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+
+
+<html lang="fr">
+<head>
+	<meta charset=utf-8>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta name="robots" content="noindex" />
+
+	<title>FAQ de Artists on Twitter Finder</title>
+
+	<link href="stylesheet.css" rel="stylesheet">
+</head>
+
+
+<body>
+	<header>
+		<h1>Artists on Twitter Finder<br>Foire aux Questions</h1>
+	</header>
+
+	<main style="text-align: left";>
+		<h2>Pourquoi faut-il entrer un lien vers une page web, et non vers une image ?</h2>
+
+		<p>Car il est nécessaire de trouver le ou les comptes Twitter de l'artiste. En effet :</p>
+		<ul>
+			<li>Il est impossible d'indexer toutes les images publiées sur Twitter. De plus, cela construirait une base de données à 99% inutile.</li>
+			<li>Et il est impossible de distinguer les Tweets des artistes de Tweets de personnes qui repostent leurs illustrations.</li>
+		</ul>
+
+		<p>Ainsi, il faut analyser la source de l'illustration pour trouver le ou les comptes Twitter de l'artiste de l'illustration.</p>
+		<p>Cette analyse est donc différente pour chaque site source. Il faut donc des algorithmes différent pour chaque site. C'est pour cela qu'il y a une liste restreinte de sites supportés.</p>
+
+		<h2>Comment les comptes Twitter des artistes sont recherchés ?</h2>
+
+		<p>La recherche de comptes Twitter est faite par le "Link Finder". Comme son nom l'indique, il recherche des liens. Il va donc rechercher sur la page web de l'illustration, ainsi que sur le profile de l'artiste, si il/elle a indiqué un lien vers son compte Twitter.</p>
+		<p>Si plusieurs comptes Twitter sont trouvés, ils seront tous considérés comme celui de l'artiste.</p>
+
+		<p>Détails de la recherche de comptes Twitter pour chaque site supporté :</p>
+		<ul>
+			<li>DeviantArt&nbsp;: Dans la description de l'illustration et dans la biographie de l'artiste sur son profile.</li>
+			<li>Pixiv&nbsp;: Dans les liens indiqués par l'artiste sur son profile.</li>
+			<li>Boorus (Danbooru, Derpibooru, Furbooru)&nbsp;: Dans les informations sur l'artiste, ainsi que sur la source de l'illustration, si elle vient d'un site supporté. Attention&nbsp;: Si la source est un Tweet, le compte Twitter associé n'est pas considéré comme le compte Twitter de l'artiste.</li>
+		</ul>
+
+		<p>Notes :</p>
+		<ul>
+			<li>La recherche de comptes Twitter se fait indépendamment pour chaque illustration. Aucune association n'est stockée.</li>
+			<li>Si les comptes Twitter trouvés sont inexistants ou supprimés, suspendus, désactivés, ou privés, ils seront considéré comme invalides, car aucune indexation ni aucune recherche ne peut être faite.</li>
+			<li>Sur les Boorus, si un liens vers le compte DeviantArt ou Pixivi de l'artiste est trouvé, il sera aussi analysé.</li>
+			<li>Si un lien Linktree est trouvé, cette page Linktree sera aussi analysée.</li>
+		</ul>
+
+		<h2>Je suis un artiste, j'ai un compte Twitter, mais il n'est pas trouvé. Pourquoi ?</h2>
+
+		<p>Vérifiez que vous avez bien mis <b>un lien</b> vers votre compte Twitter là où le serveur recherche (Voir ci-dessus).</p>
+
+		<h2>Quelles données sont stockées ?</h2>
+
+		<p>Les données suivantes sont stockées dans la base de données :</p>
+		<ul>
+			<li>Comptes Twitter : ID du compte Twitter, et curseurs d'indexation de ce compte.</li>
+			<li>Tweets : ID du Tweet, ID du compte Twitter associé, et liste des hashtags (Ne servent à rien).</li>
+			<li>Images : ID de l'image, histogramme de cette image, et ID du Tweet associé.</li>
+		</ul>
+
+		<p>Note : Il est impossible de "reconstruire" les images à partir des histogrammes.</p>
+
+		<h2>Le code source du serveur est-il disponible ?</h2>
+
+		<p>Non. Peut-être un jour ?</p>
+	</main>
+
+	<footer>
+		<p>Fait avec ❤️ sur l'île d'Oléron.</p>
+	</footer>
+</body>
+
+
+</html>

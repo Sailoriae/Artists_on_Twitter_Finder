@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+
+
+<html lang="en">
+<head>
+	<meta charset=utf-8>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta name="robots" content="noindex" />
+
+	<title>FAQ of Artists on Twitter Finder</title>
+
+	<link href="stylesheet.css" rel="stylesheet">
+</head>
+
+
+<body>
+	<header>
+		<h1>Artists on Twitter Finder<br>Frequently Asked Questions</h1>
+	</header>
+
+	<main style="text-align: left";>
+		<h2>Why is it necessary to enter a link to a webpage, and not to an image ?</h2>
+
+		<p>Because it is necessary to find the artist's Twitter account(s). Indeed :</p>
+		<ul>
+			<li>It is not possible to index all images posted on Twitter. Plus, it would build a 99% useless database.</li>
+			<li>And it's impossible to distinguish artists' Tweets to Tweets from people who repost their illustrations.</li>
+		</ul>
+
+		<p>Thus, we must analyze the source of the illustration to find the Twitter account(s) of the artist of the illustration.</p>
+		<p>This analysis is therefore different for each source website. So different algorithms are needed for each website. This is why there is a restricted list of supported websites.</p>
+
+		<h2>How are artists' Twitter accounts searched ?</h2>
+
+		<p>The search for Twitter accounts is done by the "Link Finder". As the name suggests, it searches for links. It will therefore search on the illustration's webpage, as well as on the artist's profile, if he/she has indicated a link to his Twitter account.</p>
+		<p>If multiple Twitter accounts are found, they will all be considered as the artist's.</p>
+
+		<p>Details on Twitter accounts search for each supported website :</p>
+		<ul>
+			<li>DeviantArt&nbsp;: In the description of the illustration and in the artist's biography on his/her profile.</li>
+			<li>Pixiv&nbsp;: In the links indicated by the artist on his profile.</li>
+			<li>Boorus (Danbooru, Derpibooru, Furbooru)&nbsp;: In the informations about the artist, as well as the source of the illustration, if it comes from a supported website. Warning&nbsp;: If the source is a Tweet, the associated Twitter account is not considered the artist's Twitter account.</li>
+		</ul>
+
+		<p>Notes :</p>
+		<ul>
+			<li>The search for Twitter accounts is done independently for each illustration. No association is stored.</li>
+			<li>If the founded Twitter accounts are non-existent or deleted, suspended, deactivated, or private, they will be considered as invalids, because no indexing or search can be made.</li>
+			<li>On Boorus, if a link to the artist's DeviantArt or Pixiv account is found, it will also be analyzed.</li>
+			<li>If a Linktree link is found, this Linktree page will also be analyzed.</li>
+		</ul>
+
+		<h2>I am an artist, I have a Twitter account, but it is not found. Why ?</h2>
+
+		<p>Make sure you've put <b>a link</b> to your Twitter account where the server is searching (See above).</p>
+
+		<h2>What data is stored ?</h2>
+
+		<p>The following data is stored in the database :</p>
+		<ul>
+			<li>Twitter accounts : ID of the Twitter account, and index cursors for this account.</li>
+			<li>Tweets : ID of the Tweet, ID of the associated Twitter account, and list of hashtags (Useless).</li>
+			<li>Images : ID of the Image, histogram of that image, and ID of the associated Tweet.</li>
+		</ul>
+
+		<p>Note: It is impossible to "rebuild" images from histograms.</p>
+
+		<h2>Is the source code of the server available ?</h2>
+
+		<p>No. Maybe one day ?</p>
+	</main>
+
+	<footer>
+		<p>Made with ❤️ on Oléron island, France.</p>
+	</footer>
+</body>
+
+
+</html>
