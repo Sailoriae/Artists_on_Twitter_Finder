@@ -14,7 +14,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__f
 os.chdir(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "server"))
 
 import re
-from tweet_finder import Tweets_Indexer_with_TwitterAPI
+from tweet_finder import Tweets_Indexer_with_TimelineAPI
 
 
 """
@@ -56,6 +56,6 @@ else:
 """
 Tentative d'indexation des Tweets trouvés !
 """
-engine = Tweets_Indexer_with_TwitterAPI( DEBUG = True )
+engine = Tweets_Indexer_with_TimelineAPI( DEBUG = True )
 for tweet_id in founded_ids :
     engine.index_tweet( tweet_id, FORCE_INDEX = True )
