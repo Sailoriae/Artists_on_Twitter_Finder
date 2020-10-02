@@ -2,6 +2,7 @@
 # coding: utf-8
 
 import urllib
+import http
 from time import sleep
 
 try :
@@ -54,3 +55,16 @@ def get_tweet_image ( url : str ) -> bytes :
                 
                 print( "[get_tweet_image] Abandon !" )
                 raise error
+        
+        except http.client.IncompleteRead as error :
+            print( "[get_tweet_image] Erreur avec l'image :", url )
+            print( error )
+            
+            if retry_count < 1 : # Essayer un coup d'attendre
+                print( "[get_tweet_image] On essaye d'attendre 10 secondes..." )
+                sleep( 10 )
+                retry_count += 1
+                continue
+            
+            print( "[get_tweet_image] Abandon !" )
+            raise error
