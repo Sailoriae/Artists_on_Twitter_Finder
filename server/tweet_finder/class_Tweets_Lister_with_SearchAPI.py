@@ -78,6 +78,10 @@ class Tweets_Lister_with_SearchAPI :
                 return
             
             tweet_id = tweet_json['id_str'] # ID du Tweet
+            user_id = tweet_json['user_id_str'] # ID de l'auteur du Tweet
+            # Super méga important, ne pas prendre celui trouvé par la fonction
+            # list_searchAPI_tweets() !!!
+            # Permet en cas de problème de ne pas faire n'importe quoi dans la BDD
             
             images = [] # Liste des URLs des images dans ce Tweet
             try :
@@ -95,7 +99,7 @@ class Tweets_Lister_with_SearchAPI :
                 pass
             
             if len(images) > 0 : # Sinon ça ne sert à rien
-                queue_put( tweet_id, account_id, images, hashtags )
+                queue_put( tweet_id, user_id, images, hashtags )
         
         
         # Note : Plus besoin de faire de bidouille avec "filter:safe"
