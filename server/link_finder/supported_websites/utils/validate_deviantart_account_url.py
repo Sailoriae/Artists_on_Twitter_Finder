@@ -8,17 +8,19 @@ import re
 
 # Nouveau format : deviantart.com/artiste
 deviantart_account_name_regex_new = re.compile(
-    r"http(?:s)?:\/\/(?:www\.)?deviantart\.com\/([a-zA-Z0-9]+)" )
+    r"(?:http(?:s)?:\/\/)?(?:www\.)?deviantart\.com\/([a-zA-Z0-9]+)" )
 
 # Ancien format : artiste.deviantart.com
 deviantart_account_name_regex_old = re.compile(
-    r"http(?:s)?:\/\/(?:([a-zA-Z0-9]+)\.)deviantart\.com" )
+    r"(?:http(?:s)?:\/\/)?(?:([a-zA-Z0-9]+)\.)deviantart\.com" )
 
 
 # Attention : Certaines URL peuvent être des URL de redirection. Ainsi, la
 # chaine peut être plus grande et contenir l'URL en tant que sous-chaine.
 # On ne marque donc pas le début ni la fin de la chaine, et on utilise
 # la fonction re.search() !
+
+# Le "http://" ou "https://" est obtionnel.
 
 
 """

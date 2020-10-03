@@ -5,13 +5,15 @@ import re
 
 # ^ = Début de la chaine, $ = Fin de la chaine
 twitter_account_name_regex = re.compile(
-    r"http(?:s)?:\/\/(?:www\.)?twitter\.com\/(?:#!\/)?(?:@)?([a-zA-Z0-9_]+)" )
+    r"(?:http(?:s)?:\/\/)?(?:www\.|mobile\.)?twitter\.com\/(?:#!\/)?(?:@)?([a-zA-Z0-9_]+)" )
 
 
 # Attention : Certaines URL peuvent être des URL de redirection. Ainsi, la
 # chaine peut être plus grande et contenir l'URL en tant que sous-chaine.
 # On ne marque donc pas le début ni la fin de la chaine, et on utilise
 # la fonction re.search() !
+
+# Le "http://" ou "https://" est obtionnel.
 
 
 """
