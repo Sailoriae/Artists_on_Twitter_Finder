@@ -92,6 +92,14 @@ class SNScrapeAbstraction :
             raise snscrape.base.ScraperException('Unable to find ct0 token')
         scraper._ensure_guest_token = ensure_guest_token
         
+        # Hack : Pour que celui ci-dessus fonctionne lors d'une 429
+        def unset_guest_token ( self = scraper ) :
+            self._guestToken = None
+            del self._session.cookies['ct0']
+            del self._apiHeaders['x-csrf-token']
+            del self._apiHeaders["x-twitter-auth-type"]
+        scraper._unset_guest_token = unset_guest_token
+        
         # Deep-copy de la fonction tweet_to_tweet
         tweet_to_tweet_old = copy_func( scraper._tweet_to_tweet )
         
