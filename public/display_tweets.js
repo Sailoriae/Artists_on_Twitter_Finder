@@ -25,7 +25,7 @@ function displayTweets ( json ) {
 
 	if ( tweets.length === 0 ) {
 		var p = document.createElement('p');
-		p.textContent = lang[ "NO_TWEET_FOUNDED" ];
+		p.textContent = lang[ "NO_TWEET_FOUND" ];
 		tweetsDiv.appendChild(p);
 	} else {
 		var alreadyDisplayedTweetsID = [];
@@ -38,7 +38,7 @@ function displayTweets ( json ) {
 				var div2 = document.createElement('div');
 
 				var p = document.createElement('p');
-				p.textContent = lang[ "FOUNDED_TWEET" ];
+				p.textContent = lang[ "TWEET_FOUND" ];
 				var a = document.createElement('a');
 				a.href = "https://twitter.com/any/status/" + tweets[i].tweet_id;
 				a.target = "_blank";

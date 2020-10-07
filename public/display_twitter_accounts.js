@@ -29,12 +29,12 @@ function displayTwitterAccounts ( json ) {
 	var p = document.createElement('p');
 
 	if ( twitterAccounts.length === 0 ) {
-		p.textContent = lang[ "NO_TWITTER_ACCOUNT_FOUNDED" ];
+		p.textContent = lang[ "NO_TWITTER_ACCOUNT_FOUND" ];
 	} else {
 		if ( twitterAccounts.length === 1 ) {
-			p.textContent = lang[ "FOUNDED_TWITTER_ACCOUNT" ];
+			p.textContent = lang[ "TWITTER_ACCOUNT_FOUND" ];
 		} else {
-			p.textContent = lang[ "FOUNDED_TWITTER_ACCOUNTS" ];
+			p.textContent = lang[ "TWITTER_ACCOUNT_FOUNDS" ];
 		}
 
 		for ( var i = 0; i < twitterAccounts.length; i++ ) {

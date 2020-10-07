@@ -48,20 +48,20 @@
 		<p>Returns a JSON containing the following fields&nbsp;:</p>
 		<ul>
 			<li><code>status</code><br>A string describing the current status of the request. See the list of possible statuses below.</li>
-			<li><code>has_first_time_scan</code><br>A boolean set to <code>true</code> if one of the founded Twitter accounts is not indexed. The processing will therefore be longer.</li>
-			<li><code>twitter_accounts</code><br>List of founded Twitter accounts and validated (i.e. they are existing, public, and not suspended or deactivated). Each Twitter account contains the following fields&nbsp;:
+			<li><code>has_first_time_scan</code><br>A boolean set to <code>true</code> if one of the Twitter accounts found is not indexed. The processing will therefore be longer.</li>
+			<li><code>twitter_accounts</code><br>List of Twitter accounts found and validated (i.e. they are existing, public, and not suspended or deactivated). Each Twitter account contains the following fields&nbsp;:
 				<ul>
 					<li><code>account_name</code><br>The "screen name" of the Twitter account.</li>
 					<li><code>account_id</code><br>The Twitter account ID.</li>
 				</ul>
 			</li>
-			<li><code>results</code><br>List of founded Tweets. Each Tweet contains the following fields&nbsp;:
+			<li><code>results</code><br>List of Tweets found. Each Tweet contains the following fields&nbsp;:
 				<ul>
 					<li><code>tweet_id</code><br>The Tweet ID.</li>
 					<li><code>account_id</code><br>The ID of the Twitter account that posted this Tweet.</li>
 					<li><code>image_position</code><br>The position of the image among the maximum 4 images.</li>
-					<li><code>distance_chi2</code><br>The distance between the query image and the founded image.</li>
-					<li><code>distance_bhattacharyya</code><br>The distance between the query image and the founded image.</li>
+					<li><code>distance_chi2</code><br>The distance between the query image and the image found.</li>
+					<li><code>distance_bhattacharyya</code><br>The distance between the query image and the image found.</li>
 				</ul>
 			</li>
 			<li><code>error</code><br>A string describing the error if the request was ever interrupted, <code>null</code> otherwise. See the list of possible errors below.</li>
