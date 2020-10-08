@@ -4,7 +4,7 @@ opencv-python
 imutils
 pixivpy
 mysql-connector-python
-pyquery
+requests
 tweepy
 beautifulsoup4
 Pyro4
