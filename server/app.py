@@ -206,10 +206,7 @@ if __name__ == "__main__" :
     
     if param.ENABLE_MULTIPROCESSING :
         print( "ATTENTION, serveur démarré en multiprocessing !" )
-        print( "Les \"threads\" (Procesuss) n'affichent donc rien ici !" )
-        print( "De plus, ne tuez pas ce processus ! Car cela n'arrêtera pas les autres processus !" )
-        print( "Utilisez `stop` pour arrêter le système." )
-        print( "Et si tout plante, rebootez votre machine. :D" )
+        print( "Il peut y avoir des problèmes d'affichage des messages et de processus fantômes, notamment sous Windows." )
     
     while True :
         command = input()
