@@ -7,6 +7,7 @@ from os import path as os_path
 sys_path.append(os_path.dirname(os_path.dirname(os_path.abspath(__file__))))
 
 import parameters as param
+from tweet_finder.twitter import SNScrapeAbstraction
 
 
 """
@@ -97,8 +98,43 @@ def check_parameters () :
     
     # ========================================================================
     
-    # TODO : Vérification de SNScraper en utilisant la classe Tweets_Lister_with_SearchAPI
-    # Mettre un mode test à cette classe, afin de mettre une query custom
+    for token in param.TWITTER_AUTH_TOKENS :
+        snscrape = SNScrapeAbstraction( token )
+        query = "from:@Twitter since:2020-08-11 until:2020-08-12"
+        
+        tweets_jsons = []
+        def save_tweet( tweet_json ) :
+            tweets_jsons.append( tweet_json )
+        
+        try :
+            snscrape.search( query, save_tweet )
+        except Exception as error :
+            print( "Echec de connexion à l'API de recherche de SNScrape...")
+            print( error )
+            print( "Veuillez vérifier votre fichier \"parameters.py\" !" )
+            print( "Notamment la liste de clés suivante : TWITTER_AUTH_TOKENS" )
+            return False
+        else :
+            print( "Connexion à l'API de recherche de SNScrape réussie !")
+    
+    print( "Verification de l'accès aux images avec SNScrape..." )
+    ok = False
+    for tweet_json in tweets_jsons :
+        if tweet_json['id_str'] == "1293239745695211520" : # On test avec un seul tweet
+            images = []
+            for tweet_media in tweet_json["extended_entities"]["media"] :
+                if tweet_media["type"] == "photo" :
+                    images.append( tweet_media["media_url_https"] )
+            if images == ["https://pbs.twimg.com/media/EfJ-C-JU0AAQL_C.jpg",
+                          "https://pbs.twimg.com/media/EfJ-aHlU0AAU1kq.jpg"] :
+                ok = True
+                print( "SNScrape a bien accès aux images des Tweets !" )
+    
+    if not ok :
+        print( "SNScrape n'a pas accès aux images des Tweets !" )
+        print( "Il faut revoir son code !" )
+        print( "Ou alors le Tweet ID 1293239745695211520 n'existe plus." )
+        return False
     
     # ========================================================================
     
