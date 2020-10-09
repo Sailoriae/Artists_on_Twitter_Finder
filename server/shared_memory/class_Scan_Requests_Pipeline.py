@@ -53,35 +53,35 @@ class Scan_Requests_Pipeline :
         # File d'attente à l'étape A du traitement : Listage des Tweets avec
         # l'API de recherche.
         # Les objets queue.Queue sont prévus pour faire du multi-threading.
-        self._step_A_SearchAPI_list_account_tweets_prior_queue = self._root.register_obj( Pyro_Queue( convert_uri = True ), "scan_requests_step_A_SearchAPI_list_account_tweets_prior_queue" )
+        self._step_A_SearchAPI_list_account_tweets_prior_queue = self._root.register_obj( Pyro_Queue( convert_uri = True ) )
         
         # Version non-prioritaire de la file d'attente précédente.
-        self._step_A_SearchAPI_list_account_tweets_queue = self._root.register_obj( Pyro_Queue( convert_uri = True ), "scan_requests_step_A_SearchAPI_list_account_tweets_queue" )
+        self._step_A_SearchAPI_list_account_tweets_queue = self._root.register_obj( Pyro_Queue( convert_uri = True ) )
         
         # File d'attente à l'étape B du traitement : Listage des Tweets avec
         # l'API de timeline.
-        self._step_B_TimelineAPI_list_account_tweets_prior_queue = self._root.register_obj( Pyro_Queue( convert_uri = True ), "scan_requests_step_B_TimelineAPI_list_account_tweets_prior_queue" )
+        self._step_B_TimelineAPI_list_account_tweets_prior_queue = self._root.register_obj( Pyro_Queue( convert_uri = True ) )
         
         # Version non-prioritaire de la file d'attente précédente.
-        self._step_B_TimelineAPI_list_account_tweets_queue = self._root.register_obj( Pyro_Queue( convert_uri = True ), "scan_requests_step_B_TimelineAPI_list_account_tweets_queue" )
+        self._step_B_TimelineAPI_list_account_tweets_queue = self._root.register_obj( Pyro_Queue( convert_uri = True ) )
         
         # File d'attente à l'étape C du traitement : Indexation des Tweets
         # trouvés par le listage des Tweets avec l'API de recherche.
-        self._step_C_SearchAPI_index_account_tweets_prior_queue = self._root.register_obj( Pyro_Queue( convert_uri = True ), "scan_requests_step_C_SearchAPI_index_account_tweets_prior_queue" )
+        self._step_C_SearchAPI_index_account_tweets_prior_queue = self._root.register_obj( Pyro_Queue( convert_uri = True ) )
         
         # Version non-prioritaire de la file d'attente précédente.
-        self._step_C_SearchAPI_index_account_tweets_queue = self._root.register_obj( Pyro_Queue( convert_uri = True ), "scan_requests_step_C_SearchAPI_index_account_tweets_queue" )
+        self._step_C_SearchAPI_index_account_tweets_queue = self._root.register_obj( Pyro_Queue( convert_uri = True ) )
         
         # File d'attente à l'étape D du traitement : Indexation des Tweets
         # trouvés par le listage des Tweets avec l'API de timeline.
-        self._step_D_TimelineAPI_index_account_tweets_prior_queue = self._root.register_obj( Pyro_Queue( convert_uri = True ), "scan_requests_step_D_TimelineAPI_index_account_tweets_prior_queue" )
+        self._step_D_TimelineAPI_index_account_tweets_prior_queue = self._root.register_obj( Pyro_Queue( convert_uri = True ) )
         
         # Version non-prioritaire de la file d'attente précédente.
-        self._step_D_TimelineAPI_index_account_tweets_queue = self._root.register_obj( Pyro_Queue( convert_uri = True ), "scan_requests_step_D_TimelineAPI_index_account_tweets_queue" )
+        self._step_D_TimelineAPI_index_account_tweets_queue = self._root.register_obj( Pyro_Queue( convert_uri = True ) )
         
         # Bloquer toutes les files d'attentes. Permet de passer une requête
         # en prioritaire sans avoir de problème.
-        self._queues_sem = self._root.register_obj( Pyro_Semaphore(), "scan_requests_queues_sem" )
+        self._queues_sem = self._root.register_obj( Pyro_Semaphore() )
         
         # Compteur du nombre de requêtes en cours de traitement dans le
         # pipeline.
@@ -173,7 +173,7 @@ class Scan_Requests_Pipeline :
                         self._root.unregister_obj( self._step_A_SearchAPI_list_account_tweets_queue )
                         
                         # Enregistrer la nouvelle file
-                        self._step_A_SearchAPI_list_account_tweets_queue = self._root.register_obj( temp_queue, "scan_requests_step_A_SearchAPI_list_account_tweets_queue" )
+                        self._step_A_SearchAPI_list_account_tweets_queue = self._root.register_obj( temp_queue )
                         
                         # On met la requête dans la file d'attente prioritaire.
                         Pyro4.Proxy( self._step_A_SearchAPI_list_account_tweets_prior_queue ).put( request )
@@ -192,7 +192,7 @@ class Scan_Requests_Pipeline :
                         self._root.unregister_obj( self._step_B_TimelineAPI_list_account_tweets_queue )
                         
                         # Enregistrer la nouvelle file
-                        self._step_B_TimelineAPI_list_account_tweets_queue = self._root.register_obj( temp_queue, "scan_requests_step_B_TimelineAPI_list_account_tweets_queue" )
+                        self._step_B_TimelineAPI_list_account_tweets_queue = self._root.register_obj( temp_queue )
                         
                         # On met la requête dans la file d'attente prioritaire.
                         Pyro4.Proxy( self._step_B_TimelineAPI_list_account_tweets_prior_queue ).put( request )
@@ -211,7 +211,7 @@ class Scan_Requests_Pipeline :
                         self._root.unregister_obj( self._step_C_SearchAPI_index_account_tweets_queue )
                         
                         # Enregistrer la nouvelle file
-                        self._step_C_SearchAPI_index_account_tweets_queue = self._root.register_obj( temp_queue, "scan_requests_step_C_SearchAPI_index_account_tweets_queue" )
+                        self._step_C_SearchAPI_index_account_tweets_queue = self._root.register_obj( temp_queue )
                         
                         # On met la requête dans la file d'attente prioritaire.
                         Pyro4.Proxy( self._step_C_SearchAPI_index_account_tweets_prior_queue ).put( request )
@@ -230,7 +230,7 @@ class Scan_Requests_Pipeline :
                         self._root.unregister_obj( self._step_D_TimelineAPI_index_account_tweets_queue )
                         
                         # Enregistrer la nouvelle file
-                        self._step_D_TimelineAPI_index_account_tweets_queue = self._root.register_obj( temp_queue, "scan_requests_step_D_TimelineAPI_index_account_tweets_queue" )
+                        self._step_D_TimelineAPI_index_account_tweets_queue = self._root.register_obj( temp_queue )
                         
                         # On met la requête dans la file d'attente prioritaire.
                         Pyro4.Proxy( self.step_D_TimelineAPI_index_account_tweets_prior_queue ).put( request )
@@ -248,7 +248,7 @@ class Scan_Requests_Pipeline :
         request = self._root.register_obj( Scan_Request( self._root,
                                                          account_id,
                                                          account_name,
-                                                         is_prioritary = is_prioritary ), None )
+                                                         is_prioritary = is_prioritary ) )
         self._pending_requests_count += 1 # Augmenter le compteur du nombre de requêtes en cours de traitement
         self._requests[ account_id ] = request # On passe ici l'URI de l'objet.
         

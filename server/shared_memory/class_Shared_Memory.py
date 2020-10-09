@@ -49,10 +49,10 @@ class Shared_Memory :
         self._keep_pyro_alive = True
         
         # Pipeline des requêtes des utilisateur.
-        self._user_requests = self.register_obj( User_Requests_Pipeline( self ), "user_requests" )
+        self._user_requests = self.register_obj( User_Requests_Pipeline( self ) )
         
         # Pipeline des requêtes d'indexation de comptes Twitter.
-        self._scan_requests = self.register_obj( Scan_Requests_Pipeline( self ), "scan_requests" )
+        self._scan_requests = self.register_obj( Scan_Requests_Pipeline( self ) )
         
         # Cache des statistiques, permet de faire moins d'appels à la méthode
         # get_stats().
@@ -61,10 +61,10 @@ class Shared_Memory :
         
         # Limitateur du nombre de requêtes sur le serveur HTTP / l'API par
         # secondes
-        self._http_limitator = self.register_obj( HTTP_Requests_Limitator(), "http_limitator" )
+        self._http_limitator = self.register_obj( HTTP_Requests_Limitator() )
         
         # Conteneur des mesures de temps d'éxécution.
-        self._execution_metrics = self.register_obj( Metrics_Container(), "execution_metrics" )
+        self._execution_metrics = self.register_obj( Metrics_Container() )
         
         # Objet où les threads s'enregistrent.
         # Ils y mettent aussi leur requête en cours de traitement, afin que
@@ -72,7 +72,7 @@ class Shared_Memory :
         # plantage.
         # Les threads sont identifiés par la chaine suivante :
         # procédure_du_thread.__name__ + "_number" + str(thread_id)
-        self._threads_registry = self.register_obj( Threads_Registry(), "threads_registry" )
+        self._threads_registry = self.register_obj( Threads_Registry() )
     
     """
     Getters et setters pour Pyro.
@@ -131,11 +131,10 @@ class Shared_Memory :
     crée un objet !
     
     @param obj L'objet Python à partager.
-    @param name Le nom à lui donner pour le partage.
     @return L'URI vers cet objet, sous la forme d'une string.
     """
-    def register_obj ( self, obj, name ) :
-        return self._daemon.register( obj, name ).asString()
+    def register_obj ( self, obj ) :
+        return self._daemon.register( obj ).asString()
     
     """
     Dé-enregistrer un objet.

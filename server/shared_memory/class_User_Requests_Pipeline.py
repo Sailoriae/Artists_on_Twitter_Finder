@@ -56,27 +56,27 @@ class User_Requests_Pipeline :
         
         # File d'attente à l'étape 1 du traitement : Link Finder.
         # Les objets queue.Queue sont prévus pour faire du multi-threading.
-        self._step_1_link_finder_queue = self._root.register_obj( Pyro_Queue( convert_uri = True ), "user_requests_step_1_link_finder_queue" )
+        self._step_1_link_finder_queue = self._root.register_obj( Pyro_Queue( convert_uri = True ) )
         
         # File d'attente à l'étape 2 du traitement : L'indexation des Tweets
         # des comptes Twitter de l'artiste, si nécessaire.
-        self._step_2_tweets_indexer_queue = self._root.register_obj( Pyro_Queue( convert_uri = True ), "user_requests_step_2_tweets_indexer_queue" )
+        self._step_2_tweets_indexer_queue = self._root.register_obj( Pyro_Queue( convert_uri = True ) )
         
         # File d'attente à l'étape 3 du traitement : La recherche d'image
         # inversée.
-        self._step_3_reverse_search_queue = self._root.register_obj( Pyro_Queue( convert_uri = True ), "user_requests_step_3_reverse_search_queue" )
+        self._step_3_reverse_search_queue = self._root.register_obj( Pyro_Queue( convert_uri = True ) )
         
         # File d'attente à l'étape 3 du traitement : Le filtrage des résultats.
-        self._step_4_filter_results_queue = self._root.register_obj( Pyro_Queue( convert_uri = True ), "user_requests_step_4_filter_results_queue" )
+        self._step_4_filter_results_queue = self._root.register_obj( Pyro_Queue( convert_uri = True ) )
         
         # Conteneur des adresses IP, associé à leur nombre de requêtes en cours
         # de traitement.
-        self._limit_per_ip_addresses = self._root.register_obj( Limit_per_IP_Address(), "user_requests_limit_per_ip_addresses" )
+        self._limit_per_ip_addresses = self._root.register_obj( Limit_per_IP_Address() )
         
         # Sémaphore du "if request.scan_requests == None" de la procédure de
         # thread "thread_step_2_tweets_indexer". Permet d'éviter des problèmes
         # en cas de lancement d'un scan.
-        self._thread_step_2_tweets_indexer_sem = self._root.register_obj( Pyro_Semaphore(), "user_requests_thread_step_2_tweets_indexer_sem" )
+        self._thread_step_2_tweets_indexer_sem = self._root.register_obj( Pyro_Semaphore() )
         
         # Compteur du nombre de requêtes en cours de traitement dans le
         # pipeline.
@@ -146,7 +146,7 @@ class User_Requests_Pipeline :
         
         # Créer et ajouter l'objet User_Request à notre système.
         request = self._root.register_obj( User_Request( illust_url,
-                                                         ip_address = ip_address ), None )
+                                                         ip_address = ip_address ) )
         self._requests[ illust_url ] = request # On passe ici l'URI de l'objet.
         self._pending_requests_count += 1 # Augmenter le compteur du nombre de requêtes en cours de traitement
         
@@ -173,7 +173,7 @@ class User_Requests_Pipeline :
         self._requests_sem.acquire()
         
         # Créer et ajouter l'objet User_Request à notre système.
-        request = self._root.register_obj( User_Request( image_url ), None )
+        request = self._root.register_obj( User_Request( image_url ) )
         self._requests[ image_url ] = request
         self._pending_requests_count += 1 # Augmenter le compteur du nombre de requêtes en cours de traitement
         

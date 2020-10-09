@@ -57,7 +57,7 @@ class Scan_Request :
         self._has_failed = False
         
         # File d'attente pour mettre les Tweets trouvés par l'API de recherche
-        self._SearchAPI_tweets_queue = self._root.register_obj( Pyro_Queue(), None )
+        self._SearchAPI_tweets_queue = self._root.register_obj( Pyro_Queue() )
         
         # Résultat de la fonction
         # Tweets_Lister_with_SearchAPI.list_SearchAPI_tweets() (Etape A)
@@ -65,7 +65,7 @@ class Scan_Request :
         self._SearchAPI_last_tweet_date = None
         
         # File d'attente pour mettre les Tweets trouvés par l'API de timeline
-        self._TimelineAPI_tweets_queue = self._root.register_obj( Pyro_Queue(), None )
+        self._TimelineAPI_tweets_queue = self._root.register_obj( Pyro_Queue() )
         
         # Résultat de la fonction
         # Tweets_Lister_with_TimelineAPI.list_TimelineAPI_tweets() (Etape B)
@@ -87,7 +87,7 @@ class Scan_Request :
         # Cache pour les deux indexeurs (Etape C et D)
         # Permet de savoir si l'autre est en train ou a déjà traiter un Tweet,
         # sans avoir à faire un appel à la base de données
-        self._indexing_tweets = self._root.register_obj( Common_Tweet_IDs_List(), None )
+        self._indexing_tweets = self._root.register_obj( Common_Tweet_IDs_List() )
         
         # Cache pour les deux indexeurs (Etape C et D)
         # Savoir si la requête est dans l'un des deux ou pas
@@ -205,7 +205,7 @@ class Scan_Request :
     """
     def SearchAPI_tweets_queue_put ( self, tweet_id, author_id, images_urls, hashtags ) :
         tweet = Pyro_SearchAPI_Tweet( tweet_id, author_id, images_urls, hashtags )
-        uri = self._root.register_obj( tweet, None )
+        uri = self._root.register_obj( tweet )
         
         Pyro4.Proxy( self._SearchAPI_tweets_queue ).put( uri )
     
