@@ -29,7 +29,7 @@ def thread_step_D_TimelineAPI_index_account_tweets( thread_id : int, shared_memo
     bdd_direct_access = SQLite_or_MySQL()
     
     # Dire qu'on ne fait rien
-    shared_memory.scan_requests.requests_in_thread.set_request( "thread_step_D_TimelineAPI_index_account_tweets_number" + str(thread_id), None )
+    shared_memory.threads_registry.set_request( "thread_step_D_TimelineAPI_index_account_tweets_number" + str(thread_id), None )
     
     # Tant que on ne nous dit pas de nous arrêter
     while shared_memory.keep_service_alive :
@@ -74,7 +74,7 @@ def thread_step_D_TimelineAPI_index_account_tweets( thread_id : int, shared_memo
             continue
         
         # Dire qu'on est en train de traiter cette requête
-        shared_memory.scan_requests.requests_in_thread.set_request( "thread_step_D_TimelineAPI_index_account_tweets_number" + str(thread_id), request )
+        shared_memory.threads_registry.set_request( "thread_step_D_TimelineAPI_index_account_tweets_number" + str(thread_id), request )
         
         # Si on a vu cette requête il y a moins de 5 secondes, c'est qu'il n'y
         # a pas beaucoup de requêtes dans le pipeline, on peut donc dormir
@@ -118,7 +118,7 @@ def thread_step_D_TimelineAPI_index_account_tweets( thread_id : int, shared_memo
             shared_memory.scan_requests.queues_sem.release()
         
         # Dire qu'on n'est plus en train de traiter cette requête
-        shared_memory.scan_requests.requests_in_thread.set_request( "thread_step_D_TimelineAPI_index_account_tweets_number" + str(thread_id), None )
+        shared_memory.threads_registry.set_request( "thread_step_D_TimelineAPI_index_account_tweets_number" + str(thread_id), None )
     
     print( "[step_D_th" + str(thread_id) + "] Arrêté !" )
     return

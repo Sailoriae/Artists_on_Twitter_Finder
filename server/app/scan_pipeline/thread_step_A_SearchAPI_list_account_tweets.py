@@ -26,7 +26,7 @@ def thread_step_A_SearchAPI_list_account_tweets( thread_id : int, shared_memory 
                                                              ENABLE_METRICS = param.ENABLE_METRICS )
     
     # Dire qu'on ne fait rien
-    shared_memory.scan_requests.requests_in_thread.set_request( "thread_step_A_SearchAPI_list_account_tweets_number" + str(thread_id), None )
+    shared_memory.threads_registry.set_request( "thread_step_A_SearchAPI_list_account_tweets_number" + str(thread_id), None )
     
     # Tant que on ne nous dit pas de nous arrêter
     while shared_memory.keep_service_alive :
@@ -56,7 +56,7 @@ def thread_step_A_SearchAPI_list_account_tweets( thread_id : int, shared_memory 
         shared_memory.scan_requests.queues_sem.release()
         
         # Dire qu'on est en train de traiter cette requête
-        shared_memory.scan_requests.requests_in_thread.set_request( "thread_step_A_SearchAPI_list_account_tweets_number" + str(thread_id), request )
+        shared_memory.threads_registry.set_request( "thread_step_A_SearchAPI_list_account_tweets_number" + str(thread_id), request )
         
         # On liste les tweets du compte Twitter de la requête avec l'API de recherche
         print( "[step_A_th" + str(thread_id) + "] Listage des Tweets du compte Twitter @" + request.account_name + " avec l'API de recherche." )
@@ -68,7 +68,7 @@ def thread_step_A_SearchAPI_list_account_tweets( thread_id : int, shared_memory 
             request.unfounded_account = True
         
         # Dire qu'on n'est plus en train de traiter cette requête
-        shared_memory.scan_requests.requests_in_thread.set_request( "thread_step_A_SearchAPI_list_account_tweets_number" + str(thread_id), None )
+        shared_memory.threads_registry.set_request( "thread_step_A_SearchAPI_list_account_tweets_number" + str(thread_id), None )
     
     print( "[step_A_th" + str(thread_id) + "] Arrêté !" )
     return

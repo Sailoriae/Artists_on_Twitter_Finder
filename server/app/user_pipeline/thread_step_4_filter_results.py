@@ -50,7 +50,7 @@ les mêmes.
 """
 def thread_step_4_filter_results( thread_id : int, shared_memory ) :
     # Dire qu'on ne fait rien
-    shared_memory.user_requests.requests_in_thread.set_request( "thread_step_4_filter_results_number" + str(thread_id), None )
+    shared_memory.threads_registry.set_request( "thread_step_4_filter_results_number" + str(thread_id), None )
     
     # Tant que on ne nous dit pas de nous arrêter
     while shared_memory.keep_service_alive :
@@ -64,7 +64,7 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
             continue
         
         # Dire qu'on est en train de traiter cette requête
-        shared_memory.user_requests.requests_in_thread.set_request( "thread_step_4_filter_results_number" + str(thread_id), request )
+        shared_memory.threads_registry.set_request( "thread_step_4_filter_results_number" + str(thread_id), request )
         
         # On passe la requête à l'étape suivante, c'est à dire notre étape
         shared_memory.user_requests.set_request_to_next_step( request )
@@ -82,7 +82,7 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
                 print( error )
                 request.problem = "ERROR_DURING_REVERSE_SEARCH"
                 
-                shared_memory.user_requests.requests_in_thread.set_request( "thread_step_4_filter_results_number" + str(thread_id), None )
+                shared_memory.threads_registry.set_request( "thread_step_4_filter_results_number" + str(thread_id), None )
                 shared_memory.user_requests.set_request_to_next_step( request )
                 continue
         
@@ -96,7 +96,7 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
                 print( error )
                 request.problem = "ERROR_DURING_REVERSE_SEARCH"
                 
-                shared_memory.user_requests.requests_in_thread.set_request( "thread_step_4_filter_results_number" + str(thread_id), None )
+                shared_memory.threads_registry.set_request( "thread_step_4_filter_results_number" + str(thread_id), None )
                 shared_memory.user_requests.set_request_to_next_step( request )
                 continue
         
@@ -138,7 +138,7 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
             shared_memory.execution_metrics.add_step_4_times( time() - start )
         
         # Dire qu'on n'est plus en train de traiter cette requête
-        shared_memory.user_requests.requests_in_thread.set_request( "thread_step_4_filter_results_number" + str(thread_id), None )
+        shared_memory.threads_registry.set_request( "thread_step_4_filter_results_number" + str(thread_id), None )
         
         # On passe la requête à l'étape suivante, fin du traitement
         shared_memory.user_requests.set_request_to_next_step( request )

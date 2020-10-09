@@ -11,13 +11,11 @@ try :
     from class_Limit_per_IP_Address import Limit_per_IP_Address
     from class_Pyro_Semaphore import Pyro_Semaphore
     from class_Pyro_Queue import Pyro_Queue
-    from class_Threads_Register import Threads_Register
 except ModuleNotFoundError :
     from .class_User_Request import User_Request
     from .class_Limit_per_IP_Address import Limit_per_IP_Address
     from .class_Pyro_Semaphore import Pyro_Semaphore
     from .class_Pyro_Queue import Pyro_Queue
-    from .class_Threads_Register import Threads_Register
 
 # Ajouter le répertoire parent au PATH pour pouvoir importer
 from sys import path as sys_path
@@ -75,13 +73,6 @@ class User_Requests_Pipeline :
         # de traitement.
         self._limit_per_ip_addresses = self._root.register_obj( Limit_per_IP_Address(), "user_requests_limit_per_ip_addresses" )
         
-        # Dictionnaire où les threads mettent leur requête en cours de
-        # traitement, afin que leurs collecteurs d'erreurs mettent ces
-        # requêtes en échec lors d'un plantage.
-        # Les threads sont identifiés par la chaine suivante :
-        # procédure_du_thread.__name__ + "_number" + str(thread_id)
-        self._requests_in_thread = self._root.register_obj( Threads_Register(), "user_requests_requests_in_thread" )
-        
         # Sémaphore du "if request.scan_requests == None" de la procédure de
         # thread "thread_step_2_tweets_indexer". Permet d'éviter des problèmes
         # en cas de lancement d'un scan.
@@ -108,9 +99,6 @@ class User_Requests_Pipeline :
     
     @property
     def limit_per_ip_addresses( self ) : return Pyro4.Proxy( self._limit_per_ip_addresses )
-    
-    @property
-    def requests_in_thread( self ) : return Pyro4.Proxy( self._requests_in_thread )
     
     @property
     def thread_step_2_tweets_indexer_sem( self ) : return Pyro4.Proxy( self._thread_step_2_tweets_indexer_sem )

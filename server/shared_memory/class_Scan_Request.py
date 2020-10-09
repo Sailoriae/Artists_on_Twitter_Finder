@@ -28,6 +28,10 @@ Proxy ne peut être utilisé que par un seul thread à la fois).
 """
 @Pyro4.expose
 class Scan_Request :
+    # Type de requête, pour la reconnaitre plus facilement dans le collecteur
+    # d'erreurs
+    _request_type = "scan"
+    
     """
     @param account_id L'ID du compte Twitter à indexer / scanner. Ne sert qu'à
                       identifier.
@@ -105,6 +109,9 @@ class Scan_Request :
     """
     Getters et setters pour Pyro.
     """
+    @property
+    def request_type( self ) : return self._request_type
+    
     @property
     def account_id( self ) : return self._account_id
     

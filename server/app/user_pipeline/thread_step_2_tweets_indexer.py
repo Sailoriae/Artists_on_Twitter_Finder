@@ -24,7 +24,7 @@ l'état des requêtes qu'il a lancé.
 """
 def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
     # Dire qu'on ne fait rien
-    shared_memory.user_requests.requests_in_thread.set_request( "thread_step_2_tweets_indexer_number" + str(thread_id), None )
+    shared_memory.threads_registry.set_request( "thread_step_2_tweets_indexer_number" + str(thread_id), None )
     
     # Timezone locale
     local_tz = tzlocal()
@@ -45,7 +45,7 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
             continue
         
         # Dire qu'on est en train de traiter cette requête
-        shared_memory.user_requests.requests_in_thread.set_request( "thread_step_2_tweets_indexer_number" + str(thread_id), request )
+        shared_memory.threads_registry.set_request( "thread_step_2_tweets_indexer_number" + str(thread_id), request )
         
         # Si on a vu cette requête il y a moins de 5 secondes, c'est qu'il n'y
         # a pas beaucoup de requêtes dans le pipeline, on peut donc dormir
@@ -144,7 +144,7 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
                 continue
         
         # Dire qu'on n'est plus en train de traiter cette requête
-        shared_memory.user_requests.requests_in_thread.set_request( "thread_step_2_tweets_indexer_number" + str(thread_id), None )
+        shared_memory.threads_registry.set_request( "thread_step_2_tweets_indexer_number" + str(thread_id), None )
         
         # Si l'une des requêtes de scan a eu un problème, on arrête tout avec
         # cette requête utilisateur

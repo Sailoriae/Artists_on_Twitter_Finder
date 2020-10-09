@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # coding: utf-8
 
+from os import getpid
 import traceback
 import Pyro4
 
@@ -14,41 +15,40 @@ le sont par ce collecteur d'erreur.
                          partagée Pyro4.
 """
 def error_collector( thread_procedure, thread_id : int, shared_memory_uri : str ) :
+    # Connexion au serveur de mémoire partagée
     Pyro4.config.SERIALIZER = "pickle"
     shared_memory = Pyro4.Proxy( shared_memory_uri )
-    error_count = 0
     
+    # Enregistrer le thread / le procesus
+    shared_memory.threads_registry.register_thread( thread_procedure.__name__ + "_number" + str(thread_id), getpid() )
+    
+    error_count = 0
     while shared_memory.keep_service_alive :
         try :
             thread_procedure( thread_id, shared_memory )
         except Exception :
             error_name = "Erreur dans le thread " + str(thread_id) + " de la procédure " + thread_procedure.__name__ + " !\n"
             
-            # Mettre la requête en erreur si c'est une requête utilisateur, et
-            # non une requête de scan
+            # Mettre la requête en erreur si c'est une requête utilisateur ou
+            # une requête de scan
             try :
-                request = shared_memory.user_requests.requests_in_thread.get_request( thread_procedure.__name__ + "_number" + str(thread_id) )
-            # Si on n'est pas un thread de traitement des requêtes utilisateurs
-            # (Etapes 1, 2 et 3), on aura forcément une KeyError
+                request = shared_memory.threads_registry.get_request( thread_procedure.__name__ + "_number" + str(thread_id) )
+            # Si on n'est pas un thread de traitement (Utilisateur ou scan)
             except KeyError :
                 pass
+            # Sinon, si on est un thread de traitement
             else :
-                if request != None :
-                    request.problem = "PROCESSING_ERROR"
-                    shared_memory.user_requests.set_request_to_next_step( request, force_end = True )
+                # Si la requête est une requête utilisateur
+                # (On est donc un thread de traitement des requêtes utilisateurs)            
+                if request != None and request.request_type == "user" :
+                    request.problem = "PROCESSING_ERROR" # Mettre la requête en erreur
+                    shared_memory.user_requests.set_request_to_next_step( request, force_end = True ) # Forcer sa fin
                     error_name += "URL de requête : " + str(request.input_url) + "\n"
-            
-            # Mettre la requête en erreur si c'est une requête de scan, et non
-            # une requête utilisateur
-            try :
-                request = shared_memory.scan_requests.requests_in_thread.get_request( thread_procedure.__name__ + "_number" + str(thread_id) )
-            # Si on n'est pas un thread de traitement des requêtes de scan
-            # (Etapes paralléles A, B, C et D), on aura forcément une KeyError
-            except KeyError :
-                pass
-            else :
-                if request != None :
-                    request.has_failed = True
+                
+                # Si la requête est une requête de scan
+                # (On est donc un thread de traitement des requêtes de scan)   
+                if request != None and request.request_type == "scan" :
+                    request.has_failed = True # Mettre la requête en erreur
                     error_name += "Compte Twitter : @" + request.account_name + " (ID " + str(request.account_id) + ")\n"
             
             # Enregistrer dans un fichier

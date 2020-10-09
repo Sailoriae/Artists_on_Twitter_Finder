@@ -19,6 +19,10 @@ Proxy ne peut être utilisé que par un seul thread à la fois).
 """
 @Pyro4.expose
 class User_Request :
+    # Type de requête, pour la reconnaitre plus facilement dans le collecteur
+    # d'erreurs
+    _request_type = "user"
+    
     """
     @param input_url L'URL de l'illustration de requête.
     @param ip_address L'adresse IP qui a lancé la requête.
@@ -93,6 +97,9 @@ class User_Request :
     """
     Getters et setters pour Pyro.
     """
+    @property
+    def request_type( self ) : return self._request_type
+    
     @property
     def input_url( self ) : return self._input_url
     

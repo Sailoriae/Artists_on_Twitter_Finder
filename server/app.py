@@ -296,9 +296,7 @@ if __name__ == "__main__" :
         
         elif args[0] == "threads" :
             if len(args) == 1 :
-                to_print = shared_memory.user_requests.requests_in_thread.get_status()
-                to_print += shared_memory.scan_requests.requests_in_thread.get_status()
-                print( to_print )
+                print( shared_memory.threads_registry.get_status() )
             else :
                 print( "Utilisation : threads")
         

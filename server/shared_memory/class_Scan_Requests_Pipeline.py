@@ -11,13 +11,11 @@ try :
     from remove_account_id_from_queue import remove_account_id_from_queue
     from class_Pyro_Semaphore import Pyro_Semaphore
     from class_Pyro_Queue import Pyro_Queue
-    from class_Threads_Register import Threads_Register
 except ModuleNotFoundError :
     from .class_Scan_Request import Scan_Request
     from .remove_account_id_from_queue import remove_account_id_from_queue
     from .class_Pyro_Semaphore import Pyro_Semaphore
     from .class_Pyro_Queue import Pyro_Queue
-    from .class_Threads_Register import Threads_Register
 
 
 """
@@ -85,13 +83,6 @@ class Scan_Requests_Pipeline :
         # en prioritaire sans avoir de problème.
         self._queues_sem = self._root.register_obj( Pyro_Semaphore(), "scan_requests_queues_sem" )
         
-        # Dictionnaire où les threads mettent leur requête en cours de
-        # traitement, afin que leurs collecteurs d'erreurs mettent ces
-        # requêtes en échec lors d'un plantage.
-        # Les threads sont identifiés par la chaine suivante :
-        # procédure_du_thread.__name__ + "_number" + str(thread_id)
-        self._requests_in_thread = self._root.register_obj( Threads_Register(), "scan_requests_requests_in_thread" )
-        
         # Compteur du nombre de requêtes en cours de traitement dans le
         # pipeline.
         self._pending_requests_count = 0
@@ -125,9 +116,6 @@ class Scan_Requests_Pipeline :
     
     @property
     def queues_sem( self ) : return Pyro4.Proxy( self._queues_sem )
-    
-    @property
-    def requests_in_thread( self ) : return Pyro4.Proxy( self._requests_in_thread )
     
     @property
     def pending_requests_count( self ) : return self._pending_requests_count

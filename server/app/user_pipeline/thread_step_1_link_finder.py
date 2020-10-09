@@ -31,7 +31,7 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
                                 param.OAUTH_TOKEN_SECRET )
     
     # Dire qu'on ne fait rien
-    shared_memory.user_requests.requests_in_thread.set_request( "thread_step_1_link_finder_number" + str(thread_id), None )
+    shared_memory.threads_registry.set_request( "thread_step_1_link_finder_number" + str(thread_id), None )
     
     # Tant que on ne nous dit pas de nous arrêter
     while shared_memory.keep_service_alive :
@@ -45,7 +45,7 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
             continue
         
         # Dire qu'on est en train de traiter cette requête
-        shared_memory.user_requests.requests_in_thread.set_request( "thread_step_1_link_finder_number" + str(thread_id), request )
+        shared_memory.threads_registry.set_request( "thread_step_1_link_finder_number" + str(thread_id), request )
         
         # On passe la requête à l'étape suivante, c'est à dire notre étape
         shared_memory.user_requests.set_request_to_next_step( request )
@@ -64,7 +64,7 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
             shared_memory.user_requests.set_request_to_next_step( request, force_end = True )
             
             # Dire qu'on n'est plus en train de traiter cette requête
-            shared_memory.user_requests.requests_in_thread.set_request( "thread_step_1_link_finder_number" + str(thread_id), None )
+            shared_memory.threads_registry.set_request( "thread_step_1_link_finder_number" + str(thread_id), None )
             
             print( "[step_1_th" + str(thread_id) + "] Ceci n'est pas une URL !" )
             continue
@@ -76,7 +76,7 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
             shared_memory.user_requests.set_request_to_next_step( request, force_end = True )
             
             # Dire qu'on n'est plus en train de traiter cette requête
-            shared_memory.user_requests.requests_in_thread.set_request( "thread_step_1_link_finder_number" + str(thread_id), None )
+            shared_memory.threads_registry.set_request( "thread_step_1_link_finder_number" + str(thread_id), None )
             
             print( "[step_1_th" + str(thread_id) + "] Site non supporté !" )
             continue
@@ -88,7 +88,7 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
             shared_memory.user_requests.set_request_to_next_step( request, force_end = True )
             
             # Dire qu'on n'est plus en train de traiter cette requête
-            shared_memory.user_requests.requests_in_thread.set_request( "thread_step_1_link_finder_number" + str(thread_id), None )
+            shared_memory.threads_registry.set_request( "thread_step_1_link_finder_number" + str(thread_id), None )
             
             print( "[step_1_th" + str(thread_id) + "] URL invalide ! Elle ne mène pas à une illustration." )
             continue
@@ -100,7 +100,7 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
             shared_memory.user_requests.set_request_to_next_step( request, force_end = True )
             
             # Dire qu'on n'est plus en train de traiter cette requête
-            shared_memory.user_requests.requests_in_thread.set_request( "thread_step_1_link_finder_number" + str(thread_id), None )
+            shared_memory.threads_registry.set_request( "thread_step_1_link_finder_number" + str(thread_id), None )
             
             print( "[step_1_th" + str(thread_id) + "] Aucun compte Twitter trouvé pour l'artiste de cette illustration !" )
             continue
@@ -119,7 +119,7 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
             shared_memory.user_requests.set_request_to_next_step( request, force_end = True )
             
             # Dire qu'on n'est plus en train de traiter cette requête
-            shared_memory.user_requests.requests_in_thread.set_request( "thread_step_1_link_finder_number" + str(thread_id), None )
+            shared_memory.threads_registry.set_request( "thread_step_1_link_finder_number" + str(thread_id), None )
             
             print( "[step_1_th" + str(thread_id) + "] Aucun compte Twitter valide trouvé pour l'artiste de cette illustration !" )
             continue
@@ -139,7 +139,7 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
         request.datetime = data.publish_date
         
         # Dire qu'on n'est plus en train de traiter cette requête
-        shared_memory.user_requests.requests_in_thread.set_request( "thread_step_1_link_finder_number" + str(thread_id), None )
+        shared_memory.threads_registry.set_request( "thread_step_1_link_finder_number" + str(thread_id), None )
         
         # On passe la requête à l'étape suivante
         # C'est la procédure shared_memory.user_requests.set_request_to_next_step

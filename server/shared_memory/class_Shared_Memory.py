@@ -8,11 +8,13 @@ try :
     from class_Scan_Requests_Pipeline import Scan_Requests_Pipeline
     from class_HTTP_Requests_Limitator import HTTP_Requests_Limitator
     from class_Metrics_Container import Metrics_Container
+    from class_Threads_Registry import Threads_Registry
 except ModuleNotFoundError :
     from .class_User_Requests_Pipeline import User_Requests_Pipeline
     from .class_Scan_Requests_Pipeline import Scan_Requests_Pipeline
     from .class_HTTP_Requests_Limitator import HTTP_Requests_Limitator
     from .class_Metrics_Container import Metrics_Container
+    from .class_Threads_Registry import Threads_Registry
 
 # Ajouter le répertoire parent au PATH pour pouvoir importer
 from sys import path as sys_path
@@ -63,6 +65,14 @@ class Shared_Memory :
         
         # Conteneur des mesures de temps d'éxécution.
         self._execution_metrics = self.register_obj( Metrics_Container(), "execution_metrics" )
+        
+        # Objet où les threads s'enregistrent.
+        # Ils y mettent aussi leur requête en cours de traitement, afin que
+        # leurs collecteurs d'erreurs mettent ces  requêtes en échec lors d'un
+        # plantage.
+        # Les threads sont identifiés par la chaine suivante :
+        # procédure_du_thread.__name__ + "_number" + str(thread_id)
+        self._threads_registry = self.register_obj( Threads_Registry(), "threads_registry" )
     
     """
     Getters et setters pour Pyro.
@@ -98,6 +108,9 @@ class Shared_Memory :
     
     @property
     def execution_metrics( self ) : return Pyro4.Proxy( self._execution_metrics )
+    
+    @property
+    def threads_registry( self ) : return Pyro4.Proxy( self._threads_registry )
     
     """
     Lancer le sevreur de mémoire partagée, avec Pyro.
