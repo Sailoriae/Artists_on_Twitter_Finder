@@ -168,10 +168,13 @@ class SQLite_or_MySQL :
     Destructeur
     """
     def __del__( self ) :
-        try :
+        if param.USE_MYSQL_INSTEAD_OF_SQLITE :
+            try :
+                self.conn.close()
+            except sqlite3.ProgrammingError :
+                pass
+        else :
             self.conn.close()
-        except sqlite3.ProgrammingError :
-            pass
     
     """
     Obtenir un curseur.
