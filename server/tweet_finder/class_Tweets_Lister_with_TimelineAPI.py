@@ -39,6 +39,7 @@ class Tweets_Lister_with_TimelineAPI :
     @param queue Objet queue.Queue() pour y stocker les Tweets trouvés.
                  Un Tweet est représenté par un objet "Tweepy.Status".
                  Lorsque le listage sera terminé, "None" sera ajouté.
+    @param account_id ID du compte, vérifié récemment !
     
     @return L'ID du Tweet le plus récent, à enregistrer dans la base lorsque
             l'indexation sera terminée.
@@ -49,8 +50,9 @@ class Tweets_Lister_with_TimelineAPI :
     Peut émettre une exception "Unfounded_Account_on_Lister_with_TimelineAPI" si
     le compte est introuvable.
     """
-    def list_TimelineAPI_tweets ( self, account_name, queue, add_step_B_time = None ) :
-        account_id = self.twitter.get_account_id( account_name )
+    def list_TimelineAPI_tweets ( self, account_name, queue, account_id = None, add_step_B_time = None ) :
+        if account_id == None :
+            account_id = self.twitter.get_account_id( account_name )
         if account_id == None :
             print( "[List TimelineAPI] Compte @" + account_name + " introuvable !" )
             raise Unfounded_Account_on_Lister_with_TimelineAPI

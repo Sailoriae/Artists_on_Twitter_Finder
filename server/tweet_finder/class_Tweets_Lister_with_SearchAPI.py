@@ -44,6 +44,7 @@ class Tweets_Lister_with_SearchAPI :
     
     @param queue_put Fonction à appeler pour mettre les Tweets trouvés.
                      Lorsque le listage sera terminé, "None" sera ajouté.
+    @param account_id ID du compte, vérifié récemment !
     
     @return La date du Tweet le plus récent, à enregistrer dans la base lorsque
             l'indexation sera terminée.
@@ -54,8 +55,9 @@ class Tweets_Lister_with_SearchAPI :
     Peut émettre une exception "Unfounded_Account_on_Lister_with_TimelineAPI" si
     le compte est introuvable.
     """
-    def list_searchAPI_tweets ( self, account_name, queue_put, add_step_A_time = None ) :
-        account_id = self.twitter.get_account_id( account_name )
+    def list_searchAPI_tweets ( self, account_name, queue_put, account_id = None, add_step_A_time = None ) :
+        if account_id == None :
+            account_id = self.twitter.get_account_id( account_name )
         if account_id == None :
             print( "[List SearchAPI] Compte @" + account_name + " introuvable !" )
             raise Unfounded_Account_on_Lister_with_SearchAPI

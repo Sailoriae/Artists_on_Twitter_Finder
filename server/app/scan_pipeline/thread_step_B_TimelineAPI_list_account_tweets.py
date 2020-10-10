@@ -22,11 +22,11 @@ de Twitter.
 def thread_step_B_TimelineAPI_list_account_tweets( thread_id : int, shared_memory ) :
     # Initialisation du listeur de Tweets
     timelineAPI_lister = Tweets_Lister_with_TimelineAPI( param.API_KEY,
-                                                       param.API_SECRET,
-                                                       param.TWITTER_API_KEYS[ thread_id - 1 ]["OAUTH_TOKEN"],
-                                                       param.TWITTER_API_KEYS[ thread_id - 1 ]["OAUTH_TOKEN_SECRET"],
-                                                       DEBUG = param.DEBUG,
-                                                       ENABLE_METRICS = param.ENABLE_METRICS )
+                                                         param.API_SECRET,
+                                                         param.TWITTER_API_KEYS[ thread_id - 1 ]["OAUTH_TOKEN"],
+                                                         param.TWITTER_API_KEYS[ thread_id - 1 ]["OAUTH_TOKEN_SECRET"],
+                                                         DEBUG = param.DEBUG,
+                                                         ENABLE_METRICS = param.ENABLE_METRICS )
     
     # Dire qu'on ne fait rien
     shared_memory.threads_registry.set_request( "thread_step_B_TimelineAPI_list_account_tweets_number" + str(thread_id), None )
@@ -66,6 +66,7 @@ def thread_step_B_TimelineAPI_list_account_tweets( thread_id : int, shared_memor
         try :
             request.TimelineAPI_last_tweet_id = timelineAPI_lister.list_TimelineAPI_tweets( request.account_name,
                                                                                             request.TimelineAPI_tweets_queue,
+                                                                                            account_id = request.account_id,
                                                                                             add_step_B_time = shared_memory.execution_metrics.add_step_B_time )
         except Unfounded_Account_on_Lister_with_TimelineAPI :
             request.unfounded_account = True
