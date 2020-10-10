@@ -95,6 +95,12 @@ if __name__ == "__main__" :
         import sys
         sys.exit(0)
     
+    # On s'enregistre comme thread / processus
+    # ATTENTION : Pyro crée aussi pleins de threads (Mais pas des
+    # processus comme nous en mode Multiprocessing) qui ne sont pas
+    # enregistrés dans notre mémoire partagée.
+    shared_memory.threads_registry.register_thread( "app.py", os.getpid() )
+    
     
     """
     Démarrage des threads.
