@@ -22,23 +22,12 @@ OAUTH_TOKEN = ""
 OAUTH_TOKEN_SECRET = ""
 
 """
+OAUTH_TOKEN et OAUTH_TOKEN_SECRET :
 Liste de paramètres pour l'accès à l'API Twitter, idem à ci-dessus, mais en
 plusieurs exemplaires (Donc sur plusieurs comptes) pour paralléliser les
 listages de Tweets
-"""
-TWITTER_API_KEYS = [ {
-                       "OAUTH_TOKEN" : "",
-                       "OAUTH_TOKEN_SECRET" : ""
-                      }, {
-                       "OAUTH_TOKEN" : "",
-                       "OAUTH_TOKEN_SECRET" : ""
-                      }, {
-                       "OAUTH_TOKEN" : "",
-                       "OAUTH_TOKEN_SECRET" : ""
-                      } ]
 
-"""
-Token de connexion à des comptes Twitter.
+AUTH_TOKEN : Token de connexion à des comptes Twitter.
 1. Ouvrir un compte Twitter dans un navigateur,
 2. Mettre ici la valeur du cookie "auth_token",
 3. Et ne surtout pas déconnecter ce compte, ni effacer la session !
@@ -51,10 +40,22 @@ Paramètres -> Confidentialité et sécurité -> Sécurité -> Filtres de recher
 
 Il est très recommandé d'utiliser ici des comptes "inutiles", en cas de
 piratage du serveur (Et de vol des "auth_token" ci-dessous).
+
+LES AUTH_TOKEN DOIVENT CORRESPONDRE AUX COUPLES OAUTH_TOKEN / OAUTH_TOKEN_SECRET  !
 """
-TWITTER_AUTH_TOKENS = [ "",
-                        "",
-                        "" ]
+TWITTER_API_KEYS = [ {
+                       "OAUTH_TOKEN" : "",
+                       "OAUTH_TOKEN_SECRET" : "",
+                       "AUTH_TOKEN" : ""
+                      }, {
+                       "OAUTH_TOKEN" : "",
+                       "OAUTH_TOKEN_SECRET" : "",
+                       "AUTH_TOKEN" : ""
+                      }, {
+                       "OAUTH_TOKEN" : "",
+                       "OAUTH_TOKEN_SECRET" : "",
+                       "AUTH_TOKEN" : ""
+                      } ]
 
 """
 Paramètres pour l'accès à l'API Pixiv.
@@ -98,9 +99,9 @@ NUMBER_OF_STEP_1_LINK_FINDER_THREADS = 5
 NUMBER_OF_STEP_2_TWEETS_INDEXER_THREADS = 5
 NUMBER_OF_STEP_3_REVERSE_SEARCH_THREADS = 5
 NUMBER_OF_STEP_4_FILTER_RESULTS_THREADS = 5
-NUMBER_OF_STEP_A_SEARCHAPI_LIST_ACCOUNT_TWEETS_THREADS = len( TWITTER_AUTH_TOKENS ) # NE PAS TOUCHER
+NUMBER_OF_STEP_A_SEARCHAPI_LIST_ACCOUNT_TWEETS_THREADS = len( TWITTER_API_KEYS ) # NE PAS TOUCHER
 NUMBER_OF_STEP_B_TIMELINEAPI_LIST_ACCOUNT_TWEETS_THREADS = len( TWITTER_API_KEYS ) # NE PAS TOUCHER
-NUMBER_OF_STEP_C_SEARCHAPI_INDEX_ACCOUNT_TWEETS = len( TWITTER_AUTH_TOKENS ) * 3
+NUMBER_OF_STEP_C_SEARCHAPI_INDEX_ACCOUNT_TWEETS = len( TWITTER_API_KEYS ) * 3
 NUMBER_OF_STEP_D_TIMELINEAPI_INDEX_ACCOUNT_TWEETS = len( TWITTER_API_KEYS ) * 2
 
 """

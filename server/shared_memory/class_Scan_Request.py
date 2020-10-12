@@ -78,6 +78,11 @@ class Scan_Request :
         self._started_SearchAPI_listing = False
         self._started_TimelineAPI_listing = False
         
+        # Cache pour les deux listeurs (Etapes A et B)
+        # ID dans la liste params.TWITTER_API_KEYS des tokens bloqués par
+        # ce compte
+        self._blocks_list = []
+        
         # Cache pour les deux indexeurs (Etapes C et D)
         # Permet de savoir quand la requête a été vue pour la dernière fois,
         # afin de ne pas trop itérer dessus
@@ -155,6 +160,11 @@ class Scan_Request :
     def started_TimelineAPI_listing( self ) : return self._started_TimelineAPI_listing
     @started_TimelineAPI_listing.setter
     def started_TimelineAPI_listing( self, value ) : self._started_TimelineAPI_listing = value
+    
+    @property
+    def blocks_list( self ) : return self._blocks_list
+    @blocks_list.setter
+    def blocks_list( self, value ) : self._blocks_list = value
     
     @property
     def last_seen_SearchAPI_indexer( self ) : return self._last_seen_SearchAPI_indexer

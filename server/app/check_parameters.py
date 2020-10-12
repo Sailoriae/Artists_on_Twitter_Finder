@@ -26,8 +26,7 @@ def check_parameters () :
         for creds in param.TWITTER_API_KEYS :
             check_list.append( type( creds["OAUTH_TOKEN"] ) == str )
             check_list.append( type( creds["OAUTH_TOKEN_SECRET" ]) == str )
-        for key in param.TWITTER_AUTH_TOKENS :
-            check_list.append( type( key ) == str )
+            check_list.append( type( creds["AUTH_TOKEN" ]) == str )
         check_list.append( type( param.PIXIV_USERNAME ) == str )
         check_list.append( type( param.PIXIV_PASSWORD ) == str )
         check_list.append( type( param.SQLITE_DATABASE_NAME ) == str )
@@ -75,7 +74,6 @@ def check_parameters () :
             print( "Echec de connexion à l'API publique Twitter !")
             print( "Veuillez vérifier votre fichier \"parameters.py\" !" )
             print( "Notamment les clés suivantes : API_KEY, API_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET" )
-            print( "Et la liste de clés suivante : TWITTER_API_KEYS")
             return False
         else :
             print( "Connexion à l'API publique Twitter réussie !")
@@ -98,7 +96,8 @@ def check_parameters () :
     
     # ========================================================================
     
-    for token in param.TWITTER_AUTH_TOKENS :
+    for creds in param.TWITTER_API_KEYS :
+        token = creds["AUTH_TOKEN"]
         snscrape = SNScrapeAbstraction( token )
         query = "from:@Twitter since:2020-08-11 until:2020-08-12"
         
@@ -112,7 +111,7 @@ def check_parameters () :
             print( "Echec de connexion à l'API de recherche de SNScrape...")
             print( error )
             print( "Veuillez vérifier votre fichier \"parameters.py\" !" )
-            print( "Notamment la liste de clés suivante : TWITTER_AUTH_TOKENS" )
+            print( "Notamment les clés suivantes : AUTH_TOKEN" )
             return False
         else :
             print( "Connexion à l'API de recherche de SNScrape réussie !")

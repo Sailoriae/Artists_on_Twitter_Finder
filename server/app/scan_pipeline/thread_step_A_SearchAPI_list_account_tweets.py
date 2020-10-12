@@ -10,7 +10,7 @@ from os import path as os_path
 sys_path.append(os_path.dirname(os_path.dirname(os_path.dirname(os_path.abspath(__file__)))))
 
 import parameters as param
-from tweet_finder import Tweets_Lister_with_SearchAPI, Unfounded_Account_on_Lister_with_SearchAPI
+from tweet_finder import Tweets_Lister_with_SearchAPI, Unfounded_Account_on_Lister_with_SearchAPI, Blocked_by_User_with_SearchAPI
 
 
 """
@@ -21,7 +21,11 @@ de Twitter.
 """
 def thread_step_A_SearchAPI_list_account_tweets( thread_id : int, shared_memory ) :
      # Initialisation du listeur de Tweets
-    searchAPI_lister = Tweets_Lister_with_SearchAPI( param.TWITTER_AUTH_TOKENS[ thread_id - 1 ],
+    searchAPI_lister = Tweets_Lister_with_SearchAPI( param.API_KEY,
+                                                     param.API_SECRET,
+                                                     param.TWITTER_API_KEYS[ thread_id - 1 ]["OAUTH_TOKEN"],
+                                                     param.TWITTER_API_KEYS[ thread_id - 1 ]["OAUTH_TOKEN_SECRET"],
+                                                     param.TWITTER_API_KEYS[ thread_id - 1 ]["AUTH_TOKEN"],
                                                      DEBUG = param.DEBUG,
                                                      ENABLE_METRICS = param.ENABLE_METRICS )
     
@@ -49,6 +53,24 @@ def thread_step_A_SearchAPI_list_account_tweets( thread_id : int, shared_memory 
                 sleep( 1 )
                 continue
         
+        # Vérifier qu'on n'est pas bloqué par ce compte
+        if thread_id - 1 in request.blocks_list :
+            # Si tous les comptes qu'on a pour lister sont bloqués, on met la
+            # requête en échec
+            if len( request.blocks_list ) >= len( param.TWITTER_API_KEYS ) :
+                request.has_failed = True
+            
+            # Sinon, on la remet dans la file
+            else :
+                if request.is_prioritary :
+                    shared_memory.scan_requests.step_A_SearchAPI_list_account_tweets_prior_queue.put( request )
+                else :
+                    shared_memory.scan_requests.step_A_SearchAPI_list_account_tweets_queue.put( request )
+            
+            # Lacher le sémaphore et arrêter là, on ne peut pas la traiter
+            shared_memory.scan_requests.queues_sem.release()
+            continue
+        
         # Dire qu'on a commencé à traiter cette requête
         request.started_SearchAPI_listing = True
         
@@ -67,6 +89,13 @@ def thread_step_A_SearchAPI_list_account_tweets( thread_id : int, shared_memory 
                                                                                         add_step_A_time = shared_memory.execution_metrics.add_step_A_time )
         except Unfounded_Account_on_Lister_with_SearchAPI :
             request.unfounded_account = True
+        
+        except Blocked_by_User_with_SearchAPI :
+            request.blocks_list += [ thread_id - 1 ] # Ne peut pas faire de append avec Pyro
+            if request.is_prioritary :
+                shared_memory.scan_requests.step_A_SearchAPI_list_account_tweets_prior_queue.put( request )
+            else :
+                shared_memory.scan_requests.step_A_SearchAPI_list_account_tweets_queue.put( request )
         
         # Dire qu'on n'est plus en train de traiter cette requête
         shared_memory.threads_registry.set_request( "thread_step_A_SearchAPI_list_account_tweets_number" + str(thread_id), None )

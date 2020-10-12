@@ -51,7 +51,7 @@ class TweepyAbstraction :
             except tweepy.TweepError as error :
                 print( "Erreur en récupérant les informations du Tweet " + str(tweet_id) + "." )
                 print( error.reason )
-                return None
+                return None # Bien laisser le "return None" pour le check_parameters()
     
     """
     @param account_name Le nom d'utilisateur du compte dont on veut l'ID.
@@ -108,7 +108,9 @@ class TweepyAbstraction :
                 else :
                     print( "Erreur en récupérant l'ID du compte @" + str(account_name) + "." )
                 print( error.reason )
-                return None
+                if error.api_code == 50 : # User not found
+                    return None
+                raise error
     
     """
     Obtenir les Tweets d'un utilisateur.
@@ -140,3 +142,14 @@ class TweepyAbstraction :
                                include_rts = False,
                                trim_user = True # Supprimer les infos sur l'utilisateur, on en n'a pas besoin
                               ).items() )
+    
+    """
+    Regarder si un compte bloque le compte connecté à l'API.
+    
+    @param account_id L'ID du compte.
+    @return True ou False.
+    """
+    # Note : On ne peut pas savoir via cette API si le compte est en privé.
+    def blocks_me ( self, account_id : int ) :
+        friendship = self.api.show_friendship( target_id = account_id )
+        return friendship[0].blocked_by

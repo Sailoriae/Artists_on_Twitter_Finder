@@ -10,7 +10,7 @@ from os import path as os_path
 sys_path.append(os_path.dirname(os_path.dirname(os_path.dirname(os_path.abspath(__file__)))))
 
 import parameters as param
-from tweet_finder import Tweets_Lister_with_TimelineAPI, Unfounded_Account_on_Lister_with_TimelineAPI
+from tweet_finder import Tweets_Lister_with_TimelineAPI, Unfounded_Account_on_Lister_with_TimelineAPI, Blocked_by_User_with_TimelineAPI
 
 
 """
@@ -52,6 +52,24 @@ def thread_step_B_TimelineAPI_list_account_tweets( thread_id : int, shared_memor
                 sleep( 1 )
                 continue
         
+        # Vérifier qu'on n'est pas bloqué par ce compte
+        if thread_id - 1 in request.blocks_list :
+            # Si tous les comptes qu'on a pour lister sont bloqués, on met la
+            # requête en échec
+            if len( request.blocks_list ) >= len( param.TWITTER_API_KEYS ) :
+                request.has_failed = True
+            
+            # Sinon, on la remet dans la file
+            else :
+                if request.is_prioritary :
+                    shared_memory.scan_requests.step_B_TimelineAPI_list_account_tweets_prior_queue.put( request )
+                else :
+                    shared_memory.scan_requests.step_B_TimelineAPI_list_account_tweets_queue.put( request )
+            
+            # Lacher le sémaphore et arrêter là, on ne peut pas la traiter
+            shared_memory.scan_requests.queues_sem.release()
+            continue
+        
         # Dire qu'on a commencé à traiter cette requête
         request.started_TimelineAPI_listing = True
         
@@ -70,6 +88,13 @@ def thread_step_B_TimelineAPI_list_account_tweets( thread_id : int, shared_memor
                                                                                             add_step_B_time = shared_memory.execution_metrics.add_step_B_time )
         except Unfounded_Account_on_Lister_with_TimelineAPI :
             request.unfounded_account = True
+        
+        except Blocked_by_User_with_TimelineAPI :
+            request.blocks_list += [ thread_id - 1 ] # Ne peut pas faire de append avec Pyro
+            if request.is_prioritary :
+                shared_memory.scan_requests.step_B_TimelineAPI_list_account_tweets_prior_queue.put( request )
+            else :
+                shared_memory.scan_requests.step_B_TimelineAPI_list_account_tweets_queue.put( request )
         
         # Dire qu'on n'est plus en train de traiter cette requête
         shared_memory.threads_registry.set_request( "thread_step_B_TimelineAPI_list_account_tweets_number" + str(thread_id), None )

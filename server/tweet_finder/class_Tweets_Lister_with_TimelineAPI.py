@@ -13,6 +13,8 @@ except ModuleNotFoundError : # Si on a été exécuté en temps que module
 
 class Unfounded_Account_on_Lister_with_TimelineAPI ( Exception ) :
     pass
+class Blocked_by_User_with_TimelineAPI ( Exception ) :
+    pass
 
 
 """
@@ -26,9 +28,9 @@ class Tweets_Lister_with_TimelineAPI :
         self.ENABLE_METRICS = ENABLE_METRICS
         self.bdd = SQLite_or_MySQL()
         self.twitter = TweepyAbstraction( api_key,
-                                         api_secret,
-                                         oauth_token,
-                                         oauth_token_secret )
+                                          api_secret,
+                                          oauth_token,
+                                          oauth_token_secret )
     
     """
     Lister les Tweets du compte Twitter @account_name.
@@ -49,13 +51,19 @@ class Tweets_Lister_with_TimelineAPI :
     
     Peut émettre une exception "Unfounded_Account_on_Lister_with_TimelineAPI" si
     le compte est introuvable.
+    Peut émettre des "Blocked_by_User_with_TimelineAPI" si le compte nous
+    bloque.
     """
     def list_TimelineAPI_tweets ( self, account_name, queue, account_id = None, add_step_B_time = None ) :
         if account_id == None :
-            account_id = self.twitter.get_account_id( account_name )
+            account_id = self.twitter.get_account_id( account_name ) # TOUJOURS AVEC CETTE API
         if account_id == None :
             print( "[List TimelineAPI] Compte @" + account_name + " introuvable !" )
             raise Unfounded_Account_on_Lister_with_TimelineAPI
+        
+        if self.twitter.blocks_me( account_id ) :
+            print( "[List TimelineAPI] Le compte @" + account_name + " nous bloque, impossible de le scanner !" )
+            raise Blocked_by_User_with_TimelineAPI
         
         if self.DEBUG :
             print( "[List TimelineAPI] Listage des Tweets de @" + account_name + "." )

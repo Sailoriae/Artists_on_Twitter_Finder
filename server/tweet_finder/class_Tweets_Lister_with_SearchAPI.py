@@ -10,14 +10,10 @@ except ModuleNotFoundError : # Si on a été exécuté en temps que module
     from .database import SQLite_or_MySQL
     from .twitter import TweepyAbstraction, SNScrapeAbstraction
 
-# Ajouter le répertoire parent au PATH pour pouvoir importer les paramètres
-from sys import path as sys_path
-from os import path as os_path
-sys_path.append(os_path.dirname(os_path.dirname(os_path.abspath(__file__))))
-import parameters as param
-
 
 class Unfounded_Account_on_Lister_with_SearchAPI ( Exception ) :
+    pass
+class Blocked_by_User_with_SearchAPI ( Exception ) :
     pass
 
 
@@ -26,15 +22,16 @@ Classe permettant de lister les Tweets d'un compte Twitter avec l'API
 de recherche de Twittern, via la librairie SNScrape.
 """
 class Tweets_Lister_with_SearchAPI :
-    def __init__( self, auth_token, DEBUG : bool = False, ENABLE_METRICS : bool = False ) :
+    def __init__( self, api_key, api_secret, oauth_token, oauth_token_secret, auth_token,
+                        DEBUG : bool = False, ENABLE_METRICS : bool = False ) :
         self.DEBUG = DEBUG
         self.ENABLE_METRICS = ENABLE_METRICS
         self.bdd = SQLite_or_MySQL()
         self.snscrape = SNScrapeAbstraction( auth_token )
-        self.twitter = TweepyAbstraction( param.API_KEY,
-                                         param.API_SECRET,
-                                         param.OAUTH_TOKEN,
-                                         param.OAUTH_TOKEN_SECRET )
+        self.twitter = TweepyAbstraction( api_key,
+                                          api_secret,
+                                          oauth_token,
+                                          oauth_token_secret )
     
     """
     Lister les Tweets du compte Twitter @account_name.
@@ -54,13 +51,18 @@ class Tweets_Lister_with_SearchAPI :
     
     Peut émettre une exception "Unfounded_Account_on_Lister_with_TimelineAPI" si
     le compte est introuvable.
+    Peut émettre des "Blocked_by_User_with_SearchAPI" si le compte nous bloque.
     """
     def list_searchAPI_tweets ( self, account_name, queue_put, account_id = None, add_step_A_time = None ) :
         if account_id == None :
-            account_id = self.twitter.get_account_id( account_name )
+            account_id = self.twitter.get_account_id( account_name ) # TOUJOURS AVEC CETTE API
         if account_id == None :
             print( "[List SearchAPI] Compte @" + account_name + " introuvable !" )
             raise Unfounded_Account_on_Lister_with_SearchAPI
+        
+        if self.twitter.blocks_me( account_id ) :
+            print( "[List SearchAPI] Le compte @" + account_name + " nous bloque, impossible de le scanner !" )
+            raise Blocked_by_User_with_SearchAPI
         
         if self.DEBUG :
             print( "[List SearchAPI] Listage des Tweets de @" + account_name + "." )
@@ -137,5 +139,16 @@ class Tweets_Lister_with_SearchAPI :
 Test du bon fonctionnement de cette classe
 """
 if __name__ == '__main__' :
-    engine = Tweets_Lister_with_SearchAPI( param.TWITTER_AUTH_TOKENS[0], DEBUG = True )
+    # Ajouter le répertoire parent au PATH pour pouvoir importer les paramètres
+    from sys import path as sys_path
+    from os import path as os_path
+    sys_path.append(os_path.dirname(os_path.dirname(os_path.abspath(__file__))))
+    import parameters as param
+    
+    engine = Tweets_Lister_with_SearchAPI( param.API_KEY,
+                                           param.API_SECRET,
+                                           param.TWITTER_API_KEYS[0]["OAUTH_TOKEN"],
+                                           param.TWITTER_API_KEYS[0]["OAUTH_TOKEN_SECRET"],
+                                           param.TWITTER_API_KEYS[0]["AUTH_TOKEN"],
+                                           DEBUG = True )
     engine.list_searchAPI_tweets( "rikatantan2nd", print )
