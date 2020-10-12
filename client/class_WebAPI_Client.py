@@ -107,7 +107,10 @@ class WebAPI_Client :
                 return None
             if response["error"] != None :
                 print( "Erreur : " + response["error"] )
-                return None
+                # Si des comptes Twitter ont étés trouvés, on laisse la
+                # fonction les retourner
+                if response["twitter_accounts"] == [] :
+                    return None
             if response["status"] != "WAIT_LINK_FINDER" and response["status"] != "LINK_FINDER" :
                 return response["twitter_accounts"]
             sleep( 5 )
