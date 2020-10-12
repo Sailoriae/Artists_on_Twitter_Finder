@@ -52,11 +52,13 @@ class SNScrapeAbstraction :
             - Le nombre de Tweet trouvés.
     """
     def search( self, query : str, output_function = print ) :
-        scraper = snscrape.modules.twitter.TwitterSearchScraper( query, retries = 9 )
-        # Peut réessayer 9 fois, car il fait des attentes exponentielles
+        scraper = snscrape.modules.twitter.TwitterSearchScraper( query, retries = 10 )
+        # Peut réessayer 10 fois, car il fait des attentes exponentielles
         # La somme de toutes ces attentes sera donc la suivante (en secondes):
         # 2**0 + 2**1 + 2**2 + 2**3 + 2**4 + 2**5 + 2**6 + 2**7 + 2**8 + 2**9
         # Ce qui fait 17 minutes > 15 minutes pour se débloquer d'une HTTP 429
+        # Et on passe 10 en argument car il faut qu'il fasse un dernier essai
+        # après l'attente 2**9
         
         
         # ====================================================================
