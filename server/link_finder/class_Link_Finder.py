@@ -77,6 +77,9 @@ class Link_Finder :
     
             Ou None si l'URL est invalide (Mais que le site est supporté),
             c'est à dire que l'URL donnée ne mène pas à une illustration.
+            
+            Afin d'optimiser, si aucune compte Twitter n'a été trouvé,
+            "image_url" et "publish_date" sont à None.
 
     Attention : Cette méthode émet des exceptions Unsupported_Website si le
     site n'est pas supporté !
@@ -95,7 +98,7 @@ class Link_Finder :
         # ====================================================================
         elif re.match( deviantart_url, illust_url ) != None :
             twitter_accounts = self.deviantart.get_twitter_accounts( illust_url, multiplexer = self.link_mutiplexer )
-            if not TWITTER_ONLY :
+            if not TWITTER_ONLY and twitter_accounts != [] and twitter_accounts != None :
                 image_url = self.deviantart.get_image_url( illust_url )
                 publish_date = self.deviantart.get_datetime( illust_url )
         
@@ -104,7 +107,7 @@ class Link_Finder :
         # ====================================================================
         elif re.match( pixiv_url, illust_url ) != None :
             twitter_accounts = self.pixiv.get_twitter_accounts( illust_url )
-            if not TWITTER_ONLY :
+            if not TWITTER_ONLY and twitter_accounts != [] and twitter_accounts != None :
                 image_url = self.pixiv.get_image_url( illust_url )
                 publish_date = self.pixiv.get_datetime( illust_url )
         
@@ -113,7 +116,7 @@ class Link_Finder :
         # ====================================================================
         elif re.match( danbooru_url, illust_url ) != None :
             twitter_accounts = self.danbooru.get_twitter_accounts( illust_url, multiplexer = self.link_mutiplexer )
-            if not TWITTER_ONLY :
+            if not TWITTER_ONLY and twitter_accounts != [] and twitter_accounts != None :
                 image_url = self.danbooru.get_image_url( illust_url )
                 publish_date = self.danbooru.get_datetime( illust_url )
         
@@ -136,7 +139,7 @@ class Link_Finder :
                     if data != None :
                         twitter_accounts += data.twitter_accounts
             
-            if not TWITTER_ONLY :
+            if not TWITTER_ONLY and twitter_accounts != [] and twitter_accounts != None :
                 image_url = self.derpibooru.get_image_url( illust_url )
                 publish_date = self.derpibooru.get_datetime( illust_url )
         
@@ -159,7 +162,7 @@ class Link_Finder :
                     if data != None :
                         twitter_accounts += data.twitter_accounts
             
-            if not TWITTER_ONLY :
+            if not TWITTER_ONLY and twitter_accounts != [] and twitter_accounts != None :
                 image_url = self.furbooru.get_image_url( illust_url )
                 publish_date = self.furbooru.get_datetime( illust_url )
         
@@ -177,7 +180,7 @@ class Link_Finder :
         if twitter_accounts == None :
             return None
         
-        if TWITTER_ONLY :
+        if TWITTER_ONLY or twitter_accounts == [] :
             image_url = None
             publish_date = None
         
