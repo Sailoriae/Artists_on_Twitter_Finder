@@ -1,6 +1,12 @@
 #!/usr/bin/python3
 # coding: utf-8
 
+# Toujours la même erreur :
+# [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1123)
+# Ce fix est dangereux car désactive la vérication des certificats
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
+
 import os
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
