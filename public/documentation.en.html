@@ -89,9 +89,10 @@
 			<li><code>NO_URL_FIELD</code><br>There is no <code>url</code> parameter / argument in the HTTP request URL.</li>
 			<li><code>NOT_AN_URL</code><br>The input to the <code>url</code> parameter / argument is not a URL.</li>
 			<li><code>UNSUPPORTED_WEBSITE</code><br>The site of the inputted URL is not supported, or the URL is invalid.</li>
-			<li><code>INVALID_URL</code><br>The site is supported, but the input URL does not lead to an illustration (They can be non-existent, private, suspended or deactivated).</li>
+			<li><code>INVALID_URL</code><br>The site is supported, but the input URL does not lead to an illustration.</li>
 			<li><code>NO_TWITTER_ACCOUNT_FOR_THIS_ARTIST</code><br>No Twitter account found for the illustration artist.</li>
-			<li><code>NO_VALID_TWITTER_ACCOUNT_FOR_THIS_ARTIST</code><br>Twitter accounts were found, but they are invalid.</li>
+			<li><code>NO_VALID_TWITTER_ACCOUNT_FOR_THIS_ARTIST</code><br>Twitter accounts were found, but they are invalid (They can be non-existent, private, suspended or deactivated).</li>
+			<li><code>BLOCKED_BY_TWITTER_ACCOUNT</code><br>One of the Twitter accounts to be indexed blocks all scan accounts on the server. It is therefore impossible to index this account.</li>
 			<li><code>ERROR_DURING_REVERSE_SEARCH</code><br>Error during reverse image search. Doesn't the illustration have a nutty format ? For example animated GIF ?
 </li>
 			<li><code>PROCESSING_ERROR</code><br>A worker thread crashed while processing this request. It is therefore impossible to complete this request !</li>

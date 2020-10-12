@@ -12,6 +12,7 @@ from sys import path as sys_path
 from os import path as os_path
 sys_path.append(os_path.dirname(os_path.dirname(os_path.dirname(os_path.abspath(__file__)))))
 
+import parameters as param
 from tweet_finder.database import SQLite_or_MySQL
 
 
@@ -135,7 +136,11 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
             # On vérifie que le scan se passe bien ou s'est bien passé, et si
             # un thread de traitement a planté avec la requête, on l'indique
             if scan_request.has_failed :
-                request.problem = "PROCESSING_ERROR"
+                # Si c'est parce que tous les comptes pour scanner sont bloqués
+                if len( scan_request.blocks_list ) >= len( param.TWITTER_API_KEYS ) :
+                    request.problem = "BLOCKED_BY_TWITTER_ACCOUNT"
+                else :
+                    request.problem = "PROCESSING_ERROR"
                 
                 # On abandonne le processus de traitement de cette requête,
                 # même si peut-être qu'on pourrait quand même rechercher

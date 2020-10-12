@@ -61,6 +61,7 @@ Liste des erreurs possibles :
 - `INVALID_URL` : Le site est supporté, mais l'URL entrée ne mène pas à une illustration.
 - `NO_TWITTER_ACCOUNT_FOR_THIS_ARTIST` : Aucun compte Twitter trouvé pour l'artiste de l'illustration.
 - `NO_VALID_TWITTER_ACCOUNT_FOR_THIS_ARTIST` : Des comptes Twitter ont étés trouvés, mais ils sont invalides.
+- `BLOCKED_BY_TWITTER_ACCOUNT` : Un des comptes Twitter à indexer bloque tous les comptes de scan du serveur. Il est donc impossible d'indexer ce compte.
 - `ERROR_DURING_REVERSE_SEARCH` : Erreur durant la recherche d'image inversée. Est ce que l'illustration n'a pas un format à la noix ? Par exemple GIF animé ?
 - `PROCESSING_ERROR` : Un thread de traitement a planté durant son traitement de cette requête. Il est donc impossible de terminer cette requête !
 - `YOUR_IP_HAS_MAX_PENDING_REQUESTS` : L'adresse IP qui a envoyé la requête a atteint son quota maximum de requêtes en cours de traitement. Il faut donc attendre que les autres requêtes envoyées par cette adresse IP finissend leur traitement. 
