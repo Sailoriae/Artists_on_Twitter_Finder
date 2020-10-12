@@ -22,7 +22,7 @@ function mainFunction ( new_loop = true ) {
 			if ( request.status === 200 ) {
 				if ( request.responseText === "" ) {
 					errorP.textContent = lang["CANNOT_CONTACT_SERVER"];
-					return;
+					document.getElementById("loader").style.display = "none";
 				} else {
 					var json = JSON.parse( request.responseText );
 					console.log( json );
@@ -41,6 +41,7 @@ function mainFunction ( new_loop = true ) {
 				unlockUI()
 			} else {
 				errorP.textContent = lang["CANNOT_CONTACT_SERVER"];
+				document.getElementById("loader").style.display = "none";
 			}
 		}
 	});
