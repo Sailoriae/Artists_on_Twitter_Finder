@@ -97,7 +97,8 @@ class Link_Finder :
         # DEVIANTART
         # ====================================================================
         elif re.match( deviantart_url, illust_url ) != None :
-            twitter_accounts = self.deviantart.get_twitter_accounts( illust_url, multiplexer = self.link_mutiplexer )
+            twitter_accounts = self.deviantart.get_twitter_accounts( illust_url, 
+                                                                     multiplexer = self.link_mutiplexer )
             if not TWITTER_ONLY and twitter_accounts != [] and twitter_accounts != None :
                 image_url = self.deviantart.get_image_url( illust_url )
                 publish_date = self.deviantart.get_datetime( illust_url )
@@ -115,7 +116,8 @@ class Link_Finder :
         # DANBOORU
         # ====================================================================
         elif re.match( danbooru_url, illust_url ) != None :
-            twitter_accounts = self.danbooru.get_twitter_accounts( illust_url, multiplexer = self.link_mutiplexer )
+            twitter_accounts = self.danbooru.get_twitter_accounts( illust_url,
+                                                                   multiplexer = self.link_mutiplexer )
             if not TWITTER_ONLY and twitter_accounts != [] and twitter_accounts != None :
                 image_url = self.danbooru.get_image_url( illust_url )
                 publish_date = self.danbooru.get_datetime( illust_url )
@@ -124,21 +126,10 @@ class Link_Finder :
         # DERPIBOORU
         # ====================================================================
         elif re.match( derpibooru_url, illust_url ) != None :
-            twitter_accounts = self.derpibooru.get_twitter_accounts( illust_url, multiplexer = self.link_mutiplexer )
-            
-            # Comme les Boorus sont des sites de reposts, on peut trouver la
-            # source de l'illustration. Si c'est sur un site que l'on supporte,
-            # le Link Finder peut aller y faire un tour !
-            source = self.derpibooru.get_source( illust_url )
-            if source != None and source != "" :
-                try :
-                    data = self.get_data( source, TWITTER_ONLY = True )
-                except ( Unsupported_Website, Not_an_URL ) :
-                    pass
-                else :
-                    if data != None :
-                        twitter_accounts += data.twitter_accounts
-            
+            twitter_accounts = self.derpibooru.get_twitter_accounts( illust_url,
+                                                                     multiplexer = self.link_mutiplexer,
+                                                                     loopback_source = self.get_data,
+                                                                     already_loopback = TWITTER_ONLY )
             if not TWITTER_ONLY and twitter_accounts != [] and twitter_accounts != None :
                 image_url = self.derpibooru.get_image_url( illust_url )
                 publish_date = self.derpibooru.get_datetime( illust_url )
@@ -147,21 +138,10 @@ class Link_Finder :
         # FURBOORU
         # ====================================================================
         elif re.match( furbooru_url, illust_url ) != None :
-            twitter_accounts = self.furbooru.get_twitter_accounts( illust_url, multiplexer = self.link_mutiplexer )
-            
-            # Comme les Boorus sont des sites de reposts, on peut trouver la
-            # source de l'illustration. Si c'est sur un site que l'on supporte,
-            # le Link Finder peut aller y faire un tour !
-            source = self.furbooru.get_source( illust_url )
-            if source != None and source != "" :
-                try :
-                    data = self.get_data( source, TWITTER_ONLY = True )
-                except ( Unsupported_Website, Not_an_URL ) :
-                    pass
-                else :
-                    if data != None :
-                        twitter_accounts += data.twitter_accounts
-            
+            twitter_accounts = self.furbooru.get_twitter_accounts( illust_url,
+                                                                   multiplexer = self.link_mutiplexer,
+                                                                   loopback_source = self.get_data,
+                                                                   already_loopback = TWITTER_ONLY )
             if not TWITTER_ONLY and twitter_accounts != [] and twitter_accounts != None :
                 image_url = self.furbooru.get_image_url( illust_url )
                 publish_date = self.furbooru.get_datetime( illust_url )

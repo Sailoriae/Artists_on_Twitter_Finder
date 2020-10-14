@@ -14,6 +14,12 @@ except ImportError : # Si on a été exécuté en temps que module
     from .utils import get_with_rate_limits
     from .utils import validate_url
 
+# Ajouter le répertoire parent au PATH pour pouvoir importer
+from sys import path as sys_path
+from os import path as os_path
+sys_path.append(os_path.dirname(os_path.dirname(os_path.abspath(__file__))))
+from class_Link_Finder_Result import Not_an_URL, Unsupported_Website
+
 
 # ^ = Début de la chaine
 derpibooru_post_id_regex = re.compile(
@@ -126,6 +132,11 @@ class Philomena :
                      Philomena.
     @param multiplexer Méthode "link_mutiplexer()" de la classe "Link_Finder"
                        (OPTIONNEL).
+    @param loopback_source Méthode "get_data()" de la classe "Link_Finder"
+                           (OPTIONNEL). Permet de reboucler si l'image a une
+                           source, car les sites Philomena sont des boorus.
+    @param already_loopback True ou False. Permet de désactiver l'utilisation
+                            de loopback_source !
     
     @return Une liste de comptes Twitter.
             Ou une liste vide si aucun URL de compte Twitter valide n'a été
@@ -134,7 +145,9 @@ class Philomena :
             pas une illustration sur un Booru utilisant Philomena.
     """
     def get_twitter_accounts ( self, illust_url : int,
-                                     multiplexer = None ) -> List[str] :
+                                     multiplexer = None,
+                                     loopback_source = None,
+                                     already_loopback = True ) -> List[str] :
         # On met en cache si ce n'est pas déjà fait
         if not self.cache_or_get( illust_url ) :
             return None
@@ -172,6 +185,20 @@ class Philomena :
                     get_multiplex = multiplexer( link )
                     if get_multiplex != None :
                         twitter_accounts += get_multiplex
+        
+        # Comme les Boorus sont des sites de reposts, on peut trouver la source
+        # de l'illustration. Si c'est sur un site que l'on supporte, le Link
+        # Finder peut aller y faire un tour !
+        if loopback_source != None and not loopback_source :
+            source = self.get_source( illust_url )
+            if source != None and source != "" :
+                try :
+                    data = loopback_source( source, TWITTER_ONLY = True )
+                except ( Unsupported_Website, Not_an_URL ) :
+                    pass
+                else :
+                    if data != None :
+                        twitter_accounts += data.twitter_accounts
         
         return twitter_accounts
     
@@ -226,7 +253,7 @@ if __name__ == '__main__' :
         derpibooru.get_twitter_accounts(
             "https://www.derpibooru.org/images/1731476" ) )
     
-    if test_twitter == [['the_park_0111']] :
+    if test_twitter == [['The_Park_0111']] :
         print( "Tests Twitter OK !" )
     else :
         print( "Tests Twitter échoués !" )
