@@ -26,7 +26,7 @@ def error_collector( thread_procedure, thread_id : int, shared_memory_uri : str 
     while shared_memory.keep_service_alive :
         try :
             thread_procedure( thread_id, shared_memory )
-        except Exception :
+        except Exception as error :
             error_name = "Erreur dans le thread " + str(thread_id) + " de la procédure " + thread_procedure.__name__ + " !\n"
             
             # Mettre la requête en erreur si c'est une requête utilisateur ou
@@ -39,7 +39,7 @@ def error_collector( thread_procedure, thread_id : int, shared_memory_uri : str 
             # Sinon, si on est un thread de traitement
             else :
                 # Si la requête est une requête utilisateur
-                # (On est donc un thread de traitement des requêtes utilisateurs)            
+                # (On est donc un thread de traitement des requêtes utilisateurs)
                 if request != None and request.request_type == "user" :
                     request.problem = "PROCESSING_ERROR" # Mettre la requête en erreur
                     shared_memory.user_requests.set_request_to_next_step( request, force_end = True ) # Forcer sa fin
@@ -51,16 +51,24 @@ def error_collector( thread_procedure, thread_id : int, shared_memory_uri : str 
                     request.has_failed = True # Mettre la requête en erreur
                     error_name += "Compte Twitter : @" + request.account_name + " (ID " + str(request.account_id) + ")\n"
             
+            # Si l'exception s'est produite sur le serveur de mémoire partagée
+            if hasattr( error, "_pyroTraceback" ) :
+                pyro_traceback = "".join( error._pyroTraceback )
+            else :
+                pyro_traceback = None
+            
             # Enregistrer dans un fichier
             if error_count < 100 : # Ne pas créer trop de fichiers, s'il y a autant d'erreurs, c'est que c'est la même
                 file = open( thread_procedure.__name__ + "_number" + str(thread_id) + "_errors.log", "a" )
                 file.write( error_name )
                 traceback.print_exc( file = file )
+                if pyro_traceback != None : file.write( pyro_traceback )
                 file.write( "\n\n\n" )
                 file.close()
             
             # Afficher dans le terminal
             print( error_name )
             traceback.print_exc()
+            if pyro_traceback != None : print( pyro_traceback )
             
             error_count += 1
