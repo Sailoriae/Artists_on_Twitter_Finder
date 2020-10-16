@@ -110,6 +110,8 @@ class TweepyAbstraction :
                 print( error.reason )
                 if error.api_code == 50 : # User not found
                     return None
+                if error.api_code == 63 : # User has been suspended
+                    return None
                 raise error
     
     """
