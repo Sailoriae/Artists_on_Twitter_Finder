@@ -12,15 +12,6 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 # Protection pour le multiprocessing
 if __name__ == "__main__" :
-    try :
-        import resource
-    except ModuleNotFoundError : # On n'est pas sous un système UNIX
-        pass
-    else :
-        # Augmenter le nombre de descripteurs de fichiers ouvrables.
-        # 1024 par défaut, c'est trop peu pour nous !
-        resource.setrlimit( resource.RLIMIT_NOFILE, (20000, 20000) )
-    
     """
     Script principal. NE PAS LE LANCER PLUSIEURS FOIS !
     """
@@ -56,6 +47,19 @@ if __name__ == "__main__" :
         sys.exit(0)
     
     """
+    Augmentation du nombre maximum de descripteurs de fichiers.
+    """
+    try :
+        import resource
+    except ModuleNotFoundError : # On n'est pas sous un système UNIX
+        pass
+    else :
+        # Augmenter le nombre de descripteurs de fichiers ouvrables.
+        # 1024 par défaut, c'est trop peu pour nous !
+        resource.setrlimit( resource.RLIMIT_NOFILE, (param.MAX_FILE_DESCRIPTORS, param.MAX_FILE_DESCRIPTORS) )
+    print( "Nombre maximum de descripteurs de fichiers :", param.MAX_FILE_DESCRIPTORS )
+    
+    """
     Lancement du serveur de mémoire partagée, et accès pour ce processus (Le
     collecteur d'erreurs crée les accès pour les threads).
     """
@@ -74,7 +78,7 @@ if __name__ == "__main__" :
     # génant puisque sur le processus pére (Ici, "app.py"), il n'y a que la CLI.
     launched_thread_pyro = threading.Thread( name = "thread_pyro_th1",
                                              target = thread_pyro_server,
-                                             args = ( pyro_port, ) )
+                                             args = ( pyro_port, param.MAX_FILE_DESCRIPTORS, ) )
     launched_thread_pyro.start()
     
     # On prépare la connexion au serveur.

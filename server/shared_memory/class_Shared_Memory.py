@@ -34,10 +34,22 @@ Proxy ne peut être utilisé que par un seul thread à la fois).
 """
 @Pyro4.expose
 class Shared_Memory :
-    def __init__ ( self, pyro_port ) :
+    """
+    @param pyro_port Port du serveur Pyro.
+    @param pool_size Nombre de threads ouvrables au maxmimum. Sachant qu'un
+                     thread est créé à chaque connexion. On doit donc autoriser
+                     beaucoup de connexions en même temps !
+                     Donc mettre un très grand nombre (De l'ordre de 10^4).
+                     Ce nombre doit être proportionnel aux nombre de threads
+                     de traitement, sachant qu'ils peuvent ouvrir chacun plus
+                     de 1 000 proxies !
+                     De plus, ce nombre doit être égal au nombre maximum
+                     autorisé de descripteurs de fichiers.
+    """
+    def __init__ ( self, pyro_port, pool_size ) :
         # Initialisation du serveur Pyro4
  #       Pyro4.config.SERVERTYPE = "multiplex" # NE PAS FAIRE DE MULTIPLEX, CA NE FONCTIONNE PAS POUR NOTRE UTILISATION
-        Pyro4.config.THREADPOOL_SIZE = 20000   # On doit donc autoriser beaucoup de connexions en même temps !
+        Pyro4.config.THREADPOOL_SIZE = pool_size
         Pyro4.config.SERIALIZERS_ACCEPTED = { "pickle" }
         Pyro4.config.SERIALIZER = "pickle"
         self._daemon = Pyro4.Daemon( port = pyro_port )

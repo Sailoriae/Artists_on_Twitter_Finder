@@ -44,6 +44,7 @@ def check_parameters () :
         check_list.append( type( param.NUMBER_OF_STEP_B_TIMELINEAPI_LIST_ACCOUNT_TWEETS_THREADS ) == int and param.NUMBER_OF_STEP_B_TIMELINEAPI_LIST_ACCOUNT_TWEETS_THREADS > 0 )
         check_list.append( type( param.NUMBER_OF_STEP_C_SEARCHAPI_INDEX_ACCOUNT_TWEETS ) == int and param.NUMBER_OF_STEP_C_SEARCHAPI_INDEX_ACCOUNT_TWEETS > 0 )
         check_list.append( type( param.NUMBER_OF_STEP_D_TIMELINEAPI_INDEX_ACCOUNT_TWEETS ) == int and param.NUMBER_OF_STEP_D_TIMELINEAPI_INDEX_ACCOUNT_TWEETS > 0 )
+        check_list.append( type( param.MAX_FILE_DESCRIPTORS ) == int and param.MAX_FILE_DESCRIPTORS > 0 )
         check_list.append( type( param.DEBUG ) == bool )
         check_list.append( type( param.ENABLE_METRICS ) == bool )
         check_list.append( type( param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE ) == int and param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE >= 0 )
