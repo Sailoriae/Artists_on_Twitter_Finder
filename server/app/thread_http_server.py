@@ -20,6 +20,10 @@ import parameters as param
 ATTENTION ! CE THREAD DOIT ETRE UNIQUE !
 
 Thread du serveur HTTP.
+
+Codes sources pour comprendre :
+https://github.com/python/cpython/blob/3.9/Lib/http/server.py
+https://github.com/python/cpython/blob/3.9/Lib/socketserver.py
 """
 def thread_http_server( thread_id : int, shared_memory ) :
     # Obtenir la classe du serveur HTTP
@@ -29,7 +33,18 @@ def thread_http_server( thread_id : int, shared_memory ) :
     # serveur HTTP
     http_server = ThreadingHTTPServer( ("", param.HTTP_SERVER_PORT ), HTTP_Server )
     
+    # Le timeour doit être définit ici, et non dans la classe HTTP_Server, car
+    # handle_request() est définit dans l'arbre de ThreadingHTTPServer, et non
+    # dans celui de HTTP_Server -> BaseHTTPRequestHandler
+    http_server.timeout = 5 # Fonctionne car handle_request() sort lors du stop
+    
     while shared_memory.keep_service_alive :
+        # Ordre des appels :
+        # - handle_request() <== Permet le respect de http_server.timeout, alors que serve_forever() ne le respecte pas
+        # - _handle_request_noblock()
+        # - process_request() <== Rédéfinit par ThreadingMixIn dont ThreadingHTTPServer est fille, démarre un Thread
+        # - process_request_thread()
+        # ...
         http_server.handle_request()
     http_server.server_close()
     
