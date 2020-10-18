@@ -168,7 +168,7 @@ class SQLite_or_MySQL :
     Destructeur
     """
     def __del__( self ) :
-        if param.USE_MYSQL_INSTEAD_OF_SQLITE :
+        if not param.USE_MYSQL_INSTEAD_OF_SQLITE :
             try :
                 self.conn.close()
             except sqlite3.ProgrammingError :
