@@ -36,6 +36,13 @@ def error_collector( thread_procedure, thread_id : int, shared_memory_uri : str 
             # Si on n'est pas un thread de traitement (Utilisateur ou scan)
             except KeyError :
                 pass
+            # Si le serveur Pyro est HS, c'est très certainement pour ça qu'une
+            # erreur est tombée
+            except Exception :
+                error_name += "De plus, le serveur de mémoire partagée Pyro semble ne pas répondre.\n"
+                # On ne fait rien de plus, on plantera sur la boucle "while" si
+                # Pyro est vraiment HS
+                pass
             # Sinon, si on est un thread de traitement
             else :
                 # Si la requête est une requête utilisateur
