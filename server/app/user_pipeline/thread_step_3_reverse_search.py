@@ -73,6 +73,7 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
             
             result = cbir_engine.search_tweet( request.image_url,
                                                account_name = twitter_account[0],
+                                               account_id = twitter_account[1],
                                                add_step_3_times = shared_memory.execution_metrics.add_step_3_times,
                                                query_image_binary = request.query_image_as_bytes )
             if result != None :

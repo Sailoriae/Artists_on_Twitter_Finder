@@ -38,6 +38,8 @@ class Reverse_Searcher :
     @param image_url L'URL de l'image à chercher
     @param account_name Le nom du compte Twitter dans lequel chercher, c'est à
                         dire ce qu'il y a après le @ (OPTIONNEL)
+    @param account_id ID du compte, vérifié récemment ! (OPTIONNEL)
+                      Prime sur "account_name" si nen correspondent pas
     @param query_image_binary Ne pas faire de GET à l'URL passée, mais prendre
                               plutôt cette image déjà téléchargée (OPTIONNEL)
     @return Liste d'objets Image_in_DB, contenant les attributs suivants :
@@ -49,10 +51,12 @@ class Reverse_Searcher :
     """
     def search_tweet ( self, image_url : str,
                              account_name : str = None,
+                             account_id : int = None,
                              add_step_3_times = None,
                              query_image_binary : bytes = None ) :
-        if account_name != None :
-            account_id = self.twitter.get_account_id( account_name )
+        if account_name != None or account_id != None:
+            if account_id == None :
+                account_id = self.twitter.get_account_id( account_name )
             if account_id == None :
                 print( "Compte @", account_name, "inexistant, ou désactivé, ou privé !" )
                 return None
