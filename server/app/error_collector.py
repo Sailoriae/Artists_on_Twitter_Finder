@@ -4,6 +4,7 @@
 from os import getpid
 import traceback
 import Pyro4
+import time
 
 
 """
@@ -23,7 +24,10 @@ def error_collector( thread_procedure, thread_id : int, shared_memory_uri : str 
     shared_memory.threads_registry.register_thread( thread_procedure.__name__ + "_number" + str(thread_id), getpid() )
     
     error_count = 0
+    error_on_init_count = 0
     while shared_memory.keep_service_alive :
+        start_time = time.time()
+        
         try :
             thread_procedure( thread_id, shared_memory )
         except Exception as error :
@@ -65,7 +69,7 @@ def error_collector( thread_procedure, thread_id : int, shared_memory_uri : str 
                 pyro_traceback = None
             
             # Enregistrer dans un fichier
-            if error_count < 100 : # Ne pas créer trop de fichiers, s'il y a autant d'erreurs, c'est que c'est la même
+            if error_count < 100 : # Ne pas créer trop de logs, s'il y a autant d'erreurs, c'est que c'est la même
                 file = open( thread_procedure.__name__ + "_number" + str(thread_id) + "_errors.log", "a" )
                 file.write( error_name )
                 traceback.print_exc( file = file )
@@ -77,5 +81,13 @@ def error_collector( thread_procedure, thread_id : int, shared_memory_uri : str 
             print( error_name )
             traceback.print_exc()
             if pyro_traceback != None : print( pyro_traceback )
+            
+            # Si on a crash en moins de 10 secondes, c'est qu'il y a un
+            # problème d'initialisation de la procédure
+            if time.time() - start_time < 10 :
+                error_on_init_count += 1
+                # On dors 10 mins * le nombre de fois qu'on a crash à l'init
+                print( "Attente de", 600 * error_on_init_count, "pour redémarrer !" )
+                time.sleep( 600 * error_on_init_count )
             
             error_count += 1
