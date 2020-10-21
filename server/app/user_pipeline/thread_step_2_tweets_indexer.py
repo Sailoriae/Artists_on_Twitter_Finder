@@ -24,8 +24,15 @@ Lance dans le pipeline de traitement des requêtes d'indexation, et surveille
 l'état des requêtes qu'il a lancé.
 """
 def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
+    # Maintenir ouverts certains proxies vers la mémoire partagée
+    shared_memory_threads_registry = shared_memory.threads_registry
+    shared_memory_user_requests = shared_memory.user_requests
+    shared_memory_scan_requests = shared_memory.scan_requests
+    shared_memory_user_requests_step_2_tweets_indexer_queue = shared_memory_user_requests.step_2_tweets_indexer_queue
+    shared_memory_user_requests_thread_step_2_tweets_indexer_sem = shared_memory_user_requests.thread_step_2_tweets_indexer_sem
+    
     # Dire qu'on ne fait rien
-    shared_memory.threads_registry.set_request( "thread_step_2_tweets_indexer_number" + str(thread_id), None )
+    shared_memory_threads_registry.set_request( "thread_step_2_tweets_indexer_number" + str(thread_id), None )
     
     # Timezone locale
     local_tz = tzlocal()
@@ -39,14 +46,14 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
         
         # On tente de sortir une requête de la file d'attente
         try :
-            request = shared_memory.user_requests.step_2_tweets_indexer_queue.get( block = False )
+            request = shared_memory_user_requests_step_2_tweets_indexer_queue.get( block = False )
         # Si la queue est vide, on attend une seconde et on réessaye
         except queue.Empty :
             sleep( 1 )
             continue
         
         # Dire qu'on est en train de traiter cette requête
-        shared_memory.threads_registry.set_request( "thread_step_2_tweets_indexer_number" + str(thread_id), request )
+        shared_memory_threads_registry.set_request( "thread_step_2_tweets_indexer_number" + str(thread_id), request )
         
         # Si on a vu cette requête il y a moins de 5 secondes, c'est qu'il n'y
         # a pas beaucoup de requêtes dans le pipeline, on peut donc dormir
@@ -62,10 +69,10 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
             
             # Sémaphore pour être bien tout seul dans cette procédure assez
             # particulière
-            shared_memory.user_requests.thread_step_2_tweets_indexer_sem.acquire()
+            shared_memory_user_requests_thread_step_2_tweets_indexer_sem.acquire()
             
             # On passe la requête à l'étape suivante, c'est à dire notre étape
-            shared_memory.user_requests.set_request_to_next_step( request )
+            shared_memory_user_requests.set_request_to_next_step( request )
             
             # Pour chaque compte de la liste des comptes Twitter trouvé
             for (account_name, account_id) in request.twitter_accounts_with_id :
@@ -83,7 +90,7 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
                     # scan en cours, soit en créer une nouvelle
                     # Si la requête déjà existante n'était pas prioritaire, elle
                     # va la passer en prioritaire
-                    scan_request = shared_memory.scan_requests.launch_request( account_id,
+                    scan_request = shared_memory_scan_requests.launch_request( account_id,
                                                                                account_name,
                                                                                is_prioritary = True )
                     
@@ -113,7 +120,7 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
                     if min_date - datetime.timedelta( days = 3 ) < request.datetime :
                         print( "[step_2_th" + str(thread_id) + "] @" + account_name + " est déjà dans la BDD, mais il faut le MàJ car l'illustration de requête est trop récente !" )
                         
-                        scan_request = shared_memory.scan_requests.launch_request( account_id,
+                        scan_request = shared_memory_scan_requests.launch_request( account_id,
                                                                                account_name,
                                                                                is_prioritary = True )
                         
@@ -124,7 +131,7 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
                         print( "[step_2_th" + str(thread_id) + "] @" + account_name + " est déjà dans la BDD, et on peut sauter son scan !" )
             
             # Libérer le sémaphore
-            shared_memory.user_requests.thread_step_2_tweets_indexer_sem.release()
+            shared_memory_user_requests_thread_step_2_tweets_indexer_sem.release()
         
         # Sinon, on vérifie l'état de l'avancement des requêtes qu'on a lancé
         check_list = []
@@ -144,12 +151,12 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
                 
                 # On abandonne le processus de traitement de cette requête,
                 # même si peut-être qu'on pourrait quand même rechercher
-                shared_memory.user_requests.set_request_to_next_step( request, force_end = True )
+                shared_memory_user_requests.set_request_to_next_step( request, force_end = True )
                 double_continue = True
                 continue
         
         # Dire qu'on n'est plus en train de traiter cette requête
-        shared_memory.threads_registry.set_request( "thread_step_2_tweets_indexer_number" + str(thread_id), None )
+        shared_memory_threads_registry.set_request( "thread_step_2_tweets_indexer_number" + str(thread_id), None )
         
         # Si l'une des requêtes de scan a eu un problème, on arrête tout avec
         # cette requête utilisateur
@@ -159,16 +166,16 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
         # Si toutes nos requêtes ne sont pas finies, on remet la requête en
         # haut de NOTRE file d'attente
         if not all( check_list ) :
-            shared_memory.user_requests.step_2_tweets_indexer_queue.put( request )
+            shared_memory_user_requests_step_2_tweets_indexer_queue.put( request )
             continue
         
         # Sinon, on peut vider la liste des requêtes de scan
         request.scan_requests = []
         
         # Et on passe la requête à l'étape suivante
-        # C'est la procédure shared_memory.user_requests.set_request_to_next_step
+        # C'est la procédure shared_memory_user_requests.set_request_to_next_step
         # qui vérifie si elle peut
-        shared_memory.user_requests.set_request_to_next_step( request )
+        shared_memory_user_requests.set_request_to_next_step( request )
     
     print( "[step_2_th" + str(thread_id) + "] Arrêté !" )
     return

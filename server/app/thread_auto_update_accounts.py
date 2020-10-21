@@ -30,6 +30,9 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
                                 param.OAUTH_TOKEN,
                                 param.OAUTH_TOKEN_SECRET )
     
+    # Maintenir ouverts certains proxies vers la mémoire partagée
+    shared_memory_scan_requests = shared_memory.scan_requests
+    
     # Tant que on ne nous dit pas de nous arrêter
     while shared_memory.keep_service_alive :
         # Prendre l'itérateur sur les comptes dans la base de donnée, triés
@@ -46,7 +49,7 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
             count += 1
             
             # Vérifier que le compte n'est pas déjà en cours d'indexation
-            if shared_memory.scan_requests.get_request( oldest_updated_account[0] ) != None :
+            if shared_memory_scan_requests.get_request( oldest_updated_account[0] ) != None :
                 continue
             
             # Prendre la date actuelle
@@ -100,7 +103,7 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
             # Sinon, on lance le scan pour ce compte
             else :
                 print( "[auto_update_th" + str(thread_id) + "] Mise à jour du compte @" + account_name + " (ID " + str(oldest_updated_account[0]) + ")." )
-                shared_memory.scan_requests.launch_request( oldest_updated_account[0],
+                shared_memory_scan_requests.launch_request( oldest_updated_account[0],
                                                             account_name,
                                                             is_prioritary = False )
         

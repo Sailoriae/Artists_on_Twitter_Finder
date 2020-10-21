@@ -25,25 +25,31 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
     # Initialisation de notre moteur de recherche d'image par le contenu
     cbir_engine = Reverse_Searcher( DEBUG = param.DEBUG, ENABLE_METRICS = param.ENABLE_METRICS)
     
+    # Maintenir ouverts certains proxies vers la mémoire partagée
+    shared_memory_threads_registry = shared_memory.threads_registry
+    shared_memory_user_requests = shared_memory.user_requests
+    shared_memory_execution_metrics = shared_memory.execution_metrics
+    shared_memory_user_requests_step_3_reverse_search_queue = shared_memory_user_requests.step_3_reverse_search_queue
+    
     # Dire qu'on ne fait rien
-    shared_memory.threads_registry.set_request( "thread_step_3_reverse_search_number" + str(thread_id), None )
+    shared_memory_threads_registry.set_request( "thread_step_3_reverse_search_number" + str(thread_id), None )
     
     # Tant que on ne nous dit pas de nous arrêter
     while shared_memory.keep_service_alive :
         
         # On tente de sortir une requête de la file d'attente
         try :
-            request = shared_memory.user_requests.step_3_reverse_search_queue.get( block = False )
+            request = shared_memory_user_requests_step_3_reverse_search_queue.get( block = False )
         # Si la queue est vide, on attend une seconde et on réessaye
         except queue.Empty :
             sleep( 1 )
             continue
         
         # Dire qu'on est en train de traiter cette requête
-        shared_memory.threads_registry.set_request( "thread_step_3_reverse_search_number" + str(thread_id), request )
+        shared_memory_threads_registry.set_request( "thread_step_3_reverse_search_number" + str(thread_id), request )
         
         # On passe la requête à l'étape suivante, c'est à dire notre étape
-        shared_memory.user_requests.set_request_to_next_step( request )
+        shared_memory_user_requests.set_request_to_next_step( request )
         
         if request.input_url != None :
             print( "[step_3_th" + str(thread_id) + "] Recherche de l'image suivante :\n" +
@@ -74,7 +80,7 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
             result = cbir_engine.search_tweet( request.image_url,
                                                account_name = twitter_account[0],
                                                account_id = twitter_account[1],
-                                               add_step_3_times = shared_memory.execution_metrics.add_step_3_times,
+                                               add_step_3_times = shared_memory_execution_metrics.add_step_3_times,
                                                query_image_binary = request.query_image_as_bytes )
             if result != None :
                 request.founded_tweets += result
@@ -86,7 +92,7 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
         if request.twitter_accounts_with_id == []:
             print( "[step_3_th" + str(thread_id) + "] Recherche dans toute la base de données." )
             
-            result = cbir_engine.search_tweet( request.image_url, add_step_3_times = shared_memory.execution_metrics.add_step_3_times )
+            result = cbir_engine.search_tweet( request.image_url, add_step_3_times = shared_memory_execution_metrics.add_step_3_times )
             if result != None :
                 request.founded_tweets += result
             else :
@@ -105,15 +111,15 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
                "[step_3_th" + str(thread_id) + "] " + str( [ data.tweet_id for data in request.founded_tweets ] ) )
         
         # Enregistrer le temps complet pour traiter cette requête
-        shared_memory.execution_metrics.add_user_request_full_time( time() - request.start )
+        shared_memory_execution_metrics.add_user_request_full_time( time() - request.start )
         
         # Dire qu'on n'est plus en train de traiter cette requête
-        shared_memory.threads_registry.set_request( "thread_step_3_reverse_search_number" + str(thread_id), None )
+        shared_memory_threads_registry.set_request( "thread_step_3_reverse_search_number" + str(thread_id), None )
         
         # On passe la requête à l'étape suivante
-        # C'est la procédure shared_memory.user_requests.set_request_to_next_step
+        # C'est la procédure shared_memory_user_requests.set_request_to_next_step
         # qui vérifie si elle peut
-        shared_memory.user_requests.set_request_to_next_step( request )
+        shared_memory_user_requests.set_request_to_next_step( request )
     
     print( "[step_3_th" + str(thread_id) + "] Arrêté !" )
     return

@@ -49,25 +49,31 @@ méthode indépendante de celle des histogrammes pour dire que deux images sont
 les mêmes.
 """
 def thread_step_4_filter_results( thread_id : int, shared_memory ) :
+    # Maintenir ouverts certains proxies vers la mémoire partagée
+    shared_memory_threads_registry = shared_memory.threads_registry
+    shared_memory_user_requests = shared_memory.user_requests
+    shared_memory_execution_metrics = shared_memory.execution_metrics
+    shared_memory_user_requests_step_4_filter_results_queue = shared_memory_user_requests.step_4_filter_results_queue
+    
     # Dire qu'on ne fait rien
-    shared_memory.threads_registry.set_request( "thread_step_4_filter_results_number" + str(thread_id), None )
+    shared_memory_threads_registry.set_request( "thread_step_4_filter_results_number" + str(thread_id), None )
     
     # Tant que on ne nous dit pas de nous arrêter
     while shared_memory.keep_service_alive :
         
         # On tente de sortir une requête de la file d'attente
         try :
-            request = shared_memory.user_requests.step_4_filter_results_queue.get( block = False )
+            request = shared_memory_user_requests_step_4_filter_results_queue.get( block = False )
         # Si la queue est vide, on attend une seconde et on réessaye
         except queue.Empty :
             sleep( 1 )
             continue
         
         # Dire qu'on est en train de traiter cette requête
-        shared_memory.threads_registry.set_request( "thread_step_4_filter_results_number" + str(thread_id), request )
+        shared_memory_threads_registry.set_request( "thread_step_4_filter_results_number" + str(thread_id), request )
         
         # On passe la requête à l'étape suivante, c'est à dire notre étape
-        shared_memory.user_requests.set_request_to_next_step( request )
+        shared_memory_user_requests.set_request_to_next_step( request )
         
         if param.ENABLE_METRICS :
             start = time()
@@ -82,8 +88,8 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
                 print( error )
                 request.problem = "ERROR_DURING_REVERSE_SEARCH"
                 
-                shared_memory.threads_registry.set_request( "thread_step_4_filter_results_number" + str(thread_id), None )
-                shared_memory.user_requests.set_request_to_next_step( request )
+                shared_memory_threads_registry.set_request( "thread_step_4_filter_results_number" + str(thread_id), None )
+                shared_memory_user_requests.set_request_to_next_step( request )
                 continue
         
         else :
@@ -96,8 +102,8 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
                 print( error )
                 request.problem = "ERROR_DURING_REVERSE_SEARCH"
                 
-                shared_memory.threads_registry.set_request( "thread_step_4_filter_results_number" + str(thread_id), None )
-                shared_memory.user_requests.set_request_to_next_step( request )
+                shared_memory_threads_registry.set_request( "thread_step_4_filter_results_number" + str(thread_id), None )
+                shared_memory_user_requests.set_request_to_next_step( request )
                 continue
         
         # On filtre la liste des images trouvées
@@ -135,13 +141,13 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
                "[step_4_th" + str(thread_id) + "] " + str( [ data.tweet_id for data in request.founded_tweets ] ) )
         
         if param.ENABLE_METRICS :
-            shared_memory.execution_metrics.add_step_4_times( time() - start )
+            shared_memory_execution_metrics.add_step_4_times( time() - start )
         
         # Dire qu'on n'est plus en train de traiter cette requête
-        shared_memory.threads_registry.set_request( "thread_step_4_filter_results_number" + str(thread_id), None )
+        shared_memory_threads_registry.set_request( "thread_step_4_filter_results_number" + str(thread_id), None )
         
         # On passe la requête à l'étape suivante, fin du traitement
-        shared_memory.user_requests.set_request_to_next_step( request )
+        shared_memory_user_requests.set_request_to_next_step( request )
     
     print( "[step_4_th" + str(thread_id) + "] Arrêté !" )
     return
