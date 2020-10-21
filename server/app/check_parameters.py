@@ -143,8 +143,9 @@ def check_parameters () :
     
     try :
         Pixiv( param.PIXIV_USERNAME, param.PIXIV_PASSWORD )
-    except Exception :
+    except Exception as error :
         print( "Echec de connexion à l'API Pixiv !")
+        print( error )
         print( "Veuillez vérifier votre fichier \"parameters.py\" !" )
         print( "Notamment les clés suivantes : PIXIV_USERNAME, PIXIV_PASSWORD")
         return False
@@ -164,8 +165,9 @@ def check_parameters () :
                     password = param.MYSQL_PASSWORD,
                     database = param.MYSQL_DATABASE_NAME
                 )
-        except Exception :
+        except Exception as error:
             print( "Impossible de se connecter à la base de donées MySQL !" )
+            print( error )
             print( "Veuillez vérifier votre fichier \"parameters.py\" !" )
             print( "Notamment les clés suivantes : MYSQL_ADDRESS, MYSQL_PORT, MYSQL_USERNAME, MYSQL_PASSWORD, MYSQL_DATABASE_NAME")
             print( "Vérifiez aussi que ce serveur MySQL soit bien accessible !")
