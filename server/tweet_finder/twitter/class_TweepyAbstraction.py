@@ -115,6 +115,31 @@ class TweepyAbstraction :
                 raise error
     
     """
+    @param account_name Liste de comptes Twitter dont on veut l'ID.
+    
+    @return Liste de tuples contenant le nom du compte, et son ID.
+            Un compte peut ne pas être présent dans la liste si :
+            - Le compte n'existe pas,
+            - Le compte est désactivé,
+            - Le compte est suspendu,
+            - Ou le compte est privé
+    """
+    def get_multiple_accounts_ids ( self, accounts_names ) :
+        try :
+            to_return = []
+            for account in self.api.lookup_users( screen_names = accounts_names ) :
+                # Filtrer les comptes privés
+                if account._json["protected"] == False :
+                    to_return.append( ( account.screen_name, account.id ) )
+            return to_return
+        
+        # Gérer le cas où aucun compte dans la liste n'est trouvable
+        except tweepy.TweepError as error :
+            if error.api_code == 17 : # No user matches for specified terms
+                return []
+            raise error
+    
+    """
     Obtenir les Tweets d'un utilisateur.
     ATTENTION ! Contient tous les Tweets sauf les RT
     ATTENTION ! Est forcément limité à 3 200 Tweets maximum ! RT compris,

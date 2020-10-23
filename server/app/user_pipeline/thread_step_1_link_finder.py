@@ -111,10 +111,7 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
             continue
         
         # On vérifie la liste des comptes Twitter
-        for account in data.twitter_accounts :
-            account_id = twitter.get_account_id( account )
-            if account_id != None :
-                request.twitter_accounts_with_id += [ ( account, account_id ) ] # Ne peut pas faire de append avec Pyro
+        request.twitter_accounts_with_id = twitter.get_multiple_accounts_ids( data.twitter_accounts )
         
         # Si jamais aucun compte Twitter valide n'a été trouvé, on ne va pas
         # plus loin avec la requête (On passe donc son status à "Fin de
