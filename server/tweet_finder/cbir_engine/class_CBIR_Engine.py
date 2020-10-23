@@ -24,7 +24,9 @@ SEUIL_CHI2 = 20 # L'image doit être en dessous
 # distance filtre très bien les sketchs et dessins en noir et blanc lors de
 # la recherche d'une image en couleur
 # 0 = Les images sont les mêmes, 1 = ne sont absolument pas les mêmes
-SEUIL_BHATTACHARYYA = 0.2 # L'image doit être en dessous
+SEUIL_BHATTACHARYYA = 0.3 # L'image doit être en dessous
+# Exemple d'image qui met une grosse distance (0,25) :
+# https://danbooru.donmai.us/posts/4158825
 
 # Note importante : Ca ne sert à rien d'ajouter d'autres algorithmes de
 # comparaison des histogrammes, ils se vautrent tous sur les images très
