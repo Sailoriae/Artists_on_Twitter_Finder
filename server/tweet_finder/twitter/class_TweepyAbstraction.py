@@ -36,22 +36,12 @@ class TweepyAbstraction :
             None si il y a eu un problème
     """
     def get_tweet ( self, tweet_id ) :
-        retry = True
-        while retry :
-            retry = False
-            try :
-                return self.api.get_status( tweet_id, tweet_mode = 'extended' )
-            except tweepy.error.RateLimitError as error :
-                print( "Limite atteinte en récupérant les informations du Tweet " + str(tweet_id) + "." )
-                print( error.reason )
-                print( "On va réessayer dans 60 secondes... ", end='' )
-                time.sleep( 60 )
-                print( "On réessaye !" )
-                retry = True
-            except tweepy.TweepError as error :
-                print( "Erreur en récupérant les informations du Tweet " + str(tweet_id) + "." )
-                print( error.reason )
-                return None # Bien laisser le "return None" pour le check_parameters()
+        try :
+            return self.api.get_status( tweet_id, tweet_mode = 'extended' )
+        except tweepy.TweepError as error :
+            print( "Erreur en récupérant les informations du Tweet " + str(tweet_id) + "." )
+            print( error.reason )
+            return None # Bien laisser le "return None" pour le check_parameters()
     
     """
     @param account_name Le nom d'utilisateur du compte dont on veut l'ID.
@@ -68,51 +58,38 @@ class TweepyAbstraction :
             - Ou le compte est privé
     """
     def get_account_id ( self, account_name : str, invert_mode = False ) -> int :
-        retry = True
-        while retry :
-            retry = False
-            try :
-                if invert_mode :
-                    json = self.api.get_user( user_id = account_name )
-                    if json._json["protected"] == True :
-                        if invert_mode :
-                            print( "Erreur en récupérant le nom du compte " + str(account_name) + "." )
-                        else :
-                            print( "Erreur en récupérant l'ID du compte @" + str(account_name) + "." )
-                        print( "Le compte est en privé / est protégé." )
-                        return None
-                    return json.screen_name
-                else :
-                    json = self.api.get_user( screen_name = account_name )
-                    if json._json["protected"] == True :
-                        if invert_mode :
-                            print( "Erreur en récupérant le nom du compte " + str(account_name) + "." )
-                        else :
-                            print( "Erreur en récupérant l'ID du compte @" + str(account_name) + "." )
-                        print( "Le compte est en privé / est protégé." )
-                        return None
-                    return json.id
-            except tweepy.error.RateLimitError as error :
-                if invert_mode :
-                    print( "Limite atteinte en récupérant le nom du compte " + str(account_name) + "." )
-                else :
-                    print( "Limite atteinte en récupérant l'ID du compte @" + str(account_name) + "." )
-                print( error.reason )
-                print( "On va réessayer dans 60 secondes... ", end='' )
-                time.sleep( 60 )
-                print( "On réessaye !" )
-                retry = True
-            except tweepy.TweepError as error :
-                if invert_mode :
-                    print( "Erreur en récupérant le nom du compte " + str(account_name) + "." )
-                else :
-                    print( "Erreur en récupérant l'ID du compte @" + str(account_name) + "." )
-                print( error.reason )
-                if error.api_code == 50 : # User not found
+        try :
+            if invert_mode :
+                json = self.api.get_user( user_id = account_name )
+                if json._json["protected"] == True :
+#                    if invert_mode :
+#                        print( "Erreur en récupérant le nom du compte " + str(account_name) + "." )
+#                    else :
+#                        print( "Erreur en récupérant l'ID du compte @" + str(account_name) + "." )
+#                    print( "Le compte est en privé / est protégé." )
                     return None
-                if error.api_code == 63 : # User has been suspended
+                return json.screen_name
+            else :
+                json = self.api.get_user( screen_name = account_name )
+                if json._json["protected"] == True :
+#                    if invert_mode :
+#                        print( "Erreur en récupérant le nom du compte " + str(account_name) + "." )
+#                    else :
+#                        print( "Erreur en récupérant l'ID du compte @" + str(account_name) + "." )
+#                    print( "Le compte est en privé / est protégé." )
                     return None
-                raise error
+                return json.id
+        except tweepy.TweepError as error :
+#            if invert_mode :
+#                print( "Erreur en récupérant le nom du compte " + str(account_name) + "." )
+#            else :
+#                print( "Erreur en récupérant l'ID du compte @" + str(account_name) + "." )
+#            print( error.reason )
+            if error.api_code == 50 : # User not found
+                return None
+            if error.api_code == 63 : # User has been suspended
+                return None
+            raise error
     
     """
     @param account_name Liste de comptes Twitter dont on veut l'ID.
