@@ -12,6 +12,13 @@ Attention : Ce script supprime les comptes supprimés, suspendus ou passés en p
 Permet d'extraire les indexation de Tweets qui ont échoué (Fichier `class_CBIR_Engine_with_Database_errors.log`) et de retenter de les indexer.
 
 
+## Script `cleanup_database.py`
+
+Permet de vérifier que les Tweets enregistrés dans la base de données ont bien un compte enregistré correspondant, et que les images de Tweets enregistrées ont bien un Tweet enregistré correspondant.
+
+Puis supprime les Tweets sans compte enregistré, et les images de Tweets sans Tweet enregistré.
+
+
 ## Requêtes SQL diverses
 
 Extraire les ID de comptes Twitter qui n'ont pas d'enregistrement dans la table `accounts` :
