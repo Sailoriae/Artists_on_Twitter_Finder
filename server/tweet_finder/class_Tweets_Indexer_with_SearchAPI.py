@@ -12,18 +12,6 @@ except ModuleNotFoundError : # Si on a été exécuté en temps que module
     from .database import SQLite_or_MySQL
     from .class_CBIR_Engine_for_Tweets_Images import CBIR_Engine_for_Tweets_Images
 
-# Note importante :
-# On peut télécharger les images des tweets donnés par l'API de recherche en
-# meilleure qualité. Cependant, cela n'améliore pas de beaucoup la précision du
-# calcul de la distance entre les images indexées et l'image de requête.
-# En effet, il y a 4 niveaux de qualité sur Twitter : "thumb", "small",
-# "medium" et "large". Et par défaut, si rien n'est indiqué, le serveur nous
-# envoit la qualité "medium". Donc il n'y a pas une grande différence
-# Laisser désactiver, car on ne sait pas s'il y a une qualité "large" pour
-# toutes les images !
-# De plus, laisser désactiver nous fait gagner un peu de connexion internet !
-# Ca se sent bien sur les gros comptes !
-
 
 """
 Classe permettant d'indexer les Tweets d'un compte Twitter trouvés avec l'API

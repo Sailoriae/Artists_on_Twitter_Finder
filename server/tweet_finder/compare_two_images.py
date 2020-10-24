@@ -9,9 +9,15 @@ import numpy as np
 from time import sleep, time
 
 try :
-    from utils import url_to_cv2_image, get_tweet_image
+    from utils import binary_image_to_cv2_image, get_tweet_image
 except ModuleNotFoundError : # Si on a été exécuté en temps que module
-    from .utils import url_to_cv2_image, get_tweet_image
+    from .utils import binary_image_to_cv2_image, get_tweet_image
+
+
+"""
+ATTENTION : Toutes ces fonctions utilisent get_tweet_image() si on leur passe
+un URL ! Et get_tweet_image() ajoute le paramètre "name=large" à l'URL !
+"""
 
 
 """
@@ -103,12 +109,12 @@ trop transformées par la compression Twitter.
 """
 def compare_two_images_with_opencv ( url1 : str, url2 : str, PRINT_METRICS = True ) :
     if isinstance( url1, str ) :
-        img1 = url_to_cv2_image( url1 )
+        img1 = binary_image_to_cv2_image( get_tweet_image( url1 ) )
     else :
         img1 = url1
     
     if isinstance( url2, str ) :
-        img2 = url_to_cv2_image( url2 )
+        img2 = binary_image_to_cv2_image( get_tweet_image( url2 ) )
     else :
         img2 = url2
     

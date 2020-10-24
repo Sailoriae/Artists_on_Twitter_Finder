@@ -121,8 +121,8 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
                 if image_in_db.distance_chi2 - new_founded_tweets[0].distance_chi2 > 0.5 :
                     break
             
-            # Si a déjà trouvé quelque chose et que 
-            
+            # Les deux fonctions utilisent get_tweet_image(), donc prennent
+            # bien les images de Tweets en qualité maximale !
             image_url = "https://pbs.twimg.com/media/" + image_in_db.image_name
             if USE_OPENCV :
                 similarity_percentage = compare_two_images_with_opencv( request_image, image_url, PRINT_METRICS = False )

@@ -11,6 +11,18 @@ except ModuleNotFoundError :
     from .url_to_content import url_to_content
 
 
+# Note importante :
+# On peut télécharger les images des tweets donnés par l'API de recherche en
+# meilleure qualité.
+# En effet, il y a 4 niveaux de qualité sur Twitter : "thumb", "small",
+# "medium" et "large". Et par défaut, si rien n'est indiqué, le serveur nous
+# envoie la qualité "medium". Si il n'y a pas de qualité "large", le serveur
+# nous renvoie quand même quelque chose !
+# Donc toujours prendre la meilleure qualité ! Tant pis pour la connexion et la
+# RAM, mais cela permet de ne pas trop écarter les images à cause des
+# compressions.
+
+
 """
 GET HTTP UNIFIE POUR OBTENIR LES IMAGES DE TWEETS.
 NE PASSER QUE PAR CETTE FONCTIION ! Car elle gère les erreurs HTTP dûes à la
@@ -26,14 +38,18 @@ Attention : Cette fonction retourne le contenu binaire !
 @return L'image sous forme de bits, à décoder !
         Ou None si il y a eu une erreur connue comme insolvable !
 """
-def get_tweet_image ( url : str ) -> bytes :
+def get_tweet_image ( image_url : str ) -> bytes :
     retry_count = 0
     while True :
         try :
-            return url_to_content( url )
+            # Télécharger l'image au format maximal !
+            # Théoriquement, on a toujours le format d'URL suivant :
+            # https://pbs.twimg.com/media/EgwU7JdUwAECztR.jpg
+            large_image_url = image_url + "?name=large"
+            return url_to_content( large_image_url )
         
         except urllib.error.HTTPError as error :
-            print( "[get_tweet_image] Erreur avec l'image :", url )
+            print( "[get_tweet_image] Erreur avec l'image :", image_url )
             print( error )
             
             if error.code == 404 or error.code == 500 or error.code == 403 : # Erreurs insolvables
@@ -57,7 +73,7 @@ def get_tweet_image ( url : str ) -> bytes :
                 raise error
         
         except http.client.IncompleteRead as error :
-            print( "[get_tweet_image] Erreur avec l'image :", url )
+            print( "[get_tweet_image] Erreur avec l'image :", image_url )
             print( error )
             
             if retry_count < 1 : # Essayer un coup d'attendre
