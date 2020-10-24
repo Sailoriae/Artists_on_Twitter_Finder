@@ -13,6 +13,12 @@ recevoir plusieurs Tweets (Jusqu'à 100) en une seule requête, est très
 intéressante.
 """
 
+
+import sys
+print( "Ne pas exécuter ce script sans savoir ce qu'il fait." )
+sys.exit(0)
+
+
 """
 CONNEXION API TWITTER.
 """

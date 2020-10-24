@@ -11,8 +11,14 @@ intéressante.
 Ainsi, il peut scanner en moyenne 600 000 Tweets en 1h40.
 """
 
+
+import sys
+print( "Ne pas exécuter ce script sans savoir ce qu'il fait." )
+sys.exit(0)
+
 # Deuxième passe, plus précise
 SECOND_PASS = True
+
 
 """
 CONNEXION API TWITTER.

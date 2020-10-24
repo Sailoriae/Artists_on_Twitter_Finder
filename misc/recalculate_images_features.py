@@ -18,7 +18,12 @@ très changeante, ajouter avec un script les Tweets manquants de l'ancienne BDD,
 qui les indexe comme le fait le script "extract_tweets_ids_from_error_file.py".
 """
 
+
 import sys
+print( "Ne pas exécuter ce script sans savoir ce qu'il fait." )
+sys.exit(0)
+
+
 import os
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "server"))
 
