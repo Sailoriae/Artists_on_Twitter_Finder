@@ -238,6 +238,9 @@ class SQLite_or_MySQL :
                         (OPTIONNEL)
     
     @param hashtags La liste des hashtags du Tweet (OPTIONNEL)
+    
+    @param FORCE_INDEX Forcer l'ajout du Tweet. Efface ce qui a déjà été
+                       enregistré.
     """
     def insert_tweet( self, account_id : int,
                       tweet_id : int,
@@ -249,13 +252,24 @@ class SQLite_or_MySQL :
                       image_name_2 : str = None,
                       image_name_3 : str = None,
                       image_name_4 : str = None,
-                      hashtags : List[str] = None ) :
+                      hashtags : List[str] = None,
+                      FORCE_INDEX = True ) :
          # Ne pas re-vérifier, la classe CBIR_Engine_with_Database le fait déjà
 #        if self.is_tweet_indexed( tweet_id ) :
 #            return
         
 #        if cbir_features_1 == None and cbir_features_2 == None and cbir_features_3 == None and cbir_features_4 == None :
 #            return
+        
+        # Si il faut forcer l'indexation, on efface ce qui a déjà été insert
+        if FORCE_INDEX :
+            c = self.get_cursor()
+            c.execute( "DELETE FROM tweets WHERE tweet_id = %s", (tweet_id,) )
+            c.execute( "DELETE FROM tweets_images_1 WHERE tweet_id = %s", (tweet_id,) )
+            c.execute( "DELETE FROM tweets_images_2 WHERE tweet_id = %s", (tweet_id,) )
+            c.execute( "DELETE FROM tweets_images_3 WHERE tweet_id = %s", (tweet_id,) )
+            c.execute( "DELETE FROM tweets_images_4 WHERE tweet_id = %s", (tweet_id,) )
+            self.conn.commit()
         
         c = self.get_cursor()
         

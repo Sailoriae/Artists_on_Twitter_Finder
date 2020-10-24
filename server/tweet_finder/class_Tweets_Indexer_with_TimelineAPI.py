@@ -62,8 +62,8 @@ class Tweets_Indexer_with_TimelineAPI :
     @param tweet_id L'ID du tweet à indexer.
     @param tweepy_Status_object L'objet Status de la librairie Tweepy, écrase
                                 le paramètre tweet_id (OPTIONNEL).
-    @param FORCE_INDEX Forcer l'ajout des images si elles n'ont pas étés déjà
-                       ajoutées.
+    @param FORCE_INDEX Forcer l'ajout du Tweet. Efface ce qui a déjà été
+                       enregistré.
     @return True si l'indexation a réussi,
             OU False sinon.
     """
@@ -170,7 +170,8 @@ class Tweets_Indexer_with_TimelineAPI :
             image_name_2,
             image_name_3,
             image_name_4,
-            hashtags
+            hashtags,
+            FORCE_INDEX
         )
         
         return True
