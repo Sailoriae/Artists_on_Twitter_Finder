@@ -60,18 +60,18 @@ def test ( url : str,
 print( "TEST DE PIXIV :" )
 
 test( "https://www.pixiv.net/en/artworks/82699500",
-      "https://i.pximg.net/c/600x1200_90_webp/img-master/img/2020/07/02/09/32/31/82699500_p0_master1200.jpg",
+      "https://i.pximg.net/img-original/img/2020/07/02/09/32/31/82699500_p0.png",
       ["hongnabya"],
       datetime.fromisoformat( "2020-07-02 09:32:31+09:00" ) )
 
 test( "https://www.pixiv.net/en/artworks/82566405",
-      "https://i.pximg.net/c/600x1200_90_webp/img-master/img/2020/06/26/04/01/36/82566405_p0_master1200.jpg",
+      "https://i.pximg.net/img-original/img/2020/06/26/04/01/36/82566405_p0.jpg",
       ["kazuko_art"],
       datetime.fromisoformat( "2020-06-26 04:01:36+09:00" ) )
 
 # Attention, test de NSFW
 test( "https://www.pixiv.net/artworks/80875806",
-      "https://i.pximg.net/c/600x1200_90_webp/img-master/img/2020/04/18/15/53/20/80875806_p0_master1200.jpg",
+      "https://i.pximg.net/img-original/img/2020/04/18/15/53/20/80875806_p0.jpg",
       ["_ssnv"],
       datetime.fromisoformat( "2020-04-18 15:53:20+09:00" ) )
 
@@ -103,13 +103,13 @@ print( "" )
 print( "TEST DE DANBOORU :" )
 
 test( "https://danbooru.donmai.us/posts/4000914",
-      "https://danbooru.donmai.us/data/sample/sample-139dcc6b176fb999008522b9b80a9aa8.jpg",
+      "https://danbooru.donmai.us/data/139dcc6b176fb999008522b9b80a9aa8.jpg",
       ['graviqc'],
       datetime.fromisoformat( "2020-07-15 04:14:30.199000-04:00" ) )
 
 # Attention, test de NSFW
 test( "https://danbooru.donmai.us/posts/3878029",
-      "https://danbooru.donmai.us/data/sample/sample-f316f97186dab780a2a6e54b4acccd94.jpg",
+      "https://danbooru.donmai.us/data/f316f97186dab780a2a6e54b4acccd94.png",
       ['wokada156'],
       datetime.fromisoformat( "2020-04-24 06:54:45.053000-04:00" ) )
 
@@ -120,19 +120,19 @@ print( "TEST DE DERPIBOORU :" )
 # Test intéressant, puisque le compte Twitter de l'artiste n'est pas (encore)
 # listé sur Derpibooru : https://www.derpibooru.org/tags/artist-colon-fidzfox
 test( "https://www.derpibooru.org/images/1851874",
-      "https://derpicdn.net/img/2018/10/9/1851874/large.jpeg",
+      "https://derpicdn.net/img/view/2018/10/9/1851874.jpeg",
       ['fidzfox'],
       datetime.fromisoformat( "2018-10-09T01:30:23" ) )
 
 # Attention, test de NSFW
 test( "https://www.derpibooru.org/images/2043814",
-      "https://derpicdn.net/img/2019/5/19/2043814/large.png",
+      "https://derpicdn.net/img/view/2019/5/19/2043814.png",
       ['kingkakapo'],
       datetime.fromisoformat( "2019-05-19T22:59:22" ) )
 
 # Test intéressant, où il est obligé de passer dans le multiplexeur
 test( "https://derpibooru.org/images/2234605",
-      "https://derpicdn.net/img/2019/12/31/2234605/large.png",
+      "https://derpicdn.net/img/view/2019/12/31/2234605.png",
       ['sinrinf', 'avrameow'],
       datetime.fromisoformat( "2019-12-31T09:22:36" ) )
 
@@ -141,6 +141,6 @@ print( "" )
 print( "TEST DE FURBOORU :" )
 
 test( "https://furbooru.org/images/18",
-      "https://furrycdn.org/img/2020/4/24/18/large.png",
+      "https://furrycdn.org/img/view/2020/4/24/18.png",
       ['twiren_arts'],
       datetime.fromisoformat( "2020-04-24T22:50:11" ) )

@@ -123,7 +123,7 @@ class Philomena :
             return None
         
         # On retourne le résultat voulu
-        return self.cache_illust_url_json["image"]["representations"]["large"] # Large ça suffit
+        return self.cache_illust_url_json["image"]["representations"]["full"]
     
     """
     Retourne les noms des comptes Twitter trouvés.

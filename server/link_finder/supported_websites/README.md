@@ -6,6 +6,7 @@ Chaque classe doit contenir les deux fonctions suivantes :
 
 * `get_image_url( self, illust_url  : str ) -> str` :
   Prend en entrée l'URL de l'illustration postée sur le site, et retourne l'URL de l'image source, ou `None` si l'URL passée en entrée est invalide.
+  **Doit retourner les images en qualité maximale !** Déjà que Twitter compresse, on ne va pas écarter encore plus les images avec d'autres compression.
 
 * `get_twitter_accounts( self, illust_url ) -> List[str]` :
   Prend en entrée l'URL de l'illustration postée sur le site, et retourne la liste des comptes Twitter de l'artiste (Sans le "@") qui ont étés trouvés, ou `None` si l'URL passée en entrée est invalide.

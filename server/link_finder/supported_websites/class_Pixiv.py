@@ -129,14 +129,17 @@ class Pixiv :
         # Comme l'utilisateur entre l'URL de la page, et non de l'image, on
         # devrait donc retourner ici une liste d'URL, et donc scanner plusieurs
         # images dans notre moteur CBIR.
-        # Ce qui fait que plusieurs tweets séraient retournés, et ça serait à
+        # Ce qui fait que plusieurs tweets seraient retournés, et ça serait à
         # l'utilisateur de choisir quel est le tweet qui contient l'image
         # qu'il voulait.
         # 
         # Cela serait impossible dans le cas d'un robot qui utilise notre
         # système !
         # Il faudrait donc revoir beaucoup de choses...
-        return self.cache_illust_url_json["illust"]["image_urls"]["large"]
+        try : # Une seule illustration dans la page
+            return self.cache_illust_url_json["illust"]["meta_single_page"]["original_image_url"]
+        except KeyError : # Plusieurs illustrations dans la page
+            return self.cache_illust_url_json["illust"]["meta_pages"][0]["image_urls"]["original"]
     
     """
     Retourne les noms des comptes Twitter trouvés.
