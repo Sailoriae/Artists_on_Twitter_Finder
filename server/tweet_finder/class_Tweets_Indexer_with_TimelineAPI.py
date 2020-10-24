@@ -21,6 +21,11 @@ sys_path.append(os_path.dirname(os_path.dirname(os_path.abspath(__file__))))
 import parameters as param
 
 
+# Très très très important :
+# 1 - On analyse les images en qualité maximale.
+# 2 - Si l'image n'est plus accessible, on remplit ses champs avec NULL !
+
+
 """
 Classe permettant d'indexer les Tweets d'un compte Twitter trouvés avec l'API
 de timeline de Twitter, via la librairie Tweepy.
@@ -137,9 +142,9 @@ class Tweets_Indexer_with_TimelineAPI :
             image_name_4 = tweet_images_url[3].replace("https://pbs.twimg.com/media/", "")
         
         # Si toutes les images du Tweet ont un problème
-        if image_1 == None and image_2 == None and image_3 == None and image_4 == None :
-            print( "Toutes les images du Tweet " + str(tweet_id) + " son inindexables !" )
-            return False
+#        if image_1 == None and image_2 == None and image_3 == None and image_4 == None :
+#            print( "Toutes les images du Tweet " + str(tweet_id) + " son inindexables !" )
+#            return False
         
         # Prendre les hashtags
         try :

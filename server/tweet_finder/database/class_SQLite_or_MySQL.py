@@ -200,7 +200,9 @@ class SQLite_or_MySQL :
     
     """
     Ajouter un tweet à la base de données
-    Attention ! Il faut au moins une image pour que le Tweet soit stocké !
+    Attention ! Ce sont les "image_name" qui disent si une image doit être
+    stockée ! Si un cbir_features correspondant est à None, alors les
+    caractéristiques de l'image sont mises à NULL.
     
     @param account_id L'ID du compte associé au tweet
     @param tweet_id L'ID du tweet à ajouter
@@ -260,33 +262,49 @@ class SQLite_or_MySQL :
         # features_list_for_db() ne devrait pas être utilisé puisque
         # le moteur CBIR renvoit des listes fixes de 240 valeurs !
         
-        if cbir_features_1 != None :
+        if image_name_1 != None :
 #            cbir_features_1_formatted = features_list_for_db( cbir_features_1 )
 #            c.execute( sql_requests_dict["insert_tweet_image_1"],
 #                       tuple( [tweet_id] + cbir_features_1_formatted ) )
+            if cbir_features_1 != None :
+                cbir_features_1 = [ float(v) for v in cbir_features_1 ]
+            else :
+                cbir_features_1 = [ None ] * CBIR_LIST_LENGHT
             c.execute( sql_requests_dict["insert_tweet_image_1"],
-                       tuple( [tweet_id, image_name_1] + [ float(v) for v in cbir_features_1 ] ) )
+                       tuple( [tweet_id, image_name_1] + cbir_features_1 ) )
         
-        if cbir_features_2 != None :
+        if image_name_2 != None :
 #            cbir_features_2_formatted = features_list_for_db( cbir_features_2 )
 #            c.execute( sql_requests_dict["insert_tweet_image_2"],
 #                       tuple( [tweet_id] + cbir_features_2_formatted ) )
+            if cbir_features_2 != None :
+                cbir_features_2 = [ float(v) for v in cbir_features_2 ]
+            else :
+                cbir_features_2 = [ None ] * CBIR_LIST_LENGHT
             c.execute( sql_requests_dict["insert_tweet_image_2"],
-                       tuple( [tweet_id, image_name_2] + [ float(v) for v in cbir_features_2 ] ) )
+                       tuple( [tweet_id, image_name_2] + cbir_features_2 ) )
         
-        if cbir_features_3 != None :
+        if image_name_3 != None :
 #            cbir_features_3_formatted = features_list_for_db( cbir_features_3 )
 #            c.execute( sql_requests_dict["insert_tweet_image_3"],
 #                       tuple( [tweet_id] + cbir_features_3_formatted ) )
+            if cbir_features_3 != None :
+                cbir_features_3 = [ float(v) for v in cbir_features_3 ]
+            else :
+                cbir_features_3 = [ None ] * CBIR_LIST_LENGHT
             c.execute( sql_requests_dict["insert_tweet_image_3"],
-                       tuple( [tweet_id, image_name_3] + [ float(v) for v in cbir_features_3 ] ) )
+                       tuple( [tweet_id, image_name_3] + cbir_features_3 ) )
         
-        if cbir_features_4 != None :
+        if image_name_4 != None :
 #            cbir_features_4_formatted = features_list_for_db( cbir_features_4  )
 #            c.execute( sql_requests_dict["insert_tweet_image_4"],
 #                       tuple( [tweet_id] + cbir_features_4_formatted ) )
+            if cbir_features_4 != None :
+                cbir_features_4 = [ float(v) for v in cbir_features_4 ]
+            else :
+                cbir_features_4 = [ None ] * CBIR_LIST_LENGHT
             c.execute( sql_requests_dict["insert_tweet_image_4"],
-                       tuple( [tweet_id, image_name_4] + [ float(v) for v in cbir_features_4 ] ) )
+                       tuple( [tweet_id, image_name_4] + cbir_features_4 ) )
         
         if hashtags != None and hashtags != [] and hashtags != [""] :
             hashtags_str = ";".join( [ hashtag for hashtag in hashtags ] )

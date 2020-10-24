@@ -118,6 +118,10 @@ class Image_Features_Iterator :
             
             return self.__next__( do_not_reset_iteration_start = True )
         
+        # Si la liste des caractéristiques est à NULL, on passe cette image
+        if current_line[5] == None :
+            return self.__next__( do_not_reset_iteration_start = True )
+        
         if self.ENABLE_METRICS :
             self.iteration_times.append( time() - self.iteration_start )
             self.usage_start = time()

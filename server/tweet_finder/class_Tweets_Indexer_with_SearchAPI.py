@@ -13,6 +13,11 @@ except ModuleNotFoundError : # Si on a été exécuté en temps que module
     from .class_CBIR_Engine_for_Tweets_Images import CBIR_Engine_for_Tweets_Images
 
 
+# Très très très important :
+# 1 - On analyse les images en qualité maximale.
+# 2 - Si l'image n'est plus accessible, on remplit ses champs avec NULL !
+
+
 """
 Classe permettant d'indexer les Tweets d'un compte Twitter trouvés avec l'API
 de recherche de Twitter, via la librairie SNScrape.
@@ -154,9 +159,9 @@ class Tweets_Indexer_with_SearchAPI :
                 image_name_4 = tweet.images[3].replace("https://pbs.twimg.com/media/", "")
             
             # Si toutes les images du Tweet ont un problème
-            if image_1 == None and image_2 == None and image_3 == None and image_4 == None :
-                print( "Toutes les images du Tweet " + str(tweet.id) + " son inindexables !" )
-                continue
+#            if image_1 == None and image_2 == None and image_3 == None and image_4 == None :
+#                print( "Toutes les images du Tweet " + str(tweet.id) + " son inindexables !" )
+#                continue
             
             if self.DEBUG or self.ENABLE_METRICS :
                 calculate_features_times.append( time() - start_calculate_features )
