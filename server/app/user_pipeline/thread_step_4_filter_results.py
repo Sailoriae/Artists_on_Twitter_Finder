@@ -131,7 +131,7 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
             
             # Il faut que l'image trouvée et celle de requête se ressemblent à
             # au moins SEUIL en %
-            if similarity_percentage > 85 :
+            if similarity_percentage > SEUIL :
                 new_founded_tweets.append( image_in_db )
         
         # On installe la nouvelle liste de résultats

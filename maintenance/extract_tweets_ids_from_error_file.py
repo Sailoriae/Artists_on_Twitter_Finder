@@ -18,13 +18,13 @@ from tweet_finder import Tweets_Indexer_with_TimelineAPI
 
 
 """
-Lecture du fichier "class_CBIR_Engine_with_Database_errors.log".
+Lecture du fichier "class_CBIR_Engine_for_Tweets_Images_errors.log".
 """
 
 try :
-    f = open( "class_CBIR_Engine_with_Database_errors.log", "r" )
+    f = open( "class_CBIR_Engine_for_Tweets_Images_errors.log", "r" )
 except FileNotFoundError :
-    print( "Fichier \"class_CBIR_Engine_with_Database_errors.log\" inexistant !" )
+    print( "Fichier \"class_CBIR_Engine_for_Tweets_Images_errors.log\" inexistant !" )
     sys.exit(0)
 
 lines = f.readlines()

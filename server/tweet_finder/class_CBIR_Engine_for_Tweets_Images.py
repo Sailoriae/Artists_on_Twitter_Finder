@@ -42,7 +42,7 @@ class CBIR_Engine_for_Tweets_Images :
                 print( error )
                 print( "[get_image_features] Abandon !" )
                 
-                file = open( "class_CBIR_Engine_with_Database_errors.log", "a" )
+                file = open( "class_CBIR_Engine_for_Tweets_Images_errors.log", "a" )
                 file.write( "Erreur avec le Tweet : " + str(tweet_id) + " !\n" )
                 traceback.print_exc( file = file )
                 file.write( "\n\n\n" )
@@ -61,7 +61,7 @@ class CBIR_Engine_for_Tweets_Images :
                 else :
                     print( "[get_image_features] Abandon !" )
                     
-                    file = open( "class_CBIR_Engine_with_Database_errors.log", "a" )
+                    file = open( "class_CBIR_Engine_for_Tweets_Images_errors.log", "a" )
                     file.write( "Erreur avec le Tweet : " + str(tweet_id) + " !\n" )
                     traceback.print_exc( file = file )
                     file.write( "\n\n\n" )
