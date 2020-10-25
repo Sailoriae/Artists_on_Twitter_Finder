@@ -108,7 +108,8 @@ class Tweets_Lister_with_SearchAPI :
         
         # Note : Plus besoin de faire de bidouille avec "filter:safe"
         # On met le "@" à cause de @KIYOSATO_0928 qui renvoyait des erreurs 400
-        query = "from:@" + account_name + " filter:media"
+        # Laisser "-filter:retweets", ça ne supprime pas les Tweets citant
+        query = "from:@" + account_name + " filter:media -filter:retweets"
         if since_date != None :
             query += " since:" + since_date
         
