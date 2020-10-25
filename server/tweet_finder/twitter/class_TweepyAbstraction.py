@@ -135,6 +135,8 @@ class TweepyAbstraction :
                                user_id = account_id,
                                tweet_mode = "extended",
                                include_rts = False,
+                               count = 200, # 200 Tweets par page, c'est le maximum, donc 16 requêtes pour 3200 Tweets
+                                            # Source : https://developer.twitter.com/en/docs/twitter-api/v1/tweets/timelines/api-reference/get-statuses-user_timeline
                                trim_user = True # Supprimer les infos sur l'utilisateur, on en n'a pas besoin
                               ).items() )
         else :
@@ -144,6 +146,8 @@ class TweepyAbstraction :
                                since_id = since_tweet_id,
                                tweet_mode = "extended",
                                include_rts = False,
+                               count = 200, # 200 Tweets par page, c'est le maximum, donc 16 requêtes pour 3200 Tweets
+                                            # Source : https://developer.twitter.com/en/docs/twitter-api/v1/tweets/timelines/api-reference/get-statuses-user_timeline
                                trim_user = True # Supprimer les infos sur l'utilisateur, on en n'a pas besoin
                               ).items() )
     
