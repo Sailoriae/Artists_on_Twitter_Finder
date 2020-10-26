@@ -36,9 +36,9 @@ Ceci lance le serveur et vous met en ligne de commande. Si vous souhaitez quitte
   - Filtrage des résultats de la recherche inversée, car il peut y avoir des faux positifs.
 * Traitement des requêtes de scan en 4 étapes paralléles (Module `tweet_finder`) :
   - API de recherche : Listage des Tweets des comptes Twitter trouvés. Classe principale : `Tweets_Lister_with_SearchAPI`.
-  - API de recherche : Analyse et indexation des Tweets trouvés. L'analyse consiste au calcul des caractéristiques de l'image avec le moteur CBIR. Classe principale : `Tweets_Indexer_with_SearchAPI`.
+  - API de recherche : Analyse et indexation des Tweets trouvés. L'analyse consiste au calcul des caractéristiques de l'image avec le moteur CBIR. Classe principale : `Tweets_Indexer` (Utilisée aussi pour l'API de timeline).
   - API de timeline : Listage des Tweets des comptes Twitter trouvés. Classe principale : `Tweets_Lister_with_TimelineAPI`.
-  - API de timeline : Analyse et indexation des Tweets des comptes Twitter trouvés. Classe principale : `Tweets_Indexer_with_TimelineAPI`.
+  - API de timeline : Analyse et indexation des Tweets des comptes Twitter trouvés. Classe principale : `Tweets_Indexer` (Utilisée aussi pour l'API de recherche).
   - Voir pourquoi il y a deux systèmes d'indexation, soit deux API utilisées, dans `../doc/Limites_de_scan_des_comptes_Twitter.md`. Pour faire simple : L'API de timeline est limitée aux 3 200 Tweets les plus récents des comptes à indexer (Retweets inclus), et l'API de recherche est limité à ce que Twitter indexent dans leur recherche. Utiliser les deux API permet d'être le plus exhaustif possible lors de l'indexation des comptes qui ont plus de 3 200 Tweets.
 * Serveur web pour l'API HTTP qui renvoit les status des requêtes, avec les éventuels résultats, ou une erreur s'il y a un problème. Voir `doc/API_HTTP.md`.
 * Mémoire partagée entre tous les threads dans l'objet `Shared_Memory` du module `shared_memory` (Avec la librairie Pyro4).
