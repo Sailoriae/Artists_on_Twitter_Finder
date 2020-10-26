@@ -48,6 +48,10 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
         for oldest_updated_account in oldest_updated_account_iterator  :
             count += 1
             
+            # Vérifier quand même qu'il ne faut pas s'arrêter
+            if not shared_memory.keep_service_alive :
+                break
+            
             # Vérifier que le compte n'est pas déjà en cours d'indexation
             if shared_memory_scan_requests.get_request( oldest_updated_account[0] ) != None :
                 continue
@@ -108,7 +112,7 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
                                                             is_prioritary = False )
         
         # Si il n'y avait aucun compte dans l'itérateur
-        if count == 0 :
+        if count == 0 and shared_memory.keep_service_alive :
             print( "[auto_update_th" + str(thread_id) + "] La base de données n'a pas de comptes Twitter enregistrés !" )
             
             # Retest dans une heure (1200*3 = 3600)
