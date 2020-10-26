@@ -90,6 +90,7 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
                 
                 shared_memory_threads_registry.set_request( "thread_step_4_filter_results_number" + str(thread_id), None )
                 shared_memory_user_requests.set_request_to_next_step( request )
+                request._pyroRelease()
                 continue
         
         else :
@@ -104,6 +105,7 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
                 
                 shared_memory_threads_registry.set_request( "thread_step_4_filter_results_number" + str(thread_id), None )
                 shared_memory_user_requests.set_request_to_next_step( request )
+                request._pyroRelease()
                 continue
         
         # On filtre la liste des images trouvées
@@ -148,6 +150,9 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
         
         # On passe la requête à l'étape suivante, fin du traitement
         shared_memory_user_requests.set_request_to_next_step( request )
+        
+        # Forcer la fermeture du proxy
+        request._pyroRelease()
     
     print( "[step_4_th" + str(thread_id) + "] Arrêté !" )
     return

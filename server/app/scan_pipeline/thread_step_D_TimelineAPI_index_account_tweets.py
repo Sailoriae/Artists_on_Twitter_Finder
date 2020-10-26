@@ -71,6 +71,7 @@ def thread_step_D_TimelineAPI_index_account_tweets( thread_id : int, shared_memo
         if request.unfounded_account :
             # On appelle la méthode qui termine la requête
             shared_memory_scan_requests.end_request( request, None )
+            request._pyroRelease()
             continue
         
         # Si le listage des Tweets n'a pas commencé, on doit attendre un peu
@@ -79,6 +80,7 @@ def thread_step_D_TimelineAPI_index_account_tweets( thread_id : int, shared_memo
                 shared_memory_scan_requests_step_D_TimelineAPI_index_account_tweets_prior_queue.put( request )
             else :
                 shared_memory_scan_requests_step_D_TimelineAPI_index_account_tweets_queue.put( request )
+            request._pyroRelease()
             continue
         
         # Dire qu'on est en train de traiter cette requête
@@ -127,6 +129,9 @@ def thread_step_D_TimelineAPI_index_account_tweets( thread_id : int, shared_memo
         
         # Dire qu'on n'est plus en train de traiter cette requête
         shared_memory_threads_registry.set_request( "thread_step_D_TimelineAPI_index_account_tweets_number" + str(thread_id), None )
+        
+        # Forcer la fermeture du proxy
+        request._pyroRelease()
     
     print( "[step_D_th" + str(thread_id) + "] Arrêté !" )
     return

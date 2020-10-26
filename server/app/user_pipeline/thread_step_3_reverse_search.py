@@ -70,6 +70,7 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
                 sleep(10)
                 request.query_image_as_bytes = url_to_content( request.image_url )
             else :
+                request._pyroRelease()
                 raise error
         
         # On recherche les Tweets contenant l'image de requête
@@ -120,6 +121,9 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
         # C'est la procédure shared_memory_user_requests.set_request_to_next_step
         # qui vérifie si elle peut
         shared_memory_user_requests.set_request_to_next_step( request )
+        
+        # Forcer la fermeture du proxy
+        request._pyroRelease()
     
     print( "[step_3_th" + str(thread_id) + "] Arrêté !" )
     return

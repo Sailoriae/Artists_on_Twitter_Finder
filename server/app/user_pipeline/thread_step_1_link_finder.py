@@ -71,6 +71,9 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
             # Dire qu'on n'est plus en train de traiter cette requête
             shared_memory_threads_registry.set_request( "thread_step_1_link_finder_number" + str(thread_id), None )
             
+            # Forcer la fermeture du proxy
+            request._pyroRelease()
+            
             print( "[step_1_th" + str(thread_id) + "] Ceci n'est pas une URL !" )
             continue
         
@@ -82,6 +85,9 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
             
             # Dire qu'on n'est plus en train de traiter cette requête
             shared_memory_threads_registry.set_request( "thread_step_1_link_finder_number" + str(thread_id), None )
+            
+            # Forcer la fermeture du proxy
+            request._pyroRelease()
             
             print( "[step_1_th" + str(thread_id) + "] Site non supporté !" )
             continue
@@ -95,6 +101,9 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
             # Dire qu'on n'est plus en train de traiter cette requête
             shared_memory_threads_registry.set_request( "thread_step_1_link_finder_number" + str(thread_id), None )
             
+            # Forcer la fermeture du proxy
+            request._pyroRelease()
+            
             print( "[step_1_th" + str(thread_id) + "] URL invalide ! Elle ne mène pas à une illustration." )
             continue
         
@@ -106,6 +115,9 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
             
             # Dire qu'on n'est plus en train de traiter cette requête
             shared_memory_threads_registry.set_request( "thread_step_1_link_finder_number" + str(thread_id), None )
+            
+            # Forcer la fermeture du proxy
+            request._pyroRelease()
             
             print( "[step_1_th" + str(thread_id) + "] Aucun compte Twitter trouvé pour l'artiste de cette illustration !" )
             continue
@@ -122,6 +134,9 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
             
             # Dire qu'on n'est plus en train de traiter cette requête
             shared_memory_threads_registry.set_request( "thread_step_1_link_finder_number" + str(thread_id), None )
+            
+            # Forcer la fermeture du proxy
+            request._pyroRelease()
             
             print( "[step_1_th" + str(thread_id) + "] Aucun compte Twitter valide trouvé pour l'artiste de cette illustration !" )
             continue
@@ -147,6 +162,9 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
         # C'est la procédure shared_memory_user_requests.set_request_to_next_step
         # qui vérifie si elle peut
         shared_memory_user_requests.set_request_to_next_step( request )
+        
+        # Forcer la fermeture du proxy
+        request._pyroRelease()
     
     print( "[step_1_th" + str(thread_id) + "] Arrêté !" )
     return
