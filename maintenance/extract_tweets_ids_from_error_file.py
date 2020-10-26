@@ -13,8 +13,12 @@ sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__f
 # On s'éxécute dans le répetoire "server", et l'ajouter au PATH
 os.chdir(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "server"))
 
+import parameters as param
+from tweet_finder import Tweets_Indexer, analyse_tweet_json
+from tweet_finder.twitter import TweepyAbstraction
+
 import re
-from tweet_finder import Tweets_Indexer_with_TimelineAPI
+from queue import Queue
 
 
 """
@@ -54,8 +58,22 @@ else:
 
 
 """
+Connexion à l'API Twitter.
+"""
+twitter = TweepyAbstraction( param.API_KEY,
+                             param.API_SECRET,
+                             param.OAUTH_TOKEN,
+                             param.OAUTH_TOKEN_SECRET )
+
+"""
 Tentative d'indexation des Tweets trouvés !
 """
-engine = Tweets_Indexer_with_TimelineAPI( DEBUG = True )
+tweets_queue = Queue()
 for tweet_id in founded_ids :
-    engine.index_tweet( tweet_id, FORCE_INDEX = True )
+    tweet = twitter.get_tweet( tweet_id )
+    if tweet != None :
+        tweets_queue.put( analyse_tweet_json( tweet._json ) )
+tweets_queue.put( None ) # Cloturer la file
+
+engine = Tweets_Indexer( DEBUG = True )
+engine.index_tweet( "", tweets_queue, FORCE_INDEX = True )

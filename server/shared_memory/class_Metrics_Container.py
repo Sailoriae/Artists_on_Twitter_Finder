@@ -17,13 +17,15 @@ class Metrics_Container :
         # Classe Tweets_Lister_with_TimelineAPI
         self._step_B_times = []
         
-        # Classe Tweets_Indexer_with_SearchAPI
+        # Classe Tweets_Indexer pour l'étape C
         self._step_C_times = []
         self._step_C_calculate_features_times = []
         self._step_C_insert_into_times = []
         
-        # Classe Tweets_Indexer_with_TimelineAPI
+        # Classe Tweets_Indexer pour l'étape D
         self._step_D_times = []
+        self._step_D_calculate_features_times = []
+        self._step_D_insert_into_times = []
         
         # Classe Image_Features_Iterator
         self._step_3_iteration_times = []
@@ -55,8 +57,8 @@ class Metrics_Container :
     @param step_C_calculate_features_times Liste des temps d'éxécution pour
                                            calculer les caractéristiques des
                                            images d'un Tweet.
-    @param _step_C_insert_into_times Liste des temps d'éxécution pour insérer
-                                     un Tweet dans la BDD.
+    @param step_C_insert_into_times Liste des temps d'éxécution pour insérer
+                                    un Tweet dans la BDD.
     """
     def add_step_C_times ( self, step_C_times, step_C_calculate_features_times, step_C_insert_into_times ) :
         self._step_C_times += step_C_times
@@ -64,10 +66,17 @@ class Metrics_Container :
         self._step_C_insert_into_times += step_C_insert_into_times
     
     """
-    @param step_C_times Liste de temps d'éxécution pour indexer un Tweet.
+    @param step_D_times Liste de temps d'éxécution pour indexer un Tweet.
+    @param step_D_calculate_features_times Liste des temps d'éxécution pour
+                                           calculer les caractéristiques des
+                                           images d'un Tweet.
+    @param step_D_insert_into_times Liste des temps d'éxécution pour insérer
+                                    un Tweet dans la BDD.
     """
-    def add_step_D_times ( self, step_D_times ) :
+    def add_step_D_times ( self, step_D_times, step_D_calculate_features_times, step_D_insert_into_times ) :
         self._step_D_times += step_D_times
+        self._step_D_calculate_features_times += step_D_calculate_features_times
+        self._step_D_insert_into_times += step_D_insert_into_times
     
     """
     @param step_3_iteration_times Liste des temps d'éxécution pour itérer sur
@@ -115,6 +124,10 @@ class Metrics_Container :
             to_print += " - Dont : INSERT INTO d'un Tweet : " + str(mean(self._step_C_insert_into_times)) + " (" + str(len(self._step_C_insert_into_times)) + " valeurs)\n"
         if self._step_D_times != [] :
             to_print += "Etape D : Temps moyen pour indexer avec TimelineAPI : " + str(mean(self._step_D_times)) + " (" + str(len(self._step_D_times)) + " valeurs)\n"
+        if self._step_D_calculate_features_times != [] :
+            to_print += " - Dont : Calcul CBIR d'un Tweet : " + str(mean(self._step_D_calculate_features_times)) + " (" + str(len(self._step_D_calculate_features_times)) + " valeurs)\n"
+        if self._step_D_insert_into_times != [] :
+            to_print += " - Dont : INSERT INTO d'un Tweet : " + str(mean(self._step_D_insert_into_times)) + " (" + str(len(self._step_D_insert_into_times)) + " valeurs)\n"
         if self._step_3_iteration_times != [] :
             to_print += "Etape 3 : Temps moyen pour itérer lors de la recherche : " + str(mean(self._step_3_iteration_times)) + " (" + str(len(self._step_3_iteration_times)) + " valeurs)\n"
         if self._step_3_usage_times != [] :

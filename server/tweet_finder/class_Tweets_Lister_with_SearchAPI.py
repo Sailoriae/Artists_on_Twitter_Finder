@@ -6,9 +6,11 @@ from time import time
 try :
     from database import SQLite_or_MySQL
     from twitter import TweepyAbstraction, SNScrapeAbstraction
+    from analyse_tweet_json import analyse_tweet_json
 except ModuleNotFoundError : # Si on a été exécuté en temps que module
     from .database import SQLite_or_MySQL
     from .twitter import TweepyAbstraction, SNScrapeAbstraction
+    from .analyse_tweet_json import analyse_tweet_json
 
 
 class Unfounded_Account_on_Lister_with_SearchAPI ( Exception ) :
@@ -19,7 +21,7 @@ class Blocked_by_User_with_SearchAPI ( Exception ) :
 
 """
 Classe permettant de lister les Tweets d'un compte Twitter avec l'API
-de recherche de Twittern, via la librairie SNScrape.
+de recherche de Twitter, via la librairie SNScrape.
 """
 class Tweets_Lister_with_SearchAPI :
     def __init__( self, api_key, api_secret, oauth_token, oauth_token_secret, auth_token,
@@ -39,8 +41,16 @@ class Tweets_Lister_with_SearchAPI :
     partir de la date du Tweet indexé de ce compte le plus récent, stockée dans
     la base.
     
-    @param queue_put Fonction à appeler pour mettre les Tweets trouvés.
-                     Lorsque le listage sera terminé, "None" sera ajouté.
+    Seuls les tweets avec des image(s) seront ajoutés dans la file queue, sous
+    la forme d'un dictionnaire.
+    Plus d'informations sur ce dictionnaire dans la fonction suivante :
+    fonction analyse_tweet_json()
+    On ne met pas le JSON complet renvoyé par l'API afin de gagner de la
+    mémoire vive.
+    
+    @param queue Objet queue.Queue() pour y stocker les Tweets trouvés.
+                 Un Tweet est représenté par le dictionnaire retourné par la
+                 fonction analyse_tweet_json().
     @param account_id ID du compte, vérifié récemment !
     
     @return La date du Tweet le plus récent, à enregistrer dans la base lorsque
@@ -53,7 +63,7 @@ class Tweets_Lister_with_SearchAPI :
     le compte est introuvable.
     Peut émettre des "Blocked_by_User_with_SearchAPI" si le compte nous bloque.
     """
-    def list_searchAPI_tweets ( self, account_name, queue_put, account_id = None, add_step_A_time = None ) :
+    def list_searchAPI_tweets ( self, account_name, queue, account_id = None, add_step_A_time = None ) :
         if account_id == None :
             account_id = self.twitter.get_account_id( account_name ) # TOUJOURS AVEC CETTE API
         if account_id == None :
@@ -72,41 +82,13 @@ class Tweets_Lister_with_SearchAPI :
         since_date = self.bdd.get_account_SearchAPI_last_tweet_date( account_id )
         
         
-        # Fonction de converstion vers la fonction queue_put()
+        # Fonction de converstion vers la fonction queue.put()
         # Permet de filtre les Tweets sans images, et de les formater pour la
         # fonction queue_put()
         def output_function ( tweet_json ) :
-            # Si il y a le champs "retweeted_status" dans le JSON
-            if "retweeted_status" in tweet_json : # Le Tweet est un RT
-                print( "[List SearchAPI] RT trouvé ! La recherche a donc renvoyé un RT, c'est pas normal !" )
-                return
-            
-            tweet_dict = {}
-            
-            tweet_dict["tweet_id"] = tweet_json["id_str"] # ID du Tweet
-            tweet_dict["user_id"] = tweet_json["user_id_str"] # ID de l'auteur du Tweet
-            # Super méga important, ne pas prendre celui trouvé par la fonction
-            # list_searchAPI_tweets() !!!
-            # Permet en cas de problème de ne pas faire n'importe quoi dans la BDD
-            
-            tweet_dict["images"] = [] # Liste des URLs des images dans ce Tweet
-            try :
-                for tweet_media in tweet_json["extended_entities"]["media"] :
-                    if tweet_media["type"] == "photo" :
-                        tweet_dict["images"].append( tweet_media["media_url_https"] )
-            except KeyError : # Tweet sans média
-                return # Sinon ça ne sert à rien
-            
-            tweet_dict["hashtags"] = [] # Liste des hashtags dans ce Tweet
-            try :
-                for hashtag in tweet_json["entities"]["hashtags"] :
-                    tweet_dict["hashtags"].append( "#" + hashtag["text"] )
-            except KeyError :
-                pass
-            
-            if len(tweet_dict["images"]) > 0 : # Sinon ça ne sert à rien
-                queue_put( tweet_dict )
-        
+            tweet_dict = analyse_tweet_json( tweet_json )
+            if tweet_dict != None :
+                queue.put( tweet_dict )
         
         # Note : Plus besoin de faire de bidouille avec "filter:safe"
         # On met le "@" à cause de @KIYOSATO_0928 qui renvoyait des erreurs 400
@@ -126,7 +108,7 @@ class Tweets_Lister_with_SearchAPI :
                     add_step_A_time( (time() - start) / count )
         
         # Indiquer qu'on a fini le listage
-        queue_put( None )
+        queue.put( None )
         
         # Retourner la date du Tweet trouvé le plus récent, ou celui enregistré
         # dans la base de données si aucun Tweet n'a été trouvé
@@ -148,10 +130,14 @@ if __name__ == '__main__' :
     sys_path.append(os_path.dirname(os_path.dirname(os_path.abspath(__file__))))
     import parameters as param
     
+    class Test :
+        def put( tweet ) : print( tweet )
+    test = Test()
+    
     engine = Tweets_Lister_with_SearchAPI( param.API_KEY,
                                            param.API_SECRET,
                                            param.TWITTER_API_KEYS[0]["OAUTH_TOKEN"],
                                            param.TWITTER_API_KEYS[0]["OAUTH_TOKEN_SECRET"],
                                            param.TWITTER_API_KEYS[0]["AUTH_TOKEN"],
                                            DEBUG = True )
-    engine.list_searchAPI_tweets( "rikatantan2nd", print )
+    engine.list_searchAPI_tweets( "rikatantan2nd", test )

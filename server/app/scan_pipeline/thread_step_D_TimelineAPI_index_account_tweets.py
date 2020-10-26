@@ -10,7 +10,7 @@ from os import path as os_path
 sys_path.append(os_path.dirname(os_path.dirname(os_path.dirname(os_path.abspath(__file__)))))
 
 import parameters as param
-from tweet_finder import Tweets_Indexer_with_TimelineAPI
+from tweet_finder import Tweets_Indexer
 from tweet_finder.database import SQLite_or_MySQL
 
 
@@ -22,7 +22,7 @@ l'API de timeline de Twitter.
 """
 def thread_step_D_TimelineAPI_index_account_tweets( thread_id : int, shared_memory ) :
     # Initialisation de l'indexeur de Tweets
-    timelineAPI_indexer = Tweets_Indexer_with_TimelineAPI( DEBUG = param.DEBUG, ENABLE_METRICS = param.ENABLE_METRICS )
+    tweets_indexer = Tweets_Indexer( DEBUG = param.DEBUG, ENABLE_METRICS = param.ENABLE_METRICS )
     
     # Accès direct à la base de données
     # N'UTILISER QUE DES METHODES QUI FONT SEULEMENT DES SELECT !
@@ -96,18 +96,22 @@ def thread_step_D_TimelineAPI_index_account_tweets( thread_id : int, shared_memo
         # On index / scan les comptes Twitter de la requête avec l'API de timeline
         if param.DEBUG :
             print( "[step_D_th" + str(thread_id) + "] Indexation des Tweets de @" + request.account_name + " trouvés avec l'API de timeline." )
-        request.finished_TimelineAPI_indexing = timelineAPI_indexer.index_or_update_with_TimelineAPI(
+        request_TimelineAPI_tweets_queue = request.TimelineAPI_tweets_queue
+        request_indexing_tweets = request.indexing_tweets
+        request.finished_TimelineAPI_indexing = tweets_indexer.index_tweets(
                                                     request.account_name,
-                                                    request.TimelineAPI_tweets_queue,
-                                                    request.indexing_tweets,
-                                                    add_step_D_times = shared_memory_execution_metrics.add_step_D_times )
+                                                    request_TimelineAPI_tweets_queue,
+                                                    indexing_tweets = request_indexing_tweets,
+                                                    add_step_C_or_D_times = shared_memory_execution_metrics.add_step_D_times )
+        request_TimelineAPI_tweets_queue._pyroRelease()
+        request_indexing_tweets._pyroRelease()
         
         # Si l'indexation est terminée, on met la date de fin dans la requête
         if request.finished_TimelineAPI_indexing and not request.has_failed :
             print( "[step_D_th" + str(thread_id) + "] Fin de l'indexation des Tweets de @" + request.account_name + " trouvés avec l'API de timeline." )
             
             # Enregistrer l'ID du Tweet trouvé le plus récent
-            timelineAPI_indexer.save_last_tweet_id( request.account_id, request.TimelineAPI_last_tweet_id )
+            tweets_indexer.save_last_tweet_id( request.account_id, request.TimelineAPI_last_tweet_id )
             
             # Si les deux indexations ont terminé
             if request.finished_SearchAPI_indexing :

@@ -254,10 +254,11 @@ class SQLite_or_MySQL :
                       image_name_4 : str = None,
                       hashtags : List[str] = None,
                       FORCE_INDEX = True ) :
-         # Ne pas re-vérifier, la classe CBIR_Engine_with_Database le fait déjà
+         # Ne pas re-vérifier, la classe Tweets_Indexer le fait déjà
 #        if self.is_tweet_indexed( tweet_id ) :
 #            return
         
+        # Indexer même si toutes les images du Tweet sont corrompues
 #        if cbir_features_1 == None and cbir_features_2 == None and cbir_features_3 == None and cbir_features_4 == None :
 #            return
         

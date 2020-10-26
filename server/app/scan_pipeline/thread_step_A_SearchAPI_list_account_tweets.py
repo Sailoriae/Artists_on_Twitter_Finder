@@ -92,9 +92,10 @@ def thread_step_A_SearchAPI_list_account_tweets( thread_id : int, shared_memory 
         
         # On liste les tweets du compte Twitter de la requête avec l'API de recherche
         print( "[step_A_th" + str(thread_id) + "] Listage des Tweets du compte Twitter @" + request.account_name + " avec l'API de recherche." )
+        request_SearchAPI_tweets_queue = request.SearchAPI_tweets_queue
         try :
             request.SearchAPI_last_tweet_date = searchAPI_lister.list_searchAPI_tweets( request.account_name,
-                                                                                        request.SearchAPI_tweets_queue.put,
+                                                                                        request_SearchAPI_tweets_queue,
                                                                                         account_id = request.account_id,
                                                                                         add_step_A_time = shared_memory_execution_metrics.add_step_A_time )
         except Unfounded_Account_on_Lister_with_SearchAPI :
@@ -106,6 +107,8 @@ def thread_step_A_SearchAPI_list_account_tweets( thread_id : int, shared_memory 
                 shared_memory_scan_requests_step_A_SearchAPI_list_account_tweets_prior_queue.put( request )
             else :
                 shared_memory_scan_requests_step_A_SearchAPI_list_account_tweets_queue.put( request )
+        
+        request_SearchAPI_tweets_queue._pyroRelease()
         
         # Dire qu'on n'est plus en train de traiter cette requête
         shared_memory_threads_registry.set_request( "thread_step_A_SearchAPI_list_account_tweets_number" + str(thread_id), None )

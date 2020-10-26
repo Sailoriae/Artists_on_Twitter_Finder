@@ -6,9 +6,11 @@ from time import time
 try :
     from database import SQLite_or_MySQL
     from twitter import TweepyAbstraction
+    from analyse_tweet_json import analyse_tweet_json
 except ModuleNotFoundError : # Si on a été exécuté en temps que module
     from .database import SQLite_or_MySQL
     from .twitter import TweepyAbstraction
+    from .analyse_tweet_json import analyse_tweet_json
 
 
 class Unfounded_Account_on_Lister_with_TimelineAPI ( Exception ) :
@@ -38,8 +40,19 @@ class Tweets_Lister_with_TimelineAPI :
     partir de l'ID du Tweet indexé de ce compte le plus récent, stocké dans la
     base.
     
+    Seuls les tweets avec des image(s) seront ajoutés dans la file queue, sous
+    la forme d'un dictionnaire.
+    Plus d'informations sur ce dictionnaire dans la fonction suivante :
+    fonction analyse_tweet_json()
+    On ne met pas le JSON complet renvoyé par l'API afin de gagner de la
+    mémoire vive.
+    
+    Cette méthode utlise l'API de timeline, limitée aux 3200 premiers Tweets du
+    compte, retweets compris !
+    
     @param queue Objet queue.Queue() pour y stocker les Tweets trouvés.
-                 Un Tweet est représenté par un objet "Tweepy.Status".
+                 Un Tweet est représenté par le dictionnaire retourné par la
+                 fonction analyse_tweet_json().
                  Lorsque le listage sera terminé, "None" sera ajouté.
     @param account_id ID du compte, vérifié récemment !
     
@@ -80,7 +93,9 @@ class Tweets_Lister_with_TimelineAPI :
             if last_tweet_id == None :
                 last_tweet_id = tweet.id
             
-            queue.put( tweet )
+            tweet_dict = analyse_tweet_json( tweet._json )
+            if tweet_dict != None :
+                queue.put( tweet_dict )
             count += 1
         
         if self.DEBUG or self.ENABLE_METRICS :
@@ -100,3 +115,25 @@ class Tweets_Lister_with_TimelineAPI :
             return self.bdd.get_account_TimelineAPI_last_tweet_id( account_id )
         else :
             return last_tweet_id
+
+
+"""
+Test du bon fonctionnement de cette classe
+"""
+if __name__ == '__main__' :
+    # Ajouter le répertoire parent au PATH pour pouvoir importer les paramètres
+    from sys import path as sys_path
+    from os import path as os_path
+    sys_path.append(os_path.dirname(os_path.dirname(os_path.abspath(__file__))))
+    import parameters as param
+    
+    class Test :
+        def put( tweet ) : print( tweet )
+    test = Test()
+    
+    engine = Tweets_Lister_with_TimelineAPI( param.API_KEY,
+                                             param.API_SECRET,
+                                             param.TWITTER_API_KEYS[0]["OAUTH_TOKEN"],
+                                             param.TWITTER_API_KEYS[0]["OAUTH_TOKEN_SECRET"],
+                                             DEBUG = True )
+    engine.list_searchAPI_tweets( "rikatantan2nd", test )
