@@ -56,22 +56,27 @@ class User_Requests_Pipeline :
         
         # File d'attente à l'étape 1 du traitement : Link Finder.
         # Les objets queue.Queue sont prévus pour faire du multi-threading.
-        self._step_1_link_finder_queue = self._root.register_obj( Pyro_Queue( convert_uri = True ) )
+        self._step_1_link_finder_queue_obj = Pyro_Queue( convert_uri = True )
+        self._step_1_link_finder_queue = self._root.register_obj( self._step_1_link_finder_queue_obj )
         
         # File d'attente à l'étape 2 du traitement : L'indexation des Tweets
         # des comptes Twitter de l'artiste, si nécessaire.
-        self._step_2_tweets_indexer_queue = self._root.register_obj( Pyro_Queue( convert_uri = True ) )
+        self._step_2_tweets_indexer_queue_obj = Pyro_Queue( convert_uri = True )
+        self._step_2_tweets_indexer_queue = self._root.register_obj( self._step_2_tweets_indexer_queue_obj )
         
         # File d'attente à l'étape 3 du traitement : La recherche d'image
         # inversée.
-        self._step_3_reverse_search_queue = self._root.register_obj( Pyro_Queue( convert_uri = True ) )
+        self._step_3_reverse_search_queue_obj = Pyro_Queue( convert_uri = True )
+        self._step_3_reverse_search_queue = self._root.register_obj( self._step_3_reverse_search_queue_obj )
         
         # File d'attente à l'étape 3 du traitement : Le filtrage des résultats.
-        self._step_4_filter_results_queue = self._root.register_obj( Pyro_Queue( convert_uri = True ) )
+        self._step_4_filter_results_queue_obj = Pyro_Queue( convert_uri = True )
+        self._step_4_filter_results_queue = self._root.register_obj( self._step_4_filter_results_queue_obj )
         
         # Conteneur des adresses IP, associé à leur nombre de requêtes en cours
         # de traitement.
-        self._limit_per_ip_addresses = self._root.register_obj( Limit_per_IP_Address() )
+        self._limit_per_ip_addresses_obj = Limit_per_IP_Address()
+        self._limit_per_ip_addresses = self._root.register_obj( self._limit_per_ip_addresses_obj )
         
         # Sémaphore du "if request.scan_requests == None" de la procédure de
         # thread "thread_step_2_tweets_indexer". Permet d'éviter des problèmes
@@ -140,7 +145,7 @@ class User_Requests_Pipeline :
         # C'est l'objet "Limit_per_IP_Address" qui vérifie que l'IP est dans la
         # liste "UNLIMITED_IP_ADDRESSES".
         if ip_address != None :
-            if not Pyro4.Proxy( self._limit_per_ip_addresses ).add_ip_address( ip_address ) :
+            if not self._limit_per_ip_addresses_obj.add_ip_address( ip_address ) :
                 self._requests_sem.release()
                 return None
         
@@ -152,11 +157,14 @@ class User_Requests_Pipeline :
         
         self._requests_sem.release() # Seulement ici !
         
+        # Se connecter à l'objet de la requête
+        request = Pyro4.Proxy( request )
+        
         # Les requêtes sont initialisée au status -1
-        self.set_request_to_next_step( Pyro4.Proxy( request ) )
+        self.set_request_to_next_step( request )
         
         # Retourner l'objet User_Request.
-        return Pyro4.Proxy( request )
+        return request
     
     """
     Lancer une recherche inversée d'image.
@@ -221,16 +229,16 @@ class User_Requests_Pipeline :
             request.status += 1
         
         if request.status == 0 :
-            Pyro4.Proxy( self._step_1_link_finder_queue ).put( request )
+            self._step_1_link_finder_queue_obj.put( request )
         
         if request.status == 2 :
-            Pyro4.Proxy( self._step_2_tweets_indexer_queue ).put( request )
+            self._step_2_tweets_indexer_queue_obj.put( request )
         
         if request.status == 4 :
-            Pyro4.Proxy( self._step_3_reverse_search_queue ).put( request )
+            self._step_3_reverse_search_queue_obj.put( request )
         
         if request.status == 6 :
-            Pyro4.Proxy( self._step_4_filter_results_queue ).put( request )
+            self._step_4_filter_results_queue_obj.put( request )
         
         if request.status == 8 :
             request.finished_date = datetime.datetime.now()
@@ -245,7 +253,7 @@ class User_Requests_Pipeline :
             self._requests_sem.release()
             
             if request.ip_address != None :
-                Pyro4.Proxy( self._limit_per_ip_addresses ).remove_ip_address( request.ip_address )
+                self._limit_per_ip_addresses_obj.remove_ip_address( request.ip_address )
             
             # Journaliser / Logger, uniquement si il n'y a pas eu d'erreur ou
             # de problème lors du traitement
@@ -314,6 +322,9 @@ class User_Requests_Pipeline :
             # Sinon, on la garde forcément
             else :
                 new_requests_dict[ key ] = request_uri
+            
+            # Forcer la fermeture du proxy
+            request._pyroRelease()
         
         # On installe la nouvelle liste
         self._requests = new_requests_dict
