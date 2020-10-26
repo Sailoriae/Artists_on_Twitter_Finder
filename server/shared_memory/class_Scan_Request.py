@@ -138,6 +138,10 @@ class Scan_Request :
     
     @property
     def SearchAPI_tweets_queue( self ) : return Pyro4.Proxy( self._SearchAPI_tweets_queue )
+    @property # Pour end_request()
+    def SearchAPI_tweets_queue_uri( self ) : return self._SearchAPI_tweets_queue
+    @SearchAPI_tweets_queue_uri.setter # Pour end_request()
+    def SearchAPI_tweets_queue_uri( self, value ) : self._SearchAPI_tweets_queue = value
     
     @property
     def SearchAPI_last_tweet_date( self ) : return self._SearchAPI_last_tweet_date
@@ -146,6 +150,10 @@ class Scan_Request :
     
     @property
     def TimelineAPI_tweets_queue( self ) : return Pyro4.Proxy( self._TimelineAPI_tweets_queue )
+    @property # Pour end_request()
+    def TimelineAPI_tweets_queue_uri( self ) : return self._TimelineAPI_tweets_queue
+    @TimelineAPI_tweets_queue_uri.setter # Pour end_request()
+    def TimelineAPI_tweets_queue_uri( self, value ) : self._TimelineAPI_tweets_queue = value
     
     @property
     def TimelineAPI_last_tweet_id( self ) : return self._TimelineAPI_last_tweet_id
@@ -179,8 +187,10 @@ class Scan_Request :
     
     @property
     def indexing_tweets( self ) : return Pyro4.Proxy( self._indexing_tweets )
-    @indexing_tweets.setter
-    def indexing_tweets( self, value ) : self._indexing_tweets = value
+    @property # Pour end_request()
+    def indexing_tweets_uri( self ) : return self._indexing_tweets
+    @indexing_tweets_uri.setter # Pour end_request()
+    def indexing_tweets_uri( self, value ) : self._indexing_tweets = value
     
     @property
     def is_in_SearchAPI_indexing( self ) : return self._is_in_SearchAPI_indexing
