@@ -7,11 +7,9 @@ from time import time
 try :
     from class_Pyro_Queue import Pyro_Queue
     from class_Common_Tweet_IDs_List import Common_Tweet_IDs_List
-    from class_Pyro_SearchAPI_Tweet import Pyro_SearchAPI_Tweet
 except ModuleNotFoundError :
     from .class_Pyro_Queue import Pyro_Queue
     from .class_Common_Tweet_IDs_List import Common_Tweet_IDs_List
-    from .class_Pyro_SearchAPI_Tweet import Pyro_SearchAPI_Tweet
 
 
 """
@@ -139,6 +137,9 @@ class Scan_Request :
     def has_failed( self, value ) : self._has_failed = value
     
     @property
+    def SearchAPI_tweets_queue( self ) : return Pyro4.Proxy( self._SearchAPI_tweets_queue )
+    
+    @property
     def SearchAPI_last_tweet_date( self ) : return self._SearchAPI_last_tweet_date
     @SearchAPI_last_tweet_date.setter
     def SearchAPI_last_tweet_date( self, value ) : self._SearchAPI_last_tweet_date = value
@@ -208,18 +209,3 @@ class Scan_Request :
     def finished_date( self ) : return self._finished_date
     @finished_date.setter
     def finished_date( self, value ) : self._finished_date = value
-    
-    """
-    get() et put() pour la file des Tweets trouvés par SearchAPI, car ils ne peuvent
-    pas être sérialisés !
-    """
-    def SearchAPI_tweets_queue_put ( self, tweet_id, author_id, images_urls, hashtags ) :
-        tweet = Pyro_SearchAPI_Tweet( tweet_id, author_id, images_urls, hashtags )
-        uri = self._root.register_obj( tweet )
-        
-        Pyro4.Proxy( self._SearchAPI_tweets_queue ).put( uri )
-    
-    def SearchAPI_tweets_queue_get ( self, block = True ) :
-        uri = Pyro4.Proxy( self._SearchAPI_tweets_queue ).get( block = block )
-        
-        return Pyro4.Proxy( uri )

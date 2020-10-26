@@ -88,7 +88,7 @@ class Tweets_Indexer_with_SearchAPI :
                 return False
             
             # Si on a atteint la fin de la file
-            if tweet.id == None :
+            if tweet == None :
                 if self.DEBUG or self.ENABLE_METRICS :
                     if len(times) > 0 :
                         print( "[Index SearchAPI]", len(times), "Tweets indexés avec une moyenne de", mean(times), "secondes par Tweet." )
@@ -99,19 +99,19 @@ class Tweets_Indexer_with_SearchAPI :
                 return True
             
             if self.DEBUG :
-                print( "[Index SearchAPI] Indexation Tweet " + str(tweet.id) + " de @" + account_name + "." )
+                print( "[Index SearchAPI] Indexation Tweet " + str(tweet["tweet_id"]) + " de @" + account_name + "." )
             if self.DEBUG or self.ENABLE_METRICS :
                 start = time()
             
             # Tester si l'autre classe d'indexation n'est pas déjà en train de
             # traiter, on n'a pas déjà traité, ce Tweet
-            if not indexing_tweets.add( tweet.id ) :
+            if not indexing_tweets.add( tweet["tweet_id"] ) :
                 if self.DEBUG :
                     print( "[Index SearchAPI] Tweet déjà indexé par l'autre indexeur !" )
                 continue
             
             # Tester avant d'indexer si le tweet n'est pas déjà dans la BDD
-            if self.bdd.is_tweet_indexed( tweet.id ) :
+            if self.bdd.is_tweet_indexed( tweet["tweet_id"] ) :
                 if self.DEBUG :
                     print( "Tweet déjà indexé !" )
                 continue
@@ -126,7 +126,7 @@ class Tweets_Indexer_with_SearchAPI :
             image_name_3 = None
             image_name_4 = None
             
-            length = len( tweet.images )
+            length = len( tweet["images"] )
             
             if length == 0 :
                 if self.DEBUG :
@@ -139,24 +139,24 @@ class Tweets_Indexer_with_SearchAPI :
             # Traitement des images du Tweet
             if length > 0 :
                 image_1 = self.engine.get_image_features(
-                              tweet.images[0],
-                              tweet.id )
-                image_name_1 = tweet.images[0].replace("https://pbs.twimg.com/media/", "")
+                              tweet["images"][0],
+                              tweet["tweet_id"] )
+                image_name_1 = tweet["images"][0].replace("https://pbs.twimg.com/media/", "")
             if length > 1 :
                 image_2 = self.engine.get_image_features(
-                              tweet.images[1],
-                              tweet.id )
-                image_name_2 = tweet.images[1].replace("https://pbs.twimg.com/media/", "")
+                              tweet["images"][1],
+                              tweet["tweet_id"] )
+                image_name_2 = tweet["images"][1].replace("https://pbs.twimg.com/media/", "")
             if length > 2 :
                 image_3 = self.engine.get_image_features(
-                              tweet.images[2],
-                              tweet.id )
-                image_name_3 = tweet.images[2].replace("https://pbs.twimg.com/media/", "")
+                              tweet["images"][2],
+                              tweet["tweet_id"] )
+                image_name_3 = tweet["images"][2].replace("https://pbs.twimg.com/media/", "")
             if length > 3 :
                 image_4 = self.engine.get_image_features(
-                              tweet.images[3],
-                              tweet.id )
-                image_name_4 = tweet.images[3].replace("https://pbs.twimg.com/media/", "")
+                              tweet["images"][3],
+                              tweet["tweet_id"] )
+                image_name_4 = tweet["images"][3].replace("https://pbs.twimg.com/media/", "")
             
             # Si toutes les images du Tweet ont un problème
 #            if image_1 == None and image_2 == None and image_3 == None and image_4 == None :
@@ -165,19 +165,12 @@ class Tweets_Indexer_with_SearchAPI :
             
             if self.DEBUG or self.ENABLE_METRICS :
                 calculate_features_times.append( time() - start_calculate_features )
-            
-            # Prendre les hashtags du Tweet
-            # Fonctionne avec n'importe quel Tweet, même ceux entre 160 et 280
-            # caractères (SearchAPI les voit en entier)
-            hashtags = tweet.hashtags
-            
-            if self.DEBUG or self.ENABLE_METRICS :
                 start_insert_into = time()
             
             # Stockage des résultats
             self.bdd.insert_tweet(
-                tweet.author_id,
-                tweet.id,
+                tweet["user_id"],
+                tweet["tweet_id"],
                 image_1,
                 image_2,
                 image_3,
@@ -186,7 +179,7 @@ class Tweets_Indexer_with_SearchAPI :
                 image_name_2,
                 image_name_3,
                 image_name_4,
-                hashtags
+                tweet["hashtags"]
             )
             
             if self.DEBUG or self.ENABLE_METRICS :

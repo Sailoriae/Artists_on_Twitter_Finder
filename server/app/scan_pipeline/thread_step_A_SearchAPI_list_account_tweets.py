@@ -93,7 +93,7 @@ def thread_step_A_SearchAPI_list_account_tweets( thread_id : int, shared_memory 
         print( "[step_A_th" + str(thread_id) + "] Listage des Tweets du compte Twitter @" + request.account_name + " avec l'API de recherche." )
         try :
             request.SearchAPI_last_tweet_date = searchAPI_lister.list_searchAPI_tweets( request.account_name,
-                                                                                        request.SearchAPI_tweets_queue_put,
+                                                                                        request.SearchAPI_tweets_queue.put,
                                                                                         account_id = request.account_id,
                                                                                         add_step_A_time = shared_memory_execution_metrics.add_step_A_time )
         except Unfounded_Account_on_Lister_with_SearchAPI :

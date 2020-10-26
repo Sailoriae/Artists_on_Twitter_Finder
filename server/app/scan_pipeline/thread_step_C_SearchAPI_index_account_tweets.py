@@ -96,7 +96,7 @@ def thread_step_C_SearchAPI_index_account_tweets( thread_id : int, shared_memory
             print( "[step_C_th" + str(thread_id) + "] Indexation des Tweets de @" + request.account_name + " trouvés avec l'API de recherche." )
         request.finished_SearchAPI_indexing = searchAPI_indexer.index_or_update_with_SearchAPI(
                                                   request.account_name,
-                                                  request.SearchAPI_tweets_queue_get,
+                                                  request.SearchAPI_tweets_queue.get,
                                                   request.indexing_tweets,
                                                   add_step_C_times = shared_memory_execution_metrics.add_step_C_times )
         

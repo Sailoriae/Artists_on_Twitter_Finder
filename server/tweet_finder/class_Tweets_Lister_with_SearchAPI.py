@@ -81,29 +81,31 @@ class Tweets_Lister_with_SearchAPI :
                 print( "[List SearchAPI] RT trouvé ! La recherche a donc renvoyé un RT, c'est pas normal !" )
                 return
             
-            tweet_id = tweet_json['id_str'] # ID du Tweet
-            user_id = tweet_json['user_id_str'] # ID de l'auteur du Tweet
+            tweet_dict = {}
+            
+            tweet_dict["tweet_id"] = tweet_json["id_str"] # ID du Tweet
+            tweet_dict["user_id"] = tweet_json["user_id_str"] # ID de l'auteur du Tweet
             # Super méga important, ne pas prendre celui trouvé par la fonction
             # list_searchAPI_tweets() !!!
             # Permet en cas de problème de ne pas faire n'importe quoi dans la BDD
             
-            images = [] # Liste des URLs des images dans ce Tweet
+            tweet_dict["images"] = [] # Liste des URLs des images dans ce Tweet
             try :
                 for tweet_media in tweet_json["extended_entities"]["media"] :
                     if tweet_media["type"] == "photo" :
-                        images.append( tweet_media["media_url_https"] )
+                        tweet_dict["images"].append( tweet_media["media_url_https"] )
             except KeyError : # Tweet sans média
                 return # Sinon ça ne sert à rien
             
-            hashtags = [] # Liste des hashtags dans ce Tweet
+            tweet_dict["hashtags"] = [] # Liste des hashtags dans ce Tweet
             try :
                 for hashtag in tweet_json["entities"]["hashtags"] :
-                    hashtags.append( "#" + hashtag["text"] )
+                    tweet_dict["hashtags"].append( "#" + hashtag["text"] )
             except KeyError :
                 pass
             
-            if len(images) > 0 : # Sinon ça ne sert à rien
-                queue_put( tweet_id, user_id, images, hashtags )
+            if len(tweet_dict["images"]) > 0 : # Sinon ça ne sert à rien
+                queue_put( tweet_dict )
         
         
         # Note : Plus besoin de faire de bidouille avec "filter:safe"
@@ -124,7 +126,7 @@ class Tweets_Lister_with_SearchAPI :
                     add_step_A_time( (time() - start) / count )
         
         # Indiquer qu'on a fini le listage
-        queue_put( None, None, None, None )
+        queue_put( None )
         
         # Retourner la date du Tweet trouvé le plus récent, ou celui enregistré
         # dans la base de données si aucun Tweet n'a été trouvé
