@@ -105,11 +105,20 @@ if __name__ == "__main__" :
         import sys
         sys.exit(0)
     
+    # Garder des proxies ouverts
+    # Note : Ne pas être tenté de garder un proxy permanent vers les files
+    # d'attente, car les files de scan peuvent être démontées et remplacées
+    # lors du passage à prioritaire d'une requête de scan
+    shared_memory_user_requests = shared_memory.user_requests
+    shared_memory_scan_requests = shared_memory.scan_requests
+    shared_memory_execution_metrics = shared_memory.execution_metrics
+    shared_memory_threads_registry = shared_memory.threads_registry
+    
     # On s'enregistre comme thread / processus
     # ATTENTION : Pyro crée aussi pleins de threads (Mais pas des
     # processus comme nous en mode Multiprocessing) qui ne sont pas
     # enregistrés dans notre mémoire partagée.
-    shared_memory.threads_registry.register_thread( "app.py", os.getpid() )
+    shared_memory_threads_registry.register_thread( "app.py", os.getpid() )
     
     
     """
@@ -231,13 +240,13 @@ if __name__ == "__main__" :
         if args[0] == "request" :
             if len(args) == 2 :
                 print( "Lancement de la procédure !" )
-                shared_memory.user_requests.launch_request( args[1] )
+                shared_memory_user_requests.launch_request( args[1] )
             else :
                 print( "Utilisation : request [URL de l'illustration]" )
         
         elif args[0] == "status" :
             if len(args) == 2 :
-                request = shared_memory.user_requests.get_request( args[1] )
+                request = shared_memory_user_requests.get_request( args[1] )
                 if request != None :
                     print( "Status : " + str(request.status) + " " + request.get_status_string() )
                     if request.problem != None :
@@ -263,7 +272,7 @@ if __name__ == "__main__" :
         
         elif args[0] == "result" :
             if len(args) == 2 :
-                request = shared_memory.user_requests.get_request( args[1] )
+                request = shared_memory_user_requests.get_request( args[1] )
                 if request != None :
                     print( "Comptes Twitter trouvés : " + ", ".join( [ "@" + account[0] + " (ID " + str(account[1]) + ")" for account in request.twitter_accounts_with_id ] ) )
                     print( "Résultat : " + str( [ (data.tweet_id, data.distance_chi2, data.distance_bhattacharyya ) for data in request.founded_tweets ] ) )
@@ -283,7 +292,7 @@ if __name__ == "__main__" :
                     if account_id == None :
                         print( "Compte @" + args[1] + " inexistant ou indisponible !" )
                     else :
-                        shared_memory.scan_requests.launch_request( account_id, account_name )
+                        shared_memory_scan_requests.launch_request( account_id, account_name )
                 else :
                     print( "Nom de compte Twitter impossible !" )
             else :
@@ -301,35 +310,35 @@ if __name__ == "__main__" :
                             print( "Compte @" + args[2] + " inexistant ou indisponible !" )
                         else :
                             print( "Attention ! Si ce compte n'est pas indexé, la recherche ne retournera aucun résultat." )
-                            shared_memory.user_requests.launch_reverse_search_only( args[1], args[2], account_id )
+                            shared_memory_user_requests.launch_reverse_search_only( args[1], args[2], account_id )
                     else :
                         print( "Nom de compte Twitter impossible !" )
                 else :
                     print( "Recherche dans toute la base de données !" )
-                    shared_memory.user_requests.launch_reverse_search_only( args[1] )
+                    shared_memory_user_requests.launch_reverse_search_only( args[1] )
             else :
                 print( "Utilisation : search [URL de l'image à chercher] [Nom du compte Twitter (OPTIONNEL)]" )
         
         elif args[0] == "threads" :
             if len(args) == 1 :
-                print( shared_memory.threads_registry.get_status() )
+                print( shared_memory_threads_registry.get_status() )
             else :
                 print( "Utilisation : threads")
         
         elif args[0] == "queues" :
             if len(args) == 1 :
-                print( "step_1_link_finder_queue :", shared_memory.user_requests.step_1_link_finder_queue.qsize() )
-                print( "step_2_tweets_indexer_queue :", shared_memory.user_requests.step_2_tweets_indexer_queue.qsize() )
-                print( "step_3_reverse_search_queue :", shared_memory.user_requests.step_3_reverse_search_queue.qsize() )
-                print( "step_4_filter_results_queue :", shared_memory.user_requests.step_4_filter_results_queue.qsize() )
-                print( "step_A_SearchAPI_list_account_tweets_prior_queue :", shared_memory.scan_requests.step_A_SearchAPI_list_account_tweets_prior_queue.qsize() )
-                print( "step_A_SearchAPI_list_account_tweets_queue :", shared_memory.scan_requests.step_A_SearchAPI_list_account_tweets_queue.qsize() )
-                print( "step_B_TimelineAPI_list_account_tweets_prior_queue :", shared_memory.scan_requests.step_B_TimelineAPI_list_account_tweets_prior_queue.qsize() )
-                print( "step_B_TimelineAPI_list_account_tweets_queue :", shared_memory.scan_requests.step_B_TimelineAPI_list_account_tweets_queue.qsize() )
-                print( "step_C_SearchAPI_index_account_tweets_prior_queue :", shared_memory.scan_requests.step_C_SearchAPI_index_account_tweets_prior_queue.qsize() )
-                print( "step_C_SearchAPI_index_account_tweets_queue :", shared_memory.scan_requests.step_C_SearchAPI_index_account_tweets_queue.qsize() )
-                print( "step_D_TimelineAPI_index_account_tweets_prior_queue :", shared_memory.scan_requests.step_D_TimelineAPI_index_account_tweets_prior_queue.qsize() )
-                print( "step_D_TimelineAPI_index_account_tweets_queue :", shared_memory.scan_requests.step_D_TimelineAPI_index_account_tweets_queue.qsize() )
+                print( "step_1_link_finder_queue :", shared_memory_user_requests.step_1_link_finder_queue.qsize() )
+                print( "step_2_tweets_indexer_queue :", shared_memory_user_requests.step_2_tweets_indexer_queue.qsize() )
+                print( "step_3_reverse_search_queue :", shared_memory_user_requests.step_3_reverse_search_queue.qsize() )
+                print( "step_4_filter_results_queue :", shared_memory_user_requests.step_4_filter_results_queue.qsize() )
+                print( "step_A_SearchAPI_list_account_tweets_prior_queue :", shared_memory_scan_requests.step_A_SearchAPI_list_account_tweets_prior_queue.qsize() )
+                print( "step_A_SearchAPI_list_account_tweets_queue :", shared_memory_scan_requests.step_A_SearchAPI_list_account_tweets_queue.qsize() )
+                print( "step_B_TimelineAPI_list_account_tweets_prior_queue :", shared_memory_scan_requests.step_B_TimelineAPI_list_account_tweets_prior_queue.qsize() )
+                print( "step_B_TimelineAPI_list_account_tweets_queue :", shared_memory_scan_requests.step_B_TimelineAPI_list_account_tweets_queue.qsize() )
+                print( "step_C_SearchAPI_index_account_tweets_prior_queue :", shared_memory_scan_requests.step_C_SearchAPI_index_account_tweets_prior_queue.qsize() )
+                print( "step_C_SearchAPI_index_account_tweets_queue :", shared_memory_scan_requests.step_C_SearchAPI_index_account_tweets_queue.qsize() )
+                print( "step_D_TimelineAPI_index_account_tweets_prior_queue :", shared_memory_scan_requests.step_D_TimelineAPI_index_account_tweets_prior_queue.qsize() )
+                print( "step_D_TimelineAPI_index_account_tweets_queue :", shared_memory_scan_requests.step_D_TimelineAPI_index_account_tweets_queue.qsize() )
             else :
                 print( "Utilisation : queues")
         
@@ -342,7 +351,7 @@ if __name__ == "__main__" :
         
         elif args[0] == "metrics" :
             if len(args) == 1 :
-                print( shared_memory.execution_metrics.get_metrics() )
+                print( shared_memory_execution_metrics.get_metrics() )
             else :
                 print( "Utilisation : metrics")
         
