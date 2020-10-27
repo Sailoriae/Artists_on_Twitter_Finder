@@ -55,7 +55,7 @@ Arbre des objets :
 
   - Attribut `scan_requests` : URI vers objet `Scan_Requests_Pipeline` : Mémoire partagée pour les threads de traitement des requêtes de scan.
     - Liste `requests` (Privé) : Liste d'URI vers objets `Scan_Request` : Requêtes des utilisateuts.
-      - Attribut `SearchAPI_tweets_queue` (Privé) : URIs vers objet `Pyro_Queue` : File d'attente des Tweets trouvés avec l'API de recherche.
+      - Attribut `SearchAPI_tweets_queue` : URIs vers objet `Pyro_Queue` : File d'attente des Tweets trouvés avec l'API de recherche.
       - Attribut `TimelineAPI_tweets_queue` : URIs vers objet `Pyro_Queue` : File d'attente d'attente des Tweets trouvés avec l'API de timeline.
     - Attribut `requests_sem` (Privé) : URI vers objet `Pyro_Semaphore` : Vérrouillage de la liste précédente.
     - Attributs `*_queue` : URIs vers objets `Pyro_Queue` : Files d'attente des différentes threads de traitement. Peuvent contenir des URI de la liste `requests`.
@@ -66,7 +66,6 @@ Arbre des objets :
 Voir chaque classe pour plus de documentation.
 
 
-# Notes
+## Notes
 
 Les objets `Pyro4.Proxy` ferment leur connexion lorsqu'ils arrivent dans le garbadge collector. Source : https://github.com/irmen/Pyro4/blob/79de6434259ff82d202090cbd0901673d4b8344b/src/Pyro4/core.py#L264
-

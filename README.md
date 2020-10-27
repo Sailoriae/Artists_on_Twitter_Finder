@@ -1,8 +1,8 @@
 # Artists on Twitter Finder
 
-"Artists on Twitter Finder" est un moteur de recherche inversé d'image, spécialisé dans les illustrations postées par des artistes sur Twitter.
+"Artists on Twitter Finder" est un moteur de recherche inversée d'image, spécialisé dans les illustrations postées par des artistes sur Twitter.
 
-Contrairement aux moteurs de recherche inversé d'image généralistes, comme Google Images ou TinEye, celui-ci est très spécialisé : A partir d'une illustration postée sur un des sites supportés, il va chercher si l'artiste de cette illustration possède un compte Twitter, et, si oui, va chercher son ou ses Tweets contenant cette illustration.
+Contrairement aux moteurs de recherche inversée d'image généralistes, comme Google Images ou TinEye, celui-ci est très spécialisé : A partir d'une illustration postée sur un des sites supportés, il va chercher si l'artiste de cette illustration possède un compte Twitter, et, si oui, va chercher son ou ses Tweets contenant cette illustration.
 
 Afin d'être le plus optimisé possible, ce traitement est fait par un serveur, présent dans le répertoire `server`. Ainsi, il peut indexer des comptes et leurs Tweets dans une base de données afin d'être le plus rapide possible lorsqu'il y aura une nouvelle requête pour un compte Twitter connu par le système.
 
@@ -42,9 +42,9 @@ Lorsqu'on parle d'un "site supporté" par le serveur, on parle de l'un des sites
 * `server` : Serveur "Artists on Twitter Finder". Pour chaque requête, trouve les comptes Twitter des artistes, indexe leurs Tweets, et recherche l'illustration de requête. Il contient une API sous la forme d'un serveur HTTP pour recevoir des requêtes et renvoyer leurs status et leurs résultats en JSON.
 * `configs` : Fichier de configuration Apache2, pour faire un proxy depuis l'extérieur vers le serveur HTTP du serveur.
 * `maintenance` : Scripts de maintenance de la base de données du serveur.
-* `client` : Scripts du client à l'API du serveur.
+* `client` : Client à l'API du serveur, et scripts exemples.
 * `public` : Interface web pour utiliser l'API du serveur.
-* `doc` : Documentation.
+* `doc` : Documentation diverse. Note : Le code est bien documenté, et il y a des fichiers `README.md` dans tous les répertoires.
 * `misc` : Sauvegarde de scripts divers.
 
 

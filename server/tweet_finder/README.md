@@ -2,15 +2,17 @@
 
 Le Tweet Finder est l'une des deux grandes parties du serveur "Artists on Twitter Finder", avec le Link Finder.
 
-Les classes `Tweets_Indexer_with_SearchAPI` et `Tweets_Indexer_with_TimelineAPI` listent les Tweets de comptes Twitter à partir du dernier scan (Ou tous les Tweet si le compte n'a pas été encore scanné) :
+Les classes `Tweets_Lister_with_SearchAPI` et `Tweets_Lister_with_TimelineAPI` listent les Tweets de comptes Twitter à partir du dernier scan (Ou tous les Tweet si le compte n'a pas été encore scanné) :
 * `Tweets_Indexer_with_SearchAPI` utilise la librairie SNScraper pour l'API Twitter utilisée par l'UI web https://twitter.com/search,
-* Et `Tweets_Indexer_with_TimelineAPI` utilise la librairie Tweepy pour l'API Twitter publique, module `twitter`.
+* Et `Tweets_Indexer_with_TimelineAPI` utilise la librairie Tweepy pour l'API Twitter publique.
+Elles utilisent les couches d'abstraction disponibles dans le module `twitter`.
 
-Les classes `Tweets_Lister_with_SearchAPI` et `Tweets_Lister_with_TimelineAPI` indexent les Tweets trouvés par leur classe de listage respectives :
+La classe `Tweets_Indexer` indexe les Tweets trouvés par les classes de listage :
 1. Calcul de la liste des caractéristiques de toutes les images pour chaque Tweet, module `cbir_engine`, via la classe `CBIR_Engine_for_Tweets_Images`,
 2. Stockage ce dans la base de données en les associants à l'ID du Tweet, et l'ID du compte l'ayant Tweeté, module `database`.
 
-L'étape de listage communique ses Tweets trouvés à l'étape d'indexation via un objet queue.Queue(), permettant de paralléliser ces deux étapes.
+L'étape de listage communique ses Tweets trouvés à l'étape d'indexation via un objet queue.Queue() (File d'attente), permettant de paralléliser ces deux étapes.
+Les Tweets sont insérés dans les files sous la forme de dictionnaires, créés par la fonction `analyse_tweet_json` à partie des JSON des Tweets renvoyés par les API de Twitter.
 
 La classe `Reverse_Searcher` permet de rechercher un Tweet à partir d'une image, et éventuellement du compte Twitter sur lequel chercher :
 1. Calcul la liste des caractéristiques de l'image de recherche, module `cbir_engine`,

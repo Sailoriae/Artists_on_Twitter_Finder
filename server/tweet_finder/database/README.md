@@ -11,11 +11,14 @@ Contient les attributs suivants :
 * `tweet_id BIGINT UNSIGNED PRIMARY KEY` : ID du Tweet,
 * `hashtags TEXT` : Liste des hashtags du Tweet, avec le croisillon "#", séparés par des points-virgules ";",
 
-Note : Un Tweet ne peut pas contenir plus de 4 images.
+Notes :
+* Seules les Tweets avec au moins une image sont stockés.
+* Un Tweet ne peut pas contenir plus de 4 images.
+* Si une image est corrompue / perdue par Twitter, on la stocke quand même, en remplissant sa liste de caractéristiques par des `NULL`.
 
 ### Table `tweets_images_1`
 
-Stocke la première image des Tweets analysés, si il y en a une. Sinon, l'ID du Tweet n'apparait pas dans cette table.
+Stocke la première image des Tweets analysés.
 
 Contient les attributs suivants :
 * `account_id BIGINT UNSIGNED` : ID du compte Twitter ayant posté le Tweet,
@@ -55,7 +58,8 @@ Contient les attributs suivants :
 * `last_SearchAPI_indexing_local_date DATETIME` : La date locale de la dernière mise à jour avec l'API de recherche, utilisé uniquement par le thread de mise à jour automatique,
 * `last_TimelineAPI_indexing_tweet_id BIGINT UNSIGNED` : L'ID du tweet le plus récent de ce compte scanné avec l'API de timeline (A donner au prochain scan pour éviter de rescanner tous les Tweets du compte),
 * `last_TimelineAPI_indexing_local_date DATETIME` : La date locale de la dernière mise à jour avec l'API de timeline, utilisé uniquement par le thread de mise à jour automatique.
-
+* `last_use DATETIME` : La date locale de la dernière recherche inversée sur ce compte.
+* `uses_count BIGINT UNSIGNED DEFAULT 0` : Compteur de recherches inversées sur ce compte.
 
 ## Objets dans ce module
 
