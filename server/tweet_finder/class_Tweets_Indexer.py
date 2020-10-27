@@ -77,7 +77,7 @@ class Tweets_Indexer :
                              add_step_C_or_D_times = None, # Fonction de la mémoire partagée
                              FORCE_INDEX = False ) -> bool :
 #        if self.DEBUG :
-#            print( "Indexation / scan des Tweets de @" + account_name + " avec SearchAPI." )
+#            print( "[Index Tweets] Indexation / scan des Tweets de @" + account_name + " avec SearchAPI." )
         if self.DEBUG or self.ENABLE_METRICS :
             times = [] # Liste des temps pour indexer un Tweet
             calculate_features_times = [] # Liste des temps pour calculer les caractéristiques des images du Tweet

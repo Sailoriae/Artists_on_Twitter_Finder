@@ -46,7 +46,7 @@ def get_tweet_image ( image_url : str ) -> bytes :
             # Théoriquement, on a toujours le format d'URL suivant :
             # https://pbs.twimg.com/media/EgwU7JdUwAECztR.jpg
             if "?" in image_url : # Sécurité
-                raise Exception( "URL d'image de Tweet problématique : " + image_url )
+                raise Exception( "URL d'image de Tweet problématique : " + image_url ) # Doit tomber dans le collecteur d'erreurs
             large_image_url = image_url + "?name=large"
             return url_to_content( large_image_url )
         

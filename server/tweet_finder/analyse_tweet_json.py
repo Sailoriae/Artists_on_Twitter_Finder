@@ -47,7 +47,7 @@ def analyse_tweet_json ( tweet_json : dict ) -> dict :
         return None
     
     if len(tweet_dict["images"]) > 4 :
-        raise Exception( "Le Tweet " + str(tweet_dict["tweet_id"]) + " a été analysé avec plus de 4 images !" )
+        raise Exception( "Le Tweet " + str(tweet_dict["tweet_id"]) + " a été analysé avec plus de 4 images" ) # Doit tomber dans le collecteur d'erreurs
     
     # Liste des hashtags contenus dans ce Tweet
     tweet_dict["hashtags"] = []
