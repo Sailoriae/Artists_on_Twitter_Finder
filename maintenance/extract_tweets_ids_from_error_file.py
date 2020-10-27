@@ -14,7 +14,8 @@ sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__f
 os.chdir(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "server"))
 
 import parameters as param
-from tweet_finder import Tweets_Indexer, analyse_tweet_json
+from tweet_finder import Tweets_Indexer
+from tweet_finder.analyse_tweet_json import analyse_tweet_json
 from tweet_finder.twitter import TweepyAbstraction
 
 import re
@@ -76,4 +77,4 @@ for tweet_id in founded_ids :
 tweets_queue.put( None ) # Cloturer la file
 
 engine = Tweets_Indexer( DEBUG = True )
-engine.index_tweet( "", tweets_queue, FORCE_INDEX = True )
+engine.index_tweets( "", tweets_queue, FORCE_INDEX = True )
