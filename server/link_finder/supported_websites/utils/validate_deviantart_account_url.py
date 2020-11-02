@@ -5,6 +5,7 @@ import re
 
 
 # ^ = Début de la chaine, $ = Fin de la chaine
+# Ne pas marquer le début ni la fin !
 
 # Nouveau format : deviantart.com/artiste
 deviantart_account_name_regex_new = re.compile(
@@ -20,7 +21,7 @@ deviantart_account_name_regex_old = re.compile(
 # On ne marque donc pas le début ni la fin de la chaine, et on utilise
 # la fonction re.search() !
 
-# Le "http://" ou "https://" est obtionnel.
+# Le "http://" ou "https://" est optionnel.
 
 
 """

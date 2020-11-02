@@ -188,8 +188,21 @@ class Pixiv :
                 if temp != None :
                     twitter_accounts.append( temp )
         
+        # Chercher dans le champs dédié au compte Twitter
         try :
             temp = user_id_json["profile"]["twitter_url"]
+        except KeyError :
+            pass
+        else :
+            if temp != None :
+                temp = validate_twitter_account_url( temp )
+                if temp != None :
+                    twitter_accounts.append( temp )
+        
+        # On peut aussi trouver un lien dans la bio de l'artiste, si vraiment
+        # il n'a pas envie d'utiliser le champs dédié
+        try :
+            temp = user_id_json["user"]["comment"]
         except KeyError :
             pass
         else :

@@ -5,6 +5,7 @@ import re
 
 
 # ^ = Début de la chaine, $ = Fin de la chaine
+# Ne pas marquer le début ni la fin !
 linktree_account_name_regex = re.compile(
     r"(?:http(?:s)?:\/\/)?(?:www\.)?linktr\.ee\/([a-zA-Z0-9_.]+)")
 
@@ -14,7 +15,7 @@ linktree_account_name_regex = re.compile(
 # On ne marque donc pas le début ni la fin de la chaine, et on utilise
 # la fonction re.search() !
 
-# Le "http://" ou "https://" est obtionnel.
+# Le "http://" ou "https://" est optionnel.
 
 
 """
