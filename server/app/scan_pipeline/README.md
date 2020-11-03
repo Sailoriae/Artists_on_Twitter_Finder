@@ -17,3 +17,17 @@ Ce sous-module contient les 4 threads de traitement des requêtes de scan :
 Ces 4 threads peuvent travailler en paralléle sur la même requête. En effet, la requête contient deux files, une pour les Tweets trouvés avec l'API de recherche et une pour ceux trouvés avec l'API de timeline. Les threads de listage mettent les Tweets qu'ils trouvent dans l'une des deux files, pour que les threads d'indexation les analysent et les indexent en même temps.
 
 Avant de passer au calcul de la liste des caractéristiques, on vérifie avant que le Tweet n'est pas déjà dans la base de données.
+
+
+## Procédure complémentaire
+
+La procédure de thread `thread_retry_failed_tweets` permet de réindexer les Tweets qui ont une image mise en erreur non-insolvable par la méthode `CBIR_Engine_for_Tweets_Images.get_image_features()` lors du passage du Tweet dans l'un des deux threads d'indexation (Voir ci-dessus).
+
+Une erreur "non-insolvable" est une erreur qui n'est pas connue comme insolvable. Les erreurs insolvables sont directement implémentées dans le code de la fonction `get_tweet_image()`.
+
+Ce thread peut aussi d'indexer des Tweets en connaissant uniquement leur ID. Il demande alors les détails du Tweet à l'API Twitter. Si le Tweet est introubable, il le supprime de la table des tweets à réindexer (Table `reindex_tweets`).
+Ceci ne se produit pas en utilisation normale du serveur !
+
+Ce thread force les indexation. Il efface donc tout ce qui a déjà été enregistré du Tweet (Mais uniquement si il a de nouvelles données).
+
+Si l'indexation a réussi, le Tweet est effacé de la table `reindex_tweets`.

@@ -9,7 +9,7 @@ Stocke les Tweets analysés.
 Contient les attributs suivants :
 * `account_id BIGINT UNSIGNED` : ID du compte Twitter ayant posté le Tweet,
 * `tweet_id BIGINT UNSIGNED PRIMARY KEY` : ID du Tweet,
-* `hashtags TEXT` : Liste des hashtags du Tweet, avec le croisillon "#", séparés par des points-virgules ";",
+* `hashtags TEXT` : Liste des hashtags du Tweet, avec le croisillon "#", séparés par des points-virgules ";".
 
 Notes :
 * Seules les Tweets avec au moins une image sont stockés.
@@ -21,7 +21,7 @@ Notes :
 Stocke la première image des Tweets analysés.
 
 Contient les attributs suivants :
-* `account_id BIGINT UNSIGNED` : ID du compte Twitter ayant posté le Tweet,
+* `account_id BIGINT UNSIGNED` : ID du Tweet associé,
 * 240 colonnes `image_1_features_i FLOAT UNSIGNED` (i allant de 0 à 239 compris) : Liste des caractéristiques de la première image du Tweet,.
 
 ### Table `tweets_images_2`
@@ -29,7 +29,7 @@ Contient les attributs suivants :
 Stocke la deuxième image des Tweets analysés, si il y en a une. Sinon, l'ID du Tweet n'apparait pas dans cette table.
 
 Contient les attributs suivants :
-* `account_id BIGINT UNSIGNED` : ID du compte Twitter ayant posté le Tweet,
+* `account_id BIGINT UNSIGNED` : ID du Tweet associé,
 * 240 colonnes `image_2_features_i FLOAT UNSIGNED` (i allant de 0 à 239 compris) : Liste des caractéristiques de la deuxième image du Tweet.
 
 ### Table `tweets_images_3`
@@ -37,7 +37,7 @@ Contient les attributs suivants :
 Stocke la troisième image des Tweets analysés, si il y en a une. Sinon, l'ID du Tweet n'apparait pas dans cette table.
 
 Contient les attributs suivants :
-* `account_id BIGINT UNSIGNED` : ID du compte Twitter ayant posté le Tweet,
+* `account_id BIGINT UNSIGNED` : ID du Tweet associé,
 * 240 colonnes `image_3_features_i FLOAT UNSIGNED` (i allant de 0 à 239 compris) : Liste des caractéristiques de la troisième image du Tweet.
 
 ### Table `tweets_images_4`
@@ -45,7 +45,7 @@ Contient les attributs suivants :
 Stocke la quatrième image des Tweets analysés, si il y en a une. Sinon, l'ID du Tweet n'apparait pas dans cette table.
 
 Contient les attributs suivants :
-* `account_id BIGINT UNSIGNED` : ID du compte Twitter ayant posté le Tweet,
+* `account_id BIGINT UNSIGNED` : ID du Tweet associé,
 * 240 colonnes `image_4_features_i FLOAT UNSIGNED` (i allant de 0 à 239 compris) : Liste des caractéristiques de la quatrième image du Tweet.
 
 ### Table `accounts`
@@ -57,9 +57,24 @@ Contient les attributs suivants :
 * `last_SearchAPI_indexing_api_date CHAR(10)` : La date du dernier scan de ce compte avec l'API de recherche, au format YYYY-MM-DD (A donner au prochain scan pour éviter de rescanner tous les Tweets du compte),
 * `last_SearchAPI_indexing_local_date DATETIME` : La date locale de la dernière mise à jour avec l'API de recherche, utilisé uniquement par le thread de mise à jour automatique,
 * `last_TimelineAPI_indexing_tweet_id BIGINT UNSIGNED` : L'ID du tweet le plus récent de ce compte scanné avec l'API de timeline (A donner au prochain scan pour éviter de rescanner tous les Tweets du compte),
-* `last_TimelineAPI_indexing_local_date DATETIME` : La date locale de la dernière mise à jour avec l'API de timeline, utilisé uniquement par le thread de mise à jour automatique.
-* `last_use DATETIME` : La date locale de la dernière recherche inversée sur ce compte.
+* `last_TimelineAPI_indexing_local_date DATETIME` : La date locale de la dernière mise à jour avec l'API de timeline, utilisé uniquement par le thread de mise à jour automatique,
+* `last_use DATETIME` : La date locale de la dernière recherche inversée sur ce compte,
 * `uses_count BIGINT UNSIGNED DEFAULT 0` : Compteur de recherches inversées sur ce compte.
+
+### Table `reindex_tweets`
+
+Si un Tweet a une image dont l'analyse a échouée et que l'erreur n'est pas connue comme insolvable (Voir la fonction `get_tweet_image()`), son dictionnaire (Voir la fonction `analyse_tweet_json()`) est stocké ici.
+
+Contient les attributs suivants :
+* `tweet_id BIGINT UNSIGNED PRIMARY KEY` : ID du Tweet,
+* `account_id BIGINT UNSIGNED` : ID du compte Twitter ayant posté le Tweet,
+* `image_1_url TEXT` : URL de la première image,
+* `image_2_url TEXT` : URL de la deuxième image (`NULL` sinon),
+* `image_3_url TEXT` : URL de la troisième image (`NULL` sinon),
+* `image_4_url TEXT` : URL de la quatrième image (`NULL` sinon),
+* `hashtags TEXT` : Liste des hashtags du Tweet, avec le croisillon "#", séparés par des points-virgules ";",
+* `last_retry_date DATETIME` : Date locale de la dernière tentative d'indexation,
+* `retries_count TINYINT UNSIGNED DEFAULT` : Compteur de tentatives de réindexation (0 par défaut).
 
 ## Objets dans ce module
 
