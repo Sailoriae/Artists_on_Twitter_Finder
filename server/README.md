@@ -45,6 +45,7 @@ Ceci lance le serveur et vous met en ligne de commande. Si vous souhaitez quitte
 * Limite du nombre de requête en cours de traitement par adresse IP.
 * Thread de délestage automatique des anciennes requêtes terminées.
 * Thread de lancement de mises à jour automatiques des comptes Twitter dans la base de données.
+* Thread de retentative d'indexation de Tweets dont au moins une image a échouée (Et que cette erreur n'est pas identifiée comme insolvable dans le code, voir `get_tweet_image()`).
 * Collecteur d'erreurs : Tous les threads sont éxécuté dans une instance du collecteur d'erreurs. Stocke l'erreur dans un fichier, met l'éventuelle requête en cours de traitement en situation d'erreur / échec, et redémarre le thread.
 
 

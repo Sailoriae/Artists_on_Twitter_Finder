@@ -66,6 +66,9 @@ class Tweets_Indexer :
                            d'indexer le même Tweet en paralléle (OPTIONNEL).
     @param FORCE_INDEX Forcer l'ajout des Tweets. Efface ce qui a déjà été
                        enregistré (OPTIONNEL).
+    @param FAILED_TWEETS_LIST Met dans cette liste les ID de Tweets ayant
+                              au moins une image qui a échoué.
+                              Les listes sont passées par référence.
     
     @return True si la file "tweets_queue" est terminée.
             False si il faut attendre un peu et rappeler cette méthode.
@@ -75,7 +78,8 @@ class Tweets_Indexer :
                              tweets_queue, # File d'attente d'entrée
                              indexing_tweets = None, # Objet de la mémoire partagée
                              add_step_C_or_D_times = None, # Fonction de la mémoire partagée
-                             FORCE_INDEX = False ) -> bool :
+                             FORCE_INDEX = False,
+                             FAILED_TWEETS_LIST = None ) -> bool :
 #        if self.DEBUG :
 #            print( "[Index Tweets] Indexation / scan des Tweets de @" + account_name + " avec SearchAPI." )
         if self.DEBUG or self.ENABLE_METRICS :
@@ -145,18 +149,22 @@ class Tweets_Indexer :
             if self.DEBUG or self.ENABLE_METRICS :
                 start_calculate_features = time()
             
+            # Mis à True si le Tweet aura besoin d'être réindexé
+            # Dans une liste, car les listes sont passées par référence
+            will_need_retry = [False]
+            
             # Traitement des images du Tweet
             if length > 0 :
-                image_1 = self.engine.get_image_features( tweet["images"][0], tweet["tweet_id"] )
+                image_1 = self.engine.get_image_features( tweet["images"][0], tweet["tweet_id"], UNSOLVABLE = will_need_retry )
                 image_1_name = tweet["images"][0].replace( "https://pbs.twimg.com/media/", "" )
             if length > 1 :
-                image_2 = self.engine.get_image_features( tweet["images"][1], tweet["tweet_id"] )
+                image_2 = self.engine.get_image_features( tweet["images"][1], tweet["tweet_id"], UNSOLVABLE = will_need_retry )
                 image_2_name = tweet["images"][1].replace( "https://pbs.twimg.com/media/", "" )
             if length > 2 :
-                image_3 = self.engine.get_image_features( tweet["images"][2], tweet["tweet_id"] )
+                image_3 = self.engine.get_image_features( tweet["images"][2], tweet["tweet_id"], UNSOLVABLE = will_need_retry )
                 image_3_name = tweet["images"][2].replace( "https://pbs.twimg.com/media/", "" )
             if length > 3 :
-                image_4 = self.engine.get_image_features( tweet["images"][3], tweet["tweet_id"] )
+                image_4 = self.engine.get_image_features( tweet["images"][3], tweet["tweet_id"], UNSOLVABLE = will_need_retry )
                 image_4_name = tweet["images"][3].replace( "https://pbs.twimg.com/media/", "" )
             
             if self.DEBUG or self.ENABLE_METRICS :
@@ -180,6 +188,17 @@ class Tweets_Indexer :
                 hashtags = tweet["hashtags"],
                 FORCE_INDEX = FORCE_INDEX
             )
+            
+            # Si une image a échoué, le Tweet devra être réindexé
+            # On le fait après le vrai enregistrement si jamais le compte
+            # utilisé pour réindexé est bloqué par le compte Twitter en cours
+            # de scan
+            if will_need_retry[0] :
+                self.bdd.add_retry_tweet( tweet["tweet_id"] )
+                
+                if FAILED_TWEETS_LIST != None :
+                    # Bien mettre en INT au cas où, voir thread_retry_failed_tweets
+                    FAILED_TWEETS_LIST.append( int( tweet["tweet_id"] ) )
             
             if self.DEBUG or self.ENABLE_METRICS :
                 insert_into_times.append( time() - start_insert_into )

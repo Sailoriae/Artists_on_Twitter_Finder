@@ -149,6 +149,11 @@ class SQLite_or_MySQL :
                                    last_TimelineAPI_indexing_local_date DATETIME,
                                    last_use DATETIME,
                                    uses_count BIGINT UNSIGNED DEFAULT 0 )"""
+            
+            reindex_tweets_table = """CREATE TABLE IF NOT EXISTS reindex_tweets (
+                                          tweet_id BIGINT UNSIGNED PRIMARY KEY,
+                                          last_retry_date DATETIME,
+                                          retries_count TINYINT UNSIGNED DEFAULT 0 )"""
         
         else :
             account_table = """CREATE TABLE IF NOT EXISTS accounts (
@@ -159,8 +164,14 @@ class SQLite_or_MySQL :
                                    last_TimelineAPI_indexing_local_date DATETIME,
                                    last_use DATETIME,
                                    uses_count UNSIGNED BIGINT DEFAULT 0  )"""
+            
+            reindex_tweets_table = """CREATE TABLE IF NOT EXISTS reindex_tweets (
+                                          tweet_id UNSIGNED BIGINT PRIMARY KEY,
+                                          last_retry_date DATETIME,
+                                          retries_count UNSIGNED TINYINT DEFAULT 0 )"""
         
         c.execute( account_table )
+        c.execute( reindex_tweets_table )
         
         self.conn.commit()
     
@@ -588,7 +599,7 @@ class SQLite_or_MySQL :
     @return Un itérateur sur le résultat
             Voir le fichier "class_Less_Recently_Updated_Accounts_Iterator.py"
     """
-    def get_oldest_updated_account( self ) -> int :
+    def get_oldest_updated_account( self ) :
         # Il faut que ce curseur soit buffered car on peut être amené à faire
         # d'autres requêtes sur la BDD lors de l'utilisation de l'itérateur,
         # ce qui provoque des erreurs "mysql.connector.errors.InternalError:
@@ -619,6 +630,61 @@ class SQLite_or_MySQL :
                           ORDER BY MIN( last_SearchAPI_indexing_local_date,
                                         last_TimelineAPI_indexing_local_date ) ASC""" )
         return Less_Recently_Updated_Accounts_Iterator( c )
+    
+    """
+    Enregistrer un ID de Tweet à réessayer.
+    """
+    def add_retry_tweet( self, tweet_id ) :
+        now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
+        c = self.get_cursor()
+        if param.USE_MYSQL_INSTEAD_OF_SQLITE :
+            request = """INSERT INTO reindex_tweets ( tweet_id, last_retry_date ) VALUES ( %s, %s )
+                         ON DUPLICATE KEY UPDATE last_retry_date = %s, retries_count = retries_count+1"""
+        else :
+            request = """INSERT INTO reindex_tweets ( tweet_id, last_retry_date ) VALUES ( ?, ? )
+                         ON CONFLICT ( tweet_id ) DO UPDATE SET last_retry_date = ?, retries_count = retries_count+1"""
+        
+        c.execute( request,
+                   ( tweet_id, now, now ) )
+        self.conn.commit()
+    
+    """
+    Supprimer un ID de Tweet à réessayer.
+    """
+    def remove_retry_tweet( self, tweet_id ) :
+        c = self.get_cursor()
+        
+        if param.USE_MYSQL_INSTEAD_OF_SQLITE :
+            request = "DELETE FROM reindex_tweets WHERE tweet_id = %s"
+        else :
+            request = "DELETE FROM reindex_tweets WHERE tweet_id = ?"
+        
+        c.execute( request, ( tweet_id, ) )
+        self.conn.commit()
+    
+    """
+    Obtenir un itérateur sur les Tweets à retenter d'indexer.
+    Cet itérateur donne des dictionnaires contenant les champs suivant :
+    - "tweet_id" : ID du Tweet,
+    - "last_retry_date" : Objet "datetime", date du dernier réessai,
+    - "retries_count" : Compteur de réessais.
+    Les Tweets sont triés par ordre du plus récemment réessayé au plus récent.
+    """
+    def get_retry_tweets( self ) :
+        c = self.get_cursor()
+        
+        c.execute( "SELECT tweet_id, last_retry_date, retries_count FROM reindex_tweets ORDER BY last_retry_date" )
+        
+        to_return = { "tweet_id" : None, "last_retry_date" : None, "retries_count" : None }
+        for data in c.fetchall() :
+            to_return["tweet_id"] = data[0]
+            if not param.USE_MYSQL_INSTEAD_OF_SQLITE and data[1] != None :
+                to_return["last_retry_date"] = datetime.strptime( data[1], '%Y-%m-%d %H:%M:%S' )
+            else :
+                to_return["last_retry_date"] = data[1]
+            to_return["retries_count"] = data[2]
+            yield to_return
 
 """
 Test du bon fonctionnement de cette classe

@@ -215,6 +215,12 @@ if __name__ == "__main__" :
                                                                  args = ( thread_remove_finished_requests, 1, shared_memory_uri, ) )
     launched_thread_remove_finished_requests.start()
     
+    # On ne crée qu'un seul thread de retentative d'indexation de Tweets
+    launched_thread_retry_failed_tweets = threading.Thread( name = "thread_retry_failed_tweets_th1",
+                                                            target = error_collector,
+                                                            args = ( thread_retry_failed_tweets, 1, shared_memory_uri, ) )
+    launched_thread_retry_failed_tweets.start()
+    
     
     """
     Entrée en ligne de commande (CLI).
@@ -428,6 +434,7 @@ if __name__ == "__main__" :
     launched_thread_http_server.join()
     launched_thread_auto_update_accounts.join()
     launched_thread_remove_finished_requests.join()
+    launched_thread_retry_failed_tweets.join()
     
     shared_memory.keep_pyro_alive = False
     launched_thread_pyro.join()
