@@ -111,6 +111,11 @@ class User_Requests_Pipeline :
     @property
     def pending_requests_count( self ) : return self._pending_requests_count
     
+    # Obtenir le nombre de requêtes en mémoire
+    def get_size( self ) :
+        # Pas besoin de prendre le sémaphore, le GIL Pyhton fait son job
+        return len( self._requests )
+    
     """
     Lancer la recherche des Tweets de l'artiste contenant l'illustration dont
     l'URL est passé en paramètre.

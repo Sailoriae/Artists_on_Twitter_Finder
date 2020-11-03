@@ -129,6 +129,11 @@ class Scan_Requests_Pipeline :
     @property
     def pending_requests_count( self ) : return self._pending_requests_count
     
+    # Obtenir le nombre de requêtes en mémoire
+    def get_size( self ) :
+        # Pas besoin de prendre le sémaphore, le GIL Pyhton fait son job
+        return len( self._requests )
+    
     """
     Lancer l'indexation ou la mise à jour de l'indexation d'un compte Twitter
     dans la base de données.
