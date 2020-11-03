@@ -194,7 +194,15 @@ class Tweets_Indexer :
             # utilisé pour réindexé est bloqué par le compte Twitter en cours
             # de scan
             if will_need_retry[0] :
-                self.bdd.add_retry_tweet( tweet["tweet_id"] )
+                self.bdd.add_retry_tweet(
+                    tweet["tweet_id"],
+                    tweet["user_id"],
+                    image_1_name,
+                    image_2_name,
+                    image_3_name,
+                    image_4_name,
+                    tweet["hashtags"]
+                )
                 
                 if FAILED_TWEETS_LIST != None :
                     # Bien mettre en INT au cas où, voir thread_retry_failed_tweets
