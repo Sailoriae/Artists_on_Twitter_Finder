@@ -17,7 +17,8 @@ Les threads de traitement sont dans le sous-module `user_pipeline` et `scan_pipe
 
 - `thread_http_server` : Thread de serveur HTTP.
 - `thread_auto_update_accounts` : Thread de mise à jour automatique des comptes dans la base de données.
-- `thread_remove_finished_requests` : Thread de délestage des requêtes terminées. Elles sont conservées 24h.
+- `thread_remove_finished_requests` : Thread de délestage des requêtes terminées. Les requêtes utilisateurs sont conservées 1h, et les requêtes de scan 24h.
+- `thread_reset_SearchAPI_cursors` : Thread de suppression des curseurs d'indexation avec l'API de recherche, car l'indexation sur le moteur de recherche de Twitter est très fluctuante.
 
 - `error_collector` : Procédure conteneuse de chaque thread du serveur (Exécute les procédures ci-dessus). Permet de collecter les erreurs, de les enregistrer dans des fichiers, et de redémarrer le thread. Elle met aussi la requête en échec si le thread était en train de traiter une requête.
 
