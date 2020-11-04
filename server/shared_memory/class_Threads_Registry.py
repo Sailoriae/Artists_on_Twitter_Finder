@@ -76,6 +76,15 @@ class Threads_Registry :
                 
                 # Afficher un thread de traitement des requêtes de scan
                 elif request.request_type == "scan" :
-                    to_print += " : @" + request.account_name + " (ID " + str(request.account_id) + ")\n"
+                    to_print += " : @" + request.account_name + " (ID " + str(request.account_id) + ")"
+                    
+                    # Thread d'indexation des Tweets trouvés avec l'API de recherche
+                    if "thread_step_C_SearchAPI_index_account_tweets" in key :
+                        to_print += ", " + str(request.SearchAPI_tweets_queue.qsize()) + " Tweets restant\n"
+                    # Thread d'indexation des Tweets trouvés avec l'API de timeline
+                    elif "thread_step_D_TimelineAPI_index_account_tweets" in key :
+                        to_print += ", " + str(request.TimelineAPI_tweets_queue.qsize()) + " Tweets restant\n"
+                    else :
+                        to_print += "\n"
         
         return to_print
