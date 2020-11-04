@@ -158,6 +158,8 @@ class Scan_Requests_Pipeline :
     def launch_request ( self, account_id : int,
                                account_name : str,
                                is_prioritary : bool = False ) -> Scan_Request :
+        account_id = int(account_id) # Sécurité, pour unifier
+        
         requests_sem = self._requests_sem
         queues_sem = self._queues_sem_obj
         
@@ -289,7 +291,9 @@ class Scan_Requests_Pipeline :
     @return Un objet Scan_Request,
             Ou None si la requête est inconnue.
     """
-    def get_request ( self, account_id : str ) -> Scan_Request :
+    def get_request ( self, account_id : int ) -> Scan_Request :
+        account_id = int(account_id) # Sécurité, pour unifier
+        
         self._requests_sem.acquire()
         for key in self._requests :
             if key == account_id :

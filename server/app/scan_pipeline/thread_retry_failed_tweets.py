@@ -83,7 +83,7 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
                         if not shared_memory.keep_service_alive :
                             break
                     # Recommencer la boucle du "keep_service_alive"
-                    break
+                    break # Arrête de l'itération "for"
             
             # Si il n'y a aucune info sur ce Tweet, il faut l'obtenir sur l'API
             # Ne devrait pas arriver, mais au cas où
@@ -116,7 +116,7 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
                     break
             
             # Reboucler "while shared_memory.keep_service_alive"
-            continue
+            continue # Arrête de l'itération "for"
         
         # Si il y a des Tweets à aller chercher sur l'API
         if len( hundred_tweets ) > 0 :

@@ -206,6 +206,14 @@ if __name__ == "__main__" :
     thread.start()
     threads.append( thread )
     
+    # On ne crée qu'un seul thread de reset des curseurs d'indexation avec
+    # l'API de recherche
+    thread = threading.Thread( name = "thread_reset_SearchAPI_cursors_th1",
+                               target = error_collector,
+                               args = ( thread_reset_SearchAPI_cursors, 1, shared_memory_uri, ) )
+    thread.start()
+    threads.append( thread )
+    
     # On ne crée qu'un seul thread de délestage de la liste des requêtes
     thread = threading.Thread( name = "remove_finished_requests_th1",
                                target = error_collector,

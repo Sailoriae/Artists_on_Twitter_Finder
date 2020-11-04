@@ -35,6 +35,12 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
     
     # Tant que on ne nous dit pas de nous arrêter
     while shared_memory.keep_service_alive :
+        # Avant de prendre l'itérateur (Qui n'est pas dynamique, prend un
+        # instantané des comptes dans la base), il faut "dire" au thread de
+        # reset des curseurs d'indexation avec l'API de recherche qu'on a
+        # commencé une nouvelle boucle
+        shared_memory.force_auto_update_reloop = False
+        
         # Prendre l'itérateur sur les comptes dans la base de donnée, triés
         # dans l'ordre du moins récemment mise à jour au plus récemment mis à jour
         oldest_updated_account_iterator = bdd_direct_access.get_oldest_updated_account()
@@ -85,6 +91,12 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
                         sleep( 3 )
                         if not shared_memory.keep_service_alive :
                             break
+                        # Si le thread de reset des curseurs d'indexation avec
+                        # l'API de recherche en a reset un, il faut qu'on
+                        # reboucle
+                        if shared_memory.force_auto_update_reloop :
+                            break
+                    # Reboucler "while shared_memory.keep_service_alive"
                     break # Arrête de l'itération "for"
             
             # On cherche le nom du compte Twitter

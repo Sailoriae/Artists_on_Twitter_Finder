@@ -145,6 +145,7 @@ class SQLite_or_MySQL :
                                    account_id BIGINT UNSIGNED PRIMARY KEY,
                                    last_SearchAPI_indexing_api_date CHAR(10),
                                    last_SearchAPI_indexing_local_date DATETIME,
+                                   last_SearchAPI_indexing_cursor_reset_date DATETIME,
                                    last_TimelineAPI_indexing_tweet_id BIGINT UNSIGNED,
                                    last_TimelineAPI_indexing_local_date DATETIME,
                                    last_use DATETIME,
@@ -166,10 +167,11 @@ class SQLite_or_MySQL :
                                    account_id UNSIGNED BIGINT PRIMARY KEY,
                                    last_SearchAPI_indexing_api_date CHAR(10),
                                    last_SearchAPI_indexing_local_date DATETIME,
+                                   last_SearchAPI_indexing_cursor_reset_date DATETIME ,
                                    last_TimelineAPI_indexing_tweet_id UNSIGNED BIGINT,
                                    last_TimelineAPI_indexing_local_date DATETIME,
                                    last_use DATETIME,
-                                   uses_count UNSIGNED BIGINT DEFAULT 0  )"""
+                                   uses_count UNSIGNED BIGINT DEFAULT 0 )"""
             
             reindex_tweets_table = """CREATE TABLE IF NOT EXISTS reindex_tweets (
                                           tweet_id UNSIGNED BIGINT PRIMARY KEY,
@@ -711,6 +713,53 @@ class SQLite_or_MySQL :
             else :
                 to_return["last_retry_date"] = data[6]
             to_return["retries_count"] = data[7]
+            yield to_return
+    
+    """
+    API DE RECHERCHE
+    Supprimer date du Tweet le plus récent d'un compte Twitter.
+    
+    @param account_id ID du compte Twitter.
+    """
+    def reset_account_SearchAPI_last_tweet_date( self, account_id : int ):
+        if param.USE_MYSQL_INSTEAD_OF_SQLITE :
+            request = """UPDATE accounts
+                         SET last_SearchAPI_indexing_api_date = NULL,
+                             last_SearchAPI_indexing_local_date = NULL,
+                             last_SearchAPI_indexing_cursor_reset_date = %s
+                         WHERE account_id = %s"""
+        else :
+            request = """UPDATE accounts
+                         SET last_SearchAPI_indexing_api_date = NULL,
+                             last_SearchAPI_indexing_local_date = NULL,
+                             last_SearchAPI_indexing_cursor_reset_date = ?
+                         WHERE account_id = ?"""
+        
+        c = self.get_cursor()
+        c.execute( request,
+                   ( datetime.now().strftime('%Y-%m-%d %H:%M:%S'), account_id ) )
+        self.conn.commit()
+    
+    """
+    Obtenir un itérateur sur les comptes enregistrés dans la base, triés par
+    ordre de reset de leur curseur d'indexation avec l'API de recherche. Du
+    plus ancien au plus récent.
+    Cet itérateur donne des dictionnaires contenant les champs suivant :
+    - "account_id" : ID du compte Twitter,
+    - "last_cursor_reset_date" : Objet "datetime", date du dernier reset.
+    """
+    def get_oldest_reseted_account( self ) :
+        c = self.get_cursor()
+        
+        c.execute( "SELECT account_id, last_SearchAPI_indexing_cursor_reset_date FROM accounts ORDER BY last_SearchAPI_indexing_cursor_reset_date" )
+        
+        to_return = {}
+        for data in c.fetchall() :
+            to_return["account_id"] = data[0]
+            if not param.USE_MYSQL_INSTEAD_OF_SQLITE and data[1] != None :
+                to_return["last_cursor_reset_date"] = datetime.strptime( data[1], '%Y-%m-%d %H:%M:%S' )
+            else :
+                to_return["last_cursor_reset_date"] = data[1]
             yield to_return
 
 """
