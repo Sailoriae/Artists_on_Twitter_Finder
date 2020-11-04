@@ -414,18 +414,28 @@ class SQLite_or_MySQL :
     @param last_scan Date du Tweet indexé le plus récent, au format YYYY-MM-DD
     """
     def set_account_SearchAPI_last_tweet_date( self, account_id : int, last_update : str ) :
-        now = datetime.now()
+        now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         
+        # Si pas de conflit / clé dupliquée, c'est que c'est la première indexation
+        # On met donc le dernier reset du curseur d'indexation avec l'API de recherche à maintenant
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
-            request = """INSERT INTO accounts ( account_id, last_SearchAPI_indexing_api_date, last_SearchAPI_indexing_local_date ) VALUES ( %s, %s, %s )
+            request = """INSERT INTO accounts (
+                            account_id,
+                            last_SearchAPI_indexing_api_date,
+                            last_SearchAPI_indexing_local_date,
+                            last_SearchAPI_indexing_cursor_reset_date ) VALUES ( %s, %s, %s, %s )
                          ON DUPLICATE KEY UPDATE last_SearchAPI_indexing_api_date = %s, last_SearchAPI_indexing_local_date = %s"""
         else :
-            request = """INSERT INTO accounts ( account_id, last_SearchAPI_indexing_api_date, last_SearchAPI_indexing_local_date ) VALUES ( ?, ?, ? )
+            request = """INSERT INTO accounts (
+                            account_id,
+                            last_SearchAPI_indexing_api_date,
+                            last_SearchAPI_indexing_local_date,
+                            last_SearchAPI_indexing_cursor_reset_date ) VALUES ( ?, ?, ?, ? )
                          ON CONFLICT ( account_id ) DO UPDATE SET last_SearchAPI_indexing_api_date = ?, last_SearchAPI_indexing_local_date = ?"""
         
         c = self.get_cursor()
         c.execute( request,
-                   ( account_id, last_update, now.strftime('%Y-%m-%d %H:%M:%S'), last_update, now.strftime('%Y-%m-%d %H:%M:%S') ) )
+                   ( account_id, last_update, now, now, last_update, now ) )
         self.conn.commit()
     
     """
