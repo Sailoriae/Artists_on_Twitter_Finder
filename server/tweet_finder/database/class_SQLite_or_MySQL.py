@@ -663,10 +663,10 @@ class SQLite_or_MySQL :
         
         c = self.get_cursor()
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
-            request = """INSERT INTO reindex_tweets ( tweet_id, account_id, image_1_url, image_2_url, image_3_url, image_4_url, hashtags, last_retry_date ) VALUES ( %s, %s, %s, %s, %s, %s, %s )
+            request = """INSERT INTO reindex_tweets ( tweet_id, account_id, image_1_url, image_2_url, image_3_url, image_4_url, hashtags, last_retry_date ) VALUES ( %s, %s, %s, %s, %s, %s, %s, %s )
                          ON DUPLICATE KEY UPDATE last_retry_date = %s, retries_count = retries_count+1"""
         else :
-            request = """INSERT INTO reindex_tweets ( tweet_id, account_id, image_1_url, image_2_url, image_3_url, image_4_url, hashtags, last_retry_date ) VALUES ( ?, ?, ?, ?, ?, ?, ? )
+            request = """INSERT INTO reindex_tweets ( tweet_id, account_id, image_1_url, image_2_url, image_3_url, image_4_url, hashtags, last_retry_date ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ? )
                          ON CONFLICT ( tweet_id ) DO UPDATE SET last_retry_date = ?, retries_count = retries_count+1"""
         
         if hashtags != None and hashtags != [] and hashtags != [""] :

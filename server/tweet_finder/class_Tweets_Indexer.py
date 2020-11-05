@@ -155,16 +155,16 @@ class Tweets_Indexer :
             
             # Traitement des images du Tweet
             if length > 0 :
-                image_1 = self.engine.get_image_features( tweet["images"][0], tweet["tweet_id"], UNSOLVABLE = will_need_retry )
+                image_1 = self.engine.get_image_features( tweet["images"][0], tweet["tweet_id"], CAN_RETRY = will_need_retry )
                 image_1_name = tweet["images"][0].replace( "https://pbs.twimg.com/media/", "" )
             if length > 1 :
-                image_2 = self.engine.get_image_features( tweet["images"][1], tweet["tweet_id"], UNSOLVABLE = will_need_retry )
+                image_2 = self.engine.get_image_features( tweet["images"][1], tweet["tweet_id"], CAN_RETRY = will_need_retry )
                 image_2_name = tweet["images"][1].replace( "https://pbs.twimg.com/media/", "" )
             if length > 2 :
-                image_3 = self.engine.get_image_features( tweet["images"][2], tweet["tweet_id"], UNSOLVABLE = will_need_retry )
+                image_3 = self.engine.get_image_features( tweet["images"][2], tweet["tweet_id"], CAN_RETRY = will_need_retry )
                 image_3_name = tweet["images"][2].replace( "https://pbs.twimg.com/media/", "" )
             if length > 3 :
-                image_4 = self.engine.get_image_features( tweet["images"][3], tweet["tweet_id"], UNSOLVABLE = will_need_retry )
+                image_4 = self.engine.get_image_features( tweet["images"][3], tweet["tweet_id"], CAN_RETRY = will_need_retry )
                 image_4_name = tweet["images"][3].replace( "https://pbs.twimg.com/media/", "" )
             
             if self.DEBUG or self.ENABLE_METRICS :

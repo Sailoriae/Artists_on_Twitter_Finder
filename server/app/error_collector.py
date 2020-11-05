@@ -86,8 +86,14 @@ def error_collector( thread_procedure, thread_id : int, shared_memory_uri : str 
             # problème d'initialisation de la procédure
             if time.time() - start_time < 10 :
                 error_on_init_count += 1
+                
                 # On dors 10 mins * le nombre de fois qu'on a crash à l'init
-                print( "Attente de", 600 * error_on_init_count, "pour redémarrer !" )
-                time.sleep( 600 * error_on_init_count )
+                wait_time = int( (600 * error_on_init_count) / 3 )
+                print( "Attente de", wait_time*3, "pour redémarrer !" )
+                
+                for i in range( wait_time ) :
+                    time.sleep( 3 )
+                    if not shared_memory.keep_service_alive :
+                        break
             
             error_count += 1
