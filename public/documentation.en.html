@@ -56,13 +56,13 @@
 					<li><code>account_id</code><br>The Twitter account ID.</li>
 				</ul>
 			</li>
-			<li><code>results</code><br>List of Tweets found. Each Tweet contains the following fields&nbsp;:
+			<li><code>results</code><br>List of Tweets found, sorted in ascending order by the value <code>distance_chi2</code>. Each Tweet contains the following fields&nbsp;:
 				<ul>
 					<li><code>tweet_id</code><br>The Tweet ID.</li>
 					<li><code>account_id</code><br>The ID of the Twitter account that posted this Tweet.</li>
 					<li><code>image_position</code><br>The position of the image among the maximum 4 images.</li>
-					<li><code>distance_chi2</code><br>The distance between the query image and the image found.</li>
-					<li><code>distance_bhattacharyya</code><br>The distance between the query image and the image found.</li>
+					<li><code>distance_chi2</code><br>The chi-square distance between the query image and the found image. The smaller it is, the closer the query image is to the found image.</li>
+					<li><code>distance_bhattacharyya</code><br>The Bhattacharyya distance between the query image and the found image. Allows to eliminate some false positives.</li>
 				</ul>
 			</li>
 			<li><code>error</code><br>A string describing the error if the request was ever interrupted, <code>null</code> otherwise. See the list of possible errors below.</li>
@@ -75,7 +75,7 @@
 			<li><code>WAIT_INDEX_ACCOUNTS_TWEETS</code><br>Waiting for processing by a thread to launch the indexing or the indexing update of Tweets from the artist's Twitter accounts.</li>
 			<li><code>INDEX_ACCOUNTS_TWEETS</code><br>Currently being processed by the artist's Twitter Twitter Twitter accounts.
 				<ul>
-					<li>If the <code>has_first_time_sca </code> field is <code>false</code>, it is only for an update of the accounts, because the illustration is too recent.</li>
+					<li>If the <code>has_first_time_scan</code> field is <code>false</code>, it is only for an update of the accounts, because the illustration is too recent.</li>
 					<li>Otherwise, there is one or more accounts that were unknown in the database. This step will therefore be long.</li>
 				</ul>
 			<li><code>WAIT_IMAGE_REVERSE_SEARCH</code><br>Waiting for processing by a reverse image search thread.</li>

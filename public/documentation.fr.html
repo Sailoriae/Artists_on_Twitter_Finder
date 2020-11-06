@@ -56,13 +56,13 @@
 					<li><code>account_id</code><br>L'ID du compte Twitter.</li>
 				</ul>
 			</li>
-			<li><code>results</code><br>Liste des Tweets trouvés. Chaque Tweet contient les champs suivants&nbsp;:
+			<li><code>results</code><br>Liste des Tweets trouvés, triée dans l'ordre croissant par la valeur <code>distance_chi2</code>. Chaque Tweet contient les champs suivants&nbsp;:
 				<ul>
 					<li><code>tweet_id</code><br>L'ID du Tweet.</li>
 					<li><code>account_id</code><br>L'ID du compte Twitter ayant publié ce Tweet.</li>
 					<li><code>image_position</code><br>La position de l'image parmis les 4 images maximums.</li>
-					<li><code>distance_chi2</code><br>La distance entre l'image de requête et l'image trouvée.</li>
-					<li><code>distance_bhattacharyya</code><br>La distance entre l'image de requête et l'image trouvée.</li>
+					<li><code>distance_chi2</code><br>La distance du khi-carré entre l'image de requête et l'image trouvée. Plus elle est faible, plus l'image de requête est proche de l'image trouvée.</li>
+					<li><code>distance_bhattacharyya</code><br>La distance de Bhattacharyya entre l'image de requête et l'image trouvée. Permet d'éliminer certains faux-positifs.</li>
 				</ul>
 			</li>
 			<li><code>error</code><br>Une chaine de caractères décrivant l'erreur si jamais la requête a été interrompue, <code>null</code> sinon. Voir la liste des erreurs possibles ci-dessous.</li>
