@@ -25,7 +25,10 @@ def test_distances( url1, url2 ) :
     image1_features = np.float32( engine.index_cbir( url_to_cv2_image( url1 ) ) )
     image2_features = np.float32( engine.index_cbir( url_to_cv2_image( url2 ) ) )
     
-    d1 = cv2.compareHist( image1_features, image2_features, cv2.HISTCMP_CHISQR )
+    # On prend le min(), car ce test est asymétrique
+    d1 = min( cv2.compareHist( image1_features, image2_features, cv2.HISTCMP_CHISQR ),
+              cv2.compareHist( image2_features, image1_features, cv2.HISTCMP_CHISQR ) )
+    
     d2 = cv2.compareHist( image1_features, image2_features, cv2.HISTCMP_BHATTACHARYYA )
     
     d3 = cv2.compareHist( image1_features, image2_features, cv2.HISTCMP_CORREL )

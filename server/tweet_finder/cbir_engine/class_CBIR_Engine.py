@@ -10,28 +10,55 @@ try :
 except ModuleNotFoundError : # Si on a été exécuté en temps que module
     from .class_ColorDescriptor import ColorDescriptor
 
+
+# En téléchargeant les images de Tweets en qualité maximale, on est globalement
+# plus précis, mais c'est toujours pas assez
+# On ne peut donc pas baisser les seuils
+
+
+# =============================================================================
+# DISTANCE DU HKI-DEUX
+# 0 = Les images sont les mêmes, puis tend vers l'infini
+# =============================================================================
+
+# SEUIL MAXIMUM
 # On met un seuil élevé, car à cause de la compression de Twitter, des images
 # identiques peut être très éloignées
 # Et le laisser élevé, car c'est le thread 4 qui filtre derrière
-# 0 = Les images sont les mêmes, puis tend vers l'infini
-SEUIL_CHI2 = 20 # L'image doit être en dessous
-# Exemple d'image qui met une grosse distance (11,9) :
-# https://danbooru.donmai.us/posts/4057141
-# Autre exemple (16,8) :
-# https://danbooru.donmai.us/posts/4059649
+SEUIL_CHI2 = 20 # La distance doit être en dessous
 
-# Idem pour ce seuil, mais le laisser par trop haut non plus, car ce test de
-# distance filtre très bien les sketchs et dessins en noir et blanc lors de
-# la recherche d'une image en couleur
+# Attention : Inverser les entrées change le résultat !
+# Exemples d'images qui mettent une grosse distance dans un sens :
+# https://danbooru.donmai.us/posts/4057141
+# https://danbooru.donmai.us/posts/4059649
+# https://derpibooru.org/2456926
+# https://danbooru.donmai.us/posts/3933635
+
+
+# =============================================================================
+# DISTANCE DE BHATTACHARYYA
 # 0 = Les images sont les mêmes, 1 = ne sont absolument pas les mêmes
-SEUIL_BHATTACHARYYA = 0.3 # L'image doit être en dessous
-# Exemple d'image qui met une grosse distance (0,25) :
+# =============================================================================
+
+# SEUIL MAXIMUM
+# Ne pas mettre trop haut, car ce test de distance filtre très bien les sketchs
+# et dessins en noir et blanc lors de la recherche d'une image en couleur
+SEUIL_BHATTACHARYYA = 0.3 # La distance doit être en dessous
+
+# Exemple d'image qui met une grosse distance :
 # https://danbooru.donmai.us/posts/4158825
+
+
+# =============================================================================
+# AUTRES TESTS DE DISTANCE ?
+# =============================================================================
 
 # Note importante : Ca ne sert à rien d'ajouter d'autres algorithmes de
 # comparaison des histogrammes, ils se vautrent tous sur les images très
 # claires, comme par exemple les linearts
 # Exemple : https://danbooru.donmai.us/posts/3544450
+# Fonctionne mieux avec la modification qui télécharge les images de Tweets en
+# qualité maximale.
 
 # Autre tests essayés, mais ça ne sert à rien :
 # - Corrélation (Attention : Plus est haut, plus les images sont proches) :
@@ -112,7 +139,9 @@ class CBIR_Engine :
             #   https://fr.wikipedia.org/wiki/Test_du_%CF%87%C2%B2
             # Plus la distance est faible, plus les images sont proches
             # Compris entre 0 et l'infini
-            d1 = cv2.compareHist( query_features, features, cv2.HISTCMP_CHISQR )
+            # On prend le min(), car ce test est asymétrique
+            d1 = min( cv2.compareHist( query_features, features, cv2.HISTCMP_CHISQR ),
+                      cv2.compareHist( features, query_features, cv2.HISTCMP_CHISQR ) )
             
             # - Distance de Bhattacharyya (Qui est aussi la distance de
             #   Hellinger dans OpenCV)
