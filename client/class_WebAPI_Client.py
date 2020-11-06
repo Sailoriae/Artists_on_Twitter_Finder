@@ -2,7 +2,7 @@
 # coding: utf-8
 
 import requests
-from time import sleep
+from time import sleep, time
 from json import JSONDecodeError
 
 
@@ -17,6 +17,11 @@ class Server_Connection_Not_Initialised ( Exception ) :
 class Max_Pending_Requests_On_Server ( Exception ) :
     def __init__ ( self ) :
         self.message = "Nombre maximum de requêtes en cours de traitement atteint sur ce serveur pour cet adresse IP."
+        super().__init__( self.message )
+
+class Timeout_Reached ( Exception ) :
+    def __init__ ( self, timeout ) :
+        self.message = "Timeout de " + str(timeout) + " secondes atteint."
         super().__init__( self.message )
 
 
@@ -91,16 +96,16 @@ class WebAPI_Client :
     @param illust_url URL d'une illustration sur l'un des sites supportés par
                       le serveur.
     @param timeout En seconde, le temps de traitement maximal du serveur.
+                   Emet une erreur Timeout_Reached si atteint.
                    (OPTIONNEL)
     @return Liste de dictionnaires :
             - "account_name" : Nom du compte Twitter,
             - "account_id" : L'ID du compte Twitter.
             OU une liste vide si l'artiste n'a pas de compte Twitter.
-            OU None s'il y a eu un problème, ou que le temps "timeout" s'est
-            écoulé.
+            OU None s'il y a eu un problème.
     """
     def get_twitter_accounts ( self, illust_url : str, timeout : int = 300 ) :
-        sleep_count = 0
+        start = time()
         while True :
             response = self.get_request( illust_url )
             if response == None :
@@ -114,9 +119,8 @@ class WebAPI_Client :
             if response["status"] != "WAIT_LINK_FINDER" and response["status"] != "LINK_FINDER" :
                 return response["twitter_accounts"]
             sleep( 5 )
-            sleep_count += 1
-            if sleep_count * 5 > timeout :
-                return None
+            if time() - start > timeout :
+                raise Timeout_Reached( timeout )
     
     """
     Obtenir la liste des Tweets de l'artiste de cette illustration trouvés par
@@ -124,6 +128,7 @@ class WebAPI_Client :
     @param illust_url URL d'une illustration sur l'un des sites supportés par
                       le serveur.
     @param timeout En seconde, le temps de traitement maximal du serveur.
+                   Emet une erreur Timeout_Reached si atteint.
                    (OPTIONNEL)
     @return Liste de dictionnaires :
             - "tweet_id" : L'ID du Tweet.
@@ -132,11 +137,10 @@ class WebAPI_Client :
             - "distance" : La distance calculée entre l'image de requête et cette image.
             OU une liste vide si l'artiste n'a pas de compte Twitter ou
             l'artiste n'a pas de compte Twitter.
-            OU None s'il y a eu un problème, ou que le temps "timeout" s'est
-            écoulé.
+            OU None s'il y a eu un problème.
     """
     def get_tweets ( self, illust_url : str, timeout : int = 3600 ) :
-        sleep_count = 0
+        start = time()
         while True :
             response = self.get_request( illust_url )
             if response == None :
@@ -147,6 +151,5 @@ class WebAPI_Client :
             if response["status"] == "END" :
                 return response["results"]
             sleep( 5 )
-            sleep_count += 1
-            if sleep_count * 5 > timeout :
-                return None
+            if time() - start > timeout :
+                raise Timeout_Reached( timeout )
