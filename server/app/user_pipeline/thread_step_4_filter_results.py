@@ -47,6 +47,9 @@ des images sur les serveurs de Twitter. Et ils ne sont pas évitables, même en
 augmentant la taille de l'histogramme lors de l'indexation. Il faut donc une
 méthode indépendante de celle des histogrammes pour dire que deux images sont
 les mêmes.
+
+Note : S'arrête si la distance du Khi-Carré s'éloigne de 0.5 de la première image
+validée, ou après 20 images validées.
 """
 def thread_step_4_filter_results( thread_id : int, shared_memory ) :
     # Maintenir ouverts certains proxies vers la mémoire partagée
@@ -121,6 +124,10 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
                 # A moins que Twitter aient changés leur algo de compression,
                 # mais c'est pas grave (Ce qu'ils ont fait en 2019)
                 if image_in_db.distance_chi2 - new_founded_tweets[0].distance_chi2 > 0.5 :
+                    break
+                
+                # Si on a déjà validé 20 images, on peut arrêter là
+                if len(new_founded_tweets) > 20 :
                     break
             
             # Les deux fonctions utilisent get_tweet_image(), donc prennent
