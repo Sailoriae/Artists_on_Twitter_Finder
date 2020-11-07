@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-from time import sleep
+from time import sleep, time
 import datetime
 import queue
 
@@ -74,12 +74,14 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
                 # Si aucun Tweet n'est à réessayer, on dort
                 if len( hundred_tweets ) == 0 and tweets_queue.qsize() == 0 :
                     # Reprise dans (retry_period - (now - tweet["last_retry_date"]))
-                    wait_time = int( (retry_period - (now - tweet["last_retry_date"])).total_seconds() / 3 )
-                    wait_time += 1 # Ajout de 3*1 = 3 secondes pour l'arrondi ci-dessus
+                    wait_time = int( (retry_period - (now - tweet["last_retry_date"])).total_seconds() )
+                    end_sleep_time = time() + wait_time
                     
-                    print( "[retry_failed_tweets_th" + str(thread_id) + "] Reprise dans " + str(wait_time*3) + " secondes, pour réessayer le Tweet ID " + str(tweet["tweet_id"]) + "." )
-                    for i in range( wait_time ) :
+                    print( "[retry_failed_tweets_th" + str(thread_id) + "] Reprise dans " + str(wait_time) + " secondes, pour réessayer le Tweet ID " + str(tweet["tweet_id"]) + "." )
+                    while True :
                         sleep( 3 )
+                        if time() > end_sleep_time :
+                            break
                         if not shared_memory.keep_service_alive :
                             break
                     # Recommencer la boucle du "keep_service_alive"
@@ -109,9 +111,12 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
         if len( hundred_tweets ) == 0 and tweets_queue.qsize() == 0  :
             print( "[retry_failed_tweets_th" + str(thread_id) + "] Aucun Tweet à réessayer d'indexer !" )
             
-            # Retest dans une heure (1200*3 = 3600)
-            for i in range( 1200 ) :
+            # Retest dans une heure = 3600 secondes
+            end_sleep_time = time() + 3600
+            while True :
                 sleep( 3 )
+                if time() > end_sleep_time :
+                    break
                 if not shared_memory.keep_service_alive :
                     break
             

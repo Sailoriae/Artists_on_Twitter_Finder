@@ -87,12 +87,15 @@ def error_collector( thread_procedure, thread_id : int, shared_memory_uri : str 
             if time.time() - start_time < 10 :
                 error_on_init_count += 1
                 
-                # On dors 10 mins * le nombre de fois qu'on a crash à l'init
-                wait_time = int( (600 * error_on_init_count) / 3 )
-                print( "Attente de", wait_time*3, "pour redémarrer !" )
+                # On dort 10 mins * le nombre de fois qu'on a crash à l'init
+                wait_time = 600 * error_on_init_count
+                end_sleep_time = time.time() + wait_time
+                print( "Attente de", wait_time, "pour redémarrer !" )
                 
-                for i in range( wait_time ) :
+                while True :
                     time.sleep( 3 )
+                    if time.time() > end_sleep_time :
+                        break
                     if not shared_memory.keep_service_alive :
                         break
             

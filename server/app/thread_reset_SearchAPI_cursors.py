@@ -2,7 +2,7 @@
 # coding: utf-8
 
 import datetime
-from time import sleep
+from time import sleep, time
 
 # Ajouter le répertoire parent au PATH pour pouvoir importer
 from sys import path as sys_path
@@ -51,17 +51,20 @@ def thread_reset_SearchAPI_cursors( thread_id : int, shared_memory ) :
             # Si on est arrivé au compte reset il y a moins que la période
             if account["last_cursor_reset_date"] != None and now - account["last_cursor_reset_date"] < reset_period :
                 # Reprise dans (reset_period - (now - account["last_cursor_reset_date"]))
-                wait_time = int( (reset_period - (now - account["last_cursor_reset_date"])).total_seconds() / 3 )
-                wait_time += 1 # Ajout de 3*1 = 3 secondes pour l'arrondi ci-dessus
+                wait_time = int( (reset_period - (now - account["last_cursor_reset_date"])).total_seconds() )
                 
                 # Si on a sauté le reset d'un compte qui était déjà en cours
                 # d'indexation, on dort au maximum 24h = 86400 secondes
-                if already_indexing_account and wait_time > 28800 : # 86400 / 3
-                    wait_time = 28800
+                if already_indexing_account and wait_time > 86400 :
+                    wait_time = 86400
                 
-                print( "[reset_cursors_th" + str(thread_id) + "] Reprise dans " + str(wait_time*3) + " secondes, pour reset le curseur d'indexation avec l'API de recherche du compte ID " + str(account["account_id"]) + "." )
-                for i in range( wait_time ) :
+                end_sleep_time = time() + wait_time
+                
+                print( "[reset_cursors_th" + str(thread_id) + "] Reprise dans " + str(wait_time) + " secondes, pour reset le curseur d'indexation avec l'API de recherche du compte ID " + str(account["account_id"]) + "." )
+                while True :
                     sleep( 3 )
+                    if time() > end_sleep_time :
+                        break
                     if not shared_memory.keep_service_alive :
                         break
                 # Recommencer la boucle du "keep_service_alive"

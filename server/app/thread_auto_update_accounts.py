@@ -2,7 +2,7 @@
 # coding: utf-8
 
 import datetime
-from time import sleep
+from time import sleep, time
 
 # Ajouter le répertoire parent au PATH pour pouvoir importer
 from sys import path as sys_path
@@ -82,13 +82,15 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
                 
                 if now - min_date < update_period :
                     # Retest dans (update_period - (now - min_date))
-                    wait_time = int( (update_period - (now - min_date)).total_seconds() / 3 )
-                    wait_time += 1 # Ajout de 3*1 = 3 secondes pour l'arrondi ci-dessus
+                    wait_time = int( (update_period - (now - min_date)).total_seconds() )
+                    end_sleep_time = time() + wait_time
                     
-                    print( "[auto_update_th" + str(thread_id) + "] Reprise dans " + str(wait_time*3) + " secondes, pour lancer le scan du compte ID " + str(oldest_updated_account[0]) + "." )
+                    print( "[auto_update_th" + str(thread_id) + "] Reprise dans " + str(wait_time) + " secondes, pour lancer le scan du compte ID " + str(oldest_updated_account[0]) + "." )
                     
-                    for i in range( wait_time ) :
+                    while True :
                         sleep( 3 )
+                        if time() > end_sleep_time :
+                            break
                         if not shared_memory.keep_service_alive :
                             break
                         # Si le thread de reset des curseurs d'indexation avec
@@ -127,9 +129,12 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
         if count == 0 and shared_memory.keep_service_alive :
             print( "[auto_update_th" + str(thread_id) + "] La base de données n'a pas de comptes Twitter enregistrés !" )
             
-            # Retest dans une heure (1200*3 = 3600)
-            for i in range( 1200 ) :
+            # Retest dans une heure = 3600 secondes
+            end_sleep_time = time() + 3600
+            while True :
                 sleep( 3 )
+                if time() > end_sleep_time :
+                    break
                 if not shared_memory.keep_service_alive :
                     break
     
