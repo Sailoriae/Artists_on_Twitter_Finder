@@ -36,16 +36,6 @@ def http_server_container ( shared_memory_uri_arg ) :
             return
         
         def do_GET( self ) :
-            # Vérifier la longueur de l'URL de requête, pour éviter que des
-            # petits malins viennent nous innonder notre mémoire vive
-            if len( self.path ) > 200 :
-                self.send_response(414)
-                self.send_header("Content-type", "text/plain")
-                self.end_headers()
-                
-                self.wfile.write( "414 Request-URI Too Long\n".encode("utf-8") )
-                return
-            
             # Analyser le chemin du GET HTTP
             endpoint = urlsplit( self.path ).path
             parameters = dict( parse_qs( urlsplit( self.path ).query ) )
@@ -54,22 +44,43 @@ def http_server_container ( shared_memory_uri_arg ) :
             if client_ip == None :
                 client_ip = self.client_address[0]
             
-            print( "[HTTP]", client_ip, self.log_date_time_string(), "GET", self.path )
+            # A partie de maintenant, on fait un "if" puis que des "elif" pour
+            # toutes les autres possibilités, puis un "else" final pour le 404
             
+            # =================================================================
+            # HTTP 414
+            # =================================================================
+            # Vérifier la longueur de l'URL de requête, pour éviter que des
+            # petits malins viennent nous innonder notre mémoire vive
+            if len( self.path ) > 200 :
+                http_code = 414
+                self.send_response(http_code)
+                self.send_header("Content-type", "text/plain")
+                self.end_headers()
+                
+                self.wfile.write( "414 Request-URI Too Long\n".encode("utf-8") )
+            
+            # =================================================================
+            # HTTP 429
+            # =================================================================
             # Vérifier que l'utilisateur ne fait pas trop de requêtes
-            if not self.shared_memory.http_limitator.can_request( client_ip ) :
-                self.send_response(429)
+            elif not self.shared_memory.http_limitator.can_request( client_ip ) :
+                http_code = 429
+                self.send_response(http_code)
                 self.send_header("Content-type", "text/plain")
                 self.end_headers()
                 
                 self.wfile.write( "429 Too Many Requests\n".encode("utf-8") )
-                return
             
+            # =================================================================
+            # HTTP 200
+            # =================================================================
             # Si on veut lancer une requête ou obtenir son résultat
             # GET /query
             # GET /query?url=[URL de l'illustration de requête]
-            if endpoint == "/query" : 
-                self.send_response(200)
+            elif endpoint == "/query" :
+                http_code = 200
+                self.send_response(http_code)
                 self.send_header("Content-type", "application/json")
                 self.send_header("Access-Control-Allow-Origin", "*")
                 self.end_headers()
@@ -104,8 +115,9 @@ def http_server_container ( shared_memory_uri_arg ) :
             
             # Si on demande les stats
             # GET /stats
-            elif endpoint == "/stats" : 
-                self.send_response(200)
+            elif endpoint == "/stats" :
+                http_code = 200
+                self.send_response(http_code)
                 self.send_header("Content-type", "application/json")
                 self.send_header("Access-Control-Allow-Origin", "*")
                 self.end_headers()
@@ -122,12 +134,18 @@ def http_server_container ( shared_memory_uri_arg ) :
                 json_text = json.dumps( response_dict )
                 self.wfile.write( json_text.encode("utf-8") )
             
+            # =================================================================
+            # HTTP 404
+            # =================================================================
             # Sinon, page inconnue, erreur 404
             else :
-                self.send_response(404)
+                http_code = 404
+                self.send_response(http_code)
                 self.send_header("Content-type", "text/plain")
                 self.end_headers()
                 
                 self.wfile.write( "404 Not Found\n".encode("utf-8") )
+            
+            print( "[HTTP]", client_ip, self.log_date_time_string(), "GET", self.path, "HTTP", http_code )
     
     return HTTP_Server
