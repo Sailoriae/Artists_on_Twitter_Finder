@@ -104,7 +104,7 @@ class CBIR_Engine :
         return self.cd.describe( image )
     
     """
-    Recherche d'image inversé
+    Recherche inversée d'image
     @param image Image de requête, au format de la librairie Python-OpenCV
     @param images_iterator Itérateur sur la base de données, revoyant des
                            objets contenant les attributs suivants :
@@ -114,8 +114,8 @@ class CBIR_Engine :
                              avec l'image de requête
     @return Liste d'objets renvoyés par l'itérateur
             Cette liste ne contient pas toutes les images de la BDD, mais
-            seulement celles qui ont une distance de l'image de requête
-            inférieure à la variable SEUIL
+            seulement celles qui ont des distances de l'image de requête
+            inférieures aux variables de seuil (Voir ci-dessus)
     """
     def search_cbir( self, image : np.ndarray, images_iterator ) :
         # Liste d'identifiants d'images trouvées
@@ -126,36 +126,54 @@ class CBIR_Engine :
         # plutôt celles proposées par l'itérateur)
         query_features = np.float32( self.cd.describe(image) )
         
+        # Documentation OpenCV pour calculer des histogrammes :
+        # https://docs.opencv.org/2.4/modules/imgproc/doc/histograms.html#comparehist
+        
+        # =====================================================================
+        # RECHERCHE INVERSEE AVEC LA DISTANCE DE BHATTACHARYYA
+        # En premier car plus rapide que le Khi-Deux
+        # =====================================================================
         # On itére sur toutes les images que nous propose l'itérateur
         for image in images_iterator :
             features = np.float32( image.image_features)
             
-            # Calculer les distances entre l'image de requête et l'image en
-            # cours sur l'itérateur
-            # Documentation :
-            # https://docs.opencv.org/2.4/modules/imgproc/doc/histograms.html#comparehist
+            # Distance de Bhattacharyya (Qui est aussi la distance de
+            # Hellinger dans OpenCV)
+            # https://fr.wikipedia.org/wiki/Distance_de_Bhattacharyya
+            # Plus la distance est faible, plus les images sont proches
+            # Compris entre 0 et 1
+            d = cv2.compareHist( query_features, features, cv2.HISTCMP_BHATTACHARYYA )
             
-            # - Test du khi-deux
-            #   https://fr.wikipedia.org/wiki/Test_du_%CF%87%C2%B2
+            # Si la distance est inférieure à un certain seuil, on ajoute
+            # l'identifiant de l'image en cours sur l'itérateur à notre liste
+            # de résultats
+            if d < SEUIL_BHATTACHARYYA :
+                image.distance_bhattacharyya = d
+                results.append( image )
+        
+        # =====================================================================
+        # FILTRAGE AVEC LA DISTANCE DU HKI-DEUX
+        # En deuxième car légèrement plus lent, et en plus on en fait deux
+        # =====================================================================
+        # On itére sur les images trouvées / validées précédemment
+        results_old = results
+        results = []
+        for image in results_old :
+            features = np.float32( image.image_features)
+            
+            # Test du khi-deux
+            # https://fr.wikipedia.org/wiki/Test_du_%CF%87%C2%B2
             # Plus la distance est faible, plus les images sont proches
             # Compris entre 0 et l'infini
             # On prend le min(), car ce test est asymétrique
-            d1 = min( cv2.compareHist( query_features, features, cv2.HISTCMP_CHISQR ),
-                      cv2.compareHist( features, query_features, cv2.HISTCMP_CHISQR ) )
+            d = min( cv2.compareHist( query_features, features, cv2.HISTCMP_CHISQR ),
+                     cv2.compareHist( features, query_features, cv2.HISTCMP_CHISQR ) )
             
-            # - Distance de Bhattacharyya (Qui est aussi la distance de
-            #   Hellinger dans OpenCV)
-            #   https://fr.wikipedia.org/wiki/Distance_de_Bhattacharyya
-            # Plus la distance est faible, plus les images sont proches
-            # Compris entre 0 et 1
-            d2 = cv2.compareHist( query_features, features, cv2.HISTCMP_BHATTACHARYYA )
-            
-            # Si les distances sont inférieures à un certain seuil, on ajoute
+            # Si la distance est inférieure à un certain seuil, on ajoute
             # l'identifiant de l'image en cours sur l'itérateur à notre liste
             # de résultats
-            if d1 < SEUIL_CHI2 and d2 < SEUIL_BHATTACHARYYA :
-                image.distance_chi2 = d1
-                image.distance_bhattacharyya = d2
+            if d < SEUIL_CHI2 :
+                image.distance_chi2 = d
                 results.append( image )
         
         # Retourner  la liste des résultats
