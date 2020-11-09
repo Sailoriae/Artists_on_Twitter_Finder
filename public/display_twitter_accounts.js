@@ -41,6 +41,7 @@ function displayTwitterAccounts ( json ) {
 			var a = document.createElement('a');
 			a.href = "https://twitter.com/" + twitterAccounts[i].account_name;
 			a.target = "_blank";
+			a.rel = "noopener";
 			a.textContent = "@" + twitterAccounts[i].account_name;
 			p.appendChild(a);
 

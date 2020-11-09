@@ -20,6 +20,7 @@ function displaySupportedWebites() {
 						var a = document.createElement('a');
 						a.href = json[ keys[i] ];
 						a.target = "_blank";
+						a.rel = "noopener";
 						a.textContent = keys[i];
 						supportedWebitesP.appendChild(a);
 

@@ -42,6 +42,7 @@ function displayTweets ( json ) {
 				var a = document.createElement('a');
 				a.href = "https://twitter.com/any/status/" + tweets[i].tweet_id;
 				a.target = "_blank";
+				a.rel = "noopener";
 				a.textContent = "https://twitter.com/any/status/" + tweets[i].tweet_id;
 				p.appendChild(a);
 				div1.appendChild(p);
