@@ -4,12 +4,11 @@
 import re
 
 
-# Source :
-# https://stackoverflow.com/questions/3809401/what-is-a-good-regular-expression-to-match-a-url
 url_regex = re.compile(
-    r"^(?:http(?:s)?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&\/=]*)$" )
+    r"(?:http(?:s)?:\/\/)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b\/" )
 
-# Le "http://" ou "https://" est obtionnel.
+# Le "http://" ou "https://" est optionnel.
+# Ne valide que le NDD et le protocole, la suite c'est trop complexe.
 
 
 """
