@@ -29,7 +29,7 @@ class Timeout_Reached ( Exception ) :
 Classe de client à un serveur "Artists on Twitter Finder". Permet d'utiliser
 son API.
 """
-class WebAPI_Client :
+class AOTF_Client :
     """
     @param base_api_address Addresse de base de l'API du serveur à utiliser,
                             avec un "/" au bout ! Par exemple :
@@ -62,7 +62,7 @@ class WebAPI_Client :
             self.ready = False
             raise Error_During_Server_Connection_Init( "Ceci n'est pas un serveur \"Artists on Twitter Finder\"." )
         
-        print( "Connexion réussie !" )
+        print( "Connexion à \"Artists on Twitter Finder\" réussie !" )
     
     """
     Obtenir le résultat JSON d'un appel sur l'API.

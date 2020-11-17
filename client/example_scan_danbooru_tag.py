@@ -4,14 +4,14 @@
 import requests
 from time import sleep
 
-from class_WebAPI_Client import WebAPI_Client
+from class_AOTF_Client import AOTF_Client
 
 
 """
 Fonction permettant de populer la base de données autour d'un tag sur Danbooru.
 """
 def scan_danbooru_tag ( TAG_TO_SCAN ) :
-    server = WebAPI_Client()
+    server = AOTF_Client()
     if not server.ready :
         return
     

@@ -3,7 +3,7 @@
 
 import requests
 
-from class_WebAPI_Client import WebAPI_Client
+from class_AOTF_Client import AOTF_Client
 
 
 """
@@ -16,7 +16,7 @@ Pour la recherche, les résultats sont triés par "Popular all times".
               page d'accueil. Laisser à "None" pour scanner la page d'accueil.
 """
 def scan_deviantart_home_or_search ( NUMBER_OF_ILLUST_TO_SEND = 150, SEARCH = None ) :
-    server = WebAPI_Client()
+    server = AOTF_Client()
     if not server.ready :
         return
     

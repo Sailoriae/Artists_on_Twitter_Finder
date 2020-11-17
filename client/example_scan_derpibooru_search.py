@@ -3,7 +3,7 @@
 
 import requests
 
-from class_WebAPI_Client import WebAPI_Client
+from class_AOTF_Client import AOTF_Client
 
 
 """
@@ -16,7 +16,7 @@ Note : Les images sont envoyées dans l'ordre du score, en descendant. De plus,
 aucun filtre n'est appliqué !
 """
 def scan_derpibooru_search ( SEARCH_TO_SCAN, LIMIT = None ) :
-    server = WebAPI_Client()
+    server = AOTF_Client()
     if not server.ready :
         return
     

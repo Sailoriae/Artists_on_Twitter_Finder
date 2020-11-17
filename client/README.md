@@ -1,6 +1,6 @@
 # Artists on Twitter Finder : Client
 
-## Classe `WebAPI_Client`
+## Classe `AOTF_Client`
 
 Cette classe gère la connexion au serveur "Artists on Twitter Finder".
 Après son utilisation, il faut vérifier que son attribut `ready` soit à `True`. Il indique que la connexion au serveur a réussi.
