@@ -89,3 +89,5 @@ Script `app.py` : Script central, crée et gère les threads de traitement, la l
 
 * Si l'image d'un Tweet a été perdue par Twitter, ou qu'il s'est produit une erreur, elle est de toutes manières enregistrée dans la base de données, avec des `NULL` pour liste de caractéristiques.
   Si il s'est produit une erreur, elle sont journalisées ici.
+
+* Les curseurs d'indexation sont enregistrés une fois l'indexation terminée. D'une manière générale, l'ajout ou la modifications de données dans la base de données est pensé pour qu'un arrêt brutal (Crash ou kill) d'un thread ou du serveur complet n'ait pas d'impact sur la cohérence des données.
