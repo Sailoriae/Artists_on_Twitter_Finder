@@ -59,6 +59,10 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
         # d'info dans la BDD (Ou moins)
         hundred_tweets = []
         
+        # Liste des ID de Tweets qui ont bien des infos dans la BDD (Donc qui
+        # ne sont pas dans la liste précédente)
+        tweets_list = []
+        
         # Parcourir les ID de Tweets à réessayer
         for tweet in retry_tweets_iterator :
             # Si le Tweet a été réessayé déjà 3 fois, il faut le supprimer
@@ -102,6 +106,7 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
             # comme la fonction analyse_tweet_json()
             else :
                 print( "[retry_failed_tweets_th" + str(thread_id) + "] Réindexation programée du Tweet ID : " + str(tweet["tweet_id"]) )
+                tweets_list.append( tweet["tweet_id"] )
                 tweets_queue.put( tweet )
         
         # Si il faut s'arrêter
@@ -142,7 +147,7 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
         # Supprimer de la BDD les ID de Tweets à réessayer et dont le réessai
         # a réussi, ou qui n'étaient pas dans "response", c'est à dire qu'ils
         # ont étés supprimés
-        for tweet_id in hundred_tweets :
+        for tweet_id in hundred_tweets + tweets_list :
             if not int(tweet_id) in refailed_tweets :
                 bdd_direct_access.remove_retry_tweet( tweet_id )
     
