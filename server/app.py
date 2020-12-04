@@ -245,6 +245,8 @@ if __name__ == "__main__" :
     if param.ENABLE_MULTIPROCESSING :
         print( "ATTENTION, serveur démarré en multiprocessing !" )
         print( "Il peut y avoir des problèmes d'affichage des messages et de processus fantômes, notamment sous Windows." )
+        # En fait c'est parce qu'il faudrait flush stdout de temps en temps dans les sous-processus
+        # Pour les processus fantômes, c'est quand on tue le processus père (Ou qu'il plante)
     
     while True :
         command = input()
