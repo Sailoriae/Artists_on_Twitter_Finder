@@ -197,10 +197,10 @@ class Tweets_Indexer :
                 self.bdd.add_retry_tweet(
                     tweet["tweet_id"],
                     tweet["user_id"],
-                    image_1_name,
-                    image_2_name,
-                    image_3_name,
-                    image_4_name,
+                    tweet["images"][0],
+                    tweet["images"][1],
+                    tweet["images"][2],
+                    tweet["images"][3],
                     tweet["hashtags"]
                 )
                 
