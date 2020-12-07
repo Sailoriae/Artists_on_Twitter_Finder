@@ -181,15 +181,9 @@ class Scan_Requests_Pipeline :
                     if not request.started_SearchAPI_listing :
                         # On doit démonter et remonter la file en enlevant la
                         # requête.
-                        temp_queue = remove_account_id_from_queue(
-                            Pyro4.Proxy( self._step_A_SearchAPI_list_account_tweets_queue ),
+                        remove_account_id_from_queue(
+                            self._step_A_SearchAPI_list_account_tweets_queue,
                             account_id )
-                        
-                        # Désenregistrer l'ancienne file
-                        self._root.unregister_obj( self._step_A_SearchAPI_list_account_tweets_queue )
-                        
-                        # Enregistrer la nouvelle file
-                        self._step_A_SearchAPI_list_account_tweets_queue = self._root.register_obj( temp_queue )
                         
                         # On met la requête dans la file d'attente prioritaire.
                         Pyro4.Proxy( self._step_A_SearchAPI_list_account_tweets_prior_queue ).put( request )
@@ -200,15 +194,9 @@ class Scan_Requests_Pipeline :
                     if not request.started_TimelineAPI_listing :
                         # On doit démonter et remonter la file en enlevant la
                         # requête.
-                        temp_queue = remove_account_id_from_queue(
-                            Pyro4.Proxy( self._step_B_TimelineAPI_list_account_tweets_queue ),
+                        remove_account_id_from_queue(
+                            self._step_B_TimelineAPI_list_account_tweets_queue,
                             account_id )
-                        
-                        # Désenregistrer l'ancienne file
-                        self._root.unregister_obj( self._step_B_TimelineAPI_list_account_tweets_queue )
-                        
-                        # Enregistrer la nouvelle file
-                        self._step_B_TimelineAPI_list_account_tweets_queue = self._root.register_obj( temp_queue )
                         
                         # On met la requête dans la file d'attente prioritaire.
                         Pyro4.Proxy( self._step_B_TimelineAPI_list_account_tweets_prior_queue ).put( request )
@@ -219,15 +207,9 @@ class Scan_Requests_Pipeline :
                     if not request.is_in_SearchAPI_indexing :
                         # On doit démonter et remonter la file en enlevant la
                         # requête.
-                        temp_queue = remove_account_id_from_queue(
-                            Pyro4.Proxy( self._step_C_SearchAPI_index_account_tweets_queue ),
+                        remove_account_id_from_queue(
+                            self._step_C_SearchAPI_index_account_tweets_queue,
                             account_id )
-                        
-                        # Désenregistrer l'ancienne file
-                        self._root.unregister_obj( self._step_C_SearchAPI_index_account_tweets_queue )
-                        
-                        # Enregistrer la nouvelle file
-                        self._step_C_SearchAPI_index_account_tweets_queue = self._root.register_obj( temp_queue )
                         
                         # On met la requête dans la file d'attente prioritaire.
                         Pyro4.Proxy( self._step_C_SearchAPI_index_account_tweets_prior_queue ).put( request )
@@ -238,15 +220,9 @@ class Scan_Requests_Pipeline :
                     if not request.is_in_TimelineAPI_indexing :
                         # On doit démonter et remonter la file en enlevant la
                         # requête.
-                        temp_queue = remove_account_id_from_queue(
-                            Pyro4.Proxy( self._step_D_TimelineAPI_index_account_tweets_queue ),
+                        remove_account_id_from_queue(
+                            self._step_D_TimelineAPI_index_account_tweets_queue,
                             account_id )
-                        
-                        # Désenregistrer l'ancienne file
-                        self._root.unregister_obj( self._step_D_TimelineAPI_index_account_tweets_queue )
-                        
-                        # Enregistrer la nouvelle file
-                        self._step_D_TimelineAPI_index_account_tweets_queue = self._root.register_obj( temp_queue )
                         
                         # On met la requête dans la file d'attente prioritaire.
                         Pyro4.Proxy( self.step_D_TimelineAPI_index_account_tweets_prior_queue ).put( request )

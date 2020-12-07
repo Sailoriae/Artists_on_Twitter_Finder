@@ -106,9 +106,6 @@ if __name__ == "__main__" :
         sys.exit(0)
     
     # Garder des proxies ouverts
-    # Note : Ne pas être tenté de garder un proxy permanent vers les files
-    # d'attente, car les files de scan peuvent être démontées et remplacées
-    # lors du passage à prioritaire d'une requête de scan
     shared_memory_user_requests = shared_memory.user_requests
     shared_memory_scan_requests = shared_memory.scan_requests
     shared_memory_execution_metrics = shared_memory.execution_metrics
