@@ -47,12 +47,19 @@ function displayTweets ( json ) {
 				p.appendChild(a);
 				div1.appendChild(p);
 
+				const userPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+				if (userPrefersDark) {
+					var theme = "dark";
+				} else {
+					var theme = "light";
+				}
+
 				try {
 					twttr.widgets.createTweet( tweets[i].tweet_id, div2, {
 						conversation : "none",
 						cards : "visible",
 						linkColor : "#cc0000",
-						theme : "light",
+						theme : theme,
 						dnt : "true"
 					})
 				} catch ( ReferenceError ) { // Si la JS de Twitter n'a pas été chargée

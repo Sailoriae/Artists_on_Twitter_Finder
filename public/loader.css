@@ -10,8 +10,17 @@
 	width: 13px;
 	height: 13px;
 	border-radius: 50%;
-	background: #000;
 	animation-timing-function: cubic-bezier(0, 1, 1, 0);
+}
+@media (prefers-color-scheme: light) {
+	.lds-ellipsis div {
+		background: #000;
+	}
+}
+@media (prefers-color-scheme: dark) {
+	.lds-ellipsis div {
+		background: #fff;
+	}
 }
 .lds-ellipsis div:nth-child(1) {
 	left: 8px;
