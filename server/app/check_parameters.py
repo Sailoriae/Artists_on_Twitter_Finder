@@ -59,8 +59,9 @@ def check_parameters () :
             print( "Veuillez réinitialiser votre fichier \"parameters.py\" et le re-configurer !")
             return False
     
-    except (NameError, AttributeError) :
+    except (NameError, AttributeError) as error :
         print( "Il y a un paramètre manquant !" )
+        print( error )
         print( "Veuillez réinitialiser votre fichier \"parameters.py\" et le re-configurer !")
         return False
     
