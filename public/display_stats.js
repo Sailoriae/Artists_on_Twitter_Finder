@@ -30,8 +30,8 @@ function displayStats() {
 					statsP.textContent = parse( lang[ "STATS" ], numberWithSpaces( json["indexed_tweets_count"] ), numberWithSpaces( json["indexed_accounts_count"] ) );
 					infosP.textContent = parse( lang[ "INFO" ], json["limit_per_ip_address"] )
 
-					if ( json["pending_user_requests_count"] > 20 ) {
-						warningP.textContent = parse( lang[ "WARNING" ], numberWithSpaces( json["pending_user_requests_count"] ), numberWithSpaces( json["pending_scan_requests_count"] ) );
+					if ( json["processing_user_requests_count"] > 20 ) {
+						warningP.textContent = parse( lang[ "WARNING" ], numberWithSpaces( json["processing_user_requests_count"] ), numberWithSpaces( json["processing_scan_requests_count"] ) );
 					}
 
 					await new Promise(r => setTimeout(r, 30000));

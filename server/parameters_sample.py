@@ -155,7 +155,7 @@ RESET_SEARCHAPI_CURSORS_PERIOD = 180 # jours
 """
 Limitation du nombre de requêtes (Via l'API HTTP) par addresse IP.
 """
-MAX_PENDING_REQUESTS_PER_IP_ADDRESS = 10
+MAX_PROCESSING_REQUESTS_PER_IP_ADDRESS = 10
 
 """
 Liste des addresses IP non-soumises à la limitation.

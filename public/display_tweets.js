@@ -7,7 +7,7 @@ function canDisplayTweets ( json ) {
 		 ( json.error === "UNSUPPORTED_WEBSITE" ) ||
 		 ( json.error === "NO_TWITTER_ACCOUNT_FOUND" ) ||
 		 ( json.error === "NO_VALID_TWITTER_ACCOUNT_FOUND" ) ||
-		 ( json.error === "YOUR_IP_HAS_MAX_PENDING_REQUESTS" ) ) {
+		 ( json.error === "YOUR_IP_HAS_MAX_PROCESSING_REQUESTS" ) ) {
 		return false;
 	}
 

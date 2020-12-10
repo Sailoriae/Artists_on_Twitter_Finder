@@ -47,7 +47,7 @@ class Limit_per_IP_Address :
             return True
         
         else :
-            if current_count < param.MAX_PENDING_REQUESTS_PER_IP_ADDRESS :
+            if current_count < param.MAX_PROCESSING_REQUESTS_PER_IP_ADDRESS :
                 self._dict_of_ip_addresses[ ip_address ] = current_count + 1
                 self._dict_of_ip_addresses_sem.release()
                 return True

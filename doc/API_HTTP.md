@@ -64,12 +64,12 @@ Liste des erreurs possibles :
 - `BLOCKED_BY_TWITTER_ACCOUNT` : Un des comptes Twitter à indexer bloque tous les comptes de scan du serveur. Il est donc impossible d'indexer ce compte.
 - `ERROR_DURING_REVERSE_SEARCH` : Erreur durant la recherche d'image inversée. Est ce que l'illustration n'a pas un format à la noix ? Par exemple GIF animé ?
 - `PROCESSING_ERROR` : Un thread de traitement a planté durant son traitement de cette requête. Il est donc impossible de terminer cette requête !
-- `YOUR_IP_HAS_MAX_PENDING_REQUESTS` : L'adresse IP qui a envoyé la requête a atteint son quota maximum de requêtes en cours de traitement. Il faut donc attendre que les autres requêtes envoyées par cette adresse IP finissend leur traitement. 
+- `YOUR_IP_HAS_MAX_PROCESSING_REQUESTS` : L'adresse IP qui a envoyé la requête a atteint son quota maximum de requêtes en cours de traitement. Il faut donc attendre que les autres requêtes envoyées par cette adresse IP finissend leur traitement. 
 
 La liste `results` peut être vide, ou comporter plusieurs résultats. Ils sont alors classés par ordre croissant de distance avec l'illustration de requête.
 
 L'API peut aussi fournir des statistiques sur la base de données : `GET /stats`
 
 Attention : Le serveur limite :
-- Le nombre de requêtes en cours de traitement par adresse IP. Si dépassement, le JSON de réponse contient l'erreur : `YOUR_IP_HAS_MAX_PENDING_REQUESTS`.
+- Le nombre de requêtes en cours de traitement par adresse IP. Si dépassement, le JSON de réponse contient l'erreur : `YOUR_IP_HAS_MAX_PROCESSING_REQUESTS`.
 - Et le nombre de requêtes par secondes. Si dépassement, le serveur renvoit une erreur HTTP 429.

@@ -96,7 +96,7 @@
 			<li><code>BLOCKED_BY_TWITTER_ACCOUNT</code><br>Un des comptes Twitter à indexer bloque tous les comptes de scan du serveur. Il est donc impossible d'indexer ce compte.</li>
 			<li><code>ERROR_DURING_REVERSE_SEARCH</code><br>Erreur durant la recherche d'image inversée. Est-ce que l'illustration n'a pas un format à la noix ? Par exemple GIF animé ?</li>
 			<li><code>PROCESSING_ERROR</code><br>Un thread de traitement a planté durant son traitement de cette requête. Il est donc impossible de terminer cette requête !</li>
-			<li><code>YOUR_IP_HAS_MAX_PENDING_REQUESTS</code><br>L'adresse IP qui a envoyé la requête a atteint son quota maximum de requêtes en cours de traitement. Il faut donc attendre que les autres requêtes envoyées par cette adresse IP finissent leur traitement.</li>
+			<li><code>YOUR_IP_HAS_MAX_PROCESSING_REQUESTS</code><br>L'adresse IP qui a envoyé la requête a atteint son quota maximum de requêtes en cours de traitement. Il faut donc attendre que les autres requêtes envoyées par cette adresse IP finissent leur traitement.</li>
 		</ul>
 
 		<h2>Endpoint <code>/api/stats</code></h2>
@@ -107,8 +107,8 @@
 		<ul>
 			<li><code>indexed_tweets_count</code><br>Nombre de Tweets indexés.</li>
 			<li><code>indexed_accounts_count</code><br>Nombre de comptes Twitter indexés.</li>
-			<li><code>pending_user_requests_count</code><br>Nombre de requêtes en cours de traitement. Plus cette valeur est élevée, plus votre requête va prendre du temps à être traitée.</li>
-			<li><code>pending_scan_requests_count</code><br>Nombre d'indexations ou de mise à jour d'indexation de comptes Twitter en cours. Plus cette valeur est élevée, plus votre requête risque de prendre du temps à être traitée.</li>
+			<li><code>processing_user_requests_count</code><br>Nombre de requêtes en cours de traitement. Plus cette valeur est élevée, plus votre requête va prendre du temps à être traitée.</li>
+			<li><code>processing_scan_requests_count</code><br>Nombre d'indexations ou de mise à jour d'indexation de comptes Twitter en cours. Plus cette valeur est élevée, plus votre requête risque de prendre du temps à être traitée.</li>
 			<li><code>limit_per_ip_address</code><br>Nombre maximale de requêtes en cours de traitement par adresse IP.</li>
 			<li><code>update_accounts_frequency</code><br>Fréquence de la mise à jour automatique des comptes Twitter indexés, en jours. Un compte peut aussi être mis à jour lors d'une requête si l'illustration est trop récente.</li>
 	</main>

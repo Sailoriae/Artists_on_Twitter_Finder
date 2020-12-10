@@ -33,7 +33,7 @@ Ces mèthodes peuvent émettre les exceptions suivantes :
 
 * `Server_Connection_Not_Initialised` : La connexion au serveur n'a pas été intialisée correctement.
 
-* `Max_Pending_Requests_On_Server` : Une nouvelle requête n'a pas pue être créée sur le serveur car l'adresse IP du client a atteint son maximum de requêtes en cours de traitement sur le serveur.
+* `Max_Processing_Requests_On_Server` : Une nouvelle requête n'a pas pue être créée sur le serveur car l'adresse IP du client a atteint son maximum de requêtes en cours de traitement sur le serveur.
 
 
 ## Scripts d'exemples

@@ -94,7 +94,7 @@ class Scan_Requests_Pipeline :
         
         # Compteur du nombre de requêtes en cours de traitement dans le
         # pipeline.
-        self._pending_requests_count = 0
+        self._processing_requests_count = 0
     
     """
     Getters et setters pour Pyro.
@@ -127,7 +127,7 @@ class Scan_Requests_Pipeline :
     def queues_sem( self ) : return Pyro4.Proxy( self._queues_sem )
     
     @property
-    def pending_requests_count( self ) : return self._pending_requests_count
+    def processing_requests_count( self ) : return self._processing_requests_count
     
     # Obtenir le nombre de requêtes en mémoire
     def get_size( self ) :
@@ -236,7 +236,7 @@ class Scan_Requests_Pipeline :
                                                          account_id,
                                                          account_name,
                                                          is_prioritary = is_prioritary ) )
-        self._pending_requests_count += 1 # Augmenter le compteur du nombre de requêtes en cours de traitement
+        self._processing_requests_count += 1 # Augmenter le compteur du nombre de requêtes en cours de traitement
         self._requests[ account_id ] = request # On passe ici l'URI de l'objet.
         
         request = Pyro4.Proxy( request )
@@ -296,7 +296,7 @@ class Scan_Requests_Pipeline :
             request.finished_date = datetime.datetime.now()
             
             # On fais -1 au compteur du nombre de requêtes en cours de traitement
-            self._pending_requests_count -= 1
+            self._processing_requests_count -= 1
             
             # On peut lacher le sémaphore, tant pis pour les statistiques, car
             # Python nous garantie qu'il n'y aura pas deux écritures en même temps

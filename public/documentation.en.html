@@ -97,7 +97,7 @@
 			<li><code>ERROR_DURING_REVERSE_SEARCH</code><br>Error during reverse image search. Doesn't the illustration have a nutty format ? For example animated GIF ?
 </li>
 			<li><code>PROCESSING_ERROR</code><br>A worker thread crashed while processing this request. It is therefore impossible to complete this request !</li>
-			<li><code>YOUR_IP_HAS_MAX_PENDING_REQUESTS</code><br>The IP address that sent the request has reached its maximum quota of requests being processed. We must therefore wait for the other requests sent by this IP address to finish processing.</li>
+			<li><code>YOUR_IP_HAS_MAX_PROCESSING_REQUESTS</code><br>The IP address that sent the request has reached its maximum quota of requests being processed. We must therefore wait for the other requests sent by this IP address to finish processing.</li>
 		</ul>
 
 		<h2><code>/api/stats</code> endpoint</h2>
@@ -108,8 +108,8 @@
 		<ul>
 			<li><code>indexed_tweets_count</code><br>Number of indexed Tweets.</li>
 			<li><code>indexed_accounts_count</code><br>Number of indexed Twitter accounts.</li>
-			<li><code>pending_user_requests_count</code><br>Number of requests being processed. The higher this value, the longer your request will take to be processed.</li>
-			<li><code>pending_scan_requests_count</code><br>Number of indexing or indexing updates of Twitter accounts in progress. The higher this value, the longer your request may take to be processed.</li>
+			<li><code>processing_user_requests_count</code><br>Number of requests being processed. The higher this value, the longer your request will take to be processed.</li>
+			<li><code>processing_scan_requests_count</code><br>Number of indexing or indexing updates of Twitter accounts in progress. The higher this value, the longer your request may take to be processed.</li>
 			<li><code>limit_per_ip_address</code><br>Maximum number of requests being processed per IP address.</li>
 			<li><code>update_accounts_frequency</code><br>How often indexed Twitter accounts are automatically updated, in days. An account can also be updated during a request if the illustration is too recent.</li>
 	</main>

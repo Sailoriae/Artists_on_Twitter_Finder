@@ -14,7 +14,7 @@ class Server_Connection_Not_Initialised ( Exception ) :
         self.message = "La connexion au serveur n'a pas été initialisée correctement."
         super().__init__( self.message )
 
-class Max_Pending_Requests_On_Server ( Exception ) :
+class Max_Processing_Requests_On_Server ( Exception ) :
     def __init__ ( self ) :
         self.message = "Nombre maximum de requêtes en cours de traitement atteint sur ce serveur pour cet adresse IP."
         super().__init__( self.message )
@@ -84,8 +84,8 @@ class AOTF_Client :
                 sleep(1)
             else :
                 response = response.json()
-                if response["error"] == "YOUR_IP_HAS_MAX_PENDING_REQUESTS" :
-                    raise Max_Pending_Requests_On_Server
+                if response["error"] == "YOUR_IP_HAS_MAX_PROCESSING_REQUESTS" :
+                    raise Max_Processing_Requests_On_Server
                     break
                 else :
                     return response

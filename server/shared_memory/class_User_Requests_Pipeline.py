@@ -85,7 +85,7 @@ class User_Requests_Pipeline :
         
         # Compteur du nombre de requêtes en cours de traitement dans le
         # pipeline.
-        self._pending_requests_count = 0
+        self._processing_requests_count = 0
     
     """
     Getters et setters pour Pyro.
@@ -109,7 +109,7 @@ class User_Requests_Pipeline :
     def thread_step_2_tweets_indexer_sem( self ) : return Pyro4.Proxy( self._thread_step_2_tweets_indexer_sem )
     
     @property
-    def pending_requests_count( self ) : return self._pending_requests_count
+    def processing_requests_count( self ) : return self._processing_requests_count
     
     # Obtenir le nombre de requêtes en mémoire
     def get_size( self ) :
@@ -158,7 +158,7 @@ class User_Requests_Pipeline :
         request = self._root.register_obj( User_Request( illust_url,
                                                          ip_address = ip_address ) )
         self._requests[ illust_url ] = request # On passe ici l'URI de l'objet.
-        self._pending_requests_count += 1 # Augmenter le compteur du nombre de requêtes en cours de traitement
+        self._processing_requests_count += 1 # Augmenter le compteur du nombre de requêtes en cours de traitement
         
         self._requests_sem.release() # Seulement ici !
         
@@ -188,7 +188,7 @@ class User_Requests_Pipeline :
         # Créer et ajouter l'objet User_Request à notre système.
         request = self._root.register_obj( User_Request( image_url ) )
         self._requests[ image_url ] = request
-        self._pending_requests_count += 1 # Augmenter le compteur du nombre de requêtes en cours de traitement
+        self._processing_requests_count += 1 # Augmenter le compteur du nombre de requêtes en cours de traitement
         
         self._requests_sem.release()
         
@@ -254,7 +254,7 @@ class User_Requests_Pipeline :
             # Descendre le compteur de requêtes en cours de traitement dans le
             # pipeline
             self._requests_sem.acquire()
-            self._pending_requests_count -= 1
+            self._processing_requests_count -= 1
             self._requests_sem.release()
             
             if request.ip_address != None :

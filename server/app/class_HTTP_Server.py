@@ -101,10 +101,10 @@ def http_server_container ( shared_memory_uri_arg ) :
                     # Si request == None, c'est qu'on ne peut pas lancer une
                     # nouvelle requête car l'addresse IP a trop de requêtes en
                     # cours de traitement, donc on renvoit l'erreur
-                    # YOUR_IP_HAS_MAX_PENDING_REQUESTS
+                    # YOUR_IP_HAS_MAX_PROCESSING_REQUESTS
                     if request == None :
                         response_dict["status"] = "END"
-                        response_dict["error"] = "YOUR_IP_HAS_MAX_PENDING_REQUESTS"
+                        response_dict["error"] = "YOUR_IP_HAS_MAX_PROCESSING_REQUESTS"
                     
                     # Sinon, on envoit les informations sur la requête
                     else :
@@ -125,9 +125,9 @@ def http_server_container ( shared_memory_uri_arg ) :
                 response_dict = {
                     "indexed_tweets_count" : self.shared_memory.tweets_count,
                     "indexed_accounts_count" : self.shared_memory.accounts_count,
-                    "pending_user_requests_count" : self.shared_memory.user_requests.pending_requests_count,
-                    "pending_scan_requests_count" : self.shared_memory.scan_requests.pending_requests_count,
-                    "limit_per_ip_address" : param.MAX_PENDING_REQUESTS_PER_IP_ADDRESS,
+                    "processing_user_requests_count" : self.shared_memory.user_requests.processing_requests_count,
+                    "processing_scan_requests_count" : self.shared_memory.scan_requests.processing_requests_count,
+                    "limit_per_ip_address" : param.MAX_PROCESSING_REQUESTS_PER_IP_ADDRESS,
                     "update_accounts_frequency" : param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE
                 }
                 
