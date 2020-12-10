@@ -110,7 +110,7 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
         # Si jamais aucun compte Twitter n'a été trouvé, on ne va pas plus loin
         # avec la requête (On passe donc son status à "Fin de traitement")
         elif data.twitter_accounts == []:
-            request.problem = "NO_TWITTER_ACCOUNT_FOR_THIS_ARTIST"
+            request.problem = "NO_TWITTER_ACCOUNT_FOUND"
             shared_memory_user_requests.set_request_to_next_step( request, force_end = True )
             
             # Dire qu'on n'est plus en train de traiter cette requête
@@ -129,7 +129,7 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
         # plus loin avec la requête (On passe donc son status à "Fin de
         # traitement")
         if request.twitter_accounts_with_id == []:
-            request.problem = "NO_VALID_TWITTER_ACCOUNT_FOR_THIS_ARTIST"
+            request.problem = "NO_VALID_TWITTER_ACCOUNT_FOUND"
             shared_memory_user_requests.set_request_to_next_step( request, force_end = True )
             
             # Dire qu'on n'est plus en train de traiter cette requête

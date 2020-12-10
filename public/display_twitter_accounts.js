@@ -9,8 +9,8 @@ function canDisplayTwitterAccounts ( json ) {
 		 ( json.error === "NOT_AN_URL" ) ||
 		 ( json.error === "INVALID_URL" ) ||
 		 ( json.error === "UNSUPPORTED_WEBSITE" ) ||
-		 ( json.error === "NO_TWITTER_ACCOUNT_FOR_THIS_ARTIST" ) ||
-		 ( json.error === "NO_VALID_TWITTER_ACCOUNT_FOR_THIS_ARTIST" ) ||
+		 ( json.error === "NO_TWITTER_ACCOUNT_FOUND" ) ||
+		 ( json.error === "NO_VALID_TWITTER_ACCOUNT_FOUND" ) ||
 		 ( json.error === "YOUR_IP_HAS_MAX_PENDING_REQUESTS" ) ) {
 		 return false;
 	}
@@ -34,7 +34,7 @@ function displayTwitterAccounts ( json ) {
 		if ( twitterAccounts.length === 1 ) {
 			p.textContent = lang[ "TWITTER_ACCOUNT_FOUND" ];
 		} else {
-			p.textContent = lang[ "TWITTER_ACCOUNT_FOUNDS" ];
+			p.textContent = lang[ "TWITTER_ACCOUNTS_FOUND" ];
 		}
 
 		for ( var i = 0; i < twitterAccounts.length; i++ ) {
