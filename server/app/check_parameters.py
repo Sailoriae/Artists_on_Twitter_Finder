@@ -67,6 +67,12 @@ def check_parameters () :
     
     # ========================================================================
     
+    if len( param.TWITTER_API_KEYS ) < 1 :
+        print( "Vous devez donner l'accès à au moins un compte Twitter via la liste \"TWITTER_API_KEYS\"." )
+        return False
+    
+    # ========================================================================
+    
     print( "Verification de la connexion à l'API publique Twitter..." )
     from tweet_finder.twitter import TweepyAbstraction
     
