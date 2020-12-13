@@ -2,8 +2,18 @@
 # coding: utf-8
 
 """
-Activer le multiprocessing. Prend alors plus de processeur, mais le traitement
-des requêtes est plus efficace.
+Activer le mode multi-processus.
+
+Si ce paramètre activé, de nombreux sous-processus seront créés, ainsi qu'un
+serveur de mémoire partagée reposant sur la librairie PYRO sera créé. Le
+serveur sera donc plus lourd, mais le traitement des requêtes sera bien plus
+efficace.
+
+Si ce paramètre est désactivé, seulement des threads seront créés, et la
+mémoire partagée sera simplement un objet Python. Le serveur sera donc plus
+léger, mais le traitement des requêtes sera plus lent, car les threads Python
+ne fonctionnent pas en paralléle (Voir la doc sur le GIL). 
+
 ATTENTION ! SQLite bloque la BDD lors d'une écriture ! Ne pas activer ce
 paramètre si vous utilisez SQLite !
 """

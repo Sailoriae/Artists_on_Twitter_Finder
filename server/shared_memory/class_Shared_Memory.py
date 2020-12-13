@@ -9,18 +9,21 @@ try :
     from class_HTTP_Requests_Limitator import HTTP_Requests_Limitator
     from class_Metrics_Container import Metrics_Container
     from class_Threads_Registry import Threads_Registry
+    from open_proxy import open_proxy
 except ModuleNotFoundError :
     from .class_User_Requests_Pipeline import User_Requests_Pipeline
     from .class_Scan_Requests_Pipeline import Scan_Requests_Pipeline
     from .class_HTTP_Requests_Limitator import HTTP_Requests_Limitator
     from .class_Metrics_Container import Metrics_Container
     from .class_Threads_Registry import Threads_Registry
+    from .open_proxy import open_proxy
 
 # Ajouter le répertoire parent au PATH pour pouvoir importer
 from sys import path as sys_path
 from os import path as os_path
 sys_path.append(os_path.dirname(os_path.dirname(os_path.abspath(__file__))))
 
+import parameters as param
 from tweet_finder.database import SQLite_or_MySQL
 
 
@@ -48,11 +51,11 @@ class Shared_Memory :
     """
     def __init__ ( self, pyro_port, pool_size ) :
         # Initialisation du serveur Pyro4
- #       Pyro4.config.SERVERTYPE = "multiplex" # NE PAS FAIRE DE MULTIPLEX, CA NE FONCTIONNE PAS POUR NOTRE UTILISATION
-        Pyro4.config.THREADPOOL_SIZE = pool_size
-        Pyro4.config.SERIALIZERS_ACCEPTED = { "pickle" }
-        Pyro4.config.SERIALIZER = "pickle"
-        self._daemon = Pyro4.Daemon( port = pyro_port )
+        if param.ENABLE_MULTIPROCESSING :
+            Pyro4.config.THREADPOOL_SIZE = pool_size
+            Pyro4.config.SERIALIZERS_ACCEPTED = { "pickle" }
+            Pyro4.config.SERIALIZER = "pickle"
+            self._daemon = Pyro4.Daemon( port = pyro_port )
         
         # Variable pour éteindre tout le système.
         self._keep_service_alive = True
@@ -106,10 +109,10 @@ class Shared_Memory :
     def keep_pyro_alive( self, value ) : self._keep_pyro_alive = value
     
     @property
-    def user_requests( self ) : return Pyro4.Proxy( self._user_requests )
+    def user_requests( self ) : return open_proxy( self._user_requests )
     
     @property
-    def scan_requests( self ) : return Pyro4.Proxy( self._scan_requests )
+    def scan_requests( self ) : return open_proxy( self._scan_requests )
     
     @property
     def tweets_count( self ) : return self._tweets_count
@@ -122,13 +125,13 @@ class Shared_Memory :
     def accounts_count( self, value ) : self._accounts_count = value
     
     @property
-    def http_limitator( self ) : return Pyro4.Proxy( self._http_limitator )
+    def http_limitator( self ) : return open_proxy( self._http_limitator )
     
     @property
-    def execution_metrics( self ) : return Pyro4.Proxy( self._execution_metrics )
+    def execution_metrics( self ) : return open_proxy( self._execution_metrics )
     
     @property
-    def threads_registry( self ) : return Pyro4.Proxy( self._threads_registry )
+    def threads_registry( self ) : return open_proxy( self._threads_registry )
     
     @property
     def force_auto_update_reloop( self ) : return self._force_auto_update_reloop
@@ -139,6 +142,8 @@ class Shared_Memory :
     Lancer le sevreur de mémoire partagée, avec Pyro.
     """
     def launch_pyro_server ( self ) :
+        if not param.ENABLE_MULTIPROCESSING :
+            raise RuntimeError( "Multiprocessing désactivé, le serveur Pyro ne peut pas être démarré !" )
         uri = self._daemon.register( self, "shared_memory" )
         print( "URI de la mémoire partagée :", uri )
         self._daemon.requestLoop( loopCondition = self.keep_running )
@@ -157,11 +162,15 @@ class Shared_Memory :
     @return L'URI vers cet objet, sous la forme d'une string.
     """
     def register_obj ( self, obj ) :
-        return self._daemon.register( obj ).asString()
+        if param.ENABLE_MULTIPROCESSING :
+            return self._daemon.register( obj ).asString()
+        else :
+            return obj
     
     """
     Dé-enregistrer un objet.
     @param L'URI vers cet objet.
     """
     def unregister_obj ( self, uri ) :
-        self._daemon.unregister( uri )
+        if param.ENABLE_MULTIPROCESSING :
+            self._daemon.unregister( uri )

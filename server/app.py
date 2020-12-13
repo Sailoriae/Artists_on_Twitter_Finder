@@ -60,52 +60,66 @@ if __name__ == "__main__" :
     print( "Nombre maximum de descripteurs de fichiers :", param.MAX_FILE_DESCRIPTORS )
     
     """
+    SI ON EST EN MULTIPROCESSING :
     Lancement du serveur de mémoire partagée, et accès pour ce processus (Le
     collecteur d'erreurs crée les accès pour les threads).
     """
-    from random import randint
-    from shared_memory.thread_pyro_server import thread_pyro_server
+    if param.ENABLE_MULTIPROCESSING :
+        from random import randint
+        from shared_memory.thread_pyro_server import thread_pyro_server
+        
+        # On démarre le serveur sur un port aléatoire, j'en ai marre des processus
+        # fantomes qui massacrent tous mes tests !
+        pyro_port = randint( 49152, 65535 )
+        
+        # Note : Je ne comprend pas bien pourquoi, mais sous Linux, en mode
+        # multi-processus, les processus fils se connectent à leur frère
+        # processus serveur Pyro, mais freezent sur "keep_service_alive", c'est
+        # à dire à l'accès à un attribut. Idem sur ce processus père.
+        # Du coup, on crée forcément le serveur Pyro en thread, ce qui n'est
+        # pas génant puisque sur le processus pére (Ici, "app.py"), il n'y a
+        # que la CLI.
+        thread_pyro = threading.Thread( name = "thread_pyro_th1",
+                                        target = thread_pyro_server,
+                                        args = ( pyro_port, param.MAX_FILE_DESCRIPTORS, ) )
+        thread_pyro.start()
+        
+        # On prépare la connexion au serveur.
+        import Pyro4
+        Pyro4.config.SERIALIZER = "pickle"
+        shared_memory_uri = "PYRO:shared_memory@localhost:" + str(pyro_port)
+        
+        # On test pendant 30 secondes que la connection s'établisse.
+        from time import sleep
+        shared_memory = None
+        for i in range( 30 ) :
+            print( "Connexion au serveur de mémoire partagée..." )
+            try :
+                shared_memory = Pyro4.Proxy( shared_memory_uri )
+                shared_memory.keep_service_alive # Test d'accès
+            except ( Pyro4.errors.ConnectionClosedError, Pyro4.errors.CommunicationError, ConnectionRefusedError ) :
+                sleep(1)
+            else :
+                print( "Connexion au serveur de mémoire partagée réussie !" )
+                break
+        
+        if shared_memory == None :
+            print( "Connexion au serveur de mémoire partagée impossible !" )
+            import sys
+            sys.exit(0)
     
-    # On démarre le serveur sur un port aléatoire, j'en ai marre des processus
-    # fantomes qui massacrent tous mes tests !
-    pyro_port = randint( 49152, 65535 )
+    """
+    SI ON N'EST PAS EN MULTIPROCESSING :
+    Créer simplement l'objet de mémoire partagée.
+    """
+    if not param.ENABLE_MULTIPROCESSING :
+        from shared_memory.class_Shared_Memory import Shared_Memory
+        shared_memory = Shared_Memory( 0, 0 )
+        shared_memory_uri = shared_memory # Pour passer aux threads
     
-    # Note : Je ne comprend pas bien pourquoi, mais sous Linux, en mode multi-
-    # processus, les processus fils se connectent à leur frère processus
-    # serveur Pyro, mais freezent sur "shared_memory.keep_service_alive", c'est
-    # à dire à l'accès à un attribut. Idem sur ce processus père.
-    # Du coup, on crée forcément le serveur Pyro en thread, ce qui n'est pas
-    # génant puisque sur le processus pére (Ici, "app.py"), il n'y a que la CLI.
-    thread_pyro = threading.Thread( name = "thread_pyro_th1",
-                                    target = thread_pyro_server,
-                                    args = ( pyro_port, param.MAX_FILE_DESCRIPTORS, ) )
-    thread_pyro.start()
-    
-    # On prépare la connexion au serveur.
-    import Pyro4
-    Pyro4.config.SERIALIZER = "pickle"
-    shared_memory_uri = "PYRO:shared_memory@localhost:" + str(pyro_port)
-    
-    # On test pendant 30 secondes que la connection s'établisse.
-    from time import sleep
-    shared_memory = None
-    for i in range( 30 ) :
-        print( "Connexion au serveur de mémoire partagée..." )
-        try :
-            shared_memory = Pyro4.Proxy( shared_memory_uri )
-            shared_memory.keep_service_alive # Test d'accès
-        except ( Pyro4.errors.ConnectionClosedError, Pyro4.errors.CommunicationError, ConnectionRefusedError ) :
-            sleep(1)
-        else :
-            print( "Connexion au serveur de mémoire partagée réussie !" )
-            break
-    
-    if shared_memory == None :
-        print( "Connexion au serveur de mémoire partagée impossible !" )
-        import sys
-        sys.exit(0)
-    
-    # Garder des proxies ouverts
+    """
+    Garder des proxies ouverts.
+    """
     shared_memory_user_requests = shared_memory.user_requests
     shared_memory_scan_requests = shared_memory.scan_requests
     shared_memory_execution_metrics = shared_memory.execution_metrics
@@ -424,5 +438,6 @@ if __name__ == "__main__" :
     for thread in threads :
         thread.join()
     
-    shared_memory.keep_pyro_alive = False
-    thread_pyro.join()
+    if param.ENABLE_MULTIPROCESSING :
+        shared_memory.keep_pyro_alive = False
+        thread_pyro.join()

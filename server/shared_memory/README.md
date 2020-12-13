@@ -1,8 +1,8 @@
 # Module du serveur de mémoire partagée (Dépendance de `app.py`)
 
-La mémoire partagée consiste en un serveur tournant avec la librairie Pytho `Pyro4`.
+La mémoire partagée consiste en un objet racine, `Shared_Memory`, et ses sous-objets. Si le serveur est démarré en mode multi-processus (`ENABLE_MULTIPROCESSING` est à `True`), la mémoire partagée est un serveur tournant avec la librairie Pytho `Pyro4`. Sinon, l'objet racine peut être simplement partagé entre les threads.
 
-Documentation : https://pyro4.readthedocs.io/en/stable/index.html
+Documentation de la librairie Pyro4 : https://pyro4.readthedocs.io/en/stable/index.html
 
 Cette librairie permet de partager des objets entre des processus (Car nous sommes obligés de faire du multi-processus et non du multi-threading à cause du GIL). De plus, elle permet aussi de faire des systèmes distribués. "Artists on Twitter Finder" peut donc être distribué sur plusieurs serveurs (En modifiant un peu le code).
 
@@ -19,7 +19,7 @@ Ainsi, j'ai exploré deux solutions de serveur de mémoire partagée :
 - La librarie `Pyro4`. Peut supporter des classes, et exécuter coté-serveur le code de leurs attributs, mais pas pour les sous-objets ! Cependant, une parade a été trouvée pour pallier ce problème, et faire une mémoire partagée efficace, voir ci-dessous.
 
 
-## Procédure de lancement : `thread_pyro_server`
+## Procédure de lancement du serveur Pyro : `thread_pyro_server`
 
 Cette procédure est appelée en procédure de création d'un processus (Ou d'un thread) par `app.py`.
 Le script `thread_pyro_server.py` peut être éxécuté indépendamment... Mais ça ne sert à rien, sauf à débugger.
@@ -35,13 +35,12 @@ e = Pyro4.Proxy( "PYRO:shared_memory@localhost:3300" )
 
 ## Objets dans la mémoire partagée
 
-L'objet racine de la mémoire partagée est `Shared_Memory`. Lors qu'un objet est créé, sa méthode `register_obj` est appelée afin d'enregistrer le nouvel objet sur le serveur Pyro. Cela permet de faire des "pseudos-sous-objets".
+L'objet racine de la mémoire partagée est `Shared_Memory`. Lors qu'un objet est créé, sa méthode `register_obj` est appelée afin d'enregistrer le nouvel objet sur le serveur Pyro (Elle ne fait rien si le serveur n'est pas démarré en mode multi-processus). Cela permet de faire des "pseudos-sous-objets".
 
-En effet, Pyro permet d'éxécuter les méthodes des objets sur le serveur, mais pas des sous-objets ! Afin de pallier à ce problème (Et afin d'utiliser des Sémphores, qui se sont pas tranférables car non-sérialisables), on enregistre les URI des enregistrement des objets, et non les objets eux-mêmes. Ainsi, lorsqu'un getter est appelé, il renvoit un objet `Pyro4.Proxy` qui est connecté au sous-objet.
+En effet, Pyro permet d'éxécuter les méthodes des objets sur le serveur, mais pas des sous-objets ! Afin de pallier à ce problème (Et afin d'utiliser des Sémaphores, qui se sont pas tranférables car non-sérialisables), on enregistre les URI des enregistrement des objets, et non les objets eux-mêmes. Ainsi, lorsqu'un getter est appelé, il renvoit un objet `Pyro4.Proxy` qui est connecté au sous-objet.
 
 Ainsi, l'utilisation est transparente dans le module `app` !
-
-Ainsi, toutes les méthodes de tous les objets présents dans ce module sont exécutées coté serveur Pyro !
+De plus, toutes les méthodes de tous les objets présents dans ce module sont exécutées coté serveur Pyro !
 
 Arbre des objets :
 - `Shared_Memory` : Objet racine.
@@ -69,3 +68,11 @@ Voir chaque classe pour plus de documentation.
 ## Notes
 
 Les objets `Pyro4.Proxy` ferment leur connexion lorsqu'ils arrivent dans le garbadge collector. Source : https://github.com/irmen/Pyro4/blob/79de6434259ff82d202090cbd0901673d4b8344b/src/Pyro4/core.py#L264
+
+Si les paramètres `ENABLE_MULTIPROCESSING` est à `False`, c'est à dire que le serveur ne crée pas de processus fils, le serveur Pyro n'est pas lancé, et la mémoire partagée fonctionne comme un simple objet Python, partagé entre les Threads.
+
+Ainsi, il faut toujours utiliser la fonction `open_proxy()` !
+Celle-ci renvoie un `Pyro4.Proxy` si le serveur est démarré en mode multi-processus, ou directement l'objet sinon.
+Dans ces deux cas, elle ajoute au proxy ou à l'objet deux méthodes, pour ne pas avoir à utiliser les méthodes et attributs `_pyro*` :
+* `get_URI()` : Retourne l'URI du proxy, ou simplement l'objet.
+* `release_proxy()` : Ferme le proxy, ou ne fait rien.

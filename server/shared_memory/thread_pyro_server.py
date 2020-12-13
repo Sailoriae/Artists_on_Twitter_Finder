@@ -10,6 +10,9 @@ except ModuleNotFoundError :
 
 
 """
+Permet de lancer la mémoire partagée en tant que serveur PYRO.
+A utiliser uniquement si le serveur est lancé en mode multi-processus. Sinon,
+utiliser directement l'objet Shared_Memory (A instancier qu'une seule fois).
 Voir la classe Shared_Memory pour la doc des paramètres.
 """
 def thread_pyro_server( pyro_port = 3300, pool_size = 100000 ) :

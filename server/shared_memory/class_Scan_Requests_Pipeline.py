@@ -11,11 +11,13 @@ try :
     from remove_account_id_from_queue import remove_account_id_from_queue
     from class_Pyro_Semaphore import Pyro_Semaphore
     from class_Pyro_Queue import Pyro_Queue
+    from open_proxy import open_proxy
 except ModuleNotFoundError :
     from .class_Scan_Request import Scan_Request
     from .remove_account_id_from_queue import remove_account_id_from_queue
     from .class_Pyro_Semaphore import Pyro_Semaphore
     from .class_Pyro_Queue import Pyro_Queue
+    from .open_proxy import open_proxy
 
 
 """
@@ -100,31 +102,31 @@ class Scan_Requests_Pipeline :
     Getters et setters pour Pyro.
     """
     @property
-    def step_A_SearchAPI_list_account_tweets_prior_queue( self ) : return Pyro4.Proxy( self._step_A_SearchAPI_list_account_tweets_prior_queue )
+    def step_A_SearchAPI_list_account_tweets_prior_queue( self ) : return open_proxy( self._step_A_SearchAPI_list_account_tweets_prior_queue )
     
     @property
-    def step_A_SearchAPI_list_account_tweets_queue( self ) : return Pyro4.Proxy( self._step_A_SearchAPI_list_account_tweets_queue )
+    def step_A_SearchAPI_list_account_tweets_queue( self ) : return open_proxy( self._step_A_SearchAPI_list_account_tweets_queue )
     
     @property
-    def step_B_TimelineAPI_list_account_tweets_prior_queue( self ) : return Pyro4.Proxy( self._step_B_TimelineAPI_list_account_tweets_prior_queue )
+    def step_B_TimelineAPI_list_account_tweets_prior_queue( self ) : return open_proxy( self._step_B_TimelineAPI_list_account_tweets_prior_queue )
     
     @property
-    def step_B_TimelineAPI_list_account_tweets_queue( self ) : return Pyro4.Proxy( self._step_B_TimelineAPI_list_account_tweets_queue )
+    def step_B_TimelineAPI_list_account_tweets_queue( self ) : return open_proxy( self._step_B_TimelineAPI_list_account_tweets_queue )
     
     @property
-    def step_C_SearchAPI_index_account_tweets_prior_queue( self ) : return Pyro4.Proxy( self._step_C_SearchAPI_index_account_tweets_prior_queue )
+    def step_C_SearchAPI_index_account_tweets_prior_queue( self ) : return open_proxy( self._step_C_SearchAPI_index_account_tweets_prior_queue )
     
     @property
-    def step_C_SearchAPI_index_account_tweets_queue( self ) : return Pyro4.Proxy( self._step_C_SearchAPI_index_account_tweets_queue )
+    def step_C_SearchAPI_index_account_tweets_queue( self ) : return open_proxy( self._step_C_SearchAPI_index_account_tweets_queue )
     
     @property
-    def step_D_TimelineAPI_index_account_tweets_prior_queue( self ) : return Pyro4.Proxy( self._step_D_TimelineAPI_index_account_tweets_prior_queue )
+    def step_D_TimelineAPI_index_account_tweets_prior_queue( self ) : return open_proxy( self._step_D_TimelineAPI_index_account_tweets_prior_queue )
     
     @property
-    def step_D_TimelineAPI_index_account_tweets_queue( self ) : return Pyro4.Proxy( self._step_D_TimelineAPI_index_account_tweets_queue )
+    def step_D_TimelineAPI_index_account_tweets_queue( self ) : return open_proxy( self._step_D_TimelineAPI_index_account_tweets_queue )
     
     @property
-    def queues_sem( self ) : return Pyro4.Proxy( self._queues_sem )
+    def queues_sem( self ) : return open_proxy( self._queues_sem )
     
     @property
     def processing_requests_count( self ) : return self._processing_requests_count
@@ -169,7 +171,7 @@ class Scan_Requests_Pipeline :
         # Vérifier d'abord qu'on n'est pas déjà en train de traiter ce compte.
         for key in self._requests :
             if key == account_id :
-                request = Pyro4.Proxy( self._requests[key] )
+                request = open_proxy( self._requests[key] )
                 
                 # Si il faut passer la requête en proritaire.
                 if is_prioritary and not request.is_prioritary :
@@ -186,7 +188,7 @@ class Scan_Requests_Pipeline :
                             account_id )
                         
                         # On met la requête dans la file d'attente prioritaire.
-                        Pyro4.Proxy( self._step_A_SearchAPI_list_account_tweets_prior_queue ).put( request )
+                        open_proxy( self._step_A_SearchAPI_list_account_tweets_prior_queue ).put( request )
                     
                     # Si est dans une file d'attente de listage des Tweets avec
                     # l'API de timeline, on la sort, pour la mettre dans la même
@@ -199,7 +201,7 @@ class Scan_Requests_Pipeline :
                             account_id )
                         
                         # On met la requête dans la file d'attente prioritaire.
-                        Pyro4.Proxy( self._step_B_TimelineAPI_list_account_tweets_prior_queue ).put( request )
+                        open_proxy( self._step_B_TimelineAPI_list_account_tweets_prior_queue ).put( request )
                     
                     # Si est dans une file d'attente d'indexation des Tweets avec
                     # l'API de recherche, on la sort, pour la mettre dans la même
@@ -212,7 +214,7 @@ class Scan_Requests_Pipeline :
                             account_id )
                         
                         # On met la requête dans la file d'attente prioritaire.
-                        Pyro4.Proxy( self._step_C_SearchAPI_index_account_tweets_prior_queue ).put( request )
+                        open_proxy( self._step_C_SearchAPI_index_account_tweets_prior_queue ).put( request )
                     
                     # Si est dans une file d'attente d'indexation des Tweets avec
                     # l'API de timeline, on la sort, pour la mettre dans la même
@@ -225,7 +227,7 @@ class Scan_Requests_Pipeline :
                             account_id )
                         
                         # On met la requête dans la file d'attente prioritaire.
-                        Pyro4.Proxy( self.step_D_TimelineAPI_index_account_tweets_prior_queue ).put( request )
+                        open_proxy( self.step_D_TimelineAPI_index_account_tweets_prior_queue ).put( request )
                 
                 queues_sem.release()
                 requests_sem.release()
@@ -239,7 +241,7 @@ class Scan_Requests_Pipeline :
         self._processing_requests_count += 1 # Augmenter le compteur du nombre de requêtes en cours de traitement
         self._requests[ account_id ] = request # On passe ici l'URI de l'objet.
         
-        request = Pyro4.Proxy( request )
+        request = open_proxy( request )
         
         # Comme le traitement des requêtes de scan est parallélisé, on peut
         # mettre la requêtes dans toutes les files d'attente.
@@ -274,7 +276,7 @@ class Scan_Requests_Pipeline :
         for key in self._requests :
             if key == account_id :
                 self._requests_sem.release()
-                return Pyro4.Proxy( self._requests[key] )
+                return open_proxy( self._requests[key] )
         self._requests_sem.release()
         
         return None
@@ -339,7 +341,7 @@ class Scan_Requests_Pipeline :
         
         for key in self._requests :
             request_uri = self._requests[key]
-            request = Pyro4.Proxy( request_uri )
+            request = open_proxy( request_uri )
             
             # Si la requête est terminée, il faut vérifier qu'on puisse la garder
             if request.finished_date != None :
@@ -356,7 +358,7 @@ class Scan_Requests_Pipeline :
             else :
                 new_requests_dict[ key ] = request_uri
             
-            request._pyroRelease()
+            request.release_proxy()
         
         # On installe la nouvelle liste
         self._requests = new_requests_dict

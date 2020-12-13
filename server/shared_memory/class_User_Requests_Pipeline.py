@@ -11,11 +11,13 @@ try :
     from class_Limit_per_IP_Address import Limit_per_IP_Address
     from class_Pyro_Semaphore import Pyro_Semaphore
     from class_Pyro_Queue import Pyro_Queue
+    from open_proxy import open_proxy
 except ModuleNotFoundError :
     from .class_User_Request import User_Request
     from .class_Limit_per_IP_Address import Limit_per_IP_Address
     from .class_Pyro_Semaphore import Pyro_Semaphore
     from .class_Pyro_Queue import Pyro_Queue
+    from .open_proxy import open_proxy
 
 # Ajouter le répertoire parent au PATH pour pouvoir importer
 from sys import path as sys_path
@@ -91,22 +93,22 @@ class User_Requests_Pipeline :
     Getters et setters pour Pyro.
     """
     @property
-    def step_1_link_finder_queue( self ) : return Pyro4.Proxy( self._step_1_link_finder_queue )
+    def step_1_link_finder_queue( self ) : return open_proxy( self._step_1_link_finder_queue )
     
     @property
-    def step_2_tweets_indexer_queue( self ) : return Pyro4.Proxy( self._step_2_tweets_indexer_queue )
+    def step_2_tweets_indexer_queue( self ) : return open_proxy( self._step_2_tweets_indexer_queue )
     
     @property
-    def step_3_reverse_search_queue( self ) : return Pyro4.Proxy( self._step_3_reverse_search_queue )
+    def step_3_reverse_search_queue( self ) : return open_proxy( self._step_3_reverse_search_queue )
     
     @property
-    def step_4_filter_results_queue( self ) : return Pyro4.Proxy( self._step_4_filter_results_queue )
+    def step_4_filter_results_queue( self ) : return open_proxy( self._step_4_filter_results_queue )
     
     @property
-    def limit_per_ip_addresses( self ) : return Pyro4.Proxy( self._limit_per_ip_addresses )
+    def limit_per_ip_addresses( self ) : return open_proxy( self._limit_per_ip_addresses )
     
     @property
-    def thread_step_2_tweets_indexer_sem( self ) : return Pyro4.Proxy( self._thread_step_2_tweets_indexer_sem )
+    def thread_step_2_tweets_indexer_sem( self ) : return open_proxy( self._thread_step_2_tweets_indexer_sem )
     
     @property
     def processing_requests_count( self ) : return self._processing_requests_count
@@ -143,7 +145,7 @@ class User_Requests_Pipeline :
         for key in self._requests :
             if key == illust_url :
                 self._requests_sem.release()
-                return Pyro4.Proxy( self._requests[key] )
+                return open_proxy( self._requests[key] )
         
         # Faire +1 au nombre de requêtes en cours de traitement pour cette
         # adresse IP. Si on ne peut pas, on retourne None.
@@ -163,7 +165,7 @@ class User_Requests_Pipeline :
         self._requests_sem.release() # Seulement ici !
         
         # Se connecter à l'objet de la requête
-        request = Pyro4.Proxy( request )
+        request = open_proxy( request )
         
         # Les requêtes sont initialisée au status -1
         self.set_request_to_next_step( request )
@@ -193,7 +195,7 @@ class User_Requests_Pipeline :
         self._requests_sem.release()
         
         # Modifier cet objet si nécessaire
-        request = Pyro4.Proxy( request )
+        request = open_proxy( request )
         request.image_url = image_url
         if account_name != None and account_id != None :
             request.twitter_accounts_with_id += [ (account_name,account_id) ]
@@ -216,7 +218,7 @@ class User_Requests_Pipeline :
         for key in self._requests :
             if key == illust_url :
                 self._requests_sem.release()
-                return Pyro4.Proxy( self._requests[key] )
+                return open_proxy( self._requests[key] )
         self._requests_sem.release()
         
         return None
@@ -287,7 +289,7 @@ class User_Requests_Pipeline :
         
         for key in self._requests :
             request_uri = self._requests[key]
-            request = Pyro4.Proxy( request_uri )
+            request = open_proxy( request_uri )
             
             # Si la requête est terminée, il faut vérifier qu'on puisse la garder
             if request.finished_date != None :
@@ -329,7 +331,7 @@ class User_Requests_Pipeline :
                 new_requests_dict[ key ] = request_uri
             
             # Forcer la fermeture du proxy
-            request._pyroRelease()
+            request.release_proxy()
         
         # On installe la nouvelle liste
         self._requests = new_requests_dict

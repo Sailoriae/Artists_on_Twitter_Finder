@@ -5,7 +5,6 @@ import queue
 from time import sleep, time
 from dateutil.tz import tzlocal, UTC
 import datetime
-import Pyro4
 
 # Ajouter le répertoire parent du répertoire parent au PATH pour pouvoir importer
 from sys import path as sys_path
@@ -14,6 +13,7 @@ sys_path.append(os_path.dirname(os_path.dirname(os_path.dirname(os_path.abspath(
 
 import parameters as param
 from tweet_finder.database import SQLite_or_MySQL
+from shared_memory.open_proxy import open_proxy
 
 
 """
@@ -95,10 +95,10 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
                                                                                is_prioritary = True )
                     
                     # On suit la progression de cette requête
-                    request.scan_requests += [ scan_request._pyroUri.asString() ] # Ne peut pas faire de append avec Pyro
+                    request.scan_requests += [ scan_request.get_URI() ] # Ne peut pas faire de append avec Pyro
                     
                     # Forcer la fermeture du proxy
-                    scan_request._pyroRelease()
+                    scan_request.release_proxy()
                     
                     # On indique qu'on a des indexations pour la première fois
                     request.has_first_time_scan = True
@@ -128,10 +128,10 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
                                                                                is_prioritary = True )
                         
                         # On suit la progression de cette requête
-                        request.scan_requests += [ scan_request._pyroUri.asString() ] # Ne peut pas faire de append avec Pyro
+                        request.scan_requests += [ scan_request.get_URI() ] # Ne peut pas faire de append avec Pyro
                         
                         # Forcer la fermeture du proxy
-                        scan_request._pyroRelease()
+                        scan_request.release_proxy()
                     
                     else :
                         print( "[step_2_th" + str(thread_id) + "] @" + account_name + " est déjà dans la BDD, et on peut sauter son scan !" )
@@ -143,7 +143,7 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
         check_list = []
         double_continue = False # Pour faire l'équivalent de deux instruction "continue"
         for scan_request_uri in request.scan_requests :
-            scan_request = Pyro4.Proxy( scan_request_uri )
+            scan_request = open_proxy( scan_request_uri )
             check_list.append( scan_request.finished_SearchAPI_indexing and scan_request.finished_TimelineAPI_indexing )
             
             # On vérifie que le scan se passe bien ou s'est bien passé, et si
@@ -162,7 +162,7 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
                 continue
             
             # Forcer la fermeture du proxy
-            scan_request._pyroRelease()
+            scan_request.release_proxy()
         
         # Dire qu'on n'est plus en train de traiter cette requête
         shared_memory_threads_registry.set_request( "thread_step_2_tweets_indexer_number" + str(thread_id), None )
@@ -170,14 +170,14 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
         # Si l'une des requêtes de scan a eu un problème, on arrête tout avec
         # cette requête utilisateur
         if double_continue :
-            request._pyroRelease()
+            request.release_proxy()
             continue
         
         # Si toutes nos requêtes ne sont pas finies, on remet la requête en
         # haut de NOTRE file d'attente
         if not all( check_list ) :
             shared_memory_user_requests_step_2_tweets_indexer_queue.put( request )
-            request._pyroRelease()
+            request.release_proxy()
             continue
         
         # Sinon, on peut vider la liste des requêtes de scan
@@ -189,7 +189,7 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
         shared_memory_user_requests.set_request_to_next_step( request )
         
         # Forcer la fermeture du proxy
-        request._pyroRelease()
+        request.release_proxy()
     
     print( "[step_2_th" + str(thread_id) + "] Arrêté !" )
     return

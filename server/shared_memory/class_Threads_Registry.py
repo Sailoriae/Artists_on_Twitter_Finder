@@ -3,6 +3,11 @@
 
 import Pyro4
 
+try :
+    from open_proxy import open_proxy
+except ModuleNotFoundError :
+    from .open_proxy import open_proxy
+
 
 """
 Objet pour que les thread enregistrent la requête qu'ils sont en train de
@@ -37,13 +42,13 @@ class Threads_Registry :
         if request == None :
             self._requests_dict[ thread_name ] = None
         else :
-            self._requests_dict[ thread_name ] = request._pyroUri.asString()
+            self._requests_dict[ thread_name ] = request.get_URI()
     
     """
     @param thread_name L'identifiant du thread.
     """
     def get_request ( self, thread_name ) :
-        return Pyro4.Proxy( self._requests_dict[ thread_name ] )
+        return open_proxy( self._requests_dict[ thread_name ] )
     
     """
     @return Une chaine de caractères à afficher, indiquant le status de tous
@@ -68,7 +73,7 @@ class Threads_Registry :
             if request == None :
                 to_print += " : IDLE\n"
             else :
-                request = Pyro4.Proxy( request )
+                request = open_proxy( request )
                 
                 # Afficher un thread de traitement des requêtes utilisateurs
                 if request.request_type == "user" : 

@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-import Pyro4
 from http.server import BaseHTTPRequestHandler
 from urllib.parse import parse_qs, urlsplit
 import json
@@ -17,6 +16,7 @@ from os import path as os_path
 sys_path.append(os_path.dirname(os_path.dirname(os_path.abspath(__file__))))
 
 import parameters as param
+from shared_memory.open_proxy import open_proxy
 
 
 """
@@ -28,7 +28,7 @@ def http_server_container ( shared_memory_uri_arg ) :
         shared_memory_uri = shared_memory_uri_arg # Attribut de classe
         
         def __init__( self, *args, **kwargs ) :
-            self.shared_memory = Pyro4.Proxy( self.shared_memory_uri )
+            self.shared_memory = open_proxy( self.shared_memory_uri )
             super(BaseHTTPRequestHandler, self).__init__(*args, **kwargs)
         
         # Ne pas afficher les logs par défaut dans la console

@@ -6,6 +6,14 @@ import traceback
 import Pyro4
 import time
 
+# Ajouter le répertoire parent au PATH pour pouvoir importer
+from sys import path as sys_path
+from os import path as os_path
+sys_path.append(os_path.dirname(os_path.dirname(os_path.abspath(__file__))))
+
+import parameters as param
+from shared_memory.open_proxy import open_proxy
+
 
 """
 En vérité, les procédures des threads ne sont pas exécutées directement, mais
@@ -13,12 +21,14 @@ le sont par ce collecteur d'erreur.
 @param thread_procedure Procédure à exécuter.
 @param thread_id ID du thread.
 @param shared_memory_uri L'URI menant à la racine du serveur de mémoire
-                         partagée Pyro4.
+                         partagée Pyro, ou directement l'objet de mémoire
+                         partagée si on n'est pas en mode multi-processus.
 """
 def error_collector( thread_procedure, thread_id : int, shared_memory_uri : str ) :
     # Connexion au serveur de mémoire partagée
-    Pyro4.config.SERIALIZER = "pickle"
-    shared_memory = Pyro4.Proxy( shared_memory_uri )
+    if param.ENABLE_MULTIPROCESSING :
+        Pyro4.config.SERIALIZER = "pickle"
+    shared_memory = open_proxy( shared_memory_uri )
     
     # Enregistrer le thread / le procesus
     shared_memory.threads_registry.register_thread( thread_procedure.__name__ + "_number" + str(thread_id), getpid() )

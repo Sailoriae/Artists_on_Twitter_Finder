@@ -71,7 +71,7 @@ def thread_step_C_SearchAPI_index_account_tweets( thread_id : int, shared_memory
         if request.unfounded_account :
             # On appelle la méthode qui termine la requête
             shared_memory_scan_requests.end_request( request, None )
-            request._pyroRelease()
+            request.release_proxy()
             continue
         
         # Si le listage des Tweets n'a pas commencé, on doit attendre un peu
@@ -80,7 +80,7 @@ def thread_step_C_SearchAPI_index_account_tweets( thread_id : int, shared_memory
                 shared_memory_scan_requests_step_C_SearchAPI_index_account_tweets_prior_queue.put( request )
             else :
                 shared_memory_scan_requests_step_C_SearchAPI_index_account_tweets_queue.put( request )
-            request._pyroRelease()
+            request.release_proxy()
             continue
         
         # Dire qu'on est en train de traiter cette requête
@@ -103,8 +103,8 @@ def thread_step_C_SearchAPI_index_account_tweets( thread_id : int, shared_memory
                                                   request_SearchAPI_tweets_queue,
                                                   indexing_tweets = request_indexing_tweets,
                                                   add_step_C_or_D_times = shared_memory_execution_metrics.add_step_C_times )
-        request_SearchAPI_tweets_queue._pyroRelease()
-        request_indexing_tweets._pyroRelease()
+        request_SearchAPI_tweets_queue.release_proxy()
+        request_indexing_tweets.release_proxy()
         
         # Si l'indexation est terminée, on met la date de fin dans la requête
         if request.finished_SearchAPI_indexing and not request.has_failed :
@@ -135,7 +135,7 @@ def thread_step_C_SearchAPI_index_account_tweets( thread_id : int, shared_memory
         shared_memory_threads_registry.set_request( "thread_step_C_SearchAPI_index_account_tweets_number" + str(thread_id), None )
         
         # Forcer la fermeture du proxy
-        request._pyroRelease()
+        request.release_proxy()
     
     print( "[step_C_th" + str(thread_id) + "] Arrêté !" )
     return

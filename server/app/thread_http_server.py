@@ -27,7 +27,7 @@ https://github.com/python/cpython/blob/3.9/Lib/socketserver.py
 """
 def thread_http_server( thread_id : int, shared_memory ) :
     # Obtenir la classe du serveur HTTP
-    HTTP_Server = http_server_container( shared_memory._pyroUri.asString() )
+    HTTP_Server = http_server_container( shared_memory.get_URI() )
     
     # http.server.ThreadingHTTPServer() fait lui-même le multi-threads du
     # serveur HTTP

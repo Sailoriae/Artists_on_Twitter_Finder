@@ -4,6 +4,11 @@
 import Pyro4
 import queue
 
+try :
+    from open_proxy import open_proxy
+except ModuleNotFoundError :
+    from .open_proxy import open_proxy
+
 
 """
 Comme les files d'attentes contiennent des sémaphores, et qu'ils ne peuvent pas
@@ -21,13 +26,13 @@ class Pyro_Queue :
     
     def get ( self, block = True ) :
         if self._convert_uri :
-            return Pyro4.Proxy( self._queue.get( block = block) )
+            return open_proxy( self._queue.get( block = block) )
         else :
             return self._queue.get( block = block)
     
     def put ( self, item ) :
         if self._convert_uri :
-            self._queue.put( item._pyroUri.asString() )
+            self._queue.put( item.get_URI() )
         else :
             self._queue.put( item )
     

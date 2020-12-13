@@ -76,7 +76,7 @@ def thread_step_B_TimelineAPI_list_account_tweets( thread_id : int, shared_memor
             
             # Lacher le sémaphore et arrêter là, on ne peut pas la traiter
             shared_memory_scan_requests_queues_sem.release()
-            request._pyroRelease()
+            request.release_proxy()
             continue
         
         # Dire qu'on a commencé à traiter cette requête
@@ -106,13 +106,13 @@ def thread_step_B_TimelineAPI_list_account_tweets( thread_id : int, shared_memor
             else :
                 shared_memory_scan_requests_step_B_TimelineAPI_list_account_tweets_queue.put( request )
         
-        request_TimelineAPI_tweets_queue._pyroRelease()
+        request_TimelineAPI_tweets_queue.release_proxy()
         
         # Dire qu'on n'est plus en train de traiter cette requête
         shared_memory_threads_registry.set_request( "thread_step_B_TimelineAPI_list_account_tweets_number" + str(thread_id), None )
         
         # Forcer la fermeture du proxy
-        request._pyroRelease()
+        request.release_proxy()
     
     print( "[step_B_th" + str(thread_id) + "] Arrêté !" )
     return
