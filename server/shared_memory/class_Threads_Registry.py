@@ -39,6 +39,8 @@ class Threads_Registry :
                    None s'il est en attente.
     """
     def set_request ( self, thread_name, request ) :
+        if not thread_name in self._pid_dict :
+            raise RuntimeError( f"Le thread \"{thread_name}\" n'a pas été enregistré !" )
         if request == None :
             self._requests_dict[ thread_name ] = None
         else :
@@ -46,8 +48,16 @@ class Threads_Registry :
     
     """
     @param thread_name L'identifiant du thread.
+    @return Un proxy vers la requête qu'il est en train de traiter, ou None si
+            aucune requête n'est associée au thread.
     """
     def get_request ( self, thread_name ) :
+        if not thread_name in self._pid_dict :
+            raise RuntimeError( f"Le thread \"{thread_name}\" n'a pas été enregistré !" )
+        if not thread_name in self._requests_dict :
+            return None
+        if self._requests_dict[ thread_name ] == None :
+            return None
         return open_proxy( self._requests_dict[ thread_name ] )
     
     """
