@@ -17,10 +17,10 @@ class TwitterSearchScraper ( snscrape.modules.twitter.TwitterSearchScraper ) :
         
         self.output_function = None
     
-    # Hack : Donner en douce à SNScraper des tokens pour s'authentifier comme
-    # le serait un utilisateur sur l'UI web
+    # Donner en douce à SNScraper le token pour s'authentifier comme le serait
+    # un utilisateur sur l'UI web
     # Permet de recevoir les Tweets marqués sensibles
-    def set_auth_token( self, auth_token ) :
+    def set_auth_token ( self, auth_token ) :
         self._session.cookies.set("auth_token", 
                                   auth_token,
                                   domain = '.twitter.com',
@@ -28,32 +28,11 @@ class TwitterSearchScraper ( snscrape.modules.twitter.TwitterSearchScraper ) :
                                   secure = True,
                                   expires = None)
     
-    # Hack : Remplacer l'obtention du guest token pour l'obtention du token
-    # ct0, qui change tout le temps
-    def _ensure_guest_token ( self, url = None ) :
-        if self._guestToken is not None:
-            return
-        r = self._get(self._baseUrl if url is None else url, headers = {'User-Agent': self._userAgent})
-        match = re.search(r'document\.cookie = decodeURIComponent\("ct0=(\d+); Max-Age=10800; Domain=\.twitter\.com; Path=/; Secure"\);', r.text)
-        if match:
-            self._guestToken = match.group(1)
-        if 'ct0' in r.cookies:
-            self._guestToken = r.cookies['ct0']
-        if self._guestToken:
-            self._session.cookies.set('ct0', self._guestToken, domain = '.twitter.com', path = '/', secure = True, expires = None)
-            self._apiHeaders["x-csrf-token"] = self._guestToken
-            self._apiHeaders["x-twitter-auth-type"] = "OAuth2Session"
-            return
-        raise snscrape.base.ScraperException('Unable to find ct0 token')
+    # Override : On n'utilise pas de guest_token
+    def _ensure_guest_token ( self, url = None ) : pass
+    def _unset_guest_token ( self ) : pass
     
-    # Hack : Pour que celui ci-dessus fonctionne lors d'une 429
-    def _unset_guest_token ( self ) :
-        self._guestToken = None
-        del self._session.cookies['ct0']
-        del self._apiHeaders['x-csrf-token']
-        del self._apiHeaders["x-twitter-auth-type"]
-    
-    # Hack : Comme SNScraper ne nous donne pas le JSON original des Tweets,
+    # Override : Comme SNScraper ne nous donne pas le JSON original des Tweets,
     # on remplace sa fonction pour le faire nous-même
     def _tweet_to_tweet ( self, tweet, obj ) :
         if self.output_function != None :
@@ -63,23 +42,18 @@ class TwitterSearchScraper ( snscrape.modules.twitter.TwitterSearchScraper ) :
         # normalement retourner
         return super()._tweet_to_tweet( tweet, obj )
     
-    def set_output_function( self, output_function ) :
+    # Setter de la fonction d'output pour l'override juste ci-dessus
+    def set_output_function ( self, output_function ) :
         self.output_function = output_function
     
-    # Hack : "This request requires a matching csrf cookie and header."
-    # Essayer sur un code HTTP != 200 de MàJ "x-csrf-token" avec le cookie
-    # de session (Qui a été Màj par la requête)
+    # Override : "This request requires a matching csrf cookie and header."
     def _check_api_response ( self, r ) :
-        if r.status_code == 429:
-            self._unset_guest_token()
-            self._ensure_guest_token()
-            return False, 'rate-limited'
-        if r.headers.get('content-type').replace(' ', '') != 'application/json;charset=utf-8':
-            return False, 'content type is not JSON'
-        if r.status_code != 200:
-            self._apiHeaders['x-csrf-token'] = self._session.cookies['ct0'] # MàJ avec le token de la réponse
-            return False, 'non-200 status code'
-        return True, None
+        # Toujours synchroniser le header "x-csrf-token avec le cookie "ct0"
+        # L'objet "_session" est MàJ automatiquement à chaque requête, en
+        # fonction des headers de réponse "set-cookie"
+        self._apiHeaders['x-csrf-token'] = self._session.cookies['ct0']
+        
+        return super()._check_api_response( r )
 
 
 """
