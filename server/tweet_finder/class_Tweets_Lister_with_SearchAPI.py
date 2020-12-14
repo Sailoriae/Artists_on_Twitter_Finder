@@ -67,15 +67,15 @@ class Tweets_Lister_with_SearchAPI :
         if account_id == None :
             account_id = self.twitter.get_account_id( account_name ) # TOUJOURS AVEC CETTE API
         if account_id == None :
-            print( "[List SearchAPI] Compte @" + account_name + " introuvable !" )
+            print( f"[List SearchAPI] Compte @{account_name} introuvable !" )
             raise Unfounded_Account_on_Lister_with_SearchAPI
         
         if self.twitter.blocks_me( account_id ) :
-            print( "[List SearchAPI] Le compte @" + account_name + " nous bloque, impossible de le scanner !" )
+            print( f"[List SearchAPI] Le compte @{account_name} nous bloque, impossible de le scanner !" )
             raise Blocked_by_User_with_SearchAPI
         
         if self.DEBUG :
-            print( "[List SearchAPI] Listage des Tweets de @" + account_name + "." )
+            print( f"[List SearchAPI] Listage des Tweets de @{account_name}." )
         if self.DEBUG or self.ENABLE_METRICS :
             start = time()
         
@@ -93,7 +93,7 @@ class Tweets_Lister_with_SearchAPI :
         # Note : Plus besoin de faire de bidouille avec "filter:safe"
         # On met le "@" à cause de @KIYOSATO_0928 qui renvoyait des erreurs 400
         # Laisser "-filter:retweets", ça ne supprime pas les Tweets citant
-        query = "from:@" + account_name + " filter:media -filter:retweets"
+        query = f"from:@{account_name} filter:media -filter:retweets"
         if since_date != None :
             query += " since:" + since_date
         
@@ -102,7 +102,7 @@ class Tweets_Lister_with_SearchAPI :
         
         
         if self.DEBUG or self.ENABLE_METRICS :
-            print( "[List SearchAPI] Il a fallu", time() - start, "secondes pour lister", count, "Tweets de @" + account_name + "." )
+            print( f"[List SearchAPI] Il a fallu {time() - start} secondes pour lister {count} Tweets de @{account_name}." )
             if add_step_A_time != None :
                 if count > 0 :
                     add_step_A_time( (time() - start) / count )

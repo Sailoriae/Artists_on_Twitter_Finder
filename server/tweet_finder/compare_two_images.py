@@ -31,7 +31,7 @@ def get_image ( url ) :
             return Image.open(BytesIO( get_tweet_image(url) ))
         
         except UnidentifiedImageError as error :
-            print( "[compare_two_images] Erreur avec l'image :", url )
+            print( f"[compare_two_images] Erreur avec l'image : {url}" )
             print( error )
             
             if retry_count < 1 : # Essayer un coup d'attendre
@@ -93,7 +93,7 @@ def compare_two_images ( url1, url2, PRINT_METRICS = True ) :
     difference = 100 - (dif / 255.0 * 100) / ncomponents
     
     if PRINT_METRICS :
-        print( "[compare_two_images] Temps de calcul :", time() - start )
+        print( f"[compare_two_images] Temps de calcul : {time() - start}" )
     
     return difference
 
@@ -132,6 +132,6 @@ def compare_two_images_with_opencv ( url1 : str, url2 : str, PRINT_METRICS = Tru
     to_return = 100 - (np.count_nonzero(res) * 100) / res.size
     
     if PRINT_METRICS :
-        print( "[compare_two_images] Temps de calcul:", time() - start )
+        print( f"[compare_two_images] Temps de calcul: {time() - start}" )
     
     return to_return

@@ -59,7 +59,7 @@ class Threads_Registry :
         sorted_dict = sorted( self._pid_dict.items() )
         for (key, value) in sorted_dict :
             # Affichage identique pour tous les threads
-            to_print += "[PID " + value + "] " + key
+            to_print += f"[PID {value}] " + key
             
             try :
                 request = self._requests_dict[key]
@@ -77,18 +77,18 @@ class Threads_Registry :
                 
                 # Afficher un thread de traitement des requêtes utilisateurs
                 if request.request_type == "user" : 
-                    to_print += " : " + request.input_url + "\n"
+                    to_print += f" : {request.input_url}\n"
                 
                 # Afficher un thread de traitement des requêtes de scan
                 elif request.request_type == "scan" :
-                    to_print += " : @" + request.account_name + " (ID " + str(request.account_id) + ")"
+                    to_print += f" : @{request.account_name} (ID {request.account_id})"
                     
                     # Thread d'indexation des Tweets trouvés avec l'API de recherche
                     if "thread_step_C_SearchAPI_index_account_tweets" in key :
-                        to_print += ", " + str(request.SearchAPI_tweets_queue.qsize()) + " Tweets restant\n"
+                        to_print += f", {request.SearchAPI_tweets_queue.qsize()} Tweets restant\n"
                     # Thread d'indexation des Tweets trouvés avec l'API de timeline
                     elif "thread_step_D_TimelineAPI_index_account_tweets" in key :
-                        to_print += ", " + str(request.TimelineAPI_tweets_queue.qsize()) + " Tweets restant\n"
+                        to_print += f", {request.TimelineAPI_tweets_queue.qsize()} Tweets restant\n"
                     else :
                         to_print += "\n"
         

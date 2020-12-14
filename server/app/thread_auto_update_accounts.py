@@ -85,7 +85,7 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
                     wait_time = int( (update_period - (now - min_date)).total_seconds() )
                     end_sleep_time = time() + wait_time
                     
-                    print( "[auto_update_th" + str(thread_id) + "] Reprise dans " + str(wait_time) + " secondes, pour lancer le scan du compte ID " + str(oldest_updated_account[0]) + "." )
+                    print( f"[auto_update_th{thread_id}] Reprise dans {wait_time} secondes, pour lancer le scan du compte ID {oldest_updated_account[0]}." )
                     
                     while True :
                         sleep( 3 )
@@ -106,7 +106,7 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
             
             # Si l'ID du compte Twitter n'existe plus
             if account_name == None :
-                print( "[auto_update_th" + str(thread_id) + "] L'ID de compte Twitter " + str(oldest_updated_account[0]) + " n'est plus accessible ou n'existe plus !" )
+                print( f"[auto_update_th{thread_id}] L'ID de compte Twitter {oldest_updated_account[0]} n'est plus accessible ou n'existe plus !" )
                 
                 # On met la date locale de la dernière MàJ à aujourd'hui pour
                 # éviter de ré-avoir cet ID à la prochaine itération
@@ -120,14 +120,14 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
             
             # Sinon, on lance le scan pour ce compte
             else :
-                print( "[auto_update_th" + str(thread_id) + "] Mise à jour du compte @" + account_name + " (ID " + str(oldest_updated_account[0]) + ")." )
+                print( f"[auto_update_th{thread_id}] Mise à jour du compte @{account_name} (ID {oldest_updated_account[0]})." )
                 shared_memory_scan_requests.launch_request( oldest_updated_account[0],
                                                             account_name,
                                                             is_prioritary = False )
         
         # Si il n'y avait aucun compte dans l'itérateur
         if count == 0 and shared_memory.keep_service_alive :
-            print( "[auto_update_th" + str(thread_id) + "] La base de données n'a pas de comptes Twitter enregistrés !" )
+            print( f"[auto_update_th{thread_id}] La base de données n'a pas de comptes Twitter enregistrés !" )
             
             # Retest dans une heure = 3600 secondes
             end_sleep_time = time() + 3600
@@ -138,5 +138,5 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
                 if not shared_memory.keep_service_alive :
                     break
     
-    print( "[auto_update_th" + str(thread_id) + "] Arrêté !" )
+    print( f"[auto_update_th{thread_id}] Arrêté !" )
     return

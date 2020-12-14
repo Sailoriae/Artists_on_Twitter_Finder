@@ -37,7 +37,7 @@ def thread_step_C_SearchAPI_index_account_tweets( thread_id : int, shared_memory
     shared_memory_scan_requests_step_C_SearchAPI_index_account_tweets_queue = shared_memory_scan_requests.step_C_SearchAPI_index_account_tweets_queue
     
     # Dire qu'on ne fait rien
-    shared_memory_threads_registry.set_request( "thread_step_C_SearchAPI_index_account_tweets_number" + str(thread_id), None )
+    shared_memory_threads_registry.set_request( f"thread_step_C_SearchAPI_index_account_tweets_number{thread_id}", None )
     
     # Tant que on ne nous dit pas de nous arrêter
     while shared_memory.keep_service_alive :
@@ -84,7 +84,7 @@ def thread_step_C_SearchAPI_index_account_tweets( thread_id : int, shared_memory
             continue
         
         # Dire qu'on est en train de traiter cette requête
-        shared_memory_threads_registry.set_request( "thread_step_C_SearchAPI_index_account_tweets_number" + str(thread_id), request )
+        shared_memory_threads_registry.set_request( f"thread_step_C_SearchAPI_index_account_tweets_number{thread_id}", request )
         
         # Si on a vu cette requête il y a moins de 5 secondes, c'est qu'il n'y
         # a pas beaucoup de requêtes dans le pipeline, on peut donc dormir
@@ -95,7 +95,7 @@ def thread_step_C_SearchAPI_index_account_tweets( thread_id : int, shared_memory
         
         # On index / scan les comptes Twitter de la requête avec l'API de recherche
         if param.DEBUG :
-            print( "[step_C_th" + str(thread_id) + "] Indexation des Tweets de @" + request.account_name + " trouvés avec l'API de recherche." )
+            print( f"[step_C_th{thread_id}] Indexation des Tweets de @{request.account_name} trouvés avec l'API de recherche." )
         request_SearchAPI_tweets_queue = request.SearchAPI_tweets_queue
         request_indexing_tweets = request.indexing_tweets
         request.finished_SearchAPI_indexing = tweets_indexer.index_tweets(
@@ -108,7 +108,7 @@ def thread_step_C_SearchAPI_index_account_tweets( thread_id : int, shared_memory
         
         # Si l'indexation est terminée, on met la date de fin dans la requête
         if request.finished_SearchAPI_indexing and not request.has_failed :
-            print( "[step_C_th" + str(thread_id) + "] Fin de l'indexation des Tweets de @" + request.account_name + " trouvés avec l'API de recherche." )
+            print( f"[step_C_th{thread_id}] Fin de l'indexation des Tweets de @{request.account_name} trouvés avec l'API de recherche." )
             
             # Enregistrer la date du Tweet trouvé le plus récent
             tweets_indexer.save_last_tweet_date( request.account_id, request.SearchAPI_last_tweet_date )
@@ -132,10 +132,10 @@ def thread_step_C_SearchAPI_index_account_tweets( thread_id : int, shared_memory
             shared_memory_scan_requests_queues_sem.release()
         
         # Dire qu'on n'est plus en train de traiter cette requête
-        shared_memory_threads_registry.set_request( "thread_step_C_SearchAPI_index_account_tweets_number" + str(thread_id), None )
+        shared_memory_threads_registry.set_request( f"thread_step_C_SearchAPI_index_account_tweets_number{thread_id}", None )
         
         # Forcer la fermeture du proxy
         request.release_proxy()
     
-    print( "[step_C_th" + str(thread_id) + "] Arrêté !" )
+    print( f"[step_C_th{thread_id}] Arrêté !" )
     return

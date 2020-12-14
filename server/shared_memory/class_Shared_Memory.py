@@ -86,7 +86,7 @@ class Shared_Memory :
         # leurs collecteurs d'erreurs mettent ces  requêtes en échec lors d'un
         # plantage.
         # Les threads sont identifiés par la chaine suivante :
-        # procédure_du_thread.__name__ + "_number" + str(thread_id)
+        # f"{thread_procedure.__name__}_number{thread_id}"
         self._threads_registry = self.register_obj( Threads_Registry() )
         
         # Communication entre le thread de reset des curseur d'indexation avec
@@ -145,7 +145,7 @@ class Shared_Memory :
         if not param.ENABLE_MULTIPROCESSING :
             raise RuntimeError( "Multiprocessing désactivé, le serveur Pyro ne peut pas être démarré !" )
         uri = self._daemon.register( self, "shared_memory" )
-        print( "URI de la mémoire partagée :", uri )
+        print( f"URI de la mémoire partagée : {uri}" )
         self._daemon.requestLoop( loopCondition = self.keep_running )
     
     """

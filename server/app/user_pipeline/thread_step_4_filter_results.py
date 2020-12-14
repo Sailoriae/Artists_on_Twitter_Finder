@@ -59,7 +59,7 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
     shared_memory_user_requests_step_4_filter_results_queue = shared_memory_user_requests.step_4_filter_results_queue
     
     # Dire qu'on ne fait rien
-    shared_memory_threads_registry.set_request( "thread_step_4_filter_results_number" + str(thread_id), None )
+    shared_memory_threads_registry.set_request( f"thread_step_4_filter_results_number{thread_id}", None )
     
     # Tant que on ne nous dit pas de nous arrêter
     while shared_memory.keep_service_alive :
@@ -73,7 +73,7 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
             continue
         
         # Dire qu'on est en train de traiter cette requête
-        shared_memory_threads_registry.set_request( "thread_step_4_filter_results_number" + str(thread_id), request )
+        shared_memory_threads_registry.set_request( f"thread_step_4_filter_results_number{thread_id}", request )
         
         # On passe la requête à l'étape suivante, c'est à dire notre étape
         shared_memory_user_requests.set_request_to_next_step( request )
@@ -87,11 +87,11 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
             try :
                 request_image = binary_image_to_cv2_image( request.query_image_as_bytes )
             except Exception as error :
-                print( "[step_4_th" + str(thread_id) + "] Erreur lors du filtrage des résultats. Impossible d'obtenir l'image :", request.image_url )
+                print( f"[step_3_th{thread_id}] Erreur lors du filtrage des résultats. Impossible d'obtenir l'image : {request.image_url}" )
                 print( error )
                 request.problem = "ERROR_DURING_REVERSE_SEARCH"
                 
-                shared_memory_threads_registry.set_request( "thread_step_4_filter_results_number" + str(thread_id), None )
+                shared_memory_threads_registry.set_request( f"thread_step_4_filter_results_number{thread_id}", None )
                 shared_memory_user_requests.set_request_to_next_step( request )
                 request.release_proxy()
                 continue
@@ -102,11 +102,11 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
             
             # Si l'image a un format à la noix
             except UnidentifiedImageError as error:
-                print( "[step_4_th" + str(thread_id) + "] Erreur lors du filtrage des résultats. Impossible d'obtenir l'image :", request.image_url )
+                print( f"[step_3_th{thread_id}] Erreur lors du filtrage des résultats. Impossible d'obtenir l'image : {request.image_url}" )
                 print( error )
                 request.problem = "ERROR_DURING_REVERSE_SEARCH"
                 
-                shared_memory_threads_registry.set_request( "thread_step_4_filter_results_number" + str(thread_id), None )
+                shared_memory_threads_registry.set_request( f"thread_step_4_filter_results_number{thread_id}", None )
                 shared_memory_user_requests.set_request_to_next_step( request )
                 request.release_proxy()
                 continue
@@ -146,14 +146,13 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
         # On installe la nouvelle liste de résultats
         request.founded_tweets = new_founded_tweets
         
-        print( "[step_4_th" + str(thread_id) + "] Tweets trouvés après filtrage (Du plus au moins proche) :\n" +
-               "[step_4_th" + str(thread_id) + "] " + str( [ data.tweet_id for data in request.founded_tweets ] ) )
+        print( f"[step_3_th{thread_id}] Tweets trouvés après filtrage (Du plus au moins proche) : {[ data.tweet_id for data in request.founded_tweets ]}" )
         
         if param.ENABLE_METRICS :
             shared_memory_execution_metrics.add_step_4_times( time() - start )
         
         # Dire qu'on n'est plus en train de traiter cette requête
-        shared_memory_threads_registry.set_request( "thread_step_4_filter_results_number" + str(thread_id), None )
+        shared_memory_threads_registry.set_request( f"thread_step_4_filter_results_number{thread_id}", None )
         
         # On passe la requête à l'étape suivante, fin du traitement
         shared_memory_user_requests.set_request_to_next_step( request )
@@ -161,5 +160,5 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
         # Forcer la fermeture du proxy
         request.release_proxy()
     
-    print( "[step_4_th" + str(thread_id) + "] Arrêté !" )
+    print( f"[step_3_th{thread_id}] Arrêté !" )
     return

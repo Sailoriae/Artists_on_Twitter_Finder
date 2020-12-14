@@ -92,7 +92,7 @@ class Pixiv :
                         raise error # Sera récupérée par le collecteur d'erreurs
             
             try :
-                print( "[Pixiv] Erreur :", json["error"] )
+                print( f"[Pixiv] Erreur : {json['error']}" )
             # S'il n'y a pas d'erreur dans le JSON retourné, c'est que c'est OK
             except KeyError :
                 self.cache_illust_url = illust_url

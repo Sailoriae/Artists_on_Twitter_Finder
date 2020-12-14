@@ -36,7 +36,7 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
     shared_memory_user_requests_step_1_link_finder_queue = shared_memory_user_requests.step_1_link_finder_queue
     
     # Dire qu'on ne fait rien
-    shared_memory_threads_registry.set_request( "thread_step_1_link_finder_number" + str(thread_id), None )
+    shared_memory_threads_registry.set_request( f"thread_step_1_link_finder_number{thread_id}", None )
     
     # Tant que on ne nous dit pas de nous arrêter
     while shared_memory.keep_service_alive :
@@ -50,13 +50,12 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
             continue
         
         # Dire qu'on est en train de traiter cette requête
-        shared_memory_threads_registry.set_request( "thread_step_1_link_finder_number" + str(thread_id), request )
+        shared_memory_threads_registry.set_request( f"thread_step_1_link_finder_number{thread_id}", request )
         
         # On passe la requête à l'étape suivante, c'est à dire notre étape
         shared_memory_user_requests.set_request_to_next_step( request )
         
-        print( "[step_1_th" + str(thread_id) + "] Link Finder pour :\n" +
-               "[step_1_th" + str(thread_id) + "] " + request.input_url )
+        print( f"[step_1_th{thread_id}] Link Finder pour : {request.input_url}" )
         
         # On lance le Link Finder sur cet URL
         try :
@@ -69,12 +68,12 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
             shared_memory_user_requests.set_request_to_next_step( request, force_end = True )
             
             # Dire qu'on n'est plus en train de traiter cette requête
-            shared_memory_threads_registry.set_request( "thread_step_1_link_finder_number" + str(thread_id), None )
+            shared_memory_threads_registry.set_request( f"thread_step_1_link_finder_number{thread_id}", None )
             
             # Forcer la fermeture du proxy
             request.release_proxy()
             
-            print( "[step_1_th" + str(thread_id) + "] Ceci n'est pas une URL !" )
+            print( f"[step_1_th{thread_id}] Ceci n'est pas un URL !" )
             continue
         
         # Si jamais le site n'est pas supporté, on ne va pas plus loin avec
@@ -84,12 +83,12 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
             shared_memory_user_requests.set_request_to_next_step( request, force_end = True )
             
             # Dire qu'on n'est plus en train de traiter cette requête
-            shared_memory_threads_registry.set_request( "thread_step_1_link_finder_number" + str(thread_id), None )
+            shared_memory_threads_registry.set_request( f"thread_step_1_link_finder_number{thread_id}", None )
             
             # Forcer la fermeture du proxy
             request.release_proxy()
             
-            print( "[step_1_th" + str(thread_id) + "] Site non supporté !" )
+            print( f"[step_1_th{thread_id}] Site non supporté !" )
             continue
         
         # Si jamais l'URL de la requête est invalide, on ne va pas plus loin
@@ -99,12 +98,12 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
             shared_memory_user_requests.set_request_to_next_step( request, force_end = True )
             
             # Dire qu'on n'est plus en train de traiter cette requête
-            shared_memory_threads_registry.set_request( "thread_step_1_link_finder_number" + str(thread_id), None )
+            shared_memory_threads_registry.set_request( f"thread_step_1_link_finder_number{thread_id}", None )
             
             # Forcer la fermeture du proxy
             request.release_proxy()
             
-            print( "[step_1_th" + str(thread_id) + "] URL invalide ! Elle ne mène pas à une illustration." )
+            print( f"[step_1_th{thread_id}] URL invalide ! Elle ne mène pas à une illustration." )
             continue
         
         # Si jamais aucun compte Twitter n'a été trouvé, on ne va pas plus loin
@@ -114,12 +113,12 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
             shared_memory_user_requests.set_request_to_next_step( request, force_end = True )
             
             # Dire qu'on n'est plus en train de traiter cette requête
-            shared_memory_threads_registry.set_request( "thread_step_1_link_finder_number" + str(thread_id), None )
+            shared_memory_threads_registry.set_request( f"thread_step_1_link_finder_number{thread_id}", None )
             
             # Forcer la fermeture du proxy
             request.release_proxy()
             
-            print( "[step_1_th" + str(thread_id) + "] Aucun compte Twitter trouvé pour l'artiste de cette illustration !" )
+            print( f"[step_1_th{thread_id}] Aucun compte Twitter trouvé pour l'artiste de cette illustration !" )
             continue
         
         # On vérifie la liste des comptes Twitter
@@ -133,30 +132,28 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
             shared_memory_user_requests.set_request_to_next_step( request, force_end = True )
             
             # Dire qu'on n'est plus en train de traiter cette requête
-            shared_memory_threads_registry.set_request( "thread_step_1_link_finder_number" + str(thread_id), None )
+            shared_memory_threads_registry.set_request( f"thread_step_1_link_finder_number{thread_id}", None )
             
             # Forcer la fermeture du proxy
             request.release_proxy()
             
-            print( "[step_1_th" + str(thread_id) + "] Aucun compte Twitter valide trouvé pour l'artiste de cette illustration !" )
+            print( f"[step_1_th{thread_id}] Aucun compte Twitter valide trouvé pour l'artiste de cette illustration !" )
             continue
         
-        print( "[step_1_th" + str(thread_id) + "] Comptes Twitter valides trouvés pour cet artiste :\n" +
-               "[step_1_th" + str(thread_id) + "] " + str( [ account[0] for account in request.twitter_accounts_with_id ] ) )
+        print( f"[step_1_th{thread_id}] Comptes Twitter valides trouvés pour cet artiste : {[ account[0] for account in request.twitter_accounts_with_id ]}" )
         
         # Théoriquement, on a déjà vérifié que l'URL existe, donc on devrait
         # forcément trouver une image pour cette requête
         request.image_url = data.image_url
         
-        print( "[step_1_th" + str(thread_id) + "] URL de l'image trouvée :\n" +
-               "[step_1_th" + str(thread_id) + "] " + request.image_url )
+        print( f"[step_1_th{thread_id}] URL de l'image trouvée : {request.image_url}" )
         
         # Même théorie, donc on devrait forcément trouver la date pour cette
         # requête
         request.datetime = data.publish_date
         
         # Dire qu'on n'est plus en train de traiter cette requête
-        shared_memory_threads_registry.set_request( "thread_step_1_link_finder_number" + str(thread_id), None )
+        shared_memory_threads_registry.set_request( f"thread_step_1_link_finder_number{thread_id}", None )
         
         # On passe la requête à l'étape suivante
         # C'est la procédure shared_memory_user_requests.set_request_to_next_step
@@ -166,5 +163,5 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
         # Forcer la fermeture du proxy
         request.release_proxy()
     
-    print( "[step_1_th" + str(thread_id) + "] Arrêté !" )
+    print( f"[step_1_th{thread_id}] Arrêté !" )
     return

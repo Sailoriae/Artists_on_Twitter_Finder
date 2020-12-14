@@ -30,9 +30,9 @@ def scan_derpibooru_search ( SEARCH_TO_SCAN, LIMIT = None ) :
     while True :
         # On trie par score descendant, et on prend avec le filtre 56027, qui
         # est le filtre "Everything"
-        response = requests.get(
-            "https://derpibooru.org/api/v1/json/search/images?filter_id=56027&sf=score&sd=desc&page=" + str(page_number) + "&q=" + SEARCH_TO_SCAN )
-        print( "On demande à Derpibooru : https://derpibooru.org/api/v1/json/search/images?filter_id=56027&sf=score&sd=desc&page=" + str(page_number) + "&q=" + SEARCH_TO_SCAN )
+        request = f"https://derpibooru.org/api/v1/json/search/images?filter_id=56027&sf=score&sd=desc&page={page_number}&q={SEARCH_TO_SCAN}"
+        response = requests.get( request )
+        print( "On demande à Derpibooru : " + request )
         
         json = response.json()
         
@@ -41,10 +41,11 @@ def scan_derpibooru_search ( SEARCH_TO_SCAN, LIMIT = None ) :
             break
         
         for post in json["images"] :
-            print( "Requête : https://derpibooru.org/" + str(post["id"]) )
+            url = f"https://derpibooru.org/{post['id']}"
+            print( "Requête : " + url )
             
             if LIMIT != None and count > LIMIT :
-                print( "On a atteint la limite de " + str(LIMIT) + " posts envoyés !" )
+                print( f"On a atteint la limite de {LIMIT} posts envoyés !" )
             else :
                 count += 1
             
@@ -59,7 +60,7 @@ def scan_derpibooru_search ( SEARCH_TO_SCAN, LIMIT = None ) :
             
             if not all( post_artists_launched ) :
                 print( "Envoyée !" )
-                server.get_request( "https://derpibooru.org/" + str(post["id"]) )
+                server.get_request( url )
             else :
                 print( "Non envoyée, tous les artistes de ce post sont déjà envoyés !" )
         

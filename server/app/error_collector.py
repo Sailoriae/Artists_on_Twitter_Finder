@@ -31,7 +31,7 @@ def error_collector( thread_procedure, thread_id : int, shared_memory_uri : str 
     shared_memory = open_proxy( shared_memory_uri )
     
     # Enregistrer le thread / le procesus
-    shared_memory.threads_registry.register_thread( thread_procedure.__name__ + "_number" + str(thread_id), getpid() )
+    shared_memory.threads_registry.register_thread( f"{thread_procedure.__name__}_number{thread_id}", getpid() )
     
     error_count = 0
     error_on_init_count = 0
@@ -41,12 +41,12 @@ def error_collector( thread_procedure, thread_id : int, shared_memory_uri : str 
         try :
             thread_procedure( thread_id, shared_memory )
         except Exception as error :
-            error_name = "Erreur dans le thread " + str(thread_id) + " de la procédure " + thread_procedure.__name__ + " !\n"
+            error_name = f"Erreur dans le thread {thread_id} de la procédure {thread_procedure.__name__} !\n"
             
             # Mettre la requête en erreur si c'est une requête utilisateur ou
             # une requête de scan
             try :
-                request = shared_memory.threads_registry.get_request( thread_procedure.__name__ + "_number" + str(thread_id) )
+                request = shared_memory.threads_registry.get_request( f"{thread_procedure.__name__}_number{thread_id}" )
             # Si on n'est pas un thread de traitement (Utilisateur ou scan)
             except KeyError :
                 pass
@@ -64,13 +64,13 @@ def error_collector( thread_procedure, thread_id : int, shared_memory_uri : str 
                 if request != None and request.request_type == "user" :
                     request.problem = "PROCESSING_ERROR" # Mettre la requête en erreur
                     shared_memory.user_requests.set_request_to_next_step( request, force_end = True ) # Forcer sa fin
-                    error_name += "URL de requête : " + str(request.input_url) + "\n"
+                    error_name += f"URL de requête : {request.input_url}\n"
                 
                 # Si la requête est une requête de scan
                 # (On est donc un thread de traitement des requêtes de scan)   
                 if request != None and request.request_type == "scan" :
                     request.has_failed = True # Mettre la requête en erreur
-                    error_name += "Compte Twitter : @" + request.account_name + " (ID " + str(request.account_id) + ")\n"
+                    error_name += f"Compte Twitter : @{request.account_name} (ID {request.account_id})\n"
             
             # Si l'exception s'est produite sur le serveur de mémoire partagée
             if hasattr( error, "_pyroTraceback" ) :
@@ -80,7 +80,7 @@ def error_collector( thread_procedure, thread_id : int, shared_memory_uri : str 
             
             # Enregistrer dans un fichier
             if error_count < 100 : # Ne pas créer trop de logs, s'il y a autant d'erreurs, c'est que c'est la même
-                file = open( thread_procedure.__name__ + "_number" + str(thread_id) + "_errors.log", "a" )
+                file = open( f"{thread_procedure.__name__}_number{thread_id}_errors.log", "a" )
                 file.write( error_name )
                 traceback.print_exc( file = file )
                 if pyro_traceback != None : file.write( pyro_traceback )
@@ -100,7 +100,7 @@ def error_collector( thread_procedure, thread_id : int, shared_memory_uri : str 
                 # On dort 10 mins * le nombre de fois qu'on a crash à l'init
                 wait_time = 600 * error_on_init_count
                 end_sleep_time = time.time() + wait_time
-                print( "Attente de", wait_time, "pour redémarrer !" )
+                print( f"Attente de {wait_time} pour redémarrer !" )
                 
                 while True :
                     time.sleep( 3 )

@@ -81,7 +81,7 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
                     wait_time = int( (retry_period - (now - tweet["last_retry_date"])).total_seconds() )
                     end_sleep_time = time() + wait_time
                     
-                    print( "[retry_failed_tweets_th" + str(thread_id) + "] Reprise dans " + str(wait_time) + " secondes, pour réessayer le Tweet ID " + str(tweet["tweet_id"]) + "." )
+                    print( f"[retry_failed_tweets_th{thread_id}] Reprise dans {wait_time} secondes, pour réessayer le Tweet ID {tweet['tweet_id']}." )
                     while True :
                         sleep( 3 )
                         if time() > end_sleep_time :
@@ -95,7 +95,7 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
             # Ne devrait pas arriver, mais au cas où
             # Permet d'insérer manuellement des ID de Tweets dans la table
             if tweet["user_id"] == None :
-                print( "[retry_failed_tweets_th" + str(thread_id) + "] Obtention et réindexation programés du Tweet ID : " + str(tweet["tweet_id"]) + " (Inséré manuellement)" )
+                print( f"[retry_failed_tweets_th{thread_id}] Obtention et réindexation programés du Tweet ID {tweet['tweet_id']} (Inséré manuellement)." )
                 
                 hundred_tweets.append( tweet["tweet_id"] )
                 if len( hundred_tweets ) >= 100 :
@@ -105,7 +105,7 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
             # Note : L'itérateur formate le dictionnaire de Tweet exactement
             # comme la fonction analyse_tweet_json()
             else :
-                print( "[retry_failed_tweets_th" + str(thread_id) + "] Réindexation programée du Tweet ID : " + str(tweet["tweet_id"]) )
+                print( f"[retry_failed_tweets_th{thread_id}] Réindexation programée du Tweet ID {tweet['tweet_id']}." )
                 tweets_list.append( tweet["tweet_id"] )
                 tweets_queue.put( tweet )
         
@@ -114,7 +114,7 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
         
         # Si il n'y a pas de Tweet à réindexer
         if len( hundred_tweets ) == 0 and tweets_queue.qsize() == 0  :
-            print( "[retry_failed_tweets_th" + str(thread_id) + "] Aucun Tweet à réessayer d'indexer !" )
+            print( f"[retry_failed_tweets_th{thread_id}] Aucun Tweet à réessayer d'indexer !" )
             
             # Retest dans une heure = 3600 secondes
             end_sleep_time = time() + 3600
@@ -151,5 +151,5 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
             if not int(tweet_id) in refailed_tweets :
                 bdd_direct_access.remove_retry_tweet( tweet_id )
     
-    print( "[retry_failed_tweets_th" + str(thread_id) + "] Arrêté !" )
+    print( f"[retry_failed_tweets_th{thread_id}] Arrêté !" )
     return

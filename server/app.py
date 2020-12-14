@@ -31,7 +31,7 @@ if __name__ == "__main__" :
     try :
         from app import *
     except ModuleNotFoundError as error :
-        print( "Il manque une librairie :", error )
+        print( f"Il manque une librairie : {error}" )
         print( "Veuillez exécuter : pip install -r requirements.txt" )
         import sys
         sys.exit(0)
@@ -57,7 +57,7 @@ if __name__ == "__main__" :
         # Augmenter le nombre de descripteurs de fichiers ouvrables.
         # 1024 par défaut, c'est trop peu pour nous !
         resource.setrlimit( resource.RLIMIT_NOFILE, (param.MAX_FILE_DESCRIPTORS, param.MAX_FILE_DESCRIPTORS) )
-    print( "Nombre maximum de descripteurs de fichiers :", param.MAX_FILE_DESCRIPTORS )
+    print( f"Nombre maximum de descripteurs de fichiers : {param.MAX_FILE_DESCRIPTORS}" )
     
     """
     SI ON EST EN MULTIPROCESSING :
@@ -145,56 +145,56 @@ if __name__ == "__main__" :
     threads = []
     
     for i in range( param.NUMBER_OF_STEP_1_LINK_FINDER_THREADS ) :
-        thread = threading.Thread( name = "step_1_link_finder_th" + str(i+1),
+        thread = threading.Thread( name = f"step_1_link_finder_th{i+1}",
                                    target = error_collector,
                                    args = ( thread_step_1_link_finder, i+1, shared_memory_uri, ) )
         thread.start()
         threads.append( thread )
     
     for i in range( param.NUMBER_OF_STEP_2_TWEETS_INDEXER_THREADS ) :
-        thread = threading.Thread( name = "step_2_tweets_indexer_th" + str(i+1),
+        thread = threading.Thread( name = f"step_2_tweets_indexer_th{i+1}",
                                    target = error_collector,
                                    args = ( thread_step_2_tweets_indexer, i+1, shared_memory_uri, ) )
         thread.start()
         threads.append( thread )
     
     for i in range( param.NUMBER_OF_STEP_3_REVERSE_SEARCH_THREADS ) :
-        thread = threading.Thread( name = "step_3_reverse_search_th" + str(i+1),
+        thread = threading.Thread( name = f"step_3_reverse_search_th{i+1}",
                                    target = error_collector,
                                    args = ( thread_step_3_reverse_search, i+1, shared_memory_uri, ) )
         thread.start()
         threads.append( thread )
     
     for i in range( param.NUMBER_OF_STEP_4_FILTER_RESULTS_THREADS ) :
-        thread = threading.Thread( name = "step_4_filter_results_th" + str(i+1),
+        thread = threading.Thread( name = f"step_4_filter_results_th{i+1}",
                                    target = error_collector,
                                    args = ( thread_step_4_filter_results, i+1, shared_memory_uri, ) )
         thread.start()
         threads.append( thread )
     
     for i in range( param.NUMBER_OF_STEP_A_SEARCHAPI_LIST_ACCOUNT_TWEETS_THREADS ) :
-        thread = threading.Thread( name = "step_A_SearchAPI_list_account_tweets_th" + str(i+1),
+        thread = threading.Thread( name = f"step_A_SearchAPI_list_account_tweets_th{i+1}",
                                    target = error_collector,
                                    args = ( thread_step_A_SearchAPI_list_account_tweets, i+1, shared_memory_uri, ) )
         thread.start()
         threads.append( thread )
     
     for i in range( param.NUMBER_OF_STEP_B_TIMELINEAPI_LIST_ACCOUNT_TWEETS_THREADS ) :
-        thread = threading.Thread( name = "step_B_TimelineAPI_list_account_tweets_th" + str(i+1),
+        thread = threading.Thread( name = f"step_B_TimelineAPI_list_account_tweets_th{i+1}",
                                    target = error_collector,
                                    args = ( thread_step_B_TimelineAPI_list_account_tweets, i+1, shared_memory_uri, ) )
         thread.start()
         threads.append( thread )
     
     for i in range( param.NUMBER_OF_STEP_C_SEARCHAPI_INDEX_ACCOUNT_TWEETS ) :
-        thread = threading.Thread( name = "step_C_SearchAPI_index_account_tweets_th" + str(i+1),
+        thread = threading.Thread( name = f"step_C_SearchAPI_index_account_tweets_th{i+1}",
                                    target = error_collector,
                                    args = ( thread_step_C_SearchAPI_index_account_tweets, i+1, shared_memory_uri, ) )
         thread.start()
         threads.append( thread )
     
     for i in range( param.NUMBER_OF_STEP_D_TIMELINEAPI_INDEX_ACCOUNT_TWEETS ) :
-        thread = threading.Thread( name = "step_D_TimelineAPI_index_account_tweets_th" + str(i+1),
+        thread = threading.Thread( name = f"step_D_TimelineAPI_index_account_tweets_th{i+1}",
                                    target = error_collector,
                                    args = ( thread_step_D_TimelineAPI_index_account_tweets, i+1, shared_memory_uri, ) )
         thread.start()
@@ -274,9 +274,9 @@ if __name__ == "__main__" :
             if len(args) == 2 :
                 request = shared_memory_user_requests.get_request( args[1] )
                 if request != None :
-                    print( "Status : " + str(request.status) + " " + request.get_status_string() )
+                    print( f"Status : {request.status} {request.get_status_string()}" )
                     if request.problem != None :
-                        print( "Problème : " + request.problem )
+                        print( f"Problème : {request.problem}" )
                     
                     if request.scan_requests == None :
                         print( "Cette requête n'a pas (encore ?) de requête de scan associée." )
@@ -285,12 +285,12 @@ if __name__ == "__main__" :
                     else :
                         for scan_request_uri in request.scan_requests :
                             scan_request = Pyro4.Proxy( scan_request_uri )
-                            print( "Scan @" + scan_request.account_name + " (ID " + str(scan_request.account_id) + "), prioritaire : " + str(scan_request.is_prioritary) )
-                            print( "A démarré le listage SearchAPI : " + str(scan_request.started_SearchAPI_listing) + ", TimelineAPI : " + str(scan_request.started_SearchAPI_listing) )
-                            print( "A terminé l'indexation SearchAPI : " + str(scan_request.finished_SearchAPI_indexing) + ", TimelineAPI : " + str(scan_request.finished_TimelineAPI_indexing) )
+                            print( f"Scan @{scan_request.account_name} (ID {scan_request.account_id}), prioritaire : {scan_request.is_prioritary}" )
+                            print( f"A démarré le listage SearchAPI : {scan_request.started_SearchAPI_listing}, TimelineAPI : {scan_request.started_SearchAPI_listing}" )
+                            print( f"A terminé l'indexation SearchAPI : {scan_request.finished_SearchAPI_indexing}, TimelineAPI : {scan_request.finished_TimelineAPI_indexing}" )
                     
                     if request.finished_date != None :
-                        print( "Fin du traitement : " + str(request.finished_date) )
+                        print( f"Fin du traitement : {request.finished_date}" )
                 else :
                     print( "Requête inconnue pour cet URL !" )
             else :
@@ -300,8 +300,8 @@ if __name__ == "__main__" :
             if len(args) == 2 :
                 request = shared_memory_user_requests.get_request( args[1] )
                 if request != None :
-                    print( "Comptes Twitter trouvés : " + ", ".join( [ "@" + account[0] + " (ID " + str(account[1]) + ")" for account in request.twitter_accounts_with_id ] ) )
-                    print( "Résultat : " + str( [ (data.tweet_id, data.distance_chi2, data.distance_bhattacharyya ) for data in request.founded_tweets ] ) )
+                    print( f"Comptes Twitter trouvés : {', '.join( [ f'@{account[0]} (ID {account[1]})' for account in request.twitter_accounts_with_id ] )}" )
+                    print( f"Résultat : {[ (data.tweet_id, data.distance_chi2, data.distance_bhattacharyya ) for data in request.founded_tweets ]}" )
                 else :
                     print( "Requête inconnue pour cet URL !" )
             else :
@@ -312,11 +312,11 @@ if __name__ == "__main__" :
                 # Vérification que le nom d'utilisateur Twitter est possible
                 if re.compile(r"^@?(\w){1,15}$").match(args[1]) :
                     account_name = args[1]
-                    print( "Demande de scan / d'indexation du compte @" + account_name + "." )
+                    print( f"Demande de scan / d'indexation du compte @{account_name}." )
                     account_id = twitter.get_account_id( account_name )
                     
                     if account_id == None :
-                        print( "Compte @" + args[1] + " inexistant ou indisponible !" )
+                        print( f"Compte @{args[1]} inexistant ou indisponible !" )
                     else :
                         shared_memory_scan_requests.launch_request( account_id, account_name )
                 else :
@@ -329,11 +329,11 @@ if __name__ == "__main__" :
                 if len(args) == 3 :
                     # Vérification que le nom d'utilisateur Twitter est possible
                     if re.compile(r"^@?(\w){1,15}$").match(args[2]) :
-                        print( "Recherche sur le compte @" + args[2] + "." )
+                        print( f"Recherche sur le compte @{args[2]}." )
                         account_id = twitter.get_account_id( args[2] )
                         
                         if account_id == None :
-                            print( "Compte @" + args[2] + " inexistant ou indisponible !" )
+                            print( f"Compte @{args[2]} inexistant ou indisponible !" )
                         else :
                             print( "Attention ! Si ce compte n'est pas indexé, la recherche ne retournera aucun résultat." )
                             shared_memory_user_requests.launch_reverse_search_only( args[1], args[2], account_id )
@@ -353,30 +353,30 @@ if __name__ == "__main__" :
         
         elif args[0] == "queues" :
             if len(args) == 1 :
-                to_print = "Taille step_1_link_finder_queue : " + str(shared_memory_user_requests.step_1_link_finder_queue.qsize()) + "\n"
-                to_print += "Taille step_2_tweets_indexer_queue : " + str(shared_memory_user_requests.step_2_tweets_indexer_queue.qsize()) + "\n"
-                to_print += "Taille step_3_reverse_search_queue : " + str(shared_memory_user_requests.step_3_reverse_search_queue.qsize()) + "\n"
-                to_print += "Taille step_4_filter_results_queue : " + str(shared_memory_user_requests.step_4_filter_results_queue.qsize()) + "\n"
-                to_print += "Taille step_A_SearchAPI_list_account_tweets_prior_queue : " + str(shared_memory_scan_requests.step_A_SearchAPI_list_account_tweets_prior_queue.qsize()) + "\n"
-                to_print += "Taille step_A_SearchAPI_list_account_tweets_queue : " + str(shared_memory_scan_requests.step_A_SearchAPI_list_account_tweets_queue.qsize()) + "\n"
-                to_print += "Taille step_B_TimelineAPI_list_account_tweets_prior_queue : " + str(shared_memory_scan_requests.step_B_TimelineAPI_list_account_tweets_prior_queue.qsize()) + "\n"
-                to_print += "Taille step_B_TimelineAPI_list_account_tweets_queue : " + str(shared_memory_scan_requests.step_B_TimelineAPI_list_account_tweets_queue.qsize()) + "\n"
-                to_print += "Taille step_C_SearchAPI_index_account_tweets_prior_queue : " + str(shared_memory_scan_requests.step_C_SearchAPI_index_account_tweets_prior_queue.qsize()) + "\n"
-                to_print += "Taille step_C_SearchAPI_index_account_tweets_queue : " + str(shared_memory_scan_requests.step_C_SearchAPI_index_account_tweets_queue.qsize()) + "\n"
-                to_print += "Taille step_D_TimelineAPI_index_account_tweets_prior_queue : " + str(shared_memory_scan_requests.step_D_TimelineAPI_index_account_tweets_prior_queue.qsize()) + "\n"
-                to_print += "Taille step_D_TimelineAPI_index_account_tweets_queue : " + str(shared_memory_scan_requests.step_D_TimelineAPI_index_account_tweets_queue.qsize()) + "\n"
-                to_print += "Taille totale pipeline utilisateur : " + str(shared_memory_user_requests.get_size()) + "\n"
-                to_print += "Taille totale pipeline de scan : " + str(shared_memory_scan_requests.get_size())
+                to_print = f"Taille step_1_link_finder_queue : {shared_memory_user_requests.step_1_link_finder_queue.qsize()}\n"
+                to_print += f"Taille step_2_tweets_indexer_queue : {shared_memory_user_requests.step_2_tweets_indexer_queue.qsize()}\n"
+                to_print += f"Taille step_3_reverse_search_queue : {shared_memory_user_requests.step_3_reverse_search_queue.qsize()}\n"
+                to_print += f"Taille step_4_filter_results_queue : {shared_memory_user_requests.step_4_filter_results_queue.qsize()}\n"
+                to_print += f"Taille step_A_SearchAPI_list_account_tweets_prior_queue : {shared_memory_scan_requests.step_A_SearchAPI_list_account_tweets_prior_queue.qsize()}\n"
+                to_print += f"Taille step_A_SearchAPI_list_account_tweets_queue : {shared_memory_scan_requests.step_A_SearchAPI_list_account_tweets_queue.qsize()}\n"
+                to_print += f"Taille step_B_TimelineAPI_list_account_tweets_prior_queue : {shared_memory_scan_requests.step_B_TimelineAPI_list_account_tweets_prior_queue.qsize()}\n"
+                to_print += f"Taille step_B_TimelineAPI_list_account_tweets_queue : {shared_memory_scan_requests.step_B_TimelineAPI_list_account_tweets_queue.qsize()}\n"
+                to_print += f"Taille step_C_SearchAPI_index_account_tweets_prior_queue : {shared_memory_scan_requests.step_C_SearchAPI_index_account_tweets_prior_queue.qsize()}\n"
+                to_print += f"Taille step_C_SearchAPI_index_account_tweets_queue : {shared_memory_scan_requests.step_C_SearchAPI_index_account_tweets_queue.qsize()}\n"
+                to_print += f"Taille step_D_TimelineAPI_index_account_tweets_prior_queue : {shared_memory_scan_requests.step_D_TimelineAPI_index_account_tweets_prior_queue.qsize()}\n"
+                to_print += f"Taille step_D_TimelineAPI_index_account_tweets_queue : {shared_memory_scan_requests.step_D_TimelineAPI_index_account_tweets_queue.qsize()}\n"
+                to_print += f"Taille totale pipeline utilisateur : {shared_memory_user_requests.get_size()}\n"
+                to_print += f"Taille totale pipeline de scan : {shared_memory_scan_requests.get_size()}"
                 print( to_print )
             else :
                 print( "Utilisation : queues")
         
         elif args[0] == "stats" :
             if len(args) == 1 :
-                to_print = "Nombre de tweets indexés : " + str(shared_memory.tweets_count) + "\n"
-                to_print += "Nombre de comptes Twitter indexés : " + str(shared_memory.accounts_count) + "\n"
-                to_print += "Nombre de requêtes dans le pipeline utilisateur : " + str(shared_memory_user_requests.get_size()) + "\n"
-                to_print += "Nombre de requêtes dans le pipeline de scan : " + str(shared_memory_scan_requests.get_size())
+                to_print = f"Nombre de tweets indexés : {shared_memory.tweets_count}\n"
+                to_print += f"Nombre de comptes Twitter indexés : {shared_memory.accounts_count}\n"
+                to_print += f"Nombre de requêtes dans le pipeline utilisateur : {shared_memory_user_requests.get_size()}\n"
+                to_print += f"Nombre de requêtes dans le pipeline de scan : {shared_memory_scan_requests.get_size()}"
                 print( to_print )
             else :
                 print( "Utilisation : stats")

@@ -21,7 +21,7 @@ def test ( url : str,
     data = engine.get_data( url )
     
     print( "" )
-    print( "Test : " + url )
+    print( f"Test : {url}" )
     
     if image_url_contains_mode :
         test = should_get_image_url in data.image_url
@@ -32,8 +32,8 @@ def test ( url : str,
         test_image_url = True
     else :
         print( "Test images sources : ECHEC !" )
-        print( "On aurait dû avoir : " + should_get_image_url )
-        print( "On a eu : " + data.image_url )
+        print( f"On aurait dû avoir : {should_get_image_url}" )
+        print( f"On a eu : {data.image_url}" )
         test_image_url = False
     
     if data.twitter_accounts == should_get_twitter_accounts :
@@ -41,8 +41,8 @@ def test ( url : str,
         test_twitter_accounts = True
     else :
         print( "Test comptes Twitter : ECHEC !" )
-        print( "On aurait dû avoir : " + str(should_get_twitter_accounts) )
-        print( "On a eu : " + str(data.twitter_accounts) )
+        print( f"On aurait dû avoir : {should_get_twitter_accounts}" )
+        print( f"On a eu : {data.twitter_accounts}" )
         test_twitter_accounts = False
     
     if data.publish_date == should_get_datetime :
@@ -50,8 +50,8 @@ def test ( url : str,
         test_datetime = True
     else :
         print( "Test datetime : ECHEC !" )
-        print( "On aurait dû avoir : " + str(should_get_datetime) )
-        print( "On a eu : " + str(data.publish_date) )
+        print( f"On aurait dû avoir : {should_get_datetime}" )
+        print( f"On a eu : {data.publish_date}" )
         test_datetime = False
     
     return test_image_url and test_twitter_accounts and test_datetime

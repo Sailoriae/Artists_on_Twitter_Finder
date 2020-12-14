@@ -32,7 +32,7 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
     shared_memory_user_requests_thread_step_2_tweets_indexer_sem = shared_memory_user_requests.thread_step_2_tweets_indexer_sem
     
     # Dire qu'on ne fait rien
-    shared_memory_threads_registry.set_request( "thread_step_2_tweets_indexer_number" + str(thread_id), None )
+    shared_memory_threads_registry.set_request( f"thread_step_2_tweets_indexer_number{thread_id}", None )
     
     # Timezone locale
     local_tz = tzlocal()
@@ -53,7 +53,7 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
             continue
         
         # Dire qu'on est en train de traiter cette requête
-        shared_memory_threads_registry.set_request( "thread_step_2_tweets_indexer_number" + str(thread_id), request )
+        shared_memory_threads_registry.set_request( f"thread_step_2_tweets_indexer_number{thread_id}", request )
         
         # Si on a vu cette requête il y a moins de 5 secondes, c'est qu'il n'y
         # a pas beaucoup de requêtes dans le pipeline, on peut donc dormir
@@ -84,7 +84,7 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
                 # Si l'une des deux est à NULL, il faut scanner, ou se
                 # rattacher au scan du compte déjà en cours
                 if last_scan_1 == None or last_scan_2 == None :
-                    print( "[step_2_th" + str(thread_id) + "] @" + account_name + " n'est pas dans la base de données ! On lance une nouvelle requête de scan ou on suit celle déjà en cours pour ce compte !" )
+                    print( f"[step_2_th{thread_id}] @{account_name} n'est pas dans la base de données ! On lance une nouvelle requête de scan ou on suit celle déjà en cours pour ce compte !" )
                     
                     # launch_request() va soit nous retourner la requête de
                     # scan en cours, soit en créer une nouvelle
@@ -121,7 +121,7 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
                     # (On laisse 3 jours de marge à l'artiste pour
                     # publier sur Twitter)
                     if min_date - datetime.timedelta( days = 3 ) < request.datetime :
-                        print( "[step_2_th" + str(thread_id) + "] @" + account_name + " est déjà dans la BDD, mais il faut le MàJ car l'illustration de requête est trop récente !" )
+                        print( f"[step_2_th{thread_id}] @{account_name} est déjà dans la BDD, mais il faut le MàJ car l'illustration de requête est trop récente !" )
                         
                         scan_request = shared_memory_scan_requests.launch_request( account_id,
                                                                                account_name,
@@ -134,7 +134,7 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
                         scan_request.release_proxy()
                     
                     else :
-                        print( "[step_2_th" + str(thread_id) + "] @" + account_name + " est déjà dans la BDD, et on peut sauter son scan !" )
+                        print( f"[step_2_th{thread_id}] @{account_name} est déjà dans la BDD, et on peut sauter son scan !" )
             
             # Libérer le sémaphore
             shared_memory_user_requests_thread_step_2_tweets_indexer_sem.release()
@@ -165,7 +165,7 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
             scan_request.release_proxy()
         
         # Dire qu'on n'est plus en train de traiter cette requête
-        shared_memory_threads_registry.set_request( "thread_step_2_tweets_indexer_number" + str(thread_id), None )
+        shared_memory_threads_registry.set_request( f"thread_step_2_tweets_indexer_number{thread_id}", None )
         
         # Si l'une des requêtes de scan a eu un problème, on arrête tout avec
         # cette requête utilisateur
@@ -191,5 +191,5 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
         # Forcer la fermeture du proxy
         request.release_proxy()
     
-    print( "[step_2_th" + str(thread_id) + "] Arrêté !" )
+    print( f"[step_2_th{thread_id}] Arrêté !" )
     return

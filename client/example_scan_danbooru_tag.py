@@ -24,13 +24,11 @@ def scan_danbooru_tag ( TAG_TO_SCAN ) :
     last_post_id = None
     while True :
         if page_number <= 1000 :
-            response = requests.get(
-                "https://danbooru.donmai.us/posts.json?page=" + str(page_number) + "&tags=" + TAG_TO_SCAN )
-            print( "On demande à Danbooru : https://danbooru.donmai.us/posts.json?page=" + str(page_number) + "&tags=" + TAG_TO_SCAN )
+            request = f"https://danbooru.donmai.us/posts.json?page={page_number}&tags={TAG_TO_SCAN}"
         else : # A partir de la page 1000, on ne peut plus utiliser les pages, mais l'ID du dernier post
-            response = requests.get(
-                "https://danbooru.donmai.us/posts.json?page=b" + str(last_post_id) + "&tags=" + TAG_TO_SCAN )
-            print( "On demande à Danbooru : https://danbooru.donmai.us/posts.json?page=b" + str(last_post_id) + "&tags=" + TAG_TO_SCAN )
+            request = f"https://danbooru.donmai.us/posts.json?page=b{last_post_id}&tags={TAG_TO_SCAN}"
+        print( "On demande à Danbooru : " + request )
+        response = requests.get( request )
         
         json = response.json()
         
@@ -43,16 +41,18 @@ def scan_danbooru_tag ( TAG_TO_SCAN ) :
         
         for post in json :
             try :
-                print( "Requête : https://danbooru.donmai.us/posts/" + str(post["id"]) )
+                url = f"https://danbooru.donmai.us/posts/{post['id']}"
+            except KeyError : # Certains posts dans la recherche ont leur ID masqué
+                pass
+            else :
+                print( "Requête : " + url )
                 last_post_id = str(post["id"])
                 if not post["tag_string_artist"] in launched_artists :
                     print( "Envoyée ! Artiste : " + post["tag_string_artist"] )
-                    server.get_request( "https://danbooru.donmai.us/posts/" + str(post["id"]) )
+                    server.get_request( url )
                     launched_artists.append( post["tag_string_artist"] )
                 else :
                     print( "Non envoyée, artiste déjà envoyé : " + post["tag_string_artist"] )
-            except KeyError : # Certains posts dans la recherche ont leur ID masqué
-                pass
         
         page_number += 1
         

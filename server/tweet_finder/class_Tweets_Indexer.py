@@ -81,7 +81,7 @@ class Tweets_Indexer :
                              FORCE_INDEX = False,
                              FAILED_TWEETS_LIST = None ) -> bool :
 #        if self.DEBUG :
-#            print( "[Index Tweets] Indexation / scan des Tweets de @" + account_name + " avec SearchAPI." )
+#            print( f"[Index Tweets] Indexation / scan des Tweets de @{account_name} avec SearchAPI." )
         if self.DEBUG or self.ENABLE_METRICS :
             times = [] # Liste des temps pour indexer un Tweet
             calculate_features_times = [] # Liste des temps pour calculer les caractéristiques des images du Tweet
@@ -93,9 +93,9 @@ class Tweets_Indexer :
             except queue.Empty : # Si la file d'entrée est vide
                 if self.DEBUG or self.ENABLE_METRICS :
                     if len(times) > 0 :
-                        print( "[Index Tweets]", len(times), "Tweets indexés avec une moyenne de", mean(times), "secondes par Tweet." )
-                        print( "[Index Tweets] Temps moyens de calcul des caractéristiques :", mean( calculate_features_times ) )
-                        print( "[Index Tweets] Temps moyens d'enregistrement dans la BDD :", mean( insert_into_times ) )
+                        print( f"[Index Tweets] {len(times)} Tweets indexés avec une moyenne de {mean(times)} secondes par Tweet." )
+                        print( f"[Index Tweets] Temps moyens de calcul des caractéristiques : {mean(calculate_features_times)} secondes." )
+                        print( f"[Index Tweets] Temps moyens d'enregistrement dans la BDD : {mean(insert_into_times)} secondes." )
                         if add_step_C_or_D_times != None :
                             add_step_C_or_D_times( times, calculate_features_times, insert_into_times )
                 return False
@@ -104,15 +104,15 @@ class Tweets_Indexer :
             if tweet == None :
                 if self.DEBUG or self.ENABLE_METRICS :
                     if len(times) > 0 :
-                        print( "[Index Tweets]", len(times), "Tweets indexés avec une moyenne de", mean(times), "secondes par Tweet." )
-                        print( "[Index Tweets] Temps moyens de calcul des caractéristiques :", mean( calculate_features_times ) )
-                        print( "[Index Tweets] Temps moyens d'enregistrement dans la BDD :", mean( insert_into_times ) )
+                        print( f"[Index Tweets] {len(times)} Tweets indexés avec une moyenne de {mean(times)} secondes par Tweet." )
+                        print( f"[Index Tweets] Temps moyens de calcul des caractéristiques : {mean(calculate_features_times)} secondes." )
+                        print( f"[Index Tweets] Temps moyens d'enregistrement dans la BDD : {mean(insert_into_times)} secondes." )
                         if add_step_C_or_D_times != None :
                             add_step_C_or_D_times( times, calculate_features_times, insert_into_times )
                 return True
             
             if self.DEBUG :
-                print( "[Index Tweets] Indexation Tweet " + str(tweet["tweet_id"]) + " de @" + account_name + "." )
+                print( f"[Index Tweets] Indexation Tweet ID {tweet['tweet_id']} de @{account_name}." )
             if self.DEBUG or self.ENABLE_METRICS :
                 start = time()
             

@@ -270,7 +270,7 @@ class User_Requests_Pipeline :
                     response_dict["input"] = request.input_url
                     response_dict["ip_address"] = request.ip_address
                     file = open( "results.log", "a" )
-                    file.write( json.dumps( response_dict ) + " " + "\n" )
+                    file.write( json.dumps( response_dict ) + "\n" )
                     file.close()
     
     """

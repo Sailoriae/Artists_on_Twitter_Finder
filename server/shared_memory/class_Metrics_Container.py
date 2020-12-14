@@ -113,31 +113,31 @@ class Metrics_Container :
     def get_metrics ( self ) :
         to_print = ""
         if self._step_A_times != [] :
-            to_print += "Etape A : Temps moyen pour lister avec SearchAPI : " + str(mean(self._step_A_times)) + " (" + str(len(self._step_A_times)) + " listages)\n"
+            to_print += f"Etape A : Temps moyen pour lister avec SearchAPI : {mean(self._step_A_times)} ({len(self._step_A_times)} listages)\n"
         if self._step_B_times != [] :
-            to_print += "Etape B : Temps moyen pour lister avec TimelineAPI : " + str(mean(self._step_B_times)) + " (" + str(len(self._step_B_times)) + " listages)\n"
+            to_print += f"Etape B : Temps moyen pour lister avec TimelineAPI : {mean(self._step_B_times)} ({len(self._step_B_times)} listages)\n"
         if self._step_C_times != [] :
-            to_print += "Etape C : Temps moyen pour indexer avec SearchAPI : " + str(mean(self._step_C_times)) + " (" + str(len(self._step_C_times)) + " tweets)\n"
+            to_print += f"Etape C : Temps moyen pour indexer avec SearchAPI : {mean(self._step_C_times)} ({len(self._step_C_times)} tweets)\n"
         if self._step_C_calculate_features_times != [] :
-            to_print += " - Dont : Calcul CBIR d'un Tweet : " + str(mean(self._step_C_calculate_features_times)) + " (" + str(len(self._step_C_calculate_features_times)) + " tweets)\n"
+            to_print += f" - Dont : Calcul CBIR d'un Tweet : {mean(self._step_C_calculate_features_times)} ({len(self._step_C_calculate_features_times)} tweets)\n"
         if self._step_C_insert_into_times != [] :
-            to_print += " - Dont : INSERT INTO d'un Tweet : " + str(mean(self._step_C_insert_into_times)) + " (" + str(len(self._step_C_insert_into_times)) + " tweets)\n"
+            to_print += f" - Dont : INSERT INTO d'un Tweet : {mean(self._step_C_insert_into_times)} ({len(self._step_C_insert_into_times)} tweets)\n"
         if self._step_D_times != [] :
-            to_print += "Etape D : Temps moyen pour indexer avec TimelineAPI : " + str(mean(self._step_D_times)) + " (" + str(len(self._step_D_times)) + " tweets)\n"
+            to_print += f"Etape D : Temps moyen pour indexer avec TimelineAPI : {mean(self._step_D_times)} ({len(self._step_D_times)} tweets)\n"
         if self._step_D_calculate_features_times != [] :
-            to_print += " - Dont : Calcul CBIR d'un Tweet : " + str(mean(self._step_D_calculate_features_times)) + " (" + str(len(self._step_D_calculate_features_times)) + " tweets)\n"
+            to_print += f" - Dont : Calcul CBIR d'un Tweet : {mean(self._step_D_calculate_features_times)} ({len(self._step_D_calculate_features_times)} tweets)\n"
         if self._step_D_insert_into_times != [] :
-            to_print += " - Dont : INSERT INTO d'un Tweet : " + str(mean(self._step_D_insert_into_times)) + " (" + str(len(self._step_D_insert_into_times)) + " tweets)\n"
+            to_print += f" - Dont : INSERT INTO d'un Tweet : {mean(self._step_D_insert_into_times)} ({len(self._step_D_insert_into_times)} tweets)\n"
         if self._step_3_iteration_times != [] :
-            to_print += "Etape 3 : Temps moyen pour itérer lors de la recherche : " + str(mean(self._step_3_iteration_times)) + " (" + str(len(self._step_3_iteration_times)) + " itérations)\n"
+            to_print += f"Etape 3 : Temps moyen pour itérer lors de la recherche : {mean(self._step_3_iteration_times)} ({len(self._step_3_iteration_times)} itérations)\n"
         if self._step_3_usage_times != [] :
-            to_print += "Etape 3 : Temps moyen pour comparer lors de la recherche : " + str(mean(self._step_3_usage_times)) + " (" + str(len(self._step_3_usage_times)) + " images)\n"
+            to_print += f"Etape 3 : Temps moyen pour comparer lors de la recherche : {mean(self._step_3_usage_times)} ({len(self._step_3_usage_times)} images)\n"
         if self._step_4_times != [] :
-            to_print += "Etape 4 : Temps moyen pour filtrer la liste des résultats : " + str(mean(self._step_4_times)) + " (" + str(len(self._step_4_times)) + " filtrages)\n"
+            to_print += f"Etape 4 : Temps moyen pour filtrer la liste des résultats : {mean(self._step_4_times)} ({len(self._step_4_times)} filtrages)\n"
         if self._user_request_full_time != [] :
-            to_print += "Temps moyen pour traiter une requête utilisateur : " + str(mean(self._user_request_full_time)) + " (" + str(len(self._user_request_full_time)) + " requêtes)\n"
+            to_print += f"Temps moyen pour traiter une requête utilisateur : {mean(self._user_request_full_time)} ({len(self._user_request_full_time)} requêtes)\n"
         if self._scan_request_full_time != [] :
-            to_print += "Temps moyen pour traiter une requête de scan : " + str(mean(self._scan_request_full_time)) + " (" + str(len(self._scan_request_full_time)) + " requêtes)\n"
+            to_print += f"Temps moyen pour traiter une requête de scan : {mean(self._scan_request_full_time)} ({len(self._scan_request_full_time)} requêtes)\n"
         if to_print == "" :
             to_print = "Aucune statistique disponible ! Aucune requête n'a été lancée, ou le paramètre \"ENABLE_METRICS\" est à \"False\"."
         return to_print

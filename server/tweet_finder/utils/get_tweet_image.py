@@ -51,7 +51,7 @@ def get_tweet_image ( image_url : str ) -> bytes :
             return url_to_content( large_image_url )
         
         except urllib.error.HTTPError as error :
-            print( "[get_tweet_image] Erreur avec l'image :", image_url )
+            print( f"[get_tweet_image] Erreur avec l'image : {image_url}" )
             print( error )
             
             if error.code == 404 or error.code == 500 or error.code == 403 : # Erreurs insolvables
@@ -75,7 +75,7 @@ def get_tweet_image ( image_url : str ) -> bytes :
                 raise error
         
         except http.client.IncompleteRead as error :
-            print( "[get_tweet_image] Erreur avec l'image :", image_url )
+            print( f"[get_tweet_image] Erreur avec l'image : {image_url}" )
             print( error )
             
             if retry_count < 1 : # Essayer un coup d'attendre

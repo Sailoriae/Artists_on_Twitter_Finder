@@ -38,12 +38,12 @@ class CBIR_Engine_for_Tweets_Images :
             
             # Envoyé par la fonction get_tweet_image() qui n'a pas réussi
             except urllib.error.HTTPError as error :
-                print( "[get_image_features] Erreur avec le Tweet : " + str(tweet_id) + " !" )
+                print( f"[get_image_features] Erreur avec le Tweet ID {tweet_id} !" )
                 print( error )
                 print( "[get_image_features] Abandon !" )
                 
                 file = open( "class_CBIR_Engine_for_Tweets_Images_errors.log", "a" )
-                file.write( "Erreur avec le Tweet : " + str(tweet_id) + " !\n" )
+                file.write( f"Erreur avec le Tweet ID {tweet_id} !\n" )
                 traceback.print_exc( file = file )
                 file.write( "\n\n\n" )
                 file.close()
@@ -52,7 +52,7 @@ class CBIR_Engine_for_Tweets_Images :
                 return None
             
             except Exception as error :
-                print( "[get_image_features] Erreur avec le Tweet : " + str(tweet_id) + " !" )
+                print( f"[get_image_features] Erreur avec le Tweet ID {tweet_id} !" )
                 print( error )
                 
                 if retry_count < 1 : # Essayer un coup d'attendre
@@ -64,7 +64,7 @@ class CBIR_Engine_for_Tweets_Images :
                     print( "[get_image_features] Abandon !" )
                     
                     file = open( "class_CBIR_Engine_for_Tweets_Images_errors.log", "a" )
-                    file.write( "Erreur avec le Tweet : " + str(tweet_id) + " !\n" )
+                    file.write( f"Erreur avec le Tweet ID {tweet_id} !\n" )
                     traceback.print_exc( file = file )
                     file.write( "\n\n\n" )
                     file.close()

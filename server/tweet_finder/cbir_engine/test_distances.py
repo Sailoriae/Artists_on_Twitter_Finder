@@ -37,12 +37,12 @@ def test_distances( url1, url2 ) :
     d6 = cv2.norm( image1_features, image2_features, cv2.NORM_L1 )
     
     print( "[Identiques -> Différentes]" )
-    print( "Khi-carré [0 -> +∞] :", d1 )
-    print( "Bhattacharyya [0 -> 1] :", d2 )
-    print( "Corrélation [1 -> 0] :", d3 )
-    print( "Intersection [+∞ -> 0] :", d4 )
-    print( "Euclidienne [0 -> +∞] :", d5 )
-    print( "Manhattan [0 -> +∞] :", d6 )
+    print( f"Khi-carré [0 -> +∞] : {d1}" )
+    print( f"Bhattacharyya [0 -> 1] : {d2}" )
+    print( f"Corrélation [1 -> 0] : {d3}" )
+    print( f"Intersection [+∞ -> 0] : {d4}" )
+    print( f"Euclidienne [0 -> +∞] : {d5}" )
+    print( f"Manhattan [0 -> +∞] : {d6}" )
     
     if d1 < SEUIL_CHI2 and d2 < SEUIL_BHATTACHARYYA :
         print( "Les images sont les mêmes." )

@@ -48,5 +48,5 @@ def thread_http_server( thread_id : int, shared_memory ) :
         http_server.handle_request()
     http_server.server_close()
     
-    print( "[http_server_th" + str(thread_id) + "] Arrêté !" )
+    print( f"[http_server_th{thread_id}] Arrêté !" )
     return

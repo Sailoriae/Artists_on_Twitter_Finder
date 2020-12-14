@@ -32,7 +32,7 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
     shared_memory_user_requests_step_3_reverse_search_queue = shared_memory_user_requests.step_3_reverse_search_queue
     
     # Dire qu'on ne fait rien
-    shared_memory_threads_registry.set_request( "thread_step_3_reverse_search_number" + str(thread_id), None )
+    shared_memory_threads_registry.set_request( f"thread_step_3_reverse_search_number{thread_id}", None )
     
     # Tant que on ne nous dit pas de nous arrêter
     while shared_memory.keep_service_alive :
@@ -46,17 +46,15 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
             continue
         
         # Dire qu'on est en train de traiter cette requête
-        shared_memory_threads_registry.set_request( "thread_step_3_reverse_search_number" + str(thread_id), request )
+        shared_memory_threads_registry.set_request( f"thread_step_3_reverse_search_number{thread_id}", request )
         
         # On passe la requête à l'étape suivante, c'est à dire notre étape
         shared_memory_user_requests.set_request_to_next_step( request )
         
         if request.input_url != None :
-            print( "[step_3_th" + str(thread_id) + "] Recherche de l'image suivante :\n" +
-                   "[step_3_th" + str(thread_id) + "] " + request.input_url )
+            print( f"[step_3_th{thread_id}] Recherche de l'image suivante : {request.input_url}" )
         else :
-            print( "[step_3_th" + str(thread_id) + "] Recherche de l'image suivante :\n" +
-                   "[step_3_th" + str(thread_id) + "] " + request.image_url )
+            print( f"[step_3_th{thread_id}] Recherche de l'image suivante : {request.image_url}" )
         
         # Obtenir l'image et la stocker dans la mémoire partagée
         # Permet ensuite d'être réutilisée par l'étape 4
@@ -76,7 +74,7 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
         # On recherche les Tweets contenant l'image de requête
         # Et on les stocke dans l'objet de requête
         for twitter_account in request.twitter_accounts_with_id :
-            print( "[step_3_th" + str(thread_id) + "] Recherche sur le compte Twitter @" + twitter_account[0] + "." )
+            print( f"[step_3_th{thread_id}] Recherche sur le compte Twitter @{twitter_account[0]}." )
             
             result = cbir_engine.search_tweet( request.image_url,
                                                account_name = twitter_account[0],
@@ -86,18 +84,18 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
             if result != None :
                 request.founded_tweets += result
             else :
-                print( "[step_3_th" + str(thread_id) + "] Erreur lors de la recherche d'image inversée." )
+                print( f"[step_3_th{thread_id}] Erreur lors de la recherche inversée d'image." )
                 request.problem = "ERROR_DURING_REVERSE_SEARCH"
         
         # Si il n'y a pas de compte Twitter dans la requête
         if request.twitter_accounts_with_id == []:
-            print( "[step_3_th" + str(thread_id) + "] Recherche dans toute la base de données." )
+            print( f"[step_3_th{thread_id}] Recherche dans toute la base de données." )
             
             result = cbir_engine.search_tweet( request.image_url, add_step_3_times = shared_memory_execution_metrics.add_step_3_times )
             if result != None :
                 request.founded_tweets += result
             else :
-                print( "[step_3_th" + str(thread_id) + "] Erreur lors de la recherche d'image inversée." )
+                print( f"[step_3_th{thread_id}] Erreur lors de la recherche inversée d'image." )
         
         # Trier la liste des résultats
         # On trie une liste d'objets par rapport à leur attribut "distance_chi2"
@@ -108,14 +106,13 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
         # On ne garde que les 5 Tweets les plus proches
 #        request.founded_tweets = request.founded_tweets[:5]
         
-        print( "[step_3_th" + str(thread_id) + "] Tweets trouvés (Du plus au moins proche) :\n" +
-               "[step_3_th" + str(thread_id) + "] " + str( [ data.tweet_id for data in request.founded_tweets ] ) )
+        print( f"[step_3_th{thread_id}] Tweets trouvés (Du plus au moins proche) : {[ data.tweet_id for data in request.founded_tweets ]}" )
         
         # Enregistrer le temps complet pour traiter cette requête
         shared_memory_execution_metrics.add_user_request_full_time( time() - request.start )
         
         # Dire qu'on n'est plus en train de traiter cette requête
-        shared_memory_threads_registry.set_request( "thread_step_3_reverse_search_number" + str(thread_id), None )
+        shared_memory_threads_registry.set_request( f"thread_step_3_reverse_search_number{thread_id}", None )
         
         # On passe la requête à l'étape suivante
         # C'est la procédure shared_memory_user_requests.set_request_to_next_step
@@ -125,5 +122,5 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
         # Forcer la fermeture du proxy
         request.release_proxy()
     
-    print( "[step_3_th" + str(thread_id) + "] Arrêté !" )
+    print( f"[step_3_th{thread_id}] Arrêté !" )
     return

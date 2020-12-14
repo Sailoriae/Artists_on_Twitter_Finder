@@ -27,7 +27,7 @@ def thread_remove_finished_requests( thread_id : int, shared_memory ) :
             if not shared_memory.keep_service_alive :
                 break
         
-        print( "[remove_finished_th" + str(thread_id) + "] Délestage des anciennes requêtes..." )
+        print( f"[remove_finished_th{thread_id}] Délestage des anciennes requêtes..." )
         
         # Pipeline des requêtes utilisateurs
         shared_memory_user_requests.shed_requests()
@@ -38,5 +38,5 @@ def thread_remove_finished_requests( thread_id : int, shared_memory ) :
         # Limitateur de requêtes HTTP sur l'API
         shared_memory_http_limitator.reset()
     
-    print( "[remove_finished_th" + str(thread_id) + "] Arrêté !" )
+    print( f"[remove_finished_th{thread_id}] Arrêté !" )
     return

@@ -19,7 +19,7 @@ def get_with_rate_limits ( url, max_retry = 10, retry_on_those_http_errors = [] 
         try :
             to_return = requests.get( url )
             if to_return.status_code in retry_on_those_http_errors :
-                print( "[get_with_rate_limits] Erreur", to_return.status_code, "pour :", url )
+                print( f"[get_with_rate_limits] Erreur {to_return.status_code} pour : {url}" )
                 sleep( randrange( 30, 60 ) )
                 retry_count += 1
                 if retry_count > max_retry :

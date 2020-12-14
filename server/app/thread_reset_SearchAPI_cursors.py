@@ -60,7 +60,7 @@ def thread_reset_SearchAPI_cursors( thread_id : int, shared_memory ) :
                 
                 end_sleep_time = time() + wait_time
                 
-                print( "[reset_cursors_th" + str(thread_id) + "] Reprise dans " + str(wait_time) + " secondes, pour reset le curseur d'indexation avec l'API de recherche du compte ID " + str(account["account_id"]) + "." )
+                print( f"[reset_cursors_th{thread_id}] Reprise dans {wait_time} secondes, pour reset le curseur d'indexation avec l'API de recherche du compte ID {account['account_id']}." )
                 while True :
                     sleep( 3 )
                     if time() > end_sleep_time :
@@ -84,5 +84,5 @@ def thread_reset_SearchAPI_cursors( thread_id : int, shared_memory ) :
             # Car c'est lui qui se chargera de lancer la MàJ du compte
             shared_memory.force_auto_update_reloop = True
     
-    print( "[reset_cursors_th" + str(thread_id) + "] Arrêté !" )
+    print( f"[reset_cursors_th{thread_id}] Arrêté !" )
     return

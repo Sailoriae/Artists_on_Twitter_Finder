@@ -24,9 +24,9 @@ def scan_deviantart_home_or_search ( NUMBER_OF_ILLUST_TO_SEND = 150, SEARCH = No
     deviations_count = 0
     while True :
         if SEARCH != None:
-            request = "https://www.deviantart.com/_napi/da-browse/api/faceted?init=false&page_type=browse_home&order=popular-all-time&include_scraps=false&offset=" + str( page_number * 48 ) + "&q=" + SEARCH
+            request = f"https://www.deviantart.com/_napi/da-browse/api/faceted?init=false&page_type=browse_home&order=popular-all-time&include_scraps=false&offset={page_number * 48 }&q={SEARCH}"
         else :
-            request = "https://www.deviantart.com/_napi/da-browse/api/faceted?init=false&page_type=browse_home&order=recommended&include_scraps=false&offset=" + str( page_number * 48 )
+            request = f"https://www.deviantart.com/_napi/da-browse/api/faceted?init=false&page_type=browse_home&order=recommended&include_scraps=false&offset={page_number * 48 }"
         print( "On demande à DeviantArt : " + request )
         response = requests.get( request )
         

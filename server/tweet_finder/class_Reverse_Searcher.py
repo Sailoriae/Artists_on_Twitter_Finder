@@ -58,7 +58,7 @@ class Reverse_Searcher :
             if account_id == None :
                 account_id = self.twitter.get_account_id( account_name )
             if account_id == None :
-                print( "Compte @", account_name, "inexistant, ou désactivé, ou privé !" )
+                print( f"Compte @{account_name} inexistant, ou désactivé, ou privé !" )
                 return None
         else :
             account_id = 0
@@ -69,7 +69,7 @@ class Reverse_Searcher :
             else :
                 image = binary_image_to_cv2_image( query_image_binary )
         except Exception as error :
-            print( "L'URL \"" + str(image_url) + "\" ne mène pas à une image !" )
+            print( f"L'URL \"{image_url}\" ne mène pas à une image !" )
             print( error )
             return None
         
@@ -88,7 +88,7 @@ class Reverse_Searcher :
             return None
         
         if self.DEBUG or self.ENABLE_METRICS :
-            print( "La recherche s'est faite en", time() - start, "secondes." )
+            print( f"La recherche s'est faite en {time() - start} secondes." )
         
         # Suppression des attributs "image_features" pour gagner un peu de
         # mémoire

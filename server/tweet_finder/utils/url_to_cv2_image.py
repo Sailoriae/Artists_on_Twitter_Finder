@@ -47,6 +47,6 @@ if __name__ == '__main__' :
     image = url_to_cv2_image( "https://www.debian.org/Pics/openlogo-50.png" )
     type_img = type( image )
     if type_img == np.ndarray :
-        print( "OK : " + str( type_img ) )
+        print( f"OK : {type_img }" )
     else :
-        print( "Mauvais type : " + str( type_img ) )
+        print( f"Mauvais type : {type_img}" )
