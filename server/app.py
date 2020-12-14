@@ -285,9 +285,9 @@ if __name__ == "__main__" :
                     else :
                         for scan_request_uri in request.scan_requests :
                             scan_request = Pyro4.Proxy( scan_request_uri )
-                            print( f"Scan @{scan_request.account_name} (ID {scan_request.account_id}), prioritaire : {scan_request.is_prioritary}" )
-                            print( f"A démarré le listage SearchAPI : {scan_request.started_SearchAPI_listing}, TimelineAPI : {scan_request.started_SearchAPI_listing}" )
-                            print( f"A terminé l'indexation SearchAPI : {scan_request.finished_SearchAPI_indexing}, TimelineAPI : {scan_request.finished_TimelineAPI_indexing}" )
+                            print( f" - Scan @{scan_request.account_name} (ID {scan_request.account_id}), prioritaire : {scan_request.is_prioritary}" )
+                            print( f"    - A démarré le listage SearchAPI : {scan_request.started_SearchAPI_listing}, TimelineAPI : {scan_request.started_SearchAPI_listing}" )
+                            print( f"    - A terminé l'indexation SearchAPI : {scan_request.finished_SearchAPI_indexing}, TimelineAPI : {scan_request.finished_TimelineAPI_indexing}" )
                     
                     if request.finished_date != None :
                         print( f"Fin du traitement : {request.finished_date}" )
