@@ -88,7 +88,9 @@ class Tweets_Lister_with_SearchAPI :
         def output_function ( tweet_json ) :
             tweet_dict = analyse_tweet_json( tweet_json )
             if tweet_dict != None :
-                queue.put( tweet_dict )
+                # Re-filtrer au cas où
+                if int( tweet_dict["user_id"] ) == int ( account_id ) :
+                    queue.put( tweet_dict )
         
         # Note : Plus besoin de faire de bidouille avec "filter:safe"
         # On met le "@" à cause de @KIYOSATO_0928 qui renvoyait des erreurs 400

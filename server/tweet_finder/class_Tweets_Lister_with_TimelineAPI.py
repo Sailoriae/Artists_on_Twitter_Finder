@@ -95,7 +95,9 @@ class Tweets_Lister_with_TimelineAPI :
             
             tweet_dict = analyse_tweet_json( tweet._json )
             if tweet_dict != None :
-                queue.put( tweet_dict )
+                # Re-filtrer au cas où
+                if int( tweet_dict["user_id"] ) == int ( account_id ) :
+                    queue.put( tweet_dict )
             count += 1
         
         if self.DEBUG or self.ENABLE_METRICS :
