@@ -27,8 +27,10 @@ class TweepyAbstraction :
         
         # Tweepy gère l'attente lors d'une rate limit !
         self.api = tweepy.API( auth, 
-                               wait_on_rate_limit = True,
-                               wait_on_rate_limit_notify  = True )
+                               wait_on_rate_limit = True, # Gérer les rate limits
+                               wait_on_rate_limit_notify = True ) # Faire des print() lors d'une rate limit
+        # Note : Ne pas utiliser l'option "retry_count"
+        # Elle réessaye sur TOUTES les erreurs, pas seulement celles de connexion
     
     """
     @param tweet_id L'ID du Tweet
@@ -50,6 +52,8 @@ class TweepyAbstraction :
                         entrer dans cette fonction la chaine "jack".
     @param invert_mode Inverser cette fonction, retourne le nom d'utilisateur
                        à partir de l'ID du compte.
+    @param retry_once Réessayer une fois sur une erreur de connexion.
+    
     @return L'ID du compte
             Ou None s'il y a eu un problème, c'est à dire soit :
             - Le compte n'existe pas,
@@ -57,7 +61,7 @@ class TweepyAbstraction :
             - Le compte est suspendu,
             - Ou le compte est privé
     """
-    def get_account_id ( self, account_name : str, invert_mode = False ) -> int :
+    def get_account_id ( self, account_name : str, invert_mode = False, retry_once = True ) -> int :
         try :
             if invert_mode :
                 json = self.api.get_user( user_id = account_name )
@@ -83,10 +87,14 @@ class TweepyAbstraction :
                 return None
             if error.api_code == 63 : # User has been suspended
                 return None
+            if retry_once and error.api_code == None :
+                time.sleep( 10 )
+                return self.get_account_id( account_name, invert_mode = invert_mode, retry_once = False )
             raise error
     
     """
     @param account_name Liste de comptes Twitter dont on veut l'ID.
+    @param retry_once Réessayer une fois sur une erreur de connexion.
     
     @return Liste de tuples contenant le nom du compte, et son ID.
             Un compte peut ne pas être présent dans la liste si :
@@ -95,7 +103,7 @@ class TweepyAbstraction :
             - Le compte est suspendu,
             - Ou le compte est privé
     """
-    def get_multiple_accounts_ids ( self, accounts_names ) :
+    def get_multiple_accounts_ids ( self, accounts_names, retry_once = True ) :
         try :
             to_return = []
             for account in self.api.lookup_users( screen_names = accounts_names ) :
@@ -108,6 +116,9 @@ class TweepyAbstraction :
         except tweepy.TweepError as error :
             if error.api_code == 17 : # No user matches for specified terms
                 return []
+            if retry_once and error.api_code == None :
+                time.sleep( 10 )
+                return self.get_multiple_accounts_ids( accounts_names, retry_once = False )
             raise error
     
     """
@@ -149,9 +160,16 @@ class TweepyAbstraction :
     Regarder si un compte bloque le compte connecté à l'API.
     
     @param account_id L'ID du compte.
+    @param retry_once Réessayer une fois sur une erreur de connexion.
     @return True ou False.
     """
     # Note : On ne peut pas savoir via cette API si le compte est en privé.
-    def blocks_me ( self, account_id : int ) :
-        friendship = self.api.show_friendship( target_id = account_id )
-        return friendship[0].blocked_by
+    def blocks_me ( self, account_id : int, retry_once = True ) :
+        try :
+            friendship = self.api.show_friendship( target_id = account_id )
+            return friendship[0].blocked_by
+        except tweepy.TweepError as error :
+            if retry_once and error.api_code == None :
+                time.sleep( 10 )
+                return self.blocks_me( account_id, retry_once = False )
+            raise error
