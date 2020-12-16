@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-from time import sleep, time
+from time import time
 import datetime
 import queue
 
@@ -15,6 +15,7 @@ from tweet_finder import Tweets_Indexer
 from tweet_finder.analyse_tweet_json import analyse_tweet_json
 from tweet_finder.database import SQLite_or_MySQL
 from tweet_finder.twitter import TweepyAbstraction
+from app.wait_until import wait_until
 
 
 """
@@ -38,6 +39,10 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
                                  param.API_SECRET,
                                  param.OAUTH_TOKEN,
                                  param.OAUTH_TOKEN_SECRET )
+    
+    # Fonction à passer à "wait_until()"
+    # Passer "shared_memory.keep_running" ne fonctionne pas
+    def break_wait() : return not shared_memory.keep_service_alive
     
     # Tant que on ne nous dit pas de nous arrêter
     while shared_memory.keep_service_alive :
@@ -82,14 +87,14 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
                     end_sleep_time = time() + wait_time
                     
                     print( f"[retry_failed_tweets_th{thread_id}] Reprise dans {wait_time} secondes, pour réessayer le Tweet ID {tweet['tweet_id']}." )
-                    while True :
-                        sleep( 3 )
-                        if time() > end_sleep_time :
-                            break
-                        if not shared_memory.keep_service_alive :
-                            break
-                    # Recommencer la boucle du "keep_service_alive"
-                    break # Arrête de l'itération "for"
+                    
+                    if not wait_until( end_sleep_time, break_wait ) :
+                        break # Arrêt de l'itération "for"
+                
+                # Sinon, on arrête l'itération "for" pour indexer les Tweets
+                # qu'on a déjà à réessayer
+                else :
+                   break
             
             # Si il n'y a aucune info sur ce Tweet, il faut l'obtenir sur l'API
             # Ne devrait pas arriver, mais au cas où
@@ -118,15 +123,11 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
             
             # Retest dans une heure = 3600 secondes
             end_sleep_time = time() + 3600
-            while True :
-                sleep( 3 )
-                if time() > end_sleep_time :
-                    break
-                if not shared_memory.keep_service_alive :
-                    break
+            if not wait_until( end_sleep_time, break_wait ) :
+                break # Le serveur doit s'arrêter
             
             # Reboucler "while shared_memory.keep_service_alive"
-            continue # Arrête de l'itération "for"
+            continue
         
         # Si il y a des Tweets à aller chercher sur l'API
         if len( hundred_tweets ) > 0 :

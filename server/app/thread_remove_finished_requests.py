@@ -1,7 +1,12 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-from time import sleep, time
+from time import time
+
+try :
+    from wait_until import wait_until
+except ModuleNotFoundError :
+    from .wait_until import wait_until
 
 
 """
@@ -16,16 +21,16 @@ def thread_remove_finished_requests( thread_id : int, shared_memory ) :
     shared_memory_scan_requests = shared_memory.scan_requests
     shared_memory_http_limitator = shared_memory.http_limitator
     
+    # Fonction à passer à "wait_until()"
+    # Passer "shared_memory.keep_running" ne fonctionne pas
+    def break_wait() : return not shared_memory.keep_service_alive
+    
     # Tant que on ne nous dit pas de nous arrêter
     while shared_memory.keep_service_alive :
         # On dort dix minutes = 600 secondes
         end_sleep_time = time() + 600
-        while True :
-            sleep( 3 )
-            if time() > end_sleep_time :
-                break
-            if not shared_memory.keep_service_alive :
-                break
+        if not wait_until( end_sleep_time, break_wait ) :
+            break # Le serveur doit s'arrêter
         
         print( f"[remove_finished_th{thread_id}] Délestage des anciennes requêtes..." )
         

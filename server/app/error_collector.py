@@ -98,8 +98,12 @@ def error_collector( thread_procedure, thread_id : int, shared_memory_uri : str 
                 # On dort 10 mins * le nombre de fois qu'on a crash à l'init
                 wait_time = 600 * error_on_init_count
                 end_sleep_time = time.time() + wait_time
+                
                 print( f"Attente de {wait_time} pour redémarrer !" )
                 
+                # Ne pas utiliser "wait_until()" ici
+                # Le collecteur d'erreur est censé être le plus safe possible,
+                # on éviter d'appeler d'autres fonctions
                 while True :
                     time.sleep( 3 )
                     if time.time() > end_sleep_time :
