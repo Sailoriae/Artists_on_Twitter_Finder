@@ -761,7 +761,11 @@ class SQLite_or_MySQL :
     def get_oldest_reseted_account( self ) :
         c = self.get_cursor()
         
-        c.execute( "SELECT account_id, last_SearchAPI_indexing_cursor_reset_date FROM accounts ORDER BY last_SearchAPI_indexing_cursor_reset_date" )
+        c.execute( """SELECT account_id,
+                             last_SearchAPI_indexing_cursor_reset_date,
+                             last_SearchAPI_indexing_local_date 
+                      FROM accounts
+                      ORDER BY last_SearchAPI_indexing_cursor_reset_date""" )
         
         to_return = {}
         for data in c.fetchall() :
@@ -770,6 +774,10 @@ class SQLite_or_MySQL :
                 to_return["last_cursor_reset_date"] = datetime.strptime( data[1], '%Y-%m-%d %H:%M:%S' )
             else :
                 to_return["last_cursor_reset_date"] = data[1]
+            if not param.USE_MYSQL_INSTEAD_OF_SQLITE and data[2] != None :
+                to_return["last_SearchAPI_indexing_local_date"] = datetime.strptime( data[2], '%Y-%m-%d %H:%M:%S' )
+            else :
+                to_return["last_SearchAPI_indexing_local_date"] = data[2]
             yield to_return
 
 """

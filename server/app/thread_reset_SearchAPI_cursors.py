@@ -43,7 +43,7 @@ def thread_reset_SearchAPI_cursors( thread_id : int, shared_memory ) :
     shared_memory_scan_requests = shared_memory.scan_requests
     
     # Période de reset des curseurs d'indexation avec l'API de recherche
-    reset_period = datetime.timedelta( days = param.RESET_SEARCHAPI_CURSORS_PERIOD )
+    reset_period = datetime.timedelta( days = param.RESET_SEARCHAPI_CURSORS_PERIOD ).total_seconds()
     
     # Fonction à passer à "wait_until()"
     # Passer "shared_memory.keep_running" ne fonctionne pas
@@ -51,33 +51,68 @@ def thread_reset_SearchAPI_cursors( thread_id : int, shared_memory ) :
     
     # Tant que on ne nous dit pas de nous arrêter
     while shared_memory.keep_service_alive :
+        # Si il n'y a aucun compte dans la base de données
+        if shared_memory.accounts_count < 1 :
+            print( f"[reset_cursors_th{thread_id}] La base de données n'a pas de comptes Twitter enregistré !" )
+            
+            # Retest dans une heure = 3600 secondes
+            end_sleep_time = time() + 3600
+            wait_until( end_sleep_time, break_wait )
+        
+        # Instant juste avant le lancement d'une mise à jour
+        # Sert à être précis pour répartir les mises à jour
+        start = datetime.datetime.now()
+        
+        # Calculer la moyenne du temps entre chaque mise à jour
+        # Sert à répartier les mises à jour
+        # Pas besoin de le MàJ dans la boucle "for", car l'itérateur est un
+        # instantané des comptes dans la BDD
+        max_wait = reset_period / shared_memory.accounts_count
+        
         # Prendre l'itérateur sur les comptes dans la base de donnée, triés
         # dans l'ordre du moins récemment reset au plus récemment reset
         oldest_reseted_account_iterator = bdd_direct_access.get_oldest_reseted_account()
         
-        # Compteurs du nombre d'itération
-        count = 0
-        
         # Pour chaque compte dans la BDD
         for account in oldest_reseted_account_iterator :
-            count += 1
-            
             # Vérifier quand même qu'il ne faut pas s'arrêter
             if not shared_memory.keep_service_alive :
                 break
             
-            # Prendre la date actuelle
-            now = datetime.datetime.now()
+            # Vérifier que le compte ait bien terminé sa première indexation
+            # Sinon, on le passe, c'est au thread de MàJ auto de s'en charger
+            if account["last_SearchAPI_indexing_local_date"] == None :
+                continue
+            
+            # Calculer le temps écoulé entre le dernier reset et maintenant
+            try :
+                diff = (start - account["last_cursor_reset_date"]).total_seconds()
+            
+            # Si le compte n'a pas de date de dernier reset, déjà c'est pas
+            # normal, et ensuite, on le reset forcément
+            except TypeError as error :
+                 print( f"[reset_cursors_th{thread_id}] Le compte ID {account['account_id']} n'a par de date de dernier reset de son curseur d'indexation. Pourtant il a une date de dernière indexation avec l'API de recherche. C'est pas normal !" )
+                 print( error )
+                 diff = reset_period # Forcer le reset
             
             # Si le reset du curseur de ce compte est à moins de
             # param.RESET_SEARCHAPI_CURSORS_PERIOD jours d'aujourd'hui,
             # il faut attendre
-            if account["last_cursor_reset_date"] != None and now - account["last_cursor_reset_date"] < reset_period :
+            if diff < reset_period :
                 # Reprise dans (reset_period - (now - account["last_cursor_reset_date"]))
-                wait_time = int( (reset_period - (now - account["last_cursor_reset_date"])).total_seconds() )
+                wait_time = reset_period - diff
+                
+                # Prendre de l'avance : Le temps d'attente maximal est le temps
+                # moyen entre deux MàJ, c'est à dire la période de MàJ divisée
+                # par le nombre de comptes dans la BDD
+                # Cela permet de répartir les MàJ et d'éviter de créer des pics
+                # de charge sur le serveur
+                if wait_time > max_wait :
+                    wait_time = max_wait
+                
                 end_sleep_time = time() + wait_time
                 
-                print( f"[reset_cursors_th{thread_id}] Reprise dans {wait_time} secondes, pour reset le curseur d'indexation avec l'API de recherche du compte ID {account['account_id']}." )
+                print( f"[reset_cursors_th{thread_id}] Reprise dans {int(wait_time)} secondes, pour reset le curseur d'indexation avec l'API de recherche du compte ID {account['account_id']}." )
                 
                 # Si la boucle d'attente a été cassée, c'est que le serveur
                 # doit s'arrêter, il faut retourner à la boucle
@@ -92,6 +127,10 @@ def thread_reset_SearchAPI_cursors( thread_id : int, shared_memory ) :
                 # modifications, et ce thread est unique (Ou bien des nouveaux
                 # comptes)
                 # L'itérateur se terminera donc naturellement
+            
+            # Prendre l'instant juste avant la MàJ (Prend aussi l'appel à l'API
+            # Twitter qui est une requête HTTP donc longue)
+            start = datetime.datetime.now()
             
             # On cherche le nom du compte Twitter
             account_name = twitter.get_account_id( account["account_id"], invert_mode = True )
@@ -112,14 +151,6 @@ def thread_reset_SearchAPI_cursors( thread_id : int, shared_memory ) :
                                                             account_name,
                                                             is_prioritary = False,
                                                             force_launch = True )
-        
-        # Si il n'y avait aucun compte dans l'itérateur
-        if count == 0 :
-            print( f"[reset_cursors_th{thread_id}] La base de données n'a pas de comptes Twitter enregistré !" )
-            
-            # Retest dans une heure = 3600 secondes
-            end_sleep_time = time() + 3600
-            wait_until( end_sleep_time, break_wait )
     
     print( f"[reset_cursors_th{thread_id}] Arrêté !" )
     return

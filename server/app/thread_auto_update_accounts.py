@@ -39,7 +39,7 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
     shared_memory_scan_requests = shared_memory.scan_requests
     
     # Période de mise à jour automatique des comptes
-    update_period = datetime.timedelta( days = param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE )
+    update_period = datetime.timedelta( days = param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE ).total_seconds()
     
     # Fonction à passer à "wait_until()"
     # Passer "shared_memory.keep_running" ne fonctionne pas
@@ -47,19 +47,33 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
     
     # Tant que on ne nous dit pas de nous arrêter
     while shared_memory.keep_service_alive :
+        # Si il n'y a aucun compte dans la base de données
+        if shared_memory.accounts_count < 1 :
+            print( f"[auto_update_th{thread_id}] La base de données n'a pas de comptes Twitter enregistré !" )
+            
+            # Retest dans une heure = 3600 secondes
+            end_sleep_time = time() + 3600
+            wait_until( end_sleep_time, break_wait )
+            continue
+        
+        # Instant juste avant le lancement d'une mise à jour
+        # Sert à être précis pour répartir les mises à jour
+        start = datetime.datetime.now()
+        
+        # Calculer la moyenne du temps entre chaque mise à jour
+        # Sert à répartier les mises à jour
+        # Pas besoin de le MàJ dans la boucle "for", car l'itérateur est un
+        # instantané des comptes dans la BDD
+        max_wait = update_period / shared_memory.accounts_count
+        
         # Prendre l'itérateur sur les comptes dans la base de donnée, triés
         # dans l'ordre du moins récemment mise à jour au plus récemment mis à jour
         oldest_updated_account_iterator = bdd_direct_access.get_oldest_updated_account()
-        
-        # Compteurs du nombre d'itération
-        count = 0
         
         # oldest_updated_account[0] : L'ID du compte Twitter
         # oldest_updated_account[1] : Sa date de dernière MàJ avec l'API de recherche
         # oldest_updated_account[2] : Sa date dernière MàJ avec l'API de timeline
         for oldest_updated_account in oldest_updated_account_iterator  :
-            count += 1
-            
             # Vérifier quand même qu'il ne faut pas s'arrêter
             if not shared_memory.keep_service_alive :
                 break
@@ -67,9 +81,6 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
             # Vérifier que le compte n'est pas déjà en cours d'indexation
             if shared_memory_scan_requests.get_request( oldest_updated_account[0] ) != None :
                 continue
-            
-            # Prendre la date actuelle
-            now = datetime.datetime.now()
             
             # Si une des deux dates est à NULL, on force le scan
             if oldest_updated_account[1] == None or oldest_updated_account[2] == None :
@@ -79,15 +90,27 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
             else :
                 min_date = min( oldest_updated_account[1], oldest_updated_account[2] )
                 
+                # Calculer le temps écoulé entre la dernière MàJ et maintenant
+                diff = (start - min_date).total_seconds()
+                
                 # Si cette mise à jour est à moins de
                 # param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE jours d'aujourd'hui,
                 # il faut attendre
-                if now - min_date < update_period :
+                if diff < update_period :
                     # Reprise dans (update_period - (now - min_date))
-                    wait_time = int( (update_period - (now - min_date)).total_seconds() )
+                    wait_time = update_period - diff
+                    
+                    # Prendre de l'avance : Le temps d'attente maximal est
+                    # le temps moyen entre deux MàJ, c'est à dire la période
+                    # de MàJ divisée par le nombre de comptes dans la BDD
+                    # Cela permet de répartir les MàJ et d'éviter de créer des
+                    # pics de charge sur le serveur
+                    if wait_time > max_wait :
+                        wait_time = max_wait
+                    
                     end_sleep_time = time() + wait_time
                     
-                    print( f"[auto_update_th{thread_id}] Reprise dans {wait_time} secondes, pour lancer le scan du compte ID {oldest_updated_account[0]}." )
+                    print( f"[auto_update_th{thread_id}] Reprise dans {int(wait_time)} secondes, pour lancer le scan du compte ID {oldest_updated_account[0]}." )
                     
                     # Si la boucle d'attente a été cassée, c'est que le serveur
                     # doit s'arrêter, il faut retourner à la boucle
@@ -102,6 +125,10 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
                     # dire nos modifications, et ce thread est unique (Ou bien
                     # des nouveaux comptes)
                     # L'itérateur se terminera donc naturellement
+            
+            # Prendre l'instant juste avant la MàJ (Prend aussi l'appel à l'API
+            # Twitter qui est une requête HTTP donc longue)
+            start = datetime.datetime.now()
             
             # On cherche le nom du compte Twitter
             account_name = twitter.get_account_id( oldest_updated_account[0], invert_mode = True )
@@ -126,14 +153,6 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
                 shared_memory_scan_requests.launch_request( oldest_updated_account[0],
                                                             account_name,
                                                             is_prioritary = False )
-        
-        # Si il n'y avait aucun compte dans l'itérateur
-        if count == 0 :
-            print( f"[auto_update_th{thread_id}] La base de données n'a pas de comptes Twitter enregistré !" )
-            
-            # Retest dans une heure = 3600 secondes
-            end_sleep_time = time() + 3600
-            wait_until( end_sleep_time, break_wait )
     
     print( f"[auto_update_th{thread_id}] Arrêté !" )
     return
