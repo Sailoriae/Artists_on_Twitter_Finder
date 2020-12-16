@@ -73,6 +73,16 @@ def check_parameters () :
     
     # ========================================================================
     
+    # Source : https://www.sqlite.org/faq.html#q5
+    # "Multiple processes can be doing a SELECT at the same time. But only one
+    # process can be making changes to the database at any moment in time."
+    if param.ENABLE_MULTIPROCESSING and not param.USE_MYSQL_INSTEAD_OF_SQLITE :
+        print( "Vous utilisez SQLite en mode multi-processus, ce qui est impossible !" )
+        print( "Veuillez utiliser MySQL (\"USE_MYSQL_INSTEAD_OF_SQLITE\"), ou bien désactiver le multi-processus (\"ENABLE_MULTIPROCESSING\")." )
+        return False
+    
+    # ========================================================================
+    
     print( "Verification de la connexion à l'API publique Twitter..." )
     from tweet_finder.twitter import TweepyAbstraction
     

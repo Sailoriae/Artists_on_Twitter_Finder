@@ -259,6 +259,9 @@ if __name__ == "__main__" :
         # En fait c'est parce qu'il faudrait flush stdout de temps en temps dans les sous-processus
         # Pour les processus fantômes, c'est quand on tue le processus père (Ou qu'il plante)
     
+    if not param.USE_MYSQL_INSTEAD_OF_SQLITE :
+        print( "ATTENTION, vous utilisez SQLite. Pour de meilleure performances, il est très vivement conseillé d'utiliser MySQL !" )
+    
     while True :
         command = input()
         args = command.split(" ")
