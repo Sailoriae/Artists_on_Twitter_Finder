@@ -80,6 +80,7 @@ def thread_step_B_TimelineAPI_list_account_tweets( thread_id : int, shared_memor
             continue
         
         # Dire qu'on a commencé à traiter cette requête
+        # AVANT de lacher le sémaphore !
         request.started_TimelineAPI_listing = True
         
         # Lacher le sémaphore

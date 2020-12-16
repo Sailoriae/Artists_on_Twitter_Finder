@@ -2,7 +2,12 @@
 # coding: utf-8
 
 import datetime
-from time import sleep, time
+from time import time
+
+try :
+    from wait_until import wait_until
+except ModuleNotFoundError :
+    from .wait_until import wait_until
 
 # Ajouter le répertoire parent au PATH pour pouvoir importer
 from sys import path as sys_path
@@ -33,14 +38,15 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
     # Maintenir ouverts certains proxies vers la mémoire partagée
     shared_memory_scan_requests = shared_memory.scan_requests
     
+    # Période de mise à jour automatique des comptes
+    update_period = datetime.timedelta( days = param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE )
+    
+    # Fonction à passer à "wait_until()"
+    # Passer "shared_memory.keep_running" ne fonctionne pas
+    def break_wait() : return not shared_memory.keep_service_alive
+    
     # Tant que on ne nous dit pas de nous arrêter
     while shared_memory.keep_service_alive :
-        # Avant de prendre l'itérateur (Qui n'est pas dynamique, prend un
-        # instantané des comptes dans la base), il faut "dire" au thread de
-        # reset des curseurs d'indexation avec l'API de recherche qu'on a
-        # commencé une nouvelle boucle
-        shared_memory.force_auto_update_reloop = False
-        
         # Prendre l'itérateur sur les comptes dans la base de donnée, triés
         # dans l'ordre du moins récemment mise à jour au plus récemment mis à jour
         oldest_updated_account_iterator = bdd_direct_access.get_oldest_updated_account()
@@ -75,31 +81,27 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
                 
                 # Si cette mise à jour est à moins de
                 # param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE jours d'aujourd'hui,
-                # ça ne sert à rien de MàJ, ni de continuer l'itération, car
-                # après, les comptes seront moins vieux
-                # On peut donc arrêter l'itération !
-                update_period = datetime.timedelta( days = param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE )
-                
+                # il faut attendre
                 if now - min_date < update_period :
-                    # Retest dans (update_period - (now - min_date))
+                    # Reprise dans (update_period - (now - min_date))
                     wait_time = int( (update_period - (now - min_date)).total_seconds() )
                     end_sleep_time = time() + wait_time
                     
                     print( f"[auto_update_th{thread_id}] Reprise dans {wait_time} secondes, pour lancer le scan du compte ID {oldest_updated_account[0]}." )
                     
-                    while True :
-                        sleep( 3 )
-                        if time() > end_sleep_time :
-                            break
-                        if not shared_memory.keep_service_alive :
-                            break
-                        # Si le thread de reset des curseurs d'indexation avec
-                        # l'API de recherche en a reset un, il faut qu'on
-                        # reboucle
-                        if shared_memory.force_auto_update_reloop :
-                            break
-                    # Reboucler "while shared_memory.keep_service_alive"
-                    break # Arrête de l'itération "for"
+                    # Si la boucle d'attente a été cassée, c'est que le serveur
+                    # doit s'arrêter, il faut retourner à la boucle
+                    # "while shared_memory.keep_service_alive"
+                    if not wait_until( end_sleep_time, break_wait ) :
+                        break
+                    
+                    # Si le temps d'attente est bien arrivé au bout, on peut
+                    # MàJ le compte. Pas besoin de reboucler sur l'itérateur,
+                    # puisque les seules modifications sur l'ordre des comptes
+                    # dans la BDD peuvent être des MàJ plus récente, c'est à
+                    # dire nos modifications, et ce thread est unique (Ou bien
+                    # des nouveaux comptes)
+                    # L'itérateur se terminera donc naturellement
             
             # On cherche le nom du compte Twitter
             account_name = twitter.get_account_id( oldest_updated_account[0], invert_mode = True )
@@ -114,9 +116,9 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
                 # utilise la date locale de dernière MàJ, et que ce thread est
                 # unique
                 bdd_direct_access.set_account_SearchAPI_last_tweet_date( oldest_updated_account[0],
-                                                                    bdd_direct_access.get_account_SearchAPI_last_tweet_date( oldest_updated_account[0] ) )
+                                                                         bdd_direct_access.get_account_SearchAPI_last_tweet_date( oldest_updated_account[0] ) )
                 bdd_direct_access.set_account_TimelineAPI_last_tweet_id( oldest_updated_account[0],
-                                                                        bdd_direct_access.get_account_TimelineAPI_last_tweet_id( oldest_updated_account[0] ) )
+                                                                         bdd_direct_access.get_account_TimelineAPI_last_tweet_id( oldest_updated_account[0] ) )
             
             # Sinon, on lance le scan pour ce compte
             else :
@@ -126,17 +128,12 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
                                                             is_prioritary = False )
         
         # Si il n'y avait aucun compte dans l'itérateur
-        if count == 0 and shared_memory.keep_service_alive :
-            print( f"[auto_update_th{thread_id}] La base de données n'a pas de comptes Twitter enregistrés !" )
+        if count == 0 :
+            print( f"[auto_update_th{thread_id}] La base de données n'a pas de comptes Twitter enregistré !" )
             
             # Retest dans une heure = 3600 secondes
             end_sleep_time = time() + 3600
-            while True :
-                sleep( 3 )
-                if time() > end_sleep_time :
-                    break
-                if not shared_memory.keep_service_alive :
-                    break
+            wait_until( end_sleep_time, break_wait )
     
     print( f"[auto_update_th{thread_id}] Arrêté !" )
     return

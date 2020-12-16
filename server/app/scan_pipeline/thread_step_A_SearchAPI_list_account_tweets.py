@@ -82,6 +82,7 @@ def thread_step_A_SearchAPI_list_account_tweets( thread_id : int, shared_memory 
             continue
         
         # Dire qu'on a commencé à traiter cette requête
+        # AVANT de lacher le sémaphore !
         request.started_SearchAPI_listing = True
         
         # Lacher le sémaphore

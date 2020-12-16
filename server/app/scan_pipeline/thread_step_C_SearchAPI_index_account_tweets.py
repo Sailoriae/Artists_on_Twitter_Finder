@@ -61,6 +61,7 @@ def thread_step_C_SearchAPI_index_account_tweets( thread_id : int, shared_memory
                 continue
         
         # Dire qu'on est en train de traiter cette requête
+        # AVANT de lacher le sémaphore !
         request.is_in_SearchAPI_indexing = True
         
         # Lacher le sémaphore

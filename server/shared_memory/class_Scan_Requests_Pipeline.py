@@ -152,6 +152,14 @@ class Scan_Requests_Pipeline :
     @param account_name Le nom du compte Twitter. Attention, c'est lui qui est
                         revérifié et scanné !
     @param is_prioritary Est ce que cette requête est prioritaire ?
+    @param force_launch Forcer relancement de la requête. On ne peut pas forcer
+                        certaines étapes indépendemment, cela serait trop
+                        dangereux.
+                        ATTENTION : Un relancement implique que la nouvelle
+                        requête sera non-prioritaire.
+                        LES REQUETES UTILISATEURS STOCKENT LES URI DE LEUR
+                        REQUETE DE SCAN ASSOCIEE. Il n'y a donc pas de problème
+                        à avoir un doublon.
     
     @return L'objet Scan_Request créé.
             Ou l'objet Scan_Request déjà existant.
@@ -159,8 +167,10 @@ class Scan_Requests_Pipeline :
     """
     def launch_request ( self, account_id : int,
                                account_name : str,
-                               is_prioritary : bool = False ) -> Scan_Request :
+                               is_prioritary : bool = False,
+                               force_launch : bool = False ) -> Scan_Request :
         account_id = int(account_id) # Sécurité, pour unifier
+        is_prioritary = is_prioritary and not force_launch
         
         requests_sem = self._requests_sem
         queues_sem = self._queues_sem_obj
@@ -168,8 +178,13 @@ class Scan_Requests_Pipeline :
         requests_sem.acquire()
         queues_sem.acquire()
         
+        # Si il faut forcer le relancement, on bloque la boucle "for" suivante.
+        # Evite de faire un gros "if".
+        if force_launch : requests_dict = {}
+        else : requests_dict = self._requests
+        
         # Vérifier d'abord qu'on n'est pas déjà en train de traiter ce compte.
-        for key in self._requests :
+        for key in requests_dict :
             if key == account_id :
                 request = open_proxy( self._requests[key] )
                 

@@ -88,12 +88,6 @@ class Shared_Memory :
         # Les threads sont identifiés par la chaine suivante :
         # f"{thread_procedure.__name__}_number{thread_id}"
         self._threads_registry = self.register_obj( Threads_Registry() )
-        
-        # Communication entre le thread de reset des curseur d'indexation avec
-        # l'API de recherche ("thread_reset_SearchAPI_cursors"), et celui de
-        # MàJ automatique de l'indexation des comptes présents dans la BDD
-        # ("thread_auto_update_accounts")
-        self._force_auto_update_reloop = False
     
     """
     Getters et setters pour Pyro.
@@ -132,11 +126,6 @@ class Shared_Memory :
     
     @property
     def threads_registry( self ) : return open_proxy( self._threads_registry )
-    
-    @property
-    def force_auto_update_reloop( self ) : return self._force_auto_update_reloop
-    @force_auto_update_reloop.setter
-    def force_auto_update_reloop( self, value ) : self._force_auto_update_reloop = value
     
     """
     Lancer le sevreur de mémoire partagée, avec Pyro.
