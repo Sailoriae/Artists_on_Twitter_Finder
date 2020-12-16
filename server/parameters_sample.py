@@ -149,7 +149,7 @@ MàJ automatique des comptes dans la BDD.
 Nombre de jours sans scan du compte Twitter pour le mettre à jour
 automatiquement.
 """
-DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE = 10 # jours
+DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE = 30 # jours
 
 """
 Période en jours pour réset les curseurs d'indexation avec l'API de recherche.
@@ -160,7 +160,7 @@ d'indexation avec l'API de recherche pour chaque compte.
 Cela ne supprime ou ne réindexe aucun Tweet dans la base ! On en ajoute juste.
 La vitesse dépend donc essentiellement du thread de listage.
 """
-RESET_SEARCHAPI_CURSORS_PERIOD = 180 # jours
+RESET_SEARCHAPI_CURSORS_PERIOD = 365 # jours
 
 """
 Limitation du nombre de requêtes (Via l'API HTTP) par addresse IP.
