@@ -300,7 +300,8 @@ class User_Requests_Pipeline :
                     # Si la requête s'est terminée en erreur
                     if request.problem != None :
                         # Si l'URL de requête est invalide ou le site n'est pas
-                        # supporté, on garde la requête 10 minutes
+                        # supporté (Erreur de l'utilisateur), on garde la
+                        # requête 10 minutes
                         if request.problem in [ "NOT_AN_URL",
                                                 "INVALID_URL",
                                                 "UNSUPPORTED_WEBSITE"] :
@@ -326,7 +327,7 @@ class User_Requests_Pipeline :
                 else : # On désenregistre la requête
                     to_unregister_list.append( request_uri )
             
-            # Sinon, on la garde forcément
+            # Sinon, son traitement n'est pas fini, on la garde forcément
             else :
                 new_requests_dict[ key ] = request_uri
             
@@ -336,11 +337,9 @@ class User_Requests_Pipeline :
         # On installe la nouvelle liste
         self._requests = new_requests_dict
         
-        # On désenregistre les requêtes à désenregistrer
-        # Mais normalement le garbadge collector l'a fait avant nous
-        # Oui : Pyro4 désenregistre les objets que le garbadge collector a viré
-        for uri in to_unregister_list :
-            self._root.unregister_obj( uri )
-        
         # On débloque l'accès à la liste des requêtes
         self._requests_sem.release()
+        
+        # On désenregistre les requêtes à désenregistrer
+        for uri in to_unregister_list :
+            self._root.unregister_obj( uri )

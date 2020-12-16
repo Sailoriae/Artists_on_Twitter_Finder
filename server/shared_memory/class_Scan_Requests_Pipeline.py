@@ -154,7 +154,7 @@ class Scan_Requests_Pipeline :
     @param is_prioritary Est ce que cette requête est prioritaire ?
     @param force_launch Forcer relancement de la requête. On ne peut pas forcer
                         certaines étapes indépendemment, cela serait trop
-                        dangereux.
+                        dangereux (Aller voir "shed_requests()").
                         ATTENTION : Un relancement implique que la nouvelle
                         requête sera non-prioritaire.
                         LES REQUETES UTILISATEURS STOCKENT LES URI DE LEUR
@@ -369,7 +369,7 @@ class Scan_Requests_Pipeline :
                 else : # On désenregistre la requête
                     to_unregister_list.append( request_uri )
             
-            # Sinon, on la garde forcément
+            # Sinon, son traitement n'est pas fini, on la garde forcément
             else :
                 new_requests_dict[ key ] = request_uri
             
@@ -378,11 +378,9 @@ class Scan_Requests_Pipeline :
         # On installe la nouvelle liste
         self._requests = new_requests_dict
         
-        # On désenregistre les requêtes à désenregistrer
-        # Mais normalement le garbadge collector l'a fait avant nous
-        # Oui : Pyro4 désenregistre les objets que le garbadge collector a viré
-        for uri in to_unregister_list :
-            self._root.unregister_obj( uri )
-        
         # On débloque l'accès à la liste des requêtes
         self._requests_sem.release()
+        
+        # On désenregistre les requêtes à désenregistrer
+        for uri in to_unregister_list :
+            self._root.unregister_obj( uri )
