@@ -148,6 +148,10 @@ ENABLE_METRICS = True
 MàJ automatique des comptes dans la BDD.
 Nombre de jours sans scan du compte Twitter pour le mettre à jour
 automatiquement.
+
+Attention : Afin de répartir les mises à jour dans le temps, le système de mise
+à jour automatique peut prendre de l'avance et lancer la mise à jour d'un
+compte avant ce nombre de jours ne se soit écoulé.
 """
 DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE = 30 # jours
 
@@ -159,6 +163,10 @@ Il est donc intéressant de temps en temps de réintialiser le curseur
 d'indexation avec l'API de recherche pour chaque compte.
 Cela ne supprime ou ne réindexe aucun Tweet dans la base ! On en ajoute juste.
 La vitesse dépend donc essentiellement du thread de listage.
+
+Attention : Comme pour la mise à jour automatique, le système de reset des
+curseurs peut lancer une indexation en avance, afin de les répartir dans le
+temps.
 """
 RESET_SEARCHAPI_CURSORS_PERIOD = 365 # jours
 
