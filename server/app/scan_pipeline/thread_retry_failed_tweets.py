@@ -40,6 +40,9 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
                                  param.OAUTH_TOKEN,
                                  param.OAUTH_TOKEN_SECRET )
     
+    # Ressayer les Tweets échoués toutes les 24h
+    retry_period = datetime.timedelta( hours = 24 )
+    
     # Fonction à passer à "wait_until()"
     # Passer "shared_memory.keep_running" ne fonctionne pas
     def break_wait() : return not shared_memory.keep_service_alive
@@ -52,9 +55,6 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
         
         # Prendre la date actuelle
         now = datetime.datetime.now()
-        
-        # Ressayer les Tweets échoués toutes les 24h
-        retry_period = datetime.timedelta( hours = 24 )
         
         # File d'attente des Tweets à réessayer
         # Certains n'ont pas besoin d'être obtenu sur l'API
@@ -90,6 +90,9 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
                     
                     if not wait_until( end_sleep_time, break_wait ) :
                         break # Arrêt de l'itération "for"
+                    
+                    # MàJ la date actuelle
+                    now = datetime.datetime.now()
                 
                 # Sinon, on arrête l'itération "for" pour indexer les Tweets
                 # qu'on a déjà à réessayer
@@ -143,6 +146,7 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
         refailed_tweets = []
         
         # Indexer les Tweets
+        # Incrémente le compteur d'essais si l'indexation ré-échoue
         tweets_indexer.index_tweets( "", tweets_queue, FORCE_INDEX = True, FAILED_TWEETS_LIST = refailed_tweets )
         
         # Supprimer de la BDD les ID de Tweets à réessayer et dont le réessai
