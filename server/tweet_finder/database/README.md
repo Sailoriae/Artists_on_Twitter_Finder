@@ -98,17 +98,6 @@ Ces objets contiennent aussi un attribut `distance` qui est rempli par le moteur
 
 Utilisé par la classe `CBIR_Engine_with_Database` dans le thread de recherche inversée d'image (Module `user_pipeline`, procédure `thread_step_3_reverse_search`).
 
-### Classe `Less_Recently_Updated_Accounts_Iterator`
-
-Renvoyé par la méthode `get_images_in_db_iterator()` de la classe `SQLite_or_MySQL`. Itère sur tous les comptes Twitter stockés dans la base de données, classés dans l'ordre de clui qui a la date de mise à jour locale la plus vielle. Cette date correspond à la plus vielle des attributs `last_TwitterAPI_indexing_tweet_id` et `last_TwitterAPI_indexing_local_date`. Si un de ces deux attributs est à `NULL`, leur compte correspondant sera donné en premier !
-
-Itère des triplets contenant dans cet ordre :
-* L'ID du compte Twitter,
-* La date locale de la dernière mise à jour avec l'API de recherche,
-* La date locale de la dernière mise à jour avec l'API de timeline.
-
-Utilisé par le thread de mise à jour automatique (Procédure `thread_auto_update_accounts`).
-
 ### Fonction `features_list_for_db`
 
 Permet de forcer la taille d'une liste Python en la coupant ou la ralongeant avec des `None`. N'est pas utilisée, puisque le moteur CBIR renvoir des listes fixes de 240 valeurs ! Cette taille de 240 valeurs est définie à l'initialisation de la classe `CBIR_Engine`.

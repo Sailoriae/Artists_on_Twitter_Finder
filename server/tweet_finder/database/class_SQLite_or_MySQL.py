@@ -6,12 +6,10 @@ from datetime import datetime
 
 try :
     from class_Image_Features_Iterator import Image_Features_Iterator
-    from class_Less_Recently_Updated_Accounts_Iterator import Less_Recently_Updated_Accounts_Iterator
 #    from features_list_for_db import features_list_for_db
     from sql_requests_dict import sql_requests_dict
 except ModuleNotFoundError : # Si on a été exécuté en temps que module
     from .class_Image_Features_Iterator import Image_Features_Iterator
-    from .class_Less_Recently_Updated_Accounts_Iterator import Less_Recently_Updated_Accounts_Iterator
 #    from .features_list_for_db import features_list_for_db
     from .sql_requests_dict import sql_requests_dict
 
@@ -621,24 +619,9 @@ class SQLite_or_MySQL :
     l'API de timeline.
     
     @return Un itérateur sur le résultat
-            Voir le fichier "class_Less_Recently_Updated_Accounts_Iterator.py"
     """
     def get_oldest_updated_account( self ) :
-        # Il faut que ce curseur soit buffered car on peut être amené à faire
-        # d'autres requêtes sur la BDD lors de l'utilisation de l'itérateur,
-        # ce qui provoque des erreurs "mysql.connector.errors.InternalError:
-        # Unread result found"
-        # Parce que : For nonbuffered cursors, rows are not fetched from the
-        # server until a row-fetching method is called. In this case, you must
-        # be sure to fetch all rows of the result set before executing any
-        # other statements on the same connection, or an InternalError (Unread
-        # result found) exception will be raised.
-        # Source :
-        # https://dev.mysql.com/doc/connector-python/en/connector-python-api-mysqlcursorbuffered.html
-        if param.USE_MYSQL_INSTEAD_OF_SQLITE :
-            c = self.get_cursor(buffered=True)
-        else :
-            c = self.get_cursor()
+        c = self.get_cursor()
         
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
             # Le "ORDER BY LEAST()" considère bien la valeur NULL comme
@@ -653,7 +636,17 @@ class SQLite_or_MySQL :
                           FROM accounts
                           ORDER BY MIN( last_SearchAPI_indexing_local_date,
                                         last_TimelineAPI_indexing_local_date ) ASC""" )
-        return Less_Recently_Updated_Accounts_Iterator( c )
+        
+        for triplet in c.fetchall() :
+            last_SearchAPI_indexing_local_date = triplet[1]
+            last_TimelineAPI_indexing_local_date = triplet[2]
+            if last_SearchAPI_indexing_local_date != None :
+                if not param.USE_MYSQL_INSTEAD_OF_SQLITE :
+                    last_SearchAPI_indexing_local_date = datetime.strptime( last_SearchAPI_indexing_local_date, '%Y-%m-%d %H:%M:%S' )
+            if last_TimelineAPI_indexing_local_date != None :
+                if not param.USE_MYSQL_INSTEAD_OF_SQLITE :
+                    last_TimelineAPI_indexing_local_date = datetime.strptime( last_TimelineAPI_indexing_local_date, '%Y-%m-%d %H:%M:%S' )
+            yield ( triplet[0], last_SearchAPI_indexing_local_date, last_TimelineAPI_indexing_local_date )
     
     """
     Enregistrer un ID de Tweet à réessayer.
