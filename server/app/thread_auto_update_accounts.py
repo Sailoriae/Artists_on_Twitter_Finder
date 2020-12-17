@@ -130,6 +130,20 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
             # Twitter qui est une requête HTTP donc longue)
             start = datetime.datetime.now()
             
+            # Comme on va jusqu'au bout de l'itérateur, on vérifie que la date
+            # de MàJ de ce compte n'ait pas changé dans la base de données,
+            # c'est à dire qu'il y a eu une requête de scan lancée
+            # On le fait seulement maintenant, et pas avant la boucle d'attente
+            # car la répartition des MàJ avec  un temps minimal nous ferait
+            # prendre trop d'avance
+            if ( bdd_direct_access.get_account_SearchAPI_last_scan_local_date( oldest_updated_account[0] ) != oldest_updated_account[1] and
+                 bdd_direct_access.get_account_TimelineAPI_last_scan_local_date( oldest_updated_account[0] ) != oldest_updated_account[2] ) :
+                print( f"[auto_update_th{thread_id}] Le compte ID {oldest_updated_account[0]} a eu un scan provoqué par un utilisateur, on peut le sauter." )
+                
+                # On peut sauter ce compte, on le reverra la prochaine fois
+                # qu'on lancera l'itérateur
+                continue
+            
             # On cherche le nom du compte Twitter
             account_name = twitter.get_account_id( oldest_updated_account[0], invert_mode = True )
             
