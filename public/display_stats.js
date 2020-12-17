@@ -27,11 +27,28 @@ function displayStats() {
 				} else {
 					var json = JSON.parse( request.responseText );
 					console.log( json );
-					statsP.textContent = parse( lang[ "STATS" ], numberWithSpaces( json["indexed_tweets_count"] ), numberWithSpaces( json["indexed_accounts_count"] ) );
-					infosP.textContent = parse( lang[ "INFO" ], json["limit_per_ip_address"] )
+					statsP.innerHTML = parse( lang[ "STATS_1" ], numberWithSpaces( json["indexed_tweets_count"] ), numberWithSpaces( json["indexed_accounts_count"] ) );
+
+					statsP.innerHTML += "<br/>";
+
+					if ( json["processing_user_requests_count"] == 0 )
+						statsP.innerHTML += lang[ "STATS_2_1_ZERO" ];
+					else if ( json["processing_user_requests_count"] == 1 )
+						statsP.innerHTML += lang[ "STATS_2_1_ONE" ];
+					else
+						statsP.innerHTML += parse( lang[ "STATS_2_1_PLURAL" ], numberWithSpaces( json["processing_user_requests_count"] ) );
+
+					if ( json["processing_scan_requests_count"] == 0 )
+						statsP.innerHTML += lang[ "STATS_2_2_ZERO" ];
+					else if ( json["processing_scan_requests_count"] == 1 )
+						statsP.innerHTML += lang[ "STATS_2_2_ONE" ];
+					else
+						statsP.innerHTML += parse( lang[ "STATS_2_2_PLURAL" ], numberWithSpaces( json["processing_scan_requests_count"] ) );
+
+					infosP.textContent = parse( lang[ "INFO" ], json["limit_per_ip_address"] );
 
 					if ( json["processing_user_requests_count"] > 20 ) {
-						warningP.textContent = parse( lang[ "WARNING" ], numberWithSpaces( json["processing_user_requests_count"] ), numberWithSpaces( json["processing_scan_requests_count"] ) );
+						warningP.textContent = json["processing_user_requests_count"];
 					}
 
 					await new Promise(r => setTimeout(r, 30000));
