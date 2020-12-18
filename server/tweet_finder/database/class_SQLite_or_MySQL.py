@@ -446,18 +446,27 @@ class SQLite_or_MySQL :
     @param tweet_id ID du Tweet indexé le plus récent
     """
     def set_account_TimelineAPI_last_tweet_id( self, account_id : int, tweet_id : int ) :
-        now = datetime.now()
+        now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         c = self.get_cursor()
         
+        # Important : Doit aussi enregistrer last_SearchAPI_indexing_cursor_reset_date si il crée le compte dans la BDD
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
-            request = """INSERT INTO accounts ( account_id, last_TimelineAPI_indexing_tweet_id, last_TimelineAPI_indexing_local_date ) VALUES ( %s, %s, %s )
+            request = """INSERT INTO accounts (
+                             account_id,
+                             last_TimelineAPI_indexing_tweet_id,
+                             last_TimelineAPI_indexing_local_date,
+                             last_SearchAPI_indexing_cursor_reset_date ) VALUES ( %s, %s, %s, %s )
                          ON DUPLICATE KEY UPDATE last_TimelineAPI_indexing_tweet_id = %s, last_TimelineAPI_indexing_local_date = %s"""
         else :
-            request = """INSERT INTO accounts ( account_id, last_TimelineAPI_indexing_tweet_id, last_TimelineAPI_indexing_local_date ) VALUES ( ?, ?, ? )
+            request = """INSERT INTO accounts (
+                             account_id,
+                             last_TimelineAPI_indexing_tweet_id,
+                             last_TimelineAPI_indexing_local_date,
+                             last_SearchAPI_indexing_cursor_reset_date ) VALUES ( ?, ?, ?, ? )
                          ON CONFLICT ( account_id ) DO UPDATE SET last_TimelineAPI_indexing_tweet_id = ?, last_TimelineAPI_indexing_local_date = ?"""
         
         c.execute( request,
-                   ( account_id, tweet_id, now.strftime('%Y-%m-%d %H:%M:%S'), tweet_id, now.strftime('%Y-%m-%d %H:%M:%S') ) )
+                   ( account_id, tweet_id, now, now, tweet_id, now ) )
         self.conn.commit()
     
     """
