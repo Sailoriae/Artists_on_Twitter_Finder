@@ -3,6 +3,7 @@
 
 import datetime
 from time import time
+import queue
 
 try :
     from wait_until import wait_until
@@ -44,6 +45,13 @@ def thread_reset_SearchAPI_cursors( thread_id : int, shared_memory ) :
     
     # Période de reset des curseurs d'indexation avec l'API de recherche
     reset_period = datetime.timedelta( days = param.RESET_SEARCHAPI_CURSORS_PERIOD ).total_seconds()
+    
+    # File d'attente des comptes dont leur requête de scan existe déjà
+    # Parce que c'est trop compliqué et risqué de bidouiller des requêtes de
+    # scan pour les redémarrer partiellement
+    # C'est plus simple de faire une file d'attente ici pour retester à chaque
+    # itération de la boucle "for"
+    to_reset_queue = queue.Queue()
     
     # Fonction à passer à "wait_until()"
     # Passer "shared_memory.keep_running" ne fonctionne pas
@@ -143,14 +151,47 @@ def thread_reset_SearchAPI_cursors( thread_id : int, shared_memory ) :
             if account_name == None :
                 print( f"[reset_cursors_th{thread_id}] L'ID de compte Twitter {account['account_id']} n'est plus accessible ou n'existe plus !" )
             
-            # Sinon, on FORCE l'indexation pour ce compte
+            # Sinon, on l'ajoute à la file d'attente des comptes dont il faut
+            # lancer l'indexation
             else :
                 print( f"[reset_cursors_th{thread_id}] Reset du curseur d'indexation avec l'API de recherche du compte @{account_name} (ID {account['account_id']}) et lancement de sa mise à jour." )
+                account["account_name"] = account_name # On enregistre le nom du compte pour ne pas avoir à le re-résoudre
+                account["last_try"] = 0 # Date du dernier essai dans notre file d'attente
+                account["reset_time"] = time() # Date de reset du curseur
+                to_reset_queue.put( account )
+            
+            # A chaque itération, on parcours la file d'attente des comptes
+            # dont il faut reset le curseur
+            while True :
+                try : account = to_reset_queue.get( block = False )
+                except queue.Empty : break
                 
-                shared_memory_scan_requests.launch_request( account['account_id'],
-                                                            account_name,
-                                                            is_prioritary = False,
-                                                            force_launch = True )
+                # On réessaye de lancer une requête toutes les 24 heures
+                if time() - account["last_try"] <= 86400 :
+                    to_reset_queue.put( account )
+                    continue
+                account["last_try"] = time()
+                
+                # Lancer une nouvelle requête de scan pour ce compte, permet de
+                # voir si la requête d'indexation de ce compte n'existe pas déjà
+                request = shared_memory_scan_requests.launch_request( account['account_id'],
+                                                                      account_name,
+                                                                      is_prioritary = False )
+                
+                # Si la requête est plus jeune que le reset du curseur, c'est
+                # que nous ou quelqu'un d'autre l'a lancée, mais elle a pris
+                # on prendra le curseur reset
+                # Donc on peut laisser ce compte tranquille
+                if request.start > account["reset_time"] :
+                    continue
+                
+                # Si la requête a commencé le listage avec l'API de recherche
+                # on remet le compte dans notre file d'attente
+                if request.started_SearchAPI_listing :
+                    to_reset_queue.put( account )
+                
+                # Sinon, on peut laisser ce compte tranquille, le listage
+                # prendra bien le curseur reset
     
     print( f"[reset_cursors_th{thread_id}] Arrêté !" )
     return
