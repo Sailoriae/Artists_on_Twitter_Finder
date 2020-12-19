@@ -60,18 +60,13 @@ def thread_step_C_SearchAPI_index_account_tweets( thread_id : int, shared_memory
                 sleep( 1 )
                 continue
         
-        # Dire qu'on est en train de traiter cette requête
-        # AVANT de lacher le sémaphore !
-        request.is_in_SearchAPI_indexing = True
-        
-        # Lacher le sémaphore
-        shared_memory_scan_requests_queues_sem.release()
-        
         # Si le compte est marqué comme introuvable par un des thread de
         # listage, on peut arrêter là avec cette requête
         if request.unfounded_account :
+            shared_memory_scan_requests_queues_sem.release()
+            
             # On appelle la méthode qui termine la requête
-            shared_memory_scan_requests.end_request( request, None )
+            shared_memory_scan_requests.end_request( request )
             request.release_proxy()
             continue
         
@@ -81,8 +76,16 @@ def thread_step_C_SearchAPI_index_account_tweets( thread_id : int, shared_memory
                 shared_memory_scan_requests_step_C_SearchAPI_index_account_tweets_prior_queue.put( request )
             else :
                 shared_memory_scan_requests_step_C_SearchAPI_index_account_tweets_queue.put( request )
+            shared_memory_scan_requests_queues_sem.release()
             request.release_proxy()
             continue
+        
+        # Dire qu'on est en train de traiter cette requête
+        # AVANT de lacher le sémaphore !
+        request.is_in_SearchAPI_indexing = True
+        
+        # Lacher le sémaphore
+        shared_memory_scan_requests_queues_sem.release()
         
         # Dire qu'on est en train de traiter cette requête
         shared_memory_threads_registry.set_request( f"thread_step_C_SearchAPI_index_account_tweets_number{thread_id}", request )
@@ -109,6 +112,7 @@ def thread_step_C_SearchAPI_index_account_tweets( thread_id : int, shared_memory
         
         # Si l'indexation est terminée, on met la date de fin dans la requête
         if request.finished_SearchAPI_indexing and not request.has_failed :
+            request.is_in_SearchAPI_indexing = False # Pas besoin de prendre le sémaphore car finished_SearchAPI_indexing est à True donc pas de passage en prioritaire pour la file d'attente associée
             print( f"[step_C_th{thread_id}] Fin de l'indexation des Tweets de @{request.account_name} trouvés avec l'API de recherche." )
             
             # Enregistrer la date du Tweet trouvé le plus récent
@@ -135,6 +139,7 @@ def thread_step_C_SearchAPI_index_account_tweets( thread_id : int, shared_memory
         # Si la requête est en échec, on annonce qu'elle a fini notre
         # indexation, et on essaye de la terminer
         else :
+            request.is_in_SearchAPI_indexing = False # Pas besoin de prendre le sémaphore car la requête est en échec donc pas de passage en prioritaire
             request.finished_SearchAPI_indexing = True
             
             # Si les deux indexations ont terminé

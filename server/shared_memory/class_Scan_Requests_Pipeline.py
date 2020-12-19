@@ -189,7 +189,14 @@ class Scan_Requests_Pipeline :
                 request = open_proxy( self._requests[key] )
                 
                 # Si il faut passer la requête en proritaire.
-                if is_prioritary and not request.is_prioritary and not request.has_failed :
+                if is_prioritary and not request.is_prioritary :
+                    request.is_prioritary = True
+                
+                # Si on peut passer la requête en proritaire.
+                if ( is_prioritary and
+                     not request.is_prioritary and
+                     not request.has_failed and
+                     not request.unfounded_account ) :
                     request.is_prioritary = True
                     
                     # Si est dans une file d'attente de listage des Tweets avec
@@ -221,7 +228,7 @@ class Scan_Requests_Pipeline :
                     # Si est dans une file d'attente d'indexation des Tweets avec
                     # l'API de recherche, on la sort, pour la mettre dans la même
                     # file d'attente, mais prioritaire.
-                    if not request.is_in_SearchAPI_indexing :
+                    if not request.is_in_SearchAPI_indexing and not request.finished_SearchAPI_indexing :
                         # On doit démonter et remonter la file en enlevant la
                         # requête.
                         remove_account_id_from_queue(
@@ -234,7 +241,7 @@ class Scan_Requests_Pipeline :
                     # Si est dans une file d'attente d'indexation des Tweets avec
                     # l'API de timeline, on la sort, pour la mettre dans la même
                     # file d'attente, mais prioritaire.
-                    if not request.is_in_TimelineAPI_indexing :
+                    if not request.is_in_TimelineAPI_indexing and not request.finished_TimelineAPI_indexing :
                         # On doit démonter et remonter la file en enlevant la
                         # requête.
                         remove_account_id_from_queue(
