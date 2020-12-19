@@ -304,6 +304,10 @@ class Scan_Requests_Pipeline :
                      peut pas avoir notre propre accès à la BDD !
     """
     def end_request ( self, request : Scan_Request, get_stats = None ) :
+        # Vérifier avant que les deux indexation sont terminées
+        if not request.finished_SearchAPI_indexing or not request.finished_TimelineAPI_indexing :
+            return
+        
         self._requests_sem.acquire()
         
         # Si la requête n'a pas déjà été marquée comme terminée (Car il y a
