@@ -189,7 +189,7 @@ class Scan_Requests_Pipeline :
                 request = open_proxy( self._requests[key] )
                 
                 # Si il faut passer la requête en proritaire.
-                if is_prioritary and not request.is_prioritary :
+                if is_prioritary and not request.is_prioritary and not request.has_failed :
                     request.is_prioritary = True
                     
                     # Si est dans une file d'attente de listage des Tweets avec

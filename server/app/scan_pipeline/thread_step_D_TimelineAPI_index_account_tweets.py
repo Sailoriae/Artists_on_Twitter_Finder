@@ -132,6 +132,16 @@ def thread_step_D_TimelineAPI_index_account_tweets( thread_id : int, shared_memo
                 shared_memory_scan_requests_step_D_TimelineAPI_index_account_tweets_queue.put( request )
             shared_memory_scan_requests_queues_sem.release()
         
+        # Si la requête est en échec, on annonce qu'elle a fini notre
+        # indexation, et on essaye de la terminer
+        else :
+            request.finished_TimelineAPI_indexing = True
+            
+            # Si les deux indexations ont terminé
+            if request.finished_SearchAPI_indexing :
+                # On appelle la méthode qui termine la requête
+                shared_memory_scan_requests.end_request( request )
+        
         # Dire qu'on n'est plus en train de traiter cette requête
         shared_memory_threads_registry.set_request( f"thread_step_D_TimelineAPI_index_account_tweets_number{thread_id}", None )
         
