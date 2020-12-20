@@ -26,6 +26,10 @@ Mise à jour automatique des comptes dans la base de données.
 Permet de gagner du temps lors d'une requête.
 """
 def thread_auto_update_accounts( thread_id : int, shared_memory ) :
+    # Sécurité, vérifier que le thread est unique
+    if thread_id != 1 :
+        raise RuntimeError( "Ce thread doit être unique, et doit pas conséquent avoir 1 comme identifiant (\"thread_id\") !" )
+    
     # Accès direct à la base de données
     bdd_direct_access = SQLite_or_MySQL()
     

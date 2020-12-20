@@ -31,6 +31,10 @@ Cela ne supprime ou ne réindexe aucun Tweet dans la base ! On en ajoute juste.
 La vitesse dépend donc essentiellement du thread de listage.
 """
 def thread_reset_SearchAPI_cursors( thread_id : int, shared_memory ) :
+    # Sécurité, vérifier que le thread est unique
+    if thread_id != 1 :
+        raise RuntimeError( "Ce thread doit être unique, et doit pas conséquent avoir 1 comme identifiant (\"thread_id\") !" )
+    
     # Accès direct à la base de données
     bdd_direct_access = SQLite_or_MySQL()
     

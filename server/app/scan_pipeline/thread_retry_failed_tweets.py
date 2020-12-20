@@ -26,6 +26,10 @@ a échoué, c'est à dire que la méthode suivante a retourné "None" :
 CBIR_Engine_for_Tweets_Images.get_image_features()
 """
 def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
+    # Sécurité, vérifier que le thread est unique
+    if thread_id != 1 :
+        raise RuntimeError( "Ce thread doit être unique, et doit pas conséquent avoir 1 comme identifiant (\"thread_id\") !" )
+    
     # Initialisation de l'indexeur de Tweets
     tweets_indexer = Tweets_Indexer( DEBUG = param.DEBUG, ENABLE_METRICS = param.ENABLE_METRICS )
     
