@@ -31,6 +31,8 @@ class Threads_Registry :
     @param thread_name L'identifiant du thread.
     """
     def register_thread ( self, thread_name : str, pid : int ) :
+        if thread_name in self._pid_dict :
+            raise RuntimeError( f"Le thread \"{thread_name}\" a déjà été enregistré !" )
         self._pid_dict[ thread_name ] = str(pid)
     
     """
