@@ -86,7 +86,7 @@ class Shared_Memory :
         # leurs collecteurs d'erreurs mettent ces  requêtes en échec lors d'un
         # plantage.
         # Les threads sont identifiés par la chaine suivante :
-        # f"{thread_procedure.__name__}_number{thread_id}"
+        # f"{thread_procedure.__name__}_th{thread_id}"
         self._threads_registry = self.register_obj( Threads_Registry() )
     
     """

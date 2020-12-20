@@ -31,7 +31,7 @@ def error_collector( thread_procedure, thread_id : int, shared_memory_uri : str 
     shared_memory = open_proxy( shared_memory_uri )
     
     # Enregistrer le thread / le procesus
-    shared_memory.threads_registry.register_thread( f"{thread_procedure.__name__}_number{thread_id}", getpid() )
+    shared_memory.threads_registry.register_thread( f"{thread_procedure.__name__}_th{thread_id}", getpid() )
     
     error_count = 0
     error_on_init_count = 0
@@ -46,7 +46,7 @@ def error_collector( thread_procedure, thread_id : int, shared_memory_uri : str 
             # Mettre la requête en erreur si c'est une requête utilisateur ou
             # une requête de scan
             try :
-                request = shared_memory.threads_registry.get_request( f"{thread_procedure.__name__}_number{thread_id}" )
+                request = shared_memory.threads_registry.get_request( f"{thread_procedure.__name__}_th{thread_id}" )
             
             # Si le serveur Pyro est HS, c'est très certainement pour ça qu'une
             # erreur est tombée
@@ -78,7 +78,7 @@ def error_collector( thread_procedure, thread_id : int, shared_memory_uri : str 
             
             # Enregistrer dans un fichier
             if error_count < 100 : # Ne pas créer trop de logs, s'il y a autant d'erreurs, c'est que c'est la même
-                file = open( f"{thread_procedure.__name__}_number{thread_id}_errors.log", "a" )
+                file = open( f"{thread_procedure.__name__}_th{thread_id}_errors.log", "a" )
                 file.write( error_name )
                 traceback.print_exc( file = file )
                 if pyro_traceback != None : file.write( pyro_traceback )

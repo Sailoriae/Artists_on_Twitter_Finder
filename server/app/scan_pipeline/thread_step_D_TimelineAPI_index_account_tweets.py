@@ -37,7 +37,7 @@ def thread_step_D_TimelineAPI_index_account_tweets( thread_id : int, shared_memo
     shared_memory_scan_requests_step_D_TimelineAPI_index_account_tweets_queue = shared_memory_scan_requests.step_D_TimelineAPI_index_account_tweets_queue
     
     # Dire qu'on ne fait rien
-    shared_memory_threads_registry.set_request( f"thread_step_D_TimelineAPI_index_account_tweets_number{thread_id}", None )
+    shared_memory_threads_registry.set_request( f"thread_step_D_TimelineAPI_index_account_tweets_th{thread_id}", None )
     
     # Tant que on ne nous dit pas de nous arrêter
     while shared_memory.keep_service_alive :
@@ -88,7 +88,7 @@ def thread_step_D_TimelineAPI_index_account_tweets( thread_id : int, shared_memo
         shared_memory_scan_requests_queues_sem.release()
         
         # Dire qu'on est en train de traiter cette requête
-        shared_memory_threads_registry.set_request( f"thread_step_D_TimelineAPI_index_account_tweets_number{thread_id}", request )
+        shared_memory_threads_registry.set_request( f"thread_step_D_TimelineAPI_index_account_tweets_th{thread_id}", request )
         
         # Si on a vu cette requête il y a moins de 5 secondes, c'est qu'il n'y
         # a pas beaucoup de requêtes dans le pipeline, on peut donc dormir
@@ -148,7 +148,7 @@ def thread_step_D_TimelineAPI_index_account_tweets( thread_id : int, shared_memo
                 shared_memory_scan_requests.end_request( request )
         
         # Dire qu'on n'est plus en train de traiter cette requête
-        shared_memory_threads_registry.set_request( f"thread_step_D_TimelineAPI_index_account_tweets_number{thread_id}", None )
+        shared_memory_threads_registry.set_request( f"thread_step_D_TimelineAPI_index_account_tweets_th{thread_id}", None )
         
         # Forcer la fermeture du proxy
         request.release_proxy()

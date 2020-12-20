@@ -36,7 +36,7 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
     shared_memory_user_requests_step_1_link_finder_queue = shared_memory_user_requests.step_1_link_finder_queue
     
     # Dire qu'on ne fait rien
-    shared_memory_threads_registry.set_request( f"thread_step_1_link_finder_number{thread_id}", None )
+    shared_memory_threads_registry.set_request( f"thread_step_1_link_finder_th{thread_id}", None )
     
     # Tant que on ne nous dit pas de nous arrêter
     while shared_memory.keep_service_alive :
@@ -50,7 +50,7 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
             continue
         
         # Dire qu'on est en train de traiter cette requête
-        shared_memory_threads_registry.set_request( f"thread_step_1_link_finder_number{thread_id}", request )
+        shared_memory_threads_registry.set_request( f"thread_step_1_link_finder_th{thread_id}", request )
         
         # On passe la requête à l'étape suivante, c'est à dire notre étape
         shared_memory_user_requests.set_request_to_next_step( request )
@@ -68,7 +68,7 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
             shared_memory_user_requests.set_request_to_next_step( request, force_end = True )
             
             # Dire qu'on n'est plus en train de traiter cette requête
-            shared_memory_threads_registry.set_request( f"thread_step_1_link_finder_number{thread_id}", None )
+            shared_memory_threads_registry.set_request( f"thread_step_1_link_finder_th{thread_id}", None )
             
             # Forcer la fermeture du proxy
             request.release_proxy()
@@ -83,7 +83,7 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
             shared_memory_user_requests.set_request_to_next_step( request, force_end = True )
             
             # Dire qu'on n'est plus en train de traiter cette requête
-            shared_memory_threads_registry.set_request( f"thread_step_1_link_finder_number{thread_id}", None )
+            shared_memory_threads_registry.set_request( f"thread_step_1_link_finder_th{thread_id}", None )
             
             # Forcer la fermeture du proxy
             request.release_proxy()
@@ -98,7 +98,7 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
             shared_memory_user_requests.set_request_to_next_step( request, force_end = True )
             
             # Dire qu'on n'est plus en train de traiter cette requête
-            shared_memory_threads_registry.set_request( f"thread_step_1_link_finder_number{thread_id}", None )
+            shared_memory_threads_registry.set_request( f"thread_step_1_link_finder_th{thread_id}", None )
             
             # Forcer la fermeture du proxy
             request.release_proxy()
@@ -113,7 +113,7 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
             shared_memory_user_requests.set_request_to_next_step( request, force_end = True )
             
             # Dire qu'on n'est plus en train de traiter cette requête
-            shared_memory_threads_registry.set_request( f"thread_step_1_link_finder_number{thread_id}", None )
+            shared_memory_threads_registry.set_request( f"thread_step_1_link_finder_th{thread_id}", None )
             
             # Forcer la fermeture du proxy
             request.release_proxy()
@@ -132,7 +132,7 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
             shared_memory_user_requests.set_request_to_next_step( request, force_end = True )
             
             # Dire qu'on n'est plus en train de traiter cette requête
-            shared_memory_threads_registry.set_request( f"thread_step_1_link_finder_number{thread_id}", None )
+            shared_memory_threads_registry.set_request( f"thread_step_1_link_finder_th{thread_id}", None )
             
             # Forcer la fermeture du proxy
             request.release_proxy()
@@ -153,7 +153,7 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
         request.datetime = data.publish_date
         
         # Dire qu'on n'est plus en train de traiter cette requête
-        shared_memory_threads_registry.set_request( f"thread_step_1_link_finder_number{thread_id}", None )
+        shared_memory_threads_registry.set_request( f"thread_step_1_link_finder_th{thread_id}", None )
         
         # On passe la requête à l'étape suivante
         # C'est la procédure shared_memory_user_requests.set_request_to_next_step

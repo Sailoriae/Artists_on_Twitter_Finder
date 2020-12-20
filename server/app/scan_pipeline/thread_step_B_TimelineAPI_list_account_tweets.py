@@ -37,7 +37,7 @@ def thread_step_B_TimelineAPI_list_account_tweets( thread_id : int, shared_memor
     shared_memory_scan_requests_step_B_TimelineAPI_list_account_tweets_queue = shared_memory_scan_requests.step_B_TimelineAPI_list_account_tweets_queue
     
     # Dire qu'on ne fait rien
-    shared_memory_threads_registry.set_request( f"thread_step_B_TimelineAPI_list_account_tweets_number{thread_id}", None )
+    shared_memory_threads_registry.set_request( f"thread_step_B_TimelineAPI_list_account_tweets_th{thread_id}", None )
     
     # Tant que on ne nous dit pas de nous arrêter
     while shared_memory.keep_service_alive :
@@ -87,7 +87,7 @@ def thread_step_B_TimelineAPI_list_account_tweets( thread_id : int, shared_memor
         shared_memory_scan_requests_queues_sem.release()
         
         # Dire qu'on est en train de traiter cette requête
-        shared_memory_threads_registry.set_request( f"thread_step_B_TimelineAPI_list_account_tweets_number{thread_id}", request )
+        shared_memory_threads_registry.set_request( f"thread_step_B_TimelineAPI_list_account_tweets_th{thread_id}", request )
         
         # On liste les Tweets du compte Twitter de la requête avec l'API de timeline
         print( f"[step_B_th{thread_id}] Listage des Tweets du compte Twitter @{request.account_name} avec l'API de timeline." )
@@ -110,7 +110,7 @@ def thread_step_B_TimelineAPI_list_account_tweets( thread_id : int, shared_memor
         request_TimelineAPI_tweets_queue.release_proxy()
         
         # Dire qu'on n'est plus en train de traiter cette requête
-        shared_memory_threads_registry.set_request( f"thread_step_B_TimelineAPI_list_account_tweets_number{thread_id}", None )
+        shared_memory_threads_registry.set_request( f"thread_step_B_TimelineAPI_list_account_tweets_th{thread_id}", None )
         
         # Forcer la fermeture du proxy
         request.release_proxy()
