@@ -5,6 +5,7 @@ from os import getpid
 import traceback
 import Pyro4
 import time
+from datetime import datetime
 
 # Ajouter le répertoire parent au PATH pour pouvoir importer
 from sys import path as sys_path
@@ -42,6 +43,7 @@ def error_collector( thread_procedure, thread_id : int, shared_memory_uri : str 
             thread_procedure( thread_id, shared_memory )
         except Exception as error :
             error_name = f"Erreur dans le thread {thread_id} de la procédure {thread_procedure.__name__} !\n"
+            error_name += f"S'est produite le {datetime.now().strftime('%Y-%m-%d à %H:%M:%S')}.\n"
             
             # Mettre la requête en erreur si c'est une requête utilisateur ou
             # une requête de scan
