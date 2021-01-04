@@ -39,6 +39,11 @@ def http_server_container ( shared_memory_uri_arg ) :
         def do_POST( self ) :
             return self.do_GET( method = "POST" )
         
+        # La méthode HEAD doit fonctionner comme la méthode GET
+        # Elle n'envoit juste pas de corps
+        def do_HEAD( self ) :
+            return self.do_GET( method = "HEAD" )
+        
         def do_GET( self, method = "GET" ) :
             # Analyser le chemin du GET HTTP
             endpoint = urlsplit( self.path ).path
