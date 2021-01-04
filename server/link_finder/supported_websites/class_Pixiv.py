@@ -56,13 +56,19 @@ class Pixiv :
     @return L'ID de l'illustration postée sur Pixiv.
             Ou None si ce n'est pas un artwork Pixiv.
     """
-    def artwork_url_to_id ( self, artwork_url : str ) :
+    def artwork_url_to_id ( self, artwork_url : str ) -> int :
         result_new = re.match( pixiv_artwork_id_regex_new, artwork_url )
         result_old = re.match( pixiv_artwork_id_regex_old, artwork_url )
         if result_new != None :
-            return result_new.group( 1 )
+            try :
+                return int( result_new.group( 1 ) )
+            except ValueError :
+                return None
         if result_old != None :
-            return result_old.group( 1 )
+            try :
+                return int( result_old.group( 1 ) )
+            except ValueError :
+                return None
         return None
     
     """
@@ -78,6 +84,9 @@ class Pixiv :
     def cache_or_get ( self, illust_url : int, RECONNECT = True ) -> bool :
         if illust_url != self.cache_illust_url :
             illust_id = self.artwork_url_to_id( illust_url )
+            
+            if illust_id == None :
+                return False
             
             retry_count = 0
             while True : # Solution très bourrin pour gèrer les Rate limits de l'API Pixiv
@@ -110,7 +119,7 @@ class Pixiv :
     """
     Obtenir l'URL de l'image source à partir de l'URL de l'illustration postée.
     
-    @param illust_id L'URL de l'illustration Pixiv.
+    @param illust_url L'URL de l'illustration Pixiv.
     @return L'URL de l'image.
             Ou None si il y a eu un problème, c'est à dire que l'ID donné n'est
             pas une illustration sur Pixiv.
@@ -144,7 +153,7 @@ class Pixiv :
     """
     Retourne les noms des comptes Twitter trouvés.
     
-    @param illust_id L'URL de l'illustration Pixiv.
+    @param illust_url L'URL de l'illustration Pixiv.
     @param force_pixiv_account_id Forcer l'ID du compte Pixiv (OPTIONNEL).
     @return Une liste de comptes Twitter.
             Ou une liste vide si aucun URL de compte Twitter valide n'a été
@@ -216,7 +225,7 @@ class Pixiv :
     """
     Obtenir la date de publication de l'illustration.
     
-    @param illust_id L'URL de l'illustration postée sur Pixiv.
+    @param illust_url L'URL de l'illustration postée sur Pixiv.
     @return L'objet datetime de la date de publication de l'image.
             Ou None si il y a  eu un problème, c'est à dire que l'URL donnée
             ne mène pas à une illustration sur Pixiv.
