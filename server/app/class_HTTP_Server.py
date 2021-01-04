@@ -35,7 +35,11 @@ def http_server_container ( shared_memory_uri_arg ) :
         def log_message( self, format, *args ) :
             return
         
-        def do_GET( self ) :
+        # La méthode POST fonctionne comme la méthode GET
+        def do_POST( self ) :
+            return self.do_GET( method = "POST" )
+        
+        def do_GET( self, method = "GET" ) :
             # Analyser le chemin du GET HTTP
             endpoint = urlsplit( self.path ).path
             parameters = dict( parse_qs( urlsplit( self.path ).query ) )
@@ -87,12 +91,22 @@ def http_server_container ( shared_memory_uri_arg ) :
                 
                 response_dict = get_user_request_json_model()
                 
+                illust_url = None
+                if method == "POST" :
+                    content_length = int(self.headers.get("Content-Length", 0)) # Longueur 0 par défaut, param "Content-Length" est insensible à la casse
+                    if content_length != 0 :
+                        illust_url = self.rfile.read(content_length).decode('utf-8')
+                else :
+                    try :
+                        illust_url = parameters["url"][0]
+                    except KeyError :
+                        pass
+                
                 # On envoit forcément les mêmes champs, même si ils sont vides !
-                try :
-                    illust_url = parameters["url"][0]
-                except KeyError :
+                if illust_url == None :
                     response_dict["status"] = "END"
                     response_dict["error"] = "NO_URL_FIELD"
+                
                 else :
                     # Lance une nouvelle requête, ou donne la requête déjà existante
                     request = self.shared_memory.user_requests.launch_request( illust_url,
@@ -146,6 +160,6 @@ def http_server_container ( shared_memory_uri_arg ) :
                 
                 self.wfile.write( "404 Not Found\n".encode("utf-8") )
             
-            print( "[HTTP]", client_ip, self.log_date_time_string(), "GET", self.path, "HTTP", http_code )
+            print( "[HTTP]", client_ip, self.log_date_time_string(), method, self.path, "HTTP", http_code )
     
     return HTTP_Server

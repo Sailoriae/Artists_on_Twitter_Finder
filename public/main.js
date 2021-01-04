@@ -46,8 +46,9 @@ function mainFunction ( new_loop = true ) {
 		}
 	});
 
-	request.open("GET", "./api/query?url=" + illustURL); // self.send_header("Access-Control-Allow-Origin", "*")
-	request.send();
+	request.open("POST", "./api/query"); // self.send_header("Access-Control-Allow-Origin", "*")
+	request.setRequestHeader("Content-type", "text/plain");
+	request.send( illustURL );
 }
 
 function lockUI () {
