@@ -89,6 +89,9 @@ class Link_Finder :
         # mènent bien vers des illustrations.
         # Ici, on vérifie juste le domaine.
         
+        # Remplacer les "&amp;" par des "&"
+        illust_url = illust_url.replace( "&amp;", "&" )
+        
         # Vérification que ce soit bien une URL
         if validate_url( illust_url ) == None :
             raise Not_an_URL
