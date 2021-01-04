@@ -42,33 +42,55 @@
 
 		<p>L'API vous limite à 1 requête HTTP par seconde. Sinon, vous recevrez une erreur HTTP 429.</p>
 
-		<h2>Endpoint <code>/api/query</code></h2>
+
+		<h2>Endpoint <code>POST /api/query</code> (Recommandé)</h2>
 
 		<p>Lancer le traitement d'une illustration et recevoir son statut.</p>
+
+		<p>Le contenu doit être uniquement l'URL de la page web de l'un des sites supportés contenant l'illustration (Type <code>text/plain</code> encodé en UTF-8).</p>
+
+		<p>Exemples de contenu&nbsp;:</p>
+		<ul>
+			<li><code>https://www.deviantart.com/raemz-desu/art/Miku-498506170</code></li>
+			<li><code>https://danbooru.donmai.us/posts/2790874</code></li>
+			<li><code>https://www.pixiv.net/en/artworks/78119407</code></li>
+		</ul>
+
+		<p>Retourne un JSON décrit ci-dessous.</p>
+
+
+		<h2>Endpoint <code>GET /api/query</code> (Non-recommandé)</h2>
+
+		<p>Même fonctionnement précedemment, mais l'URL de la page web contenant l'illustration est passée en paramètre.</p>
 
 		<p>Paramètres&nbsp;:</p>
 		<ul>
 			<li><code>url</code><br>L'URL de la page web de l'un des sites supportés contenant l'illustration.</li>
 		</ul>
 
-		<p>Exemples :</p>
+		<p>Exemples&nbsp;:</p>
 		<ul>
 			<li><a href="./api/query?url=https://www.deviantart.com/raemz-desu/art/Miku-498506170">/api/query?url=https://www.deviantart.com/raemz-desu/art/Miku-498506170</a></li>
 			<li><a href="./api/query?url=https://danbooru.donmai.us/posts/2790874">/api/query?url=https://danbooru.donmai.us/posts/2790874</a></li>
 			<li><a href="./api/query?url=https://www.pixiv.net/en/artworks/78119407">/api/query?url=https://www.pixiv.net/en/artworks/78119407</a></li>
 		</ul>
 
-		<p>Retourne un JSON contenant les champs suivants&nbsp;:</p>
+		<p>Retourne un JSON décrit ci-dessous.</p>
+
+
+		<h2>JSON retourné par <code>/api/query</code></h2>
+
+		<p>Le JSON retourné par <code>/api/query</code> contient forcément les champs suivants&nbsp;:</p>
 		<ul>
 			<li><code>status</code><br>Une chaine de caractères décrivant l'état actuel de la requête. Voir la liste des status possibles ci-dessous.</li>
 			<li><code>has_first_time_scan</code><br>Un booléen mis à <code>true</code> si un des compte Twitter trouvé n'est pas indexé. Le traitement va donc être plus long.</li>
-			<li><code>twitter_accounts</code><br>Liste de comptes Twitter trouvés et validés (C'est à dire qu'ils sont existants, publiques, et non suspendus ou désactivés). Chaque compte Twitter contient les champs suivants&nbsp;:
+			<li><code>twitter_accounts</code><br>Liste de comptes Twitter trouvés et validés (C'est à dire qu'ils sont existants, publiques, et non suspendus ou désactivés). Peut être une liste vide.. Chaque compte Twitter contient les champs suivants&nbsp;:
 				<ul>
 					<li><code>account_name</code><br>Le "screen name" du compte Twitter.</li>
 					<li><code>account_id</code><br>L'ID du compte Twitter.</li>
 				</ul>
 			</li>
-			<li><code>results</code><br>Liste des Tweets trouvés, triée dans l'ordre croissant par la valeur <code>distance_chi2</code>. Chaque Tweet contient les champs suivants&nbsp;:
+			<li><code>results</code><br>Liste des Tweets trouvés, triée dans l'ordre croissant par la valeur <code>distance_chi2</code>. Peut être une liste vide. Chaque Tweet contient les champs suivants&nbsp;:
 				<ul>
 					<li><code>tweet_id</code><br>L'ID du Tweet.</li>
 					<li><code>account_id</code><br>L'ID du compte Twitter ayant publié ce Tweet.</li>
@@ -111,7 +133,8 @@
 			<li><code>YOUR_IP_HAS_MAX_PROCESSING_REQUESTS</code><br>L'adresse IP qui a envoyé la requête a atteint son quota maximum de requêtes en cours de traitement. Il faut donc attendre que les autres requêtes envoyées par cette adresse IP finissent leur traitement.</li>
 		</ul>
 
-		<h2>Endpoint <code>/api/stats</code></h2>
+
+		<h2>Endpoint <code>GET /api/stats</code></h2>
 
 		<p>Recevoir des informations sur le serveur.</p>
 
