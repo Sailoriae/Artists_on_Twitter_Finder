@@ -2,7 +2,7 @@
 # coding: utf-8
 
 from typing import List
-from datetime import datetime
+from dateutil import parser
 from bs4 import BeautifulSoup
 
 try :
@@ -205,7 +205,7 @@ class DeviantArt :
             return None
         
         # On retourne le résultat voulu
-        return datetime.fromisoformat( self.cache_illust_url_json["pubdate"] )
+        return parser.isoparse( self.cache_illust_url_json["pubdate"] )
 
 
 """

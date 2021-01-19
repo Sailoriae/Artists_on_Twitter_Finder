@@ -9,3 +9,4 @@ tweepy
 beautifulsoup4
 Pyro4
 -e git+https://github.com/JustAnotherArchivist/snscrape.git#egg=snscrape
+dateutil

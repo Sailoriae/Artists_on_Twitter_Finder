@@ -3,16 +3,14 @@
 
 from typing import List
 import re
-from datetime import datetime
+from dateutil import parser
 
 try :
     from utils import Webpage_to_Twitter_Accounts
-    from utils import validate_pixiv_account_url
     from utils import get_with_rate_limits
     from utils import validate_url
 except ImportError : # Si on a été exécuté en temps que module
     from .utils import Webpage_to_Twitter_Accounts
-    from .utils import validate_pixiv_account_url
     from .utils import get_with_rate_limits
     from .utils import validate_url
 
@@ -173,7 +171,7 @@ class Danbooru :
             return None
         
         # On retourne le résultat voulu
-        return datetime.fromisoformat( self.cache_illust_url_json["created_at"] )
+        return parser.isoparse( self.cache_illust_url_json["created_at"] )
 
 
 """

@@ -2,6 +2,9 @@
 # coding: utf-8
 
 from typing import List
+
+# On utilise ici datetime.fromisoformat() plutpôt que dateutil.parser.isoparse()
+# afin d'avoir deux libs différentes, pour être certain
 from datetime import datetime
 
 from class_Link_Finder import Link_Finder
@@ -122,19 +125,19 @@ print( "TEST DE DERPIBOORU :" )
 test( "https://www.derpibooru.org/images/1851874",
       "https://derpicdn.net/img/view/2018/10/9/1851874.jpeg",
       ['fidzfox'],
-      datetime.fromisoformat( "2018-10-09T01:30:23" ) )
+      datetime.fromisoformat( "2018-10-09 01:30:23+00:00" ) )
 
 # Attention, test de NSFW
 test( "https://www.derpibooru.org/images/2043814",
       "https://derpicdn.net/img/view/2019/5/19/2043814.png",
       ['kingkakapo'],
-      datetime.fromisoformat( "2019-05-19T22:59:22" ) )
+      datetime.fromisoformat( "2019-05-19 22:59:22+00:00" ) )
 
 # Test intéressant, où il est obligé de passer dans le multiplexeur
 test( "https://derpibooru.org/images/2234605",
       "https://derpicdn.net/img/view/2019/12/31/2234605.png",
       ['sinrinf', 'avrameow'],
-      datetime.fromisoformat( "2019-12-31T09:22:36" ) )
+      datetime.fromisoformat( "2019-12-31 09:22:36+00:00" ) )
 
 
 print( "" )
@@ -143,4 +146,4 @@ print( "TEST DE FURBOORU :" )
 test( "https://furbooru.org/images/18",
       "https://furrycdn.org/img/view/2020/4/24/18.png",
       ['twiren_arts'],
-      datetime.fromisoformat( "2020-04-24T22:50:11" ) )
+      datetime.fromisoformat( "2020-04-24 22:50:11+00:00" ) )

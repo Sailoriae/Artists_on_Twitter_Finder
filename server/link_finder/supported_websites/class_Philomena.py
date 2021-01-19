@@ -3,7 +3,7 @@
 
 from typing import List
 import re
-from datetime import datetime
+from dateutil import parser
 
 try :
     from utils import Webpage_to_Twitter_Accounts
@@ -240,7 +240,7 @@ class Philomena :
             return None
         
         # On retourne le résultat voulu
-        return datetime.fromisoformat( self.cache_illust_url_json["image"]["created_at"] )
+        return parser.isoparse( self.cache_illust_url_json["image"]["created_at"] )
 
 
 """

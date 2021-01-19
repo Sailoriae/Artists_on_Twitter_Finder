@@ -6,7 +6,7 @@ from typing import List
 import re
 from time import sleep
 from random import randrange
-from datetime import datetime
+from dateutil import parser
 
 try :
     from utils import validate_twitter_account_url
@@ -236,4 +236,4 @@ class Pixiv :
             return None
         
         # On retourne le résultat voulu
-        return datetime.fromisoformat( self.cache_illust_url_json["illust"]["create_date"] )
+        return parser.isoparse( self.cache_illust_url_json["illust"]["create_date"] )
