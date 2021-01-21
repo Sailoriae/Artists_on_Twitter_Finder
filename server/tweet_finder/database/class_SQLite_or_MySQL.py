@@ -30,6 +30,19 @@ else :
 CBIR_LIST_LENGHT = 240
 
 
+# Note : Si on veut optimiser les perfs lors de la recherche, il faut :
+# 1 - Utiliser MySQLdb, doc : https://mysqlclient.readthedocs.io/index.html
+# 2 - Arrêter les "INNER JOIN" entre la table des Tweets et les tables
+#     d'images. Ca prend trop de temps par rapport à un simple "SELECT".
+# 3 - Faire des "fetchmany()" dans l'itérateur des images.
+# Avec MySQLdb, fait un "SELECT * FROM tweets" prend 2 secondes par millions
+# d'images. La recherche dans toute la BDD reste donc compliquée. Est-ce que ça
+# vaut le coup ?
+# Autre gros problème : MySQLdb utilise forcément des curseurs buffered. Ce qui
+# fait exploser la RAM lors d'un gros SELECT... Comme par exemple lors de la
+# recherche.
+
+
 """
 Couche d'abstraction à la base de données SQLite.
 

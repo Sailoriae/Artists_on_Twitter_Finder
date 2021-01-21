@@ -6,12 +6,17 @@ from statistics import mean
 
 try :
     from class_Image_in_DB import Image_in_DB
-    from sql_requests_dict import sql_requests_dict
 except ModuleNotFoundError : # Si on a été exécuté en temps que module
     from .class_Image_in_DB import Image_in_DB
-    from .sql_requests_dict import sql_requests_dict
 
 CBIR_LIST_LENGHT = 240
+
+
+# Note :
+# Ca ne sert à rien de chercher une optimisation avec fetchmany(). En effet :
+# The fetchone() method is used by fetchall() and fetchmany().
+# Source :
+# https://dev.mysql.com/doc/connector-python/en/connector-python-api-mysqlcursor-fetchone.html
 
 
 """
