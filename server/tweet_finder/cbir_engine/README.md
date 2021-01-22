@@ -29,9 +29,9 @@ Ce module analyse des images représentés par des objets `numpy.ndarray`.
 
 Le module `utils` contient la fonction `url_to_cv2_image` permettant d'importer n'importe quelle image depuis le web et de la convertir dans ce format.
 
-### Indexation
+### Indexation (Extraction de caractéristiques)
 
-Pour obtenir la liste des caractéristiques d'une image :
+Pour obtenir la liste des caractéristiques ("feature vector") d'une image :
 ```
 engine.index_cbir( image )
 ```
@@ -39,7 +39,7 @@ Avec `image` l'image à indexer, sous la forme d'un objet `numpy.ndarray`.
 
 Cette fonction retourne alors une liste de réels.
 
-### Recherche d'image inversé
+### Recherche d'image inversée
 
 Pour chercher une image à partir d'une autre :
 ```
@@ -55,3 +55,20 @@ Cette fonction retourne alors une liste d'identifiants d'images.
 
 C'est la classe `Image_in_DB` du module `database` qui représente une image indexée.
 De plus, il y a dans ce module `database` un exemple d'itérateur.
+
+
+## Fonctionnement de la liste des caractéristiques
+
+Pour chaque image, on calcul une liste de caractéristiques. Cette liste contient des nombres décimaux compris entre 0 et 1. Ces nombres représentent 5 histogrammes 3D.
+
+Un histogramme 3D sur une image contient l'intensité pour plusieurs échantillons des 3 canaux des images. Ici, on traite les images en HSV, et non en RGB.
+Attention, ce n'est pas l'image qu'on échantillonne, mais les 3 composantes de HSV. Ainsi, l'histogramme a 4 dimensions !
+
+Il est possible de visualiser l'histogramme 3D d'images avec la fonction `plot_histogram()`.
+Attention, il est impossible d'afficher un véritable histogramme 3D. En effet, cela reviendrait à représenter des cubes de couleurs variants avec l'intensité, mais les cubes extérieurs masqueraient les cubes intérieurs. C'est pour cela que cette fonction affiche des points à la place de cubes.
+
+Le Notebook Jupyter `plot_histogram.ipynb` permet d'afficher l'histogramme et le tourner dynamiquement.
+
+Exemple avec l'image suivante : https://danbooru.donmai.us/posts/4307427
+
+![Exemple d'histogramme 3D](plot_histogram_example.png)
