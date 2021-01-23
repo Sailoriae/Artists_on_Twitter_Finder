@@ -24,7 +24,7 @@ cette fonction affiche des points à la place de cubes.
 
 @param url URL de l'image dont il faut calculer l'histogramme.
 """
-def plot_histogram( url ) :
+def plot_histogram( url, test_proof = False ) :
     # Nombre d'échantillons pour les 3 dimensions (HSV) de l'image
     bins = (8,12,3)
     
@@ -40,9 +40,9 @@ def plot_histogram( url ) :
     hist_flat = cv2.normalize(hist, hist).flatten()
     
     # Créer la liste des échantillons sur les 3 dimensions
-    h = list(range(0,bins[0]))
-    s = list(range(0,bins[1]))
-    v = list(range(0,bins[2]))
+    h_indice = list(range(0,bins[0]))
+    s_indice = list(range(0,bins[1]))
+    v_indice = list(range(0,bins[2]))
     
     # Calculs du pas entre chaque valeurs
     h_step = 180/bins[0]
@@ -52,9 +52,9 @@ def plot_histogram( url ) :
     # Mettre des pseudo-vraies-valeurs aux échentillons
     # Ce sont en vérité des "bins", mais comme c'est trop gros à représenter,
     # on représente seulement le point central
-    h = [value * h_step + h_step/2 for value in h]
-    s = [value * s_step + s_step/2 for value in s]
-    v = [value * v_step + v_step/2 for value in v]
+    h = [value * h_step + h_step/2 for value in h_indice]
+    s = [value * s_step + s_step/2 for value in s_indice]
+    v = [value * v_step + v_step/2 for value in v_indice]
     
     # Générer toutes les combinaisons possibles des 3 listes précédentes
     # Dans l'ordre HSV, c'est ainsi que cv2.normalize() "applatit"
@@ -63,6 +63,15 @@ def plot_histogram( url ) :
     # Ainsi, les coordonnées de cette liste correspondent aux valeurs dans la
     # liste "hist_flat"
     coord = list(itertools.product(*[h,s,v]))
+    
+    # Preuve de fonctionnement de ce que je raconte ci-dessus
+    # On accède aux valeurs sans planter, alors que les échantillonnages des
+    # 3 dimensions sont différents (8-12-3 pour respectivement H-S-V)
+    if test_proof :
+        for c in list(itertools.product(*[h_indice,s_indice,v_indice])) :
+            hist[c[0]][c[1]][c[2]]
+    # Pour tester que les axes ne sont pas inversés, il suffit de tester avec
+    # des images couleur unique
     
     # Séparer la liste de tuples en trois listes
     h, s, v = list(zip(*coord))
