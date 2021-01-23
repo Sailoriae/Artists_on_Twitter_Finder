@@ -26,9 +26,9 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
     
     # Initialisation de notre couche d'abstraction à l'API Twitter
     twitter = TweepyAbstraction( param.API_KEY,
-                                param.API_SECRET,
-                                param.OAUTH_TOKEN,
-                                param.OAUTH_TOKEN_SECRET )
+                                 param.API_SECRET,
+                                 param.OAUTH_TOKEN,
+                                 param.OAUTH_TOKEN_SECRET )
     
     # Maintenir ouverts certains proxies vers la mémoire partagée
     shared_memory_threads_registry = shared_memory.threads_registry
@@ -57,108 +57,82 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
         
         print( f"[step_1_th{thread_id}] Link Finder pour : {request.input_url}" )
         
+        # Cette variable est mise à False si la requête ne peut pas aller plus
+        # loin dans le pipeline utilisateur
+        can_proceed = True
+        
         # On lance le Link Finder sur cet URL
         try :
             data = finder_engine.get_data( request.input_url )
+        
+        # =====================================================================
+        # VERIFICATION DE DONNES TROUVEES PAR LE LINK FINDER
+        # =====================================================================
         
         # Si jamais l'entrée n'est pas une URL, on ne peut pas aller plus loin
         # avec cette requête (On passe donc son status à "Fin de traitement")
         except Not_an_URL :
             request.problem = "NOT_AN_URL"
-            shared_memory_user_requests.set_request_to_next_step( request, force_end = True )
-            
-            # Dire qu'on n'est plus en train de traiter cette requête
-            shared_memory_threads_registry.set_request( f"thread_step_1_link_finder_th{thread_id}", None )
-            
-            # Forcer la fermeture du proxy
-            request.release_proxy()
-            
             print( f"[step_1_th{thread_id}] Ceci n'est pas un URL !" )
-            continue
+            can_proceed = False
         
         # Si jamais le site n'est pas supporté, on ne va pas plus loin avec
         # cette requête (On passe donc son status à "Fin de traitement")
         except Unsupported_Website :
             request.problem = "UNSUPPORTED_WEBSITE"
-            shared_memory_user_requests.set_request_to_next_step( request, force_end = True )
-            
-            # Dire qu'on n'est plus en train de traiter cette requête
-            shared_memory_threads_registry.set_request( f"thread_step_1_link_finder_th{thread_id}", None )
-            
-            # Forcer la fermeture du proxy
-            request.release_proxy()
-            
             print( f"[step_1_th{thread_id}] Site non supporté !" )
-            continue
+            can_proceed = False
         
         # Si jamais l'URL de la requête est invalide, on ne va pas plus loin
         # avec elle (On passe donc son status à "Fin de traitement")
-        if data == None :
+        if can_proceed and data == None :
             request.problem = "INVALID_URL"
-            shared_memory_user_requests.set_request_to_next_step( request, force_end = True )
-            
-            # Dire qu'on n'est plus en train de traiter cette requête
-            shared_memory_threads_registry.set_request( f"thread_step_1_link_finder_th{thread_id}", None )
-            
-            # Forcer la fermeture du proxy
-            request.release_proxy()
-            
             print( f"[step_1_th{thread_id}] URL invalide ! Elle ne mène pas à une illustration." )
-            continue
+            can_proceed = False
         
         # Si jamais aucun compte Twitter n'a été trouvé, on ne va pas plus loin
         # avec la requête (On passe donc son status à "Fin de traitement")
-        elif data.twitter_accounts == []:
+        elif can_proceed and data.twitter_accounts == []:
             request.problem = "NO_TWITTER_ACCOUNT_FOUND"
-            shared_memory_user_requests.set_request_to_next_step( request, force_end = True )
-            
-            # Dire qu'on n'est plus en train de traiter cette requête
-            shared_memory_threads_registry.set_request( f"thread_step_1_link_finder_th{thread_id}", None )
-            
-            # Forcer la fermeture du proxy
-            request.release_proxy()
-            
             print( f"[step_1_th{thread_id}] Aucun compte Twitter trouvé pour l'artiste de cette illustration !" )
-            continue
+            can_proceed = False
         
         # On vérifie la liste des comptes Twitter
-        request.twitter_accounts_with_id = twitter.get_multiple_accounts_ids( data.twitter_accounts )
+        if can_proceed :
+            request.twitter_accounts_with_id = twitter.get_multiple_accounts_ids( data.twitter_accounts )
         
         # Si jamais aucun compte Twitter valide n'a été trouvé, on ne va pas
         # plus loin avec la requête (On passe donc son status à "Fin de
         # traitement")
-        if request.twitter_accounts_with_id == []:
+        if can_proceed and request.twitter_accounts_with_id == []:
             request.problem = "NO_VALID_TWITTER_ACCOUNT_FOUND"
-            shared_memory_user_requests.set_request_to_next_step( request, force_end = True )
-            
-            # Dire qu'on n'est plus en train de traiter cette requête
-            shared_memory_threads_registry.set_request( f"thread_step_1_link_finder_th{thread_id}", None )
-            
-            # Forcer la fermeture du proxy
-            request.release_proxy()
-            
             print( f"[step_1_th{thread_id}] Aucun compte Twitter valide trouvé pour l'artiste de cette illustration !" )
-            continue
+            can_proceed = False
         
-        print( f"[step_1_th{thread_id}] Comptes Twitter valides trouvés pour cet artiste : {[ account[0] for account in request.twitter_accounts_with_id ]}" )
+        # =====================================================================
+        # TERMINER LE TRAITEMENT
+        # =====================================================================
         
-        # Théoriquement, on a déjà vérifié que l'URL existe, donc on devrait
-        # forcément trouver une image pour cette requête
-        request.image_url = data.image_url
+        # Si la requête ne peut pas continuer dans le pipeline utilisateur
+        if not can_proceed :
+            # Forcer la fin de la requête, elle ne passe pas à l'étape suivante
+            shared_memory_user_requests.set_request_to_next_step( request, force_end = True )
         
-        print( f"[step_1_th{thread_id}] URL de l'image trouvée : {request.image_url}" )
-        
-        # Même théorie, donc on devrait forcément trouver la date pour cette
-        # requête
-        request.datetime = data.publish_date
+        # Si la requête peut continuer dans le pipeline utilisateur
+        else :
+            print( f"[step_1_th{thread_id}] Comptes Twitter valides trouvés pour cet artiste : {[ account[0] for account in request.twitter_accounts_with_id ]}" )
+            print( f"[step_1_th{thread_id}] URL de l'image trouvée : {data.image_url}" )
+            
+            # Enregistrer les données trouvées dans l'objet User_Request
+            # data.twitter_accounts a déjà été enregistré
+            request.image_url = data.image_url
+            request.datetime = data.publish_date
+            
+            # On passe la requête à l'étape suivante
+            shared_memory_user_requests.set_request_to_next_step( request )
         
         # Dire qu'on n'est plus en train de traiter cette requête
         shared_memory_threads_registry.set_request( f"thread_step_1_link_finder_th{thread_id}", None )
-        
-        # On passe la requête à l'étape suivante
-        # C'est la procédure shared_memory_user_requests.set_request_to_next_step
-        # qui vérifie si elle peut
-        shared_memory_user_requests.set_request_to_next_step( request )
         
         # Forcer la fermeture du proxy
         request.release_proxy()
