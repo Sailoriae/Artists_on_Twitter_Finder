@@ -189,7 +189,7 @@ class Philomena :
         # Comme les Boorus sont des sites de reposts, on peut trouver la source
         # de l'illustration. Si c'est sur un site que l'on supporte, le Link
         # Finder peut aller y faire un tour !
-        if loopback_source != None and not loopback_source :
+        if loopback_source != None and not already_loopback :
             source = self.get_source( illust_url )
             if source != None and source != "" :
                 try :
