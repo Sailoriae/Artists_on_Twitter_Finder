@@ -8,10 +8,17 @@ from time import sleep
 from random import randrange
 from dateutil import parser
 
-try :
-    from utils import validate_twitter_account_url
-except ImportError : # Si on a été exécuté en temps que module
-    from .utils import validate_twitter_account_url
+# Les importations se font depuis le répertoire racine du serveur AOTF
+# Ainsi, si on veut utiliser ce script indépendemment (Notemment pour des
+# tests), il faut que son répertoire de travail soit ce même répertoire
+if __name__ == "__main__" :
+    from os.path import abspath as get_abspath
+    from os.path import dirname as get_dirname
+    from os import chdir as change_wdir
+    change_wdir(get_dirname(get_abspath(__file__)))
+    change_wdir( "../.." )
+
+from link_finder.supported_websites.utils.validate_twitter_account_url import validate_twitter_account_url
 
 
 # ^ = Début de la chaine

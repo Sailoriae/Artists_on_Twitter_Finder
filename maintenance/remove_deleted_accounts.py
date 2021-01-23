@@ -13,14 +13,15 @@ API utilisée : "GET users/lookup", documentation :
 https://developer.twitter.com/en/docs/twitter-api/v1/accounts-and-users/follow-search-get-users/api-reference/get-users-lookup
 """
 
+import sys
 import tweepy
 
-import os
-import sys
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "server"))
-
-# On s'éxécute dans le répetoire "server", et l'ajouter au PATH
-os.chdir(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "server"))
+# On travaille dans le répertoire racine du serveur AOTF
+from os.path import abspath as get_abspath
+from os.path import dirname as get_dirname
+from os import chdir as change_wdir
+change_wdir(get_dirname(get_abspath(__file__)))
+change_wdir( "../server" )
 
 import parameters as param
 

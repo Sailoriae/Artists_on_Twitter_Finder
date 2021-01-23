@@ -1,4 +1,5 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-from .class_SQLite_or_MySQL import SQLite_or_MySQL
+# Laisser vide pour éviter les importations circulaires
+# Elles se produisent car il y a des importations inter-modules

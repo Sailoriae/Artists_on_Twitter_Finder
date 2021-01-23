@@ -8,10 +8,18 @@ import cv2
 import numpy as np
 from time import sleep, time
 
-try :
-    from utils import binary_image_to_cv2_image, get_tweet_image
-except ModuleNotFoundError : # Si on a été exécuté en temps que module
-    from .utils import binary_image_to_cv2_image, get_tweet_image
+# Les importations se font depuis le répertoire racine du serveur AOTF
+# Ainsi, si on veut utiliser ce script indépendemment (Notemment pour des
+# tests), il faut que son répertoire de travail soit ce même répertoire
+if __name__ == "__main__" :
+    from os.path import abspath as get_abspath
+    from os.path import dirname as get_dirname
+    from os import chdir as change_wdir
+    change_wdir(get_dirname(get_abspath(__file__)))
+    change_wdir( ".." )
+
+from tweet_finder.utils.url_to_cv2_image import binary_image_to_cv2_image
+from tweet_finder.utils.get_tweet_image import get_tweet_image
 
 
 """

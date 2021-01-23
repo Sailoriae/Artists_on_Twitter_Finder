@@ -7,6 +7,8 @@
 import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
 
+# On travaille dans le répertoire racine du serveur AOTF
+# Toutes les importations se font depuis cet emplacement
 import os
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -29,7 +31,25 @@ if __name__ == "__main__" :
     
     print( "Vérification des importations...")
     try :
-        from app import *
+        from app.check_parameters import check_parameters
+        
+        from app.error_collector import error_collector
+        
+        from app.thread_auto_update_accounts import thread_auto_update_accounts
+        from app.thread_reset_SearchAPI_cursors import thread_reset_SearchAPI_cursors
+        from app.thread_remove_finished_requests import thread_remove_finished_requests
+        from app.thread_http_server import thread_http_server
+        
+        from app.user_pipeline.thread_step_1_link_finder import thread_step_1_link_finder
+        from app.user_pipeline.thread_step_2_tweets_indexer import thread_step_2_tweets_indexer
+        from app.user_pipeline.thread_step_3_reverse_search import thread_step_3_reverse_search
+        from app.user_pipeline.thread_step_4_filter_results import thread_step_4_filter_results
+        
+        from app.scan_pipeline.thread_step_A_SearchAPI_list_account_tweets import thread_step_A_SearchAPI_list_account_tweets
+        from app.scan_pipeline.thread_step_B_TimelineAPI_list_account_tweets import thread_step_B_TimelineAPI_list_account_tweets
+        from app.scan_pipeline.thread_step_C_SearchAPI_index_account_tweets import thread_step_C_SearchAPI_index_account_tweets
+        from app.scan_pipeline.thread_step_D_TimelineAPI_index_account_tweets import thread_step_D_TimelineAPI_index_account_tweets
+        from app.scan_pipeline.thread_retry_failed_tweets import thread_retry_failed_tweets
     except ModuleNotFoundError as error :
         print( f"Il manque une librairie : {error}" )
         print( "Veuillez exécuter : pip install -r requirements.txt" )
@@ -244,7 +264,7 @@ if __name__ == "__main__" :
     Entrée en ligne de commande (CLI).
     """
     # Initialisation de notre couche d'abstraction à l'API Twitter
-    from tweet_finder.twitter import TweepyAbstraction
+    from tweet_finder.twitter.class_TweepyAbstraction import TweepyAbstraction
     twitter = TweepyAbstraction( param.API_KEY,
                                 param.API_SECRET,
                                 param.OAUTH_TOKEN,

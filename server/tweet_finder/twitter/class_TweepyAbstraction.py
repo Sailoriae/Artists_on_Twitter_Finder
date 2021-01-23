@@ -4,10 +4,17 @@
 import tweepy
 import time
 
-try :
-    from class_Cursor_Iterator import Cursor_Iterator
-except ModuleNotFoundError : # Si on a été exécuté en temps que module
-    from .class_Cursor_Iterator import Cursor_Iterator
+# Les importations se font depuis le répertoire racine du serveur AOTF
+# Ainsi, si on veut utiliser ce script indépendemment (Notemment pour des
+# tests), il faut que son répertoire de travail soit ce même répertoire
+if __name__ == "__main__" :
+    from os.path import abspath as get_abspath
+    from os.path import dirname as get_dirname
+    from os import chdir as change_wdir
+    change_wdir(get_dirname(get_abspath(__file__)))
+    change_wdir( "../.." )
+
+from tweet_finder.twitter.class_Cursor_Iterator import Cursor_Iterator
 
 
 """

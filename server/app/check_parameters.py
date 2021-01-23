@@ -1,13 +1,20 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-# Ajouter le répertoire parent au PATH pour pouvoir importer
-from sys import path as sys_path
-from os import path as os_path
-sys_path.append(os_path.dirname(os_path.dirname(os_path.abspath(__file__))))
+# Les importations se font depuis le répertoire racine du serveur AOTF
+# Ainsi, si on veut utiliser ce script indépendemment (Notemment pour des
+# tests), il faut que son répertoire de travail soit ce même répertoire
+if __name__ == "__main__" :
+    from os.path import abspath as get_abspath
+    from os.path import dirname as get_dirname
+    from os import chdir as change_wdir
+    change_wdir(get_dirname(get_abspath(__file__)))
+    change_wdir( ".." )
 
 import parameters as param
-from tweet_finder.twitter import SNScrapeAbstraction
+from tweet_finder.twitter.class_SNScrapeAbstraction import SNScrapeAbstraction
+from tweet_finder.twitter.class_TweepyAbstraction import TweepyAbstraction
+from link_finder.supported_websites.class_Pixiv import Pixiv
 
 
 """
@@ -84,7 +91,6 @@ def check_parameters () :
     # ========================================================================
     
     print( "Verification de la connexion à l'API publique Twitter..." )
-    from tweet_finder.twitter import TweepyAbstraction
     
     def test_twitter ( api ) :
         # On essaye d'avoir le premier Tweet sur Twitter
@@ -157,7 +163,6 @@ def check_parameters () :
     # ========================================================================
     
     print( "Vérification de la connexion à l'API Pixiv..." )
-    from link_finder.supported_websites import Pixiv
     
     try :
         Pixiv( param.PIXIV_USERNAME, param.PIXIV_PASSWORD )

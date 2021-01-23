@@ -4,14 +4,21 @@
 import queue
 from time import sleep, time
 
-# Ajouter le répertoire parent du répertoire parent au PATH pour pouvoir importer
-from sys import path as sys_path
-from os import path as os_path
-sys_path.append(os_path.dirname(os_path.dirname(os_path.dirname(os_path.abspath(__file__)))))
+# Les importations se font depuis le répertoire racine du serveur AOTF
+# Ainsi, si on veut utiliser ce script indépendemment (Notemment pour des
+# tests), il faut que son répertoire de travail soit ce même répertoire
+if __name__ == "__main__" :
+    from os.path import abspath as get_abspath
+    from os.path import dirname as get_dirname
+    from os import chdir as change_wdir
+    change_wdir(get_dirname(get_abspath(__file__)))
+    change_wdir( "../.." )
 
 import parameters as param
-from link_finder import Link_Finder, Not_an_URL, Unsupported_Website
-from tweet_finder.twitter import TweepyAbstraction
+from link_finder.class_Link_Finder import Link_Finder
+from link_finder.class_Link_Finder import Not_an_URL
+from link_finder.class_Link_Finder import Unsupported_Website
+from tweet_finder.twitter.class_TweepyAbstraction import TweepyAbstraction
 
 
 """

@@ -5,16 +5,21 @@ from time import time
 import datetime
 import queue
 
-# Ajouter le répertoire parent du répertoire parent au PATH pour pouvoir importer
-from sys import path as sys_path
-from os import path as os_path
-sys_path.append(os_path.dirname(os_path.dirname(os_path.dirname(os_path.abspath(__file__)))))
+# Les importations se font depuis le répertoire racine du serveur AOTF
+# Ainsi, si on veut utiliser ce script indépendemment (Notemment pour des
+# tests), il faut que son répertoire de travail soit ce même répertoire
+if __name__ == "__main__" :
+    from os.path import abspath as get_abspath
+    from os.path import dirname as get_dirname
+    from os import chdir as change_wdir
+    change_wdir(get_dirname(get_abspath(__file__)))
+    change_wdir( "../.." )
 
 import parameters as param
-from tweet_finder import Tweets_Indexer
+from tweet_finder.class_Tweets_Indexer import Tweets_Indexer
 from tweet_finder.analyse_tweet_json import analyse_tweet_json
-from tweet_finder.database import SQLite_or_MySQL
-from tweet_finder.twitter import TweepyAbstraction
+from tweet_finder.database.class_SQLite_or_MySQL import SQLite_or_MySQL
+from tweet_finder.twitter.class_TweepyAbstraction import TweepyAbstraction
 from app.wait_until import wait_until
 
 

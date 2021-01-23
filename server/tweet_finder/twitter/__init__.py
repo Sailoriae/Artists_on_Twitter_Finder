@@ -1,5 +1,5 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-from .class_TweepyAbstraction import TweepyAbstraction
-from .class_SNScrapeAbstraction import SNScrapeAbstraction
+# Laisser vide pour éviter les importations circulaires
+# Elles se produisent car il y a des importations inter-modules

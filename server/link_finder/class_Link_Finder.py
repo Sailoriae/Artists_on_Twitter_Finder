@@ -3,21 +3,30 @@
 
 import re
 
-try :
-    from supported_websites import DeviantArt, Pixiv, Danbooru, Philomena
-    from supported_websites.utils import filter_twitter_accounts_list, Webpage_to_Twitter_Accounts
-    from supported_websites.utils import validate_url, validate_deviantart_account_url, validate_pixiv_account_url, validate_twitter_account_url, validate_linktree_account_url
-    from class_Link_Finder_Result import Link_Finder_Result, Not_an_URL, Unsupported_Website
-except ModuleNotFoundError : # Si on a été exécuté en temps que module
-    from .supported_websites import DeviantArt, Pixiv, Danbooru, Philomena
-    from .supported_websites.utils import filter_twitter_accounts_list, Webpage_to_Twitter_Accounts
-    from .supported_websites.utils import validate_url, validate_deviantart_account_url, validate_pixiv_account_url, validate_twitter_account_url, validate_linktree_account_url
-    from .class_Link_Finder_Result import Link_Finder_Result, Not_an_URL , Unsupported_Website
+# Les importations se font depuis le répertoire racine du serveur AOTF
+# Ainsi, si on veut utiliser ce script indépendemment (Notemment pour des
+# tests), il faut que son répertoire de travail soit ce même répertoire
+if __name__ == "__main__" :
+    from os.path import abspath as get_abspath
+    from os.path import dirname as get_dirname
+    from os import chdir as change_wdir
+    change_wdir(get_dirname(get_abspath(__file__)))
+    change_wdir( ".." )
 
-# Ajouter le répertoire parent au PATH pour pouvoir importer les paramètres
-from sys import path as sys_path
-from os import path as os_path
-sys_path.append(os_path.dirname(os_path.dirname(os_path.abspath(__file__))))
+from link_finder.supported_websites.class_DeviantArt import DeviantArt
+from link_finder.supported_websites.class_Pixiv import Pixiv
+from link_finder.supported_websites.class_Danbooru import Danbooru
+from link_finder.supported_websites.class_Philomena import Philomena
+from link_finder.supported_websites.utils.filter_twitter_accounts_list import filter_twitter_accounts_list
+from link_finder.supported_websites.utils.class_Webpage_to_Twitter_Accounts import Webpage_to_Twitter_Accounts
+from link_finder.supported_websites.utils.validate_url import validate_url
+from link_finder.supported_websites.utils.validate_deviantart_account_url import validate_deviantart_account_url
+from link_finder.supported_websites.utils.validate_pixiv_account_url import validate_pixiv_account_url
+from link_finder.supported_websites.utils.validate_twitter_account_url import validate_twitter_account_url
+from link_finder.supported_websites.utils.validate_linktree_account_url import validate_linktree_account_url
+from link_finder.class_Link_Finder_Result import Link_Finder_Result
+from link_finder.class_Link_Finder_Result import Not_an_URL
+from link_finder.class_Link_Finder_Result import Unsupported_Website
 import parameters as param
 
 
@@ -223,4 +232,4 @@ class Link_Finder :
 Test du bon fonctionnement de cette classe
 """
 if __name__ == '__main__' :
-    import link_finder_tester
+    import link_finder.link_finder_tester

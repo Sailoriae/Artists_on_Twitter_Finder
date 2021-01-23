@@ -3,6 +3,7 @@
 
 import urllib
 
+
 """
 Obtenir le contenu disponible à une URL.
 Attention : Cette fonction retourne le contenu binaire !

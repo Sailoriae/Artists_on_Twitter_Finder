@@ -4,14 +4,19 @@
 import Pyro4
 from time import time
 
-try :
-    from class_Pyro_Queue import Pyro_Queue
-    from class_Common_Tweet_IDs_List import Common_Tweet_IDs_List
-    from open_proxy import open_proxy
-except ModuleNotFoundError :
-    from .class_Pyro_Queue import Pyro_Queue
-    from .class_Common_Tweet_IDs_List import Common_Tweet_IDs_List
-    from .open_proxy import open_proxy
+# Les importations se font depuis le répertoire racine du serveur AOTF
+# Ainsi, si on veut utiliser ce script indépendemment (Notemment pour des
+# tests), il faut que son répertoire de travail soit ce même répertoire
+if __name__ == "__main__" :
+    from os.path import abspath as get_abspath
+    from os.path import dirname as get_dirname
+    from os import chdir as change_wdir
+    change_wdir(get_dirname(get_abspath(__file__)))
+    change_wdir( ".." )
+
+from shared_memory.class_Pyro_Queue import Pyro_Queue
+from shared_memory.class_Common_Tweet_IDs_List import Common_Tweet_IDs_List
+from shared_memory.open_proxy import open_proxy
 
 
 """

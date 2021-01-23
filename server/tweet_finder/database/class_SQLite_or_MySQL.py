@@ -4,20 +4,18 @@
 from typing import List
 from datetime import datetime
 
-try :
-    from class_Image_Features_Iterator import Image_Features_Iterator
-#    from features_list_for_db import features_list_for_db
-    from sql_requests_dict import sql_requests_dict
-except ModuleNotFoundError : # Si on a été exécuté en temps que module
-    from .class_Image_Features_Iterator import Image_Features_Iterator
-#    from .features_list_for_db import features_list_for_db
-    from .sql_requests_dict import sql_requests_dict
+# Les importations se font depuis le répertoire racine du serveur AOTF
+# Ainsi, si on veut utiliser ce script indépendemment (Notemment pour des
+# tests), il faut que son répertoire de travail soit ce même répertoire
+if __name__ == "__main__" :
+    from os.path import abspath as get_abspath
+    from os.path import dirname as get_dirname
+    from os import chdir as change_wdir
+    change_wdir(get_dirname(get_abspath(__file__)))
+    change_wdir( "../.." )
 
-# Ajouter le répertoire parent du parent au PATH pour pouvoir importer
-from sys import path as sys_path
-from os import path as os_path
-sys_path.append(os_path.dirname(os_path.dirname(os_path.dirname(os_path.abspath(__file__)))))
-
+from tweet_finder.database.class_Image_Features_Iterator import Image_Features_Iterator
+from tweet_finder.database.sql_requests_dict import sql_requests_dict
 import parameters as param
 
 if param.USE_MYSQL_INSTEAD_OF_SQLITE :

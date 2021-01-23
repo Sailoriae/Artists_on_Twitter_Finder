@@ -5,12 +5,18 @@ import re
 from bs4 import BeautifulSoup
 from typing import List
 
-try :
-    from validate_twitter_account_url import validate_twitter_account_url
-    from get_with_rate_limits import get_with_rate_limits
-except ModuleNotFoundError : # Si on a été exécuté en temps que module
-    from .validate_twitter_account_url import validate_twitter_account_url
-    from .get_with_rate_limits import get_with_rate_limits
+# Les importations se font depuis le répertoire racine du serveur AOTF
+# Ainsi, si on veut utiliser ce script indépendemment (Notemment pour des
+# tests), il faut que son répertoire de travail soit ce même répertoire
+if __name__ == "__main__" :
+    from os.path import abspath as get_abspath
+    from os.path import dirname as get_dirname
+    from os import chdir as change_wdir
+    change_wdir(get_dirname(get_abspath(__file__)))
+    change_wdir( "../../.." )
+
+from link_finder.supported_websites.utils.validate_twitter_account_url import validate_twitter_account_url
+from link_finder.supported_websites.utils.get_with_rate_limits import get_with_rate_limits
 
 
 """

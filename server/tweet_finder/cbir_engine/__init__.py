@@ -1,4 +1,5 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-from .class_CBIR_Engine import CBIR_Engine
+# Laisser vide pour éviter les importations circulaires
+# Elles se produisent car il y a des importations inter-modules

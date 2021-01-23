@@ -5,12 +5,18 @@ from time import time
 from statistics import mean
 import queue
 
-try :
-    from database import SQLite_or_MySQL
-    from class_CBIR_Engine_for_Tweets_Images import CBIR_Engine_for_Tweets_Images
-except ModuleNotFoundError : # Si on a été exécuté en temps que module
-    from .database import SQLite_or_MySQL
-    from .class_CBIR_Engine_for_Tweets_Images import CBIR_Engine_for_Tweets_Images
+# Les importations se font depuis le répertoire racine du serveur AOTF
+# Ainsi, si on veut utiliser ce script indépendemment (Notemment pour des
+# tests), il faut que son répertoire de travail soit ce même répertoire
+if __name__ == "__main__" :
+    from os.path import abspath as get_abspath
+    from os.path import dirname as get_dirname
+    from os import chdir as change_wdir
+    change_wdir(get_dirname(get_abspath(__file__)))
+    change_wdir( ".." )
+
+from tweet_finder.database.class_SQLite_or_MySQL import SQLite_or_MySQL
+from tweet_finder.class_CBIR_Engine_for_Tweets_Images import CBIR_Engine_for_Tweets_Images
 
 
 # Très très très important :

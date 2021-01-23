@@ -4,13 +4,20 @@
 import queue
 from time import sleep
 
-# Ajouter le répertoire parent du répertoire parent au PATH pour pouvoir importer
-from sys import path as sys_path
-from os import path as os_path
-sys_path.append(os_path.dirname(os_path.dirname(os_path.dirname(os_path.abspath(__file__)))))
+# Les importations se font depuis le répertoire racine du serveur AOTF
+# Ainsi, si on veut utiliser ce script indépendemment (Notemment pour des
+# tests), il faut que son répertoire de travail soit ce même répertoire
+if __name__ == "__main__" :
+    from os.path import abspath as get_abspath
+    from os.path import dirname as get_dirname
+    from os import chdir as change_wdir
+    change_wdir(get_dirname(get_abspath(__file__)))
+    change_wdir( "../.." )
 
 import parameters as param
-from tweet_finder import Tweets_Lister_with_TimelineAPI, Unfounded_Account_on_Lister_with_TimelineAPI, Blocked_by_User_with_TimelineAPI
+from tweet_finder.class_Tweets_Lister_with_TimelineAPI import Tweets_Lister_with_TimelineAPI
+from tweet_finder.class_Tweets_Lister_with_TimelineAPI import Unfounded_Account_on_Lister_with_TimelineAPI
+from tweet_finder.class_Tweets_Lister_with_TimelineAPI import Blocked_by_User_with_TimelineAPI
 
 
 """
