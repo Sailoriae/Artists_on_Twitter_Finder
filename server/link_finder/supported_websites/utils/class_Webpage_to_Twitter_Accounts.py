@@ -150,7 +150,7 @@ if __name__ == '__main__' :
         USE_BS4 = False ) # Ce n'est pas recommandé d'utiliser Régex pour DA !
     test.append( scanner.scan() )
     
-    if test == [['nopeys1'], ['lumspark'], ['lumspark']] :
+    if test == [['NOPEYS1'], ['lumspark'], ['lumspark', 'DeviantArt']] : # Bordel car plus de filtre
         print( "Tests OK !" )
     else :
         print( "Tests échoués !" )

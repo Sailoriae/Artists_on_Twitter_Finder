@@ -223,7 +223,7 @@ if __name__ == '__main__' :
         da.get_twitter_accounts(
             "https://www.deviantart.com/nopeys/art/Azula-847851539" ) )
     
-    if test == [['nopeys1', 'nopeys1']] : # Trouve deux fois, plus de filtre
+    if test == [['NOPEYS1', 'NOPEYS1']] : # Trouve deux fois, plus de filtre
         print( "Tests OK !" )
     else :
         print( "Tests échoués !" )

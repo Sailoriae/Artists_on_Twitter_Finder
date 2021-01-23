@@ -189,17 +189,7 @@ if __name__ == '__main__' :
         danbooru.get_twitter_accounts(
             "https://danbooru.donmai.us/posts/3994568" ) )
     
-    test_pixiv = []
-    test_pixiv.append(
-        danbooru.get_pixiv_accounts(
-            "https://danbooru.donmai.us/posts/3994568" ) )
-    
     if test_twitter == [['brillewind']] :
         print( "Tests Twitter OK !" )
     else :
         print( "Tests Twitter échoués !" )
-        
-    if test_pixiv == [['9224174']] :
-        print( "Tests Pixiv OK !" )
-    else :
-        print( "Tests Pixiv échoués !" )
