@@ -2,7 +2,7 @@
 # coding: utf-8
 
 import queue
-from time import sleep
+from time import sleep, time
 
 # Ajouter le répertoire parent du répertoire parent au PATH pour pouvoir importer
 from sys import path as sys_path
@@ -33,6 +33,7 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
     # Maintenir ouverts certains proxies vers la mémoire partagée
     shared_memory_threads_registry = shared_memory.threads_registry
     shared_memory_user_requests = shared_memory.user_requests
+    shared_memory_execution_metrics = shared_memory.execution_metrics
     shared_memory_user_requests_step_1_link_finder_queue = shared_memory_user_requests.step_1_link_finder_queue
     
     # Dire qu'on ne fait rien
@@ -56,6 +57,7 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
         shared_memory_user_requests.set_request_to_next_step( request )
         
         print( f"[step_1_th{thread_id}] Link Finder pour : {request.input_url}" )
+        start = time()
         
         # Cette variable est mise à False si la requête ne peut pas aller plus
         # loin dans le pipeline utilisateur
@@ -133,6 +135,9 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
         
         # Dire qu'on n'est plus en train de traiter cette requête
         shared_memory_threads_registry.set_request( f"thread_step_1_link_finder_th{thread_id}", None )
+        
+        # Enregistrer le temps qu'on a mis pour traiter cette requête
+        shared_memory_execution_metrics.add_step_1_times( time() - start )
         
         # Forcer la fermeture du proxy
         request.release_proxy()

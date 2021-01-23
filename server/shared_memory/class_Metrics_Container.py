@@ -27,7 +27,11 @@ class Metrics_Container :
         self._step_D_calculate_features_times = []
         self._step_D_insert_into_times = []
         
+        # Execution complète du Link Finder
+        self._step_1_times = []
+        
         # Classe Image_Features_Iterator
+        self._step_3_times = []
         self._step_3_iteration_times = []
         self._step_3_usage_times = []
         
@@ -79,11 +83,19 @@ class Metrics_Container :
         self._step_D_insert_into_times += step_D_insert_into_times
     
     """
+    @param step_1_times Temps d'éxécution global à l'étape 1.
+    """
+    def add_step_1_times ( self, step_1_times : float ) :
+        self._step_1_times.append( step_1_times )
+    
+    """
+    @param step_3_times Temps d'éxécution pour faire la recherche inversée.
     @param step_3_iteration_times Liste des temps d'éxécution pour itérer sur
                                   la base de données.
     @param step_3_usage_times Liste des temps d'éxécution de l'utilisation.
     """
-    def add_step_3_times ( self, step_3_iteration_times, step_3_usage_times ) :
+    def add_step_3_times ( self, step_3_times, step_3_iteration_times, step_3_usage_times ) :
+        self._step_3_times.append( step_3_times )
         self._step_3_iteration_times += step_3_iteration_times
         self._step_3_usage_times += step_3_usage_times
     
@@ -128,10 +140,14 @@ class Metrics_Container :
             to_print += f" - Dont : Calcul CBIR d'un Tweet : {mean(self._step_D_calculate_features_times)} ({len(self._step_D_calculate_features_times)} tweets)\n"
         if self._step_D_insert_into_times != [] :
             to_print += f" - Dont : INSERT INTO d'un Tweet : {mean(self._step_D_insert_into_times)} ({len(self._step_D_insert_into_times)} tweets)\n"
+        if self._step_1_times != [] :
+            to_print += f"Etape 1 : Temps moyen pour passer dans le Link Finder : {mean(self._step_1_times)} ({len(self._step_1_times)} éxécutions)\n"
+        if self._step_3_times != [] :
+            to_print += f"Etape 3 : Temps moyen pour éxécuter la recherche inversée : {mean(self._step_3_times)} ({len(self._step_3_times)} recherches de {int(len(self._step_3_usage_times)/len(self._step_3_times))} comparaisons en moyenne)\n"
         if self._step_3_iteration_times != [] :
-            to_print += f"Etape 3 : Temps moyen pour itérer lors de la recherche : {mean(self._step_3_iteration_times)} ({len(self._step_3_iteration_times)} itérations)\n"
+            to_print += f" - Dont : Itérer sur la base de données : {mean(self._step_3_iteration_times)} ({len(self._step_3_iteration_times)} itérations)\n"
         if self._step_3_usage_times != [] :
-            to_print += f"Etape 3 : Temps moyen pour comparer lors de la recherche : {mean(self._step_3_usage_times)} ({len(self._step_3_usage_times)} images)\n"
+            to_print += f" - Dont : Comparer deux vecteurs : {mean(self._step_3_usage_times)} ({len(self._step_3_usage_times)} images)\n"
         if self._step_4_times != [] :
             to_print += f"Etape 4 : Temps moyen pour filtrer la liste des résultats : {mean(self._step_4_times)} ({len(self._step_4_times)} filtrages)\n"
         if self._user_request_full_time != [] :

@@ -66,6 +66,7 @@ class Image_Features_Iterator :
             self.usage_times = [] # Durées des utilisations
             self.usage_start = None
             self.iteration_start = None
+            self.start = time()
         
         # Fonction pour enregistrer les temps d'éxécution
         self.add_step_3_times = None
@@ -95,11 +96,11 @@ class Image_Features_Iterator :
             if self.current_table == 5 :
                 if self.ENABLE_METRICS :
                     if self.iteration_times != [] and self.usage_times != [] :
-                        print( f"[Images_It] Itération sur {len(self.usage_times)} images." )
+                        print( f"[Images_It] Itération sur {len(self.usage_times)} images en {time() - self.start} secondes." )
                         print( f"[Images_It] Temps moyen d'itération : {mean(self.iteration_times)} secondes." )
                         print( f"[Images_It] Temps moyen d'utilisation : {mean(self.usage_times)} secondes." )
                     if self.add_step_3_times != None :
-                        self.add_step_3_times( self.iteration_times, self.usage_times )
+                        self.add_step_3_times( time() - self.start, self.iteration_times, self.usage_times )
                 raise StopIteration
             
             if self.current_table == 2 :
