@@ -14,8 +14,7 @@ de traitement, et de retenter de les indexer.
 import os
 import sys
 
-# On s'éxécute dans le répetoire "server", et l'ajouter au PATH
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "server"))
+# On s'éxécute dans le répertoire "server"
 os.chdir(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "server"))
 
 import parameters as param

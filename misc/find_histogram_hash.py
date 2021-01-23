@@ -11,14 +11,11 @@ Il faudrait pousser ça plus loin afin de faire le maximum de filtrages dans
 la BDD !
 """
 
+import os
 import numpy as np
 import statistics as stats
 
-import os
-import sys
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "server"))
-
-# On s'éxécute dans le répetoire "server", et l'ajouter au PATH
+# On s'éxécute dans le répertoire "server"
 os.chdir(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "server"))
 
 import parameters as param
