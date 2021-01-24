@@ -54,9 +54,10 @@ Stocke les comptes Twitter analysés.
 
 Contient les attributs suivants :
 * `account_id BIGINT UNSIGNED PRIMARY KEY` : L'ID du compte Twitter,
-* `last_SearchAPI_indexing_api_date CHAR(10)` : La date du dernier scan de ce compte avec l'API de recherche, au format YYYY-MM-DD (A donner au prochain scan pour éviter de rescanner tous les Tweets du compte),
+* `last_SearchAPI_indexing_api_date CHAR(10)` : **Curseur d'indexation avec l'API de recherche**, c'est-à-dire la date du dernier scan de ce compte avec l'API de recherche, au format YYYY-MM-DD (A donner au prochain scan pour éviter de rescanner tous les Tweets du compte),
 * `last_SearchAPI_indexing_local_date DATETIME` : La date locale de la dernière mise à jour avec l'API de recherche, utilisé uniquement par le thread de mise à jour automatique,
-* `last_TimelineAPI_indexing_tweet_id BIGINT UNSIGNED` : L'ID du tweet le plus récent de ce compte scanné avec l'API de timeline (A donner au prochain scan pour éviter de rescanner tous les Tweets du compte),
+* `last_SearchAPI_indexing_cursor_reset_date DATETIME` : La date locale du dernier reset du curseur d'indexation avec l'API de recherche. En effet, comme l'indexation sur le moteur de recherche interne à Twitter est fluctuante, on peut donc de temps en temps (De l'ordre d'une fois par ans) re-lister tous les Tweets de ce compte.
+* `last_TimelineAPI_indexing_tweet_id BIGINT UNSIGNED` : **Curseur d'indexation avec l'API de timeline**, c'est-à-dire l'ID du tweet le plus récent de ce compte scanné avec l'API de timeline (A donner au prochain scan pour éviter de rescanner tous les Tweets du compte),
 * `last_TimelineAPI_indexing_local_date DATETIME` : La date locale de la dernière mise à jour avec l'API de timeline, utilisé uniquement par le thread de mise à jour automatique,
 * `last_use DATETIME` : La date locale de la dernière recherche inversée sur ce compte,
 * `uses_count BIGINT UNSIGNED DEFAULT 0` : Compteur de recherches inversées sur ce compte.
