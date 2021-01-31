@@ -87,7 +87,7 @@ class Tweets_Indexer :
                              FORCE_INDEX = False,
                              FAILED_TWEETS_LIST = None ) -> bool :
 #        if self.DEBUG :
-#            print( f"[Index Tweets] Indexation / scan des Tweets de @{account_name} avec SearchAPI." )
+#            print( f"[Tweets_Indexer] Indexation / scan des Tweets de @{account_name}." )
         if self.DEBUG or self.ENABLE_METRICS :
             times = [] # Liste des temps pour indexer un Tweet
             calculate_features_times = [] # Liste des temps pour calculer les caractéristiques des images du Tweet
@@ -99,9 +99,9 @@ class Tweets_Indexer :
             except queue.Empty : # Si la file d'entrée est vide
                 if self.DEBUG or self.ENABLE_METRICS :
                     if len(times) > 0 :
-                        print( f"[Index Tweets] {len(times)} Tweets indexés avec une moyenne de {mean(times)} secondes par Tweet." )
-                        print( f"[Index Tweets] Temps moyens de calcul des caractéristiques : {mean(calculate_features_times)} secondes." )
-                        print( f"[Index Tweets] Temps moyens d'enregistrement dans la BDD : {mean(insert_into_times)} secondes." )
+                        print( f"[Tweets_Indexer] {len(times)} Tweets indexés avec une moyenne de {mean(times)} secondes par Tweet." )
+                        print( f"[Tweets_Indexer] Temps moyens de calcul des caractéristiques : {mean(calculate_features_times)} secondes." )
+                        print( f"[Tweets_Indexer] Temps moyens d'enregistrement dans la BDD : {mean(insert_into_times)} secondes." )
                         if add_step_C_or_D_times != None :
                             add_step_C_or_D_times( times, calculate_features_times, insert_into_times )
                 return False
@@ -110,15 +110,15 @@ class Tweets_Indexer :
             if tweet == None :
                 if self.DEBUG or self.ENABLE_METRICS :
                     if len(times) > 0 :
-                        print( f"[Index Tweets] {len(times)} Tweets indexés avec une moyenne de {mean(times)} secondes par Tweet." )
-                        print( f"[Index Tweets] Temps moyens de calcul des caractéristiques : {mean(calculate_features_times)} secondes." )
-                        print( f"[Index Tweets] Temps moyens d'enregistrement dans la BDD : {mean(insert_into_times)} secondes." )
+                        print( f"[Tweets_Indexer] {len(times)} Tweets indexés avec une moyenne de {mean(times)} secondes par Tweet." )
+                        print( f"[Tweets_Indexer] Temps moyens de calcul des caractéristiques : {mean(calculate_features_times)} secondes." )
+                        print( f"[Tweets_Indexer] Temps moyens d'enregistrement dans la BDD : {mean(insert_into_times)} secondes." )
                         if add_step_C_or_D_times != None :
                             add_step_C_or_D_times( times, calculate_features_times, insert_into_times )
                 return True
             
             if self.DEBUG :
-                print( f"[Index Tweets] Indexation Tweet ID {tweet['tweet_id']} de @{account_name}." )
+                print( f"[Tweets_Indexer] Indexation Tweet ID {tweet['tweet_id']} de @{account_name}." )
             if self.DEBUG or self.ENABLE_METRICS :
                 start = time()
             
@@ -126,20 +126,20 @@ class Tweets_Indexer :
             if indexing_tweets != None :
                 if not indexing_tweets.add( int( tweet["tweet_id"] ) ) :
                     if self.DEBUG :
-                        print( "[Index Tweets] Tweet déjà indexé par un autre indexeur !" )
+                        print( "[Tweets_Indexer] Tweet déjà indexé par un autre indexeur !" )
                     continue
             
             # Tester avant d'indexer si le tweet n'est pas déjà dans la BDD
             if self.bdd.is_tweet_indexed( tweet["tweet_id"] ) and not FORCE_INDEX :
                 if self.DEBUG :
-                    print( "[Index Tweets] Tweet déjà indexé !" )
+                    print( "[Tweets_Indexer] Tweet déjà indexé !" )
                 continue
             
             length = len( tweet["images"] )
             
             if length == 0 :
                 if self.DEBUG :
-                    print( "[Index Tweets] Tweet sans image, on le passe !" )
+                    print( "[Tweets_Indexer] Tweet sans image, on le passe !" )
                 continue
             
             image_1_url = None

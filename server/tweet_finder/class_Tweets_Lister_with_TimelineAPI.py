@@ -76,15 +76,15 @@ class Tweets_Lister_with_TimelineAPI :
         if account_id == None :
             account_id = self.twitter.get_account_id( account_name ) # TOUJOURS AVEC CETTE API
         if account_id == None :
-            print( f"[List TimelineAPI] Compte @{account_name} introuvable !" )
+            print( f"[List_TimelineAPI] Compte @{account_name} introuvable !" )
             raise Unfounded_Account_on_Lister_with_TimelineAPI
         
         if self.twitter.blocks_me( account_id ) :
-            print( f"[List TimelineAPI] Le compte @{account_name} nous bloque, impossible de le scanner !" )
+            print( f"[List_TimelineAPI] Le compte @{account_name} nous bloque, impossible de le scanner !" )
             raise Blocked_by_User_with_TimelineAPI
         
         if self.DEBUG :
-            print( f"[List TimelineAPI] Listage des Tweets de @{account_name}." )
+            print( f"[List_TimelineAPI] Listage des Tweets de @{account_name}." )
         if self.DEBUG or self.ENABLE_METRICS :
             start = time()
         
@@ -106,7 +106,7 @@ class Tweets_Lister_with_TimelineAPI :
             count += 1
         
         if self.DEBUG or self.ENABLE_METRICS :
-            print( f"[List TimelineAPI] Il a fallu {time() - start} secondes pour lister {count} Tweets de @{account_name}." )
+            print( f"[List_TimelineAPI] Il a fallu {time() - start} secondes pour lister {count} Tweets de @{account_name}." )
             if add_step_B_time != None :
                 if count > 0 :
                     add_step_B_time( (time() - start) / count )
