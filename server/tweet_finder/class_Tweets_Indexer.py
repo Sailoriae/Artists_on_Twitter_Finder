@@ -142,10 +142,15 @@ class Tweets_Indexer :
                     print( "[Index Tweets] Tweet sans image, on le passe !" )
                 continue
             
-            image_1 = None
-            image_2 = None
-            image_3 = None
-            image_4 = None
+            image_1_url = None
+            image_2_url = None
+            image_3_url = None
+            image_4_url = None
+            
+            image_1_features = None
+            image_2_features = None
+            image_3_features = None
+            image_4_features = None
             
             image_1_name = None
             image_2_name = None
@@ -161,17 +166,21 @@ class Tweets_Indexer :
             
             # Traitement des images du Tweet
             if length > 0 :
-                image_1 = self.engine.get_image_features( tweet["images"][0], tweet["tweet_id"], CAN_RETRY = will_need_retry )
-                image_1_name = tweet["images"][0].replace( "https://pbs.twimg.com/media/", "" )
+                image_1_url = tweet["images"][0]
+                image_1_features = self.engine.get_image_features( image_1_url, tweet["tweet_id"], CAN_RETRY = will_need_retry )
+                image_1_name = image_1_url.replace( "https://pbs.twimg.com/media/", "" )
             if length > 1 :
-                image_2 = self.engine.get_image_features( tweet["images"][1], tweet["tweet_id"], CAN_RETRY = will_need_retry )
-                image_2_name = tweet["images"][1].replace( "https://pbs.twimg.com/media/", "" )
+                image_2_url = tweet["images"][1]
+                image_2_features = self.engine.get_image_features( image_2_url, tweet["tweet_id"], CAN_RETRY = will_need_retry )
+                image_2_name = image_2_url.replace( "https://pbs.twimg.com/media/", "" )
             if length > 2 :
-                image_3 = self.engine.get_image_features( tweet["images"][2], tweet["tweet_id"], CAN_RETRY = will_need_retry )
-                image_3_name = tweet["images"][2].replace( "https://pbs.twimg.com/media/", "" )
+                image_3_url = tweet["images"][2]
+                image_3_features = self.engine.get_image_features( image_3_url, tweet["tweet_id"], CAN_RETRY = will_need_retry )
+                image_3_name = image_3_url.replace( "https://pbs.twimg.com/media/", "" )
             if length > 3 :
-                image_4 = self.engine.get_image_features( tweet["images"][3], tweet["tweet_id"], CAN_RETRY = will_need_retry )
-                image_4_name = tweet["images"][3].replace( "https://pbs.twimg.com/media/", "" )
+                image_4_url = tweet["images"][3]
+                image_4_features = self.engine.get_image_features( image_4_url, tweet["tweet_id"], CAN_RETRY = will_need_retry )
+                image_4_name = image_4_url.replace( "https://pbs.twimg.com/media/", "" )
             
             if self.DEBUG or self.ENABLE_METRICS :
                 calculate_features_times.append( time() - start_calculate_features )
@@ -183,10 +192,10 @@ class Tweets_Indexer :
             self.bdd.insert_tweet(
                 tweet["user_id"],
                 tweet["tweet_id"],
-                cbir_features_1 = image_1,
-                cbir_features_2 = image_2,
-                cbir_features_3 = image_3,
-                cbir_features_4 = image_4,
+                cbir_features_1 = image_1_features,
+                cbir_features_2 = image_2_features,
+                cbir_features_3 = image_3_features,
+                cbir_features_4 = image_4_features,
                 image_name_1 = image_1_name,
                 image_name_2 = image_2_name,
                 image_name_3 = image_3_name,
@@ -203,10 +212,10 @@ class Tweets_Indexer :
                 self.bdd.add_retry_tweet(
                     tweet["tweet_id"],
                     tweet["user_id"],
-                    tweet["images"][0],
-                    tweet["images"][1],
-                    tweet["images"][2],
-                    tweet["images"][3],
+                    image_1_url,
+                    image_2_url,
+                    image_3_url,
+                    image_4_url,
                     tweet["hashtags"]
                 )
                 
