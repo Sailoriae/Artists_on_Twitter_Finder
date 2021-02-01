@@ -87,7 +87,7 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
                                                add_step_3_times = shared_memory_execution_metrics.add_step_3_times,
                                                query_image_binary = request.query_image_as_bytes )
             if result != None :
-                request.founded_tweets += result
+                request.found_tweets += result
             else :
                 print( f"[step_3_th{thread_id}] Erreur lors de la recherche inversée d'image." )
                 request.problem = "ERROR_DURING_REVERSE_SEARCH"
@@ -98,20 +98,20 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
             
             result = cbir_engine.search_tweet( request.image_url, add_step_3_times = shared_memory_execution_metrics.add_step_3_times )
             if result != None :
-                request.founded_tweets += result
+                request.found_tweets += result
             else :
                 print( f"[step_3_th{thread_id}] Erreur lors de la recherche inversée d'image." )
         
         # Trier la liste des résultats
         # On trie une liste d'objets par rapport à leur attribut "distance_chi2"
-        request.founded_tweets = sorted( request.founded_tweets,
+        request.found_tweets = sorted( request.found_tweets,
                                          key = lambda x: x.distance_chi2,
                                          reverse = False )
         
         # On ne garde que les 5 Tweets les plus proches
-#        request.founded_tweets = request.founded_tweets[:5]
+#        request.found_tweets = request.found_tweets[:5]
         
-        print( f"[step_3_th{thread_id}] Tweets trouvés (Du plus au moins proche) : {[ data.tweet_id for data in request.founded_tweets ]}" )
+        print( f"[step_3_th{thread_id}] Tweets trouvés (Du plus au moins proche) : {[ data.tweet_id for data in request.found_tweets ]}" )
         
         # Enregistrer le temps complet pour traiter cette requête
         shared_memory_execution_metrics.add_user_request_full_time( time() - request.start )

@@ -16,7 +16,7 @@ if __name__ == "__main__" :
 
 import parameters as param
 from tweet_finder.class_Tweets_Lister_with_SearchAPI import Tweets_Lister_with_SearchAPI
-from tweet_finder.class_Tweets_Lister_with_SearchAPI import Unfounded_Account_on_Lister_with_SearchAPI
+from tweet_finder.class_Tweets_Lister_with_SearchAPI import Unfound_Account_on_Lister_with_SearchAPI
 from tweet_finder.class_Tweets_Lister_with_SearchAPI import Blocked_by_User_with_SearchAPI
 
 
@@ -106,8 +106,8 @@ def thread_step_A_SearchAPI_list_account_tweets( thread_id : int, shared_memory 
                                                                                         request_SearchAPI_tweets_queue,
                                                                                         account_id = request.account_id,
                                                                                         add_step_A_time = shared_memory_execution_metrics.add_step_A_time )
-        except Unfounded_Account_on_Lister_with_SearchAPI :
-            request.unfounded_account = True
+        except Unfound_Account_on_Lister_with_SearchAPI :
+            request.unfound_account = True
         
         except Blocked_by_User_with_SearchAPI :
             request.blocks_list += [ thread_id - 1 ] # Ne peut pas faire de append avec Pyro

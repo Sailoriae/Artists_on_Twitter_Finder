@@ -19,7 +19,7 @@ from tweet_finder.twitter.class_SNScrapeAbstraction import SNScrapeAbstraction
 from tweet_finder.analyse_tweet_json import analyse_tweet_json
 
 
-class Unfounded_Account_on_Lister_with_SearchAPI ( Exception ) :
+class Unfound_Account_on_Lister_with_SearchAPI ( Exception ) :
     pass
 class Blocked_by_User_with_SearchAPI ( Exception ) :
     pass
@@ -65,7 +65,7 @@ class Tweets_Lister_with_SearchAPI :
             "NULL" pour ce compte dans la base de données si le compte était
             déjà dans la base.
     
-    Peut émettre une exception "Unfounded_Account_on_Lister_with_TimelineAPI" si
+    Peut émettre une exception "Unfound_Account_on_Lister_with_TimelineAPI" si
     le compte est introuvable.
     Peut émettre des "Blocked_by_User_with_SearchAPI" si le compte nous bloque.
     """
@@ -74,7 +74,7 @@ class Tweets_Lister_with_SearchAPI :
             account_id = self.twitter.get_account_id( account_name ) # TOUJOURS AVEC CETTE API
         if account_id == None :
             print( f"[List_SearchAPI] Compte @{account_name} introuvable !" )
-            raise Unfounded_Account_on_Lister_with_SearchAPI
+            raise Unfound_Account_on_Lister_with_SearchAPI
         
         if self.twitter.blocks_me( account_id ) :
             print( f"[List_SearchAPI] Le compte @{account_name} nous bloque, impossible de le scanner !" )

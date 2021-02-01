@@ -55,7 +55,7 @@ class Scan_Request :
         self._is_prioritary = is_prioritary
         
         # Si le compte est introuvable
-        self._unfounded_account = False
+        self._unfound_account = False
         
         # Si jamais un thread de traitement a planté avec la requête, le
         # collecteur d'erreur l'indiquera ici
@@ -134,9 +134,9 @@ class Scan_Request :
     def is_prioritary( self, value ) : self._is_prioritary = value
     
     @property
-    def unfounded_account( self ) : return self._unfounded_account
-    @unfounded_account.setter
-    def unfounded_account( self, value ) : self._unfounded_account = value
+    def unfound_account( self ) : return self._unfound_account
+    @unfound_account.setter
+    def unfound_account( self, value ) : self._unfound_account = value
     
     @property
     def has_failed( self ) : return self._has_failed

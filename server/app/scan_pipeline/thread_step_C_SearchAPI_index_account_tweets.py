@@ -67,7 +67,7 @@ def thread_step_C_SearchAPI_index_account_tweets( thread_id : int, shared_memory
         
         # Si le compte est marqué comme introuvable par un des thread de
         # listage, on peut arrêter là avec cette requête
-        if request.unfounded_account :
+        if request.unfound_account :
             shared_memory_scan_requests_queues_sem.release()
             
             # On appelle la méthode qui termine la requête

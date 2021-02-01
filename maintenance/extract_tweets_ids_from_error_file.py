@@ -40,14 +40,14 @@ lines = f.readlines()
 f.close()
 
 regex_expr = re.compile( r"Erreur avec le Tweet : ([0-9]+) !" )
-founded_ids = []
+found_ids = []
 
 for l in lines :
     result = re.search( regex_expr, l )
     if result != None :
-        founded_ids.append( int( result.group( 1 ) ) )
+        found_ids.append( int( result.group( 1 ) ) )
 
-print( "Tweets trouvés :", founded_ids )
+print( "Tweets trouvés :", found_ids )
 
 
 """
@@ -74,7 +74,7 @@ twitter = TweepyAbstraction( param.API_KEY,
 Tentative d'indexation des Tweets trouvés !
 """
 tweets_queue = Queue()
-for tweet_id in founded_ids :
+for tweet_id in found_ids :
     tweet = twitter.get_tweet( tweet_id )
     if tweet != None :
         tweets_queue.put( analyse_tweet_json( tweet._json ) )

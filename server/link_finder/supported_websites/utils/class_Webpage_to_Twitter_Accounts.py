@@ -79,21 +79,21 @@ class Webpage_to_Twitter_Accounts :
     def scan ( self, validator_function = validate_twitter_account_url ) -> List[str] :
         # Scan avec BeautifulSoup4
         if self.USE_BS4  :
-            accounts_founded = self.scan_beautifulsoup( validator_function )
+            accounts_found = self.scan_beautifulsoup( validator_function )
         
         # Scan avec Regex
         else :
-            accounts_founded = self.scan_regex( validator_function )
+            accounts_found = self.scan_regex( validator_function )
         
         # Filtrer (Supprimer les doublons et les comptes officiels) et retourner
-        return accounts_founded
+        return accounts_found
     
     """
     Méthode privée, appelée par la méthode "scan()".
     """
     def scan_beautifulsoup ( self, validator_function ) -> List[str] :
         # Initialiser la liste que l'on va retourner
-        accounts_founded : List[str] = []
+        accounts_found : List[str] = []
         
         # Pour trouver toutes les balises HTML <a href=""> trouvables dans la page
         if self.soup != None :
@@ -103,17 +103,17 @@ class Webpage_to_Twitter_Accounts :
                     continue
                 result = validator_function( link.get("href") )
                 if result != None :
-                    accounts_founded.append( result )
+                    accounts_found.append( result )
         
         # Retourner
-        return accounts_founded
+        return accounts_found
     
     """
     Méthode privée, appelée par la méthode "scan()".
     """
     def scan_regex ( self, validator_function ) -> List[str] :
         # Initialiser la liste que l'on va retourner
-        accounts_founded : List[str] = []
+        accounts_found : List[str] = []
         
         # Pour trouver toutes les URL trouvables dans la page
         for link in re.findall( r"(https?://[^\s]+)", self.response.text) :
@@ -121,10 +121,10 @@ class Webpage_to_Twitter_Accounts :
                 continue
             result = validator_function( link )
             if result != None :
-                accounts_founded.append( result )
+                accounts_found.append( result )
         
         # Retourner
-        return accounts_founded
+        return accounts_found
 
 
 """

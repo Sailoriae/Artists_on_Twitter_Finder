@@ -76,7 +76,7 @@ class User_Request :
         # Résultat de la recherche inversée (Etape 3)
         # Résultats de la recherche inversée de l'image
         # Est une liste d'objets Image_in_DB
-        self._founded_tweets = []
+        self._found_tweets = []
         
         # ID de l'étape dans laquelle la requête se trouve.
         # 0 : En attente de traitement à l'étape suivante...
@@ -147,9 +147,9 @@ class User_Request :
     def query_image_as_bytes( self, value ) : self._query_image_as_bytes = value
     
     @property
-    def founded_tweets( self ) : return self._founded_tweets
-    @founded_tweets.setter
-    def founded_tweets( self, value ) : self._founded_tweets = value
+    def found_tweets( self ) : return self._found_tweets
+    @found_tweets.setter
+    def found_tweets( self, value ) : self._found_tweets = value
     
     @property
     def status( self ) : return self._status

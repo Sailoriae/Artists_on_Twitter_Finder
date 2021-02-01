@@ -30,7 +30,7 @@ def generate_user_request_json ( request, response_dict = None ) -> dict :
                          "account_id" : str(account[1]) }
         response_dict["twitter_accounts"].append( account_dict )
     
-    for result in request.founded_tweets :
+    for result in request.found_tweets :
         tweet_dict = { "tweet_id" : str(result.tweet_id),
                        "account_id" : str(result.account_id),
                        "image_position" : result.image_position,

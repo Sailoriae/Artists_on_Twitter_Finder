@@ -117,20 +117,20 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
         # On filtre la liste des images trouvées
         # Rappel : Cette liste est triée par distance durant l'étape 3
         # Rappel : Les distances sont dans l'ordre croissant
-        new_founded_tweets = [] # Nouvelle liste
-        for image_in_db in request.founded_tweets :
-            if len(new_founded_tweets) > 0 :
+        new_found_tweets = [] # Nouvelle liste
+        for image_in_db in request.found_tweets :
+            if len(new_found_tweets) > 0 :
                 # Si on s'éloigne de 0.5 de la première image ajoutée à la liste,
                 # on peut arrêter là
                 # On a déjà trouvé un Tweet avec l'image de toutes manières,
                 # d'autres Tweets contenant l'image devraient être proches
                 # A moins que Twitter aient changés leur algo de compression,
                 # mais c'est pas grave (Ce qu'ils ont fait en 2019)
-                if image_in_db.distance_chi2 - new_founded_tweets[0].distance_chi2 > 0.5 :
+                if image_in_db.distance_chi2 - new_found_tweets[0].distance_chi2 > 0.5 :
                     break
                 
                 # Si on a déjà validé 20 images, on peut arrêter là
-                if len(new_founded_tweets) > 20 :
+                if len(new_found_tweets) > 20 :
                     break
             
             # Les deux fonctions utilisent get_tweet_image(), donc prennent
@@ -144,12 +144,12 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
             # Il faut que l'image trouvée et celle de requête se ressemblent à
             # au moins SEUIL en %
             if similarity_percentage > SEUIL :
-                new_founded_tweets.append( image_in_db )
+                new_found_tweets.append( image_in_db )
         
         # On installe la nouvelle liste de résultats
-        request.founded_tweets = new_founded_tweets
+        request.found_tweets = new_found_tweets
         
-        print( f"[step_3_th{thread_id}] Tweets trouvés après filtrage (Du plus au moins proche) : {[ data.tweet_id for data in request.founded_tweets ]}" )
+        print( f"[step_3_th{thread_id}] Tweets trouvés après filtrage (Du plus au moins proche) : {[ data.tweet_id for data in request.found_tweets ]}" )
         
         if param.ENABLE_METRICS :
             shared_memory_execution_metrics.add_step_4_times( time() - start )

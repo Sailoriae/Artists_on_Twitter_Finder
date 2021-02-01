@@ -185,7 +185,7 @@ class Scan_Requests_Pipeline :
                 if ( is_prioritary and
                      not request.is_prioritary and
                      not request.has_failed and
-                     not request.unfounded_account ) :
+                     not request.unfound_account ) :
                     request.is_prioritary = True
                     
                     # Si est dans une file d'attente de listage des Tweets avec

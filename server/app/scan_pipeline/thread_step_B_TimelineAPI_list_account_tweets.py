@@ -16,7 +16,7 @@ if __name__ == "__main__" :
 
 import parameters as param
 from tweet_finder.class_Tweets_Lister_with_TimelineAPI import Tweets_Lister_with_TimelineAPI
-from tweet_finder.class_Tweets_Lister_with_TimelineAPI import Unfounded_Account_on_Lister_with_TimelineAPI
+from tweet_finder.class_Tweets_Lister_with_TimelineAPI import Unfound_Account_on_Lister_with_TimelineAPI
 from tweet_finder.class_Tweets_Lister_with_TimelineAPI import Blocked_by_User_with_TimelineAPI
 
 
@@ -104,8 +104,8 @@ def thread_step_B_TimelineAPI_list_account_tweets( thread_id : int, shared_memor
                                                                                             request_TimelineAPI_tweets_queue,
                                                                                             account_id = request.account_id,
                                                                                             add_step_B_time = shared_memory_execution_metrics.add_step_B_time )
-        except Unfounded_Account_on_Lister_with_TimelineAPI :
-            request.unfounded_account = True
+        except Unfound_Account_on_Lister_with_TimelineAPI :
+            request.unfound_account = True
         
         except Blocked_by_User_with_TimelineAPI :
             request.blocks_list += [ thread_id - 1 ] # Ne peut pas faire de append avec Pyro
