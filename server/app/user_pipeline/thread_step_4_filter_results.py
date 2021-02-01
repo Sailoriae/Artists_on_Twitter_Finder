@@ -85,15 +85,14 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
         if param.ENABLE_METRICS :
             start = time()
         
-        # On télécharge l'image de requête (Même si on l'a déjà fait lors de
-        # la recherche inversée)
+        # On utilise l'image téléchargée à l'étape 3
         if USE_OPENCV :
             try :
                 request_image = binary_image_to_cv2_image( request.query_image_as_bytes )
             except Exception as error :
                 print( f"[step_3_th{thread_id}] Erreur lors du filtrage des résultats. Impossible d'obtenir l'image : {request.image_url}" )
                 print( error )
-                request.problem = "ERROR_DURING_REVERSE_SEARCH"
+                request.problem = "ERROR_DURING_REVERSE_SEARCH" # Un peu con de mettre la même erreur, mais bon
                 
                 shared_memory_threads_registry.set_request( f"thread_step_4_filter_results_th{thread_id}", None )
                 shared_memory_user_requests.set_request_to_next_step( request )
