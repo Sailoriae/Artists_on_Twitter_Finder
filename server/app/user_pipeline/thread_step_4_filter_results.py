@@ -105,7 +105,7 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
             
             # Si l'image a un format à la noix
             except UnidentifiedImageError as error:
-                print( f"[step_3_th{thread_id}] Erreur lors du filtrage des résultats. Impossible d'obtenir l'image : {request.image_url}" )
+                print( f"[step_3_th{thread_id}] L'image d'entrée est intraitable." )
                 print( error )
                 request.problem = "ERROR_DURING_REVERSE_SEARCH"
                 

@@ -89,7 +89,7 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
             if result != None :
                 request.found_tweets += result
             else :
-                print( f"[step_3_th{thread_id}] Erreur lors de la recherche inversée d'image." )
+                print( f"[step_3_th{thread_id}] L'image d'entrée est intraitable." )
                 request.problem = "ERROR_DURING_REVERSE_SEARCH"
         
         # Si il n'y a pas de compte Twitter dans la requête
