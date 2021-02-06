@@ -1,6 +1,10 @@
 #!/usr/bin/python3
 # coding: utf-8
 
+import sys
+print( "Ne pas exécuter ce script sans savoir ce qu'il fait." )
+sys.exit(0)
+
 """
 Ce script va tester si Tweepy est limité par adresse IP ou par clés
 d'authentification.
@@ -8,8 +12,6 @@ Il émet beaucoup de requêtes. Lorsqu'une limite est atteinte, redémarrez le
 script avec d'autres clés d'authentification.
 Si il re-fonctionne directement, c'est que les rate limits ne sont pas par
 adresse IP.
-
-Réponse au 12 aout 2020 :
 """
 
 print( "Veuillez entrer les clés suivantes..." )
