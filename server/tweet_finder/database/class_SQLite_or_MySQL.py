@@ -796,6 +796,8 @@ class SQLite_or_MySQL :
 """
 Test du bon fonctionnement de cette classe
 """
+# Laisser commenté ! Trop dangereux sur un serveur de production
+"""
 if __name__ == '__main__' :
     bdd = SQLite_or_MySQL()
     bdd.insert_tweet( 12, 42, [0.0000000001, 1000000000] )
@@ -806,3 +808,4 @@ if __name__ == '__main__' :
     bdd.get_account_SearchAPI_last_tweet_date( 13 )
     
     bdd.conn.close()
+"""
