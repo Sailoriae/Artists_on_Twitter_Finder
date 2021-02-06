@@ -1,6 +1,12 @@
 #!/usr/bin/python3
 # coding: utf-8
 
+
+import sys
+print( "Ne pas exécuter ce script sans savoir ce qu'il fait." )
+sys.exit(0)
+
+
 """
 Ce script m'a permis de vérifier les ID des comptes associés aux Tweets dans ma
 base de données, afin de ne pas avoir à la réinitialiser. Je l'ai sauvegardé
@@ -12,11 +18,6 @@ L'utilisation de la fonction "statuses_lookup()" de Tweepy, permettant de
 recevoir plusieurs Tweets (Jusqu'à 100) en une seule requête, est très
 intéressante.
 """
-
-
-import sys
-print( "Ne pas exécuter ce script sans savoir ce qu'il fait." )
-sys.exit(0)
 
 
 """

@@ -16,7 +16,7 @@ from time import time
 from statistics import mean
 
 # On travaille dans le répertoire racine du serveur AOTF
-# On bouge dedans, et on est obligé de l'ajouter au PATH
+# On bouge dedans, et on l'ajoute au PATH
 from os.path import abspath as get_abspath
 from os.path import dirname as get_dirname
 from os import chdir as change_wdir
@@ -27,7 +27,8 @@ change_wdir( "../server" )
 path.append(get_wdir())
 
 import parameters as param
-from tweet_finder.database.class_Graph_Search import Graph_Search
+#from tweet_finder.database.class_Graph_Search import Graph_Search
+from class_Graph_Search import Graph_Search # Ce fichier était destiné à être dans le répertoire "database"
 
 CBIR_LIST_LENGHT = 240
 

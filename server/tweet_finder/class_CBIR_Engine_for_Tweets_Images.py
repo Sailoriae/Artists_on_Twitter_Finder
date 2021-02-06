@@ -12,8 +12,11 @@ if __name__ == "__main__" :
     from os.path import abspath as get_abspath
     from os.path import dirname as get_dirname
     from os import chdir as change_wdir
+    from os import getcwd as get_wdir
+    from sys import path
     change_wdir(get_dirname(get_abspath(__file__)))
     change_wdir( ".." )
+    path.append(get_wdir())
 
 from tweet_finder.cbir_engine.class_CBIR_Engine import CBIR_Engine
 from tweet_finder.utils.url_to_cv2_image import binary_image_to_cv2_image

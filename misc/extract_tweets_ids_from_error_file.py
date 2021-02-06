@@ -14,8 +14,16 @@ de traitement, et de retenter de les indexer.
 import os
 import sys
 
-# On s'éxécute dans le répertoire "server"
-os.chdir(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "server"))
+# On travaille dans le répertoire racine du serveur AOTF
+# On bouge dedans, et on l'ajoute au PATH
+from os.path import abspath as get_abspath
+from os.path import dirname as get_dirname
+from os import chdir as change_wdir
+from os import getcwd as get_wdir
+from sys import path
+change_wdir(get_dirname(get_abspath(__file__)))
+change_wdir( "../server" )
+path.append(get_wdir())
 
 import parameters as param
 from tweet_finder import Tweets_Indexer

@@ -1,6 +1,12 @@
 #!/usr/bin/python3
 # coding: utf-8
 
+
+import sys
+print( "Ne pas exécuter ce script sans savoir ce qu'il fait." )
+sys.exit(0)
+
+
 """
 Ce script permet de recalculer la liste des caractéristiques CBIR pour toutes
 les images dans la base de données.
@@ -19,13 +25,16 @@ qui les indexe comme le fait le script "extract_tweets_ids_from_error_file.py".
 """
 
 
-import sys
-print( "Ne pas exécuter ce script sans savoir ce qu'il fait." )
-sys.exit(0)
-
-
-import os
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "server"))
+# On travaille dans le répertoire racine du serveur AOTF
+# On bouge dedans, et on l'ajoute au PATH
+from os.path import abspath as get_abspath
+from os.path import dirname as get_dirname
+from os import chdir as change_wdir
+from os import getcwd as get_wdir
+from sys import path
+change_wdir(get_dirname(get_abspath(__file__)))
+change_wdir( "../server" )
+path.append(get_wdir())
 
 from tweet_finder import CBIR_Engine_for_Tweets_Images
 from tweet_finder.database import SQLite_or_MySQL

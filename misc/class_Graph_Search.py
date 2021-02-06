@@ -31,7 +31,8 @@ if __name__ == "__main__" :
     from os.path import dirname as get_dirname
     from os import chdir as change_wdir
     change_wdir(get_dirname(get_abspath(__file__)))
-    change_wdir( "../.." )
+#    change_wdir( "../.." ) # Ce fichier était destiné à être dans le répertoire "database"
+    change_wdir( "../server" )
 
 from tweet_finder.database.class_SQLite_or_MySQL import SQLite_or_MySQL
 import parameters as param

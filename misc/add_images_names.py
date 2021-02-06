@@ -1,6 +1,10 @@
 #!/usr/bin/python3
 # coding: utf-8
 
+import sys
+print( "Ne pas exécuter ce script sans savoir ce qu'il fait." )
+sys.exit(0)
+
 """
 Ce script m'a permis d'ajouter les noms des images à ma base de données, afin
 de ne pas avoir à la réinitialiser. Je l'ai sauvegardé dans le GIT, car
@@ -11,10 +15,6 @@ intéressante.
 Ainsi, il peut scanner en moyenne 600 000 Tweets en 1h40.
 """
 
-
-import sys
-print( "Ne pas exécuter ce script sans savoir ce qu'il fait." )
-sys.exit(0)
 
 # Deuxième passe, plus précise
 SECOND_PASS = True

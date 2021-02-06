@@ -12,8 +12,11 @@ if __name__ == "__main__" :
     from os.path import abspath as get_abspath
     from os.path import dirname as get_dirname
     from os import chdir as change_wdir
+    from os import getcwd as get_wdir
+    from sys import path
     change_wdir(get_dirname(get_abspath(__file__)))
     change_wdir( ".." )
+    path.append(get_wdir())
 
 from tweet_finder.database.class_SQLite_or_MySQL import SQLite_or_MySQL
 from tweet_finder.class_CBIR_Engine_for_Tweets_Images import CBIR_Engine_for_Tweets_Images

@@ -12,8 +12,11 @@ if __name__ == "__main__" :
     from os.path import abspath as get_abspath
     from os.path import dirname as get_dirname
     from os import chdir as change_wdir
+    from os import getcwd as get_wdir
+    from sys import path
     change_wdir(get_dirname(get_abspath(__file__)))
     change_wdir( "../.." )
+    path.append(get_wdir())
 
 from link_finder.supported_websites.utils.class_Webpage_to_Twitter_Accounts import Webpage_to_Twitter_Accounts
 from link_finder.supported_websites.utils.get_with_rate_limits import get_with_rate_limits

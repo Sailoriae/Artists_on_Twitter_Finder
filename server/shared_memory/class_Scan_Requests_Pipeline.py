@@ -13,8 +13,11 @@ if __name__ == "__main__" :
     from os.path import abspath as get_abspath
     from os.path import dirname as get_dirname
     from os import chdir as change_wdir
+    from os import getcwd as get_wdir
+    from sys import path
     change_wdir(get_dirname(get_abspath(__file__)))
     change_wdir( ".." )
+    path.append(get_wdir())
 
 from shared_memory.class_Scan_Request import Scan_Request
 from shared_memory.remove_account_id_from_queue import remove_account_id_from_queue
