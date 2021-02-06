@@ -55,8 +55,9 @@ Chose très intéressante : Milvus organise les vecteurs stockés par proximité
 - Source : https://medium.com/unstructured-data-service/milvus-was-built-for-massive-scale-think-trillion-vector-similarity-search-aec846038624#5d14
 - Plusieurs méthodes d'indexation sont proposées : https://milvus.io/docs/v0.11.0/index.md#CPU
 
-Avec l'indexation prenant le moins de RAM, pour 10 000 000 de vecteurs à 240 valeurs, ils recommandent 3 Go de RAM.
+Avec l'indexation prenant le moins de RAM, pour 10 000 000 de vecteurs à 240 valeurs, ils recommandent 3 Go de RAM. Cependant, on a besoin d'un résultat le plus juste possible ("recall rate"). Ainsi, la méthode d'indexation `IVF_FLAT` est la plus adaptée à notre besoin. Le problème est que pour le même nombre de vecteurs de même taille, ils recommandent 9 Go de RAM.
 - Comparer les ressources recommandées en fonction de la méthode d'indexation : https://www.milvus.io/tools/sizing
+- "recall rate" = "la proportion des items pertinents proposés parmi l'ensemble des items pertinents", source : https://fr.wikipedia.org/wiki/Pr%C3%A9cision_et_rappel
 
 On pourrait soit utiliser Milvus, soit créer notre système de graphe de voisinage (Et donc un nouveau algorithme de recherche).
 Cependant, on a testé notre propre système, mais il est super lent ! Voir [`class_Graph_Search.py`](../misc/class_Graph_Search.py) pour notre implémentation.
