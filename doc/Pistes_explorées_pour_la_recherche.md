@@ -59,6 +59,7 @@ Avec l'indexation prenant le moins de RAM, pour 10 000 000 de vecteurs à 240 va
 - Comparer les ressources recommandées en fonction de la méthode d'indexation : https://www.milvus.io/tools/sizing
 
 On pourrait soit utiliser Milvus, soit créer notre système de graphe de voisinage (Et donc un nouveau algorithme de recherche).
+Cependant, on a testé notre propre système, mais il est super lent ! Voir [`class_Graph_Search.py`](../misc/class_Graph_Search.py) pour notre implémentation.
 
 Installation de Milvus sans Docker : https://github.com/milvus-io/milvus/blob/master/INSTALL.md
 

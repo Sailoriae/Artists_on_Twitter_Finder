@@ -31,3 +31,6 @@ Ces fonctionnalités n'ont pas étées ajoutées au serveur Artists on Twitter F
 
 * Script [`find_histogram_hash.py`](find_histogram_hash.py) :
   Tests statistiques pour chercher une méthode de hash des histogrammes.
+
+* Scripts [`class_Graph_Search.py`](class_Graph_Search.py) et [`build_vectors_graph.py`](build_vectors_graph.py) :
+  Permet d'ajouter au serveur la possibilité de faire de la recherche de vecteurs similaires via un arbre. Les vecteurs (C'est à dire les images de Tweets) sont organisées sous la forme d'un arbre, et la recherche le parcours afin de trouver des vecteurs similaires au vecteur de requête. N'a pas été ajouté au serveur car est super lent ! Pour faire ce genre de recherche, il faut rapprocher les données et les algorithmes. Milvus fait ça, lire [`Pistes_explorées_pour_la_recherche.md`](../doc/Pistes_explorées_pour_la_recherche.md) pour plus de détails.
