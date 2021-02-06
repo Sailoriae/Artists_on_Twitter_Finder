@@ -3,9 +3,7 @@
 
 
 if __name__ != "__main__" :
-    import sys
-    print( "Ce script ne peut pas être importé depuis un autre script." )
-    sys.exit(0)
+    raise Exception( "Ce script ne peut pas être importé depuis un autre script." )
 
 
 from typing import List
@@ -45,7 +43,9 @@ def test ( url : str,
     print( "" )
     print( f"Test : {url}" )
     
-    if image_url_contains_mode :
+    if data.image_url == None :
+        test = False
+    elif image_url_contains_mode :
         test = should_get_image_url in data.image_url
     else :
         test = data.image_url == should_get_image_url
