@@ -406,7 +406,10 @@ if __name__ == "__main__" :
         
         elif args[0] == "metrics" :
             if len(args) == 1 :
-                print( shared_memory_execution_metrics.get_metrics() )
+                if not param.ENABLE_METRICS :
+                    print( "Le paramètre \"ENABLE_METRICS\" est à \"False\" !" )
+                else :
+                    print( shared_memory_execution_metrics.get_metrics() )
             else :
                 print( "Utilisation : metrics")
         
