@@ -65,3 +65,16 @@ Cependant, on a testé notre propre système, mais il est super lent ! Voir [`cl
 Installation de Milvus sans Docker : https://github.com/milvus-io/milvus/blob/master/INSTALL.md
 
 **Cependant, Milvus risque d'être une surconsommation de mémoire vive pour un gain minime lors d'une recherche sur un artiste.**
+
+
+## Divers
+
+Autre article intéressant sur la construction d'un moteur de recherche par image : https://www.oreilly.com/library/view/practical-deep-learning/9781492034858/ch04.html
+
+Notamment le paragraphe "Length of Feature Vectors" qui compare certains modèles de Keras. VGG16 est celui qui sort les vecteurs de plus petite taille (512 valeurs, contre 2048 pour ResNet-50). Cependant, l'article propose de "compresser" ces 2048 valeurs en 100 (Voir le paragraphe "Reducing Feature-Length with PCA"). Cependant, cette méthode n'est pas adapté à notre utilisation, car elle nécessite l'ensemble des vecteurs pour pouvoir les réduires sur les valeurs qui les différencient.
+
+Il compare aussi des librairies ANN = Approximate Nearest Neighbors (Annoy, NGT, FAISS...). Attention : Ce sont des librairies, pas des serveurs comme Milvus.
+
+Les codes sources sont disponibles ici : https://github.com/PracticalDL/Practical-Deep-Learning-Book/tree/master/code/chapter-4
+
+**Conclusion : Milvus est plus adapté à notre cas**, pour le parallélisme, à moins qu'on crée un thread qui gére la BDD via une librairie (Par exemple NGT). Et VGG16 aussi semble pas mal : Petits vecteurs, vitesse raisonnable, et "Top-1% accuracy" par trop mal (Même si ce n'est pas le meilleur).
