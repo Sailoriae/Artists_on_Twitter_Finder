@@ -230,10 +230,3 @@ class Link_Finder :
         
         # PAGE NON SUPPORTEE
         return None
-
-
-"""
-Test du bon fonctionnement de cette classe
-"""
-if __name__ == '__main__' :
-    import link_finder.link_finder_tester
