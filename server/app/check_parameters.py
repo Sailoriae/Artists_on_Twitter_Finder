@@ -37,8 +37,6 @@ def check_parameters () :
             check_list.append( type( creds["OAUTH_TOKEN"] ) == str )
             check_list.append( type( creds["OAUTH_TOKEN_SECRET" ]) == str )
             check_list.append( type( creds["AUTH_TOKEN" ]) == str )
-        check_list.append( type( param.PIXIV_USERNAME ) == str )
-        check_list.append( type( param.PIXIV_PASSWORD ) == str )
         check_list.append( type( param.SQLITE_DATABASE_NAME ) == str )
         check_list.append( type( param.USE_MYSQL_INSTEAD_OF_SQLITE ) == bool )
         check_list.append( type( param.MYSQL_ADDRESS ) == str )
@@ -162,21 +160,6 @@ def check_parameters () :
         print( "Il faut revoir son code !" )
         print( "Ou alors le Tweet ID 1293239745695211520 n'existe plus." )
         return False
-    
-    # ========================================================================
-    
-    print( "Vérification de la connexion à l'API Pixiv..." )
-    
-    try :
-        Pixiv( param.PIXIV_USERNAME, param.PIXIV_PASSWORD )
-    except Exception as error :
-        print( "Echec de connexion à l'API Pixiv !")
-        print( error )
-        print( "Veuillez vérifier votre fichier \"parameters.py\" !" )
-        print( "Notamment les clés suivantes : PIXIV_USERNAME, PIXIV_PASSWORD")
-        return False
-    else :
-        print( "Connexion à l'API Pixiv réussie !")
     
     # ========================================================================
     

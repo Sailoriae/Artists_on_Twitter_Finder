@@ -68,19 +68,6 @@ TWITTER_API_KEYS = [ {
                       } ]
 
 """
-Paramètres pour l'accès à l'API Pixiv.
-Il est très recommandé de ne pas utiliser un compte personnel !
-
-Ce compte doit pouvoir voir les illustrations sensibles !
-Aller dans les Paramètres Pixiv, et mettre sur "Show" les champs "Explicit
-content (R-18)" et "Ero-guro content (R-18G)".
-Sinon, le serveur renvera l'erreur "NO_TWITTER_ACCOUNT_FOUND" pour
-ce genre d'illustrations.
-"""
-PIXIV_USERNAME = ""
-PIXIV_PASSWORD = ""
-
-"""
 Paramètres pour l'utilisation de SQLite.
 """
 SQLITE_DATABASE_NAME = "SQLite_Database.db"

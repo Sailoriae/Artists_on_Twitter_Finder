@@ -1,11 +1,10 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-import pixivpy3
+from bs4 import BeautifulSoup
+from json import loads as json_loads
 from typing import List
 import re
-from time import sleep
-from random import randrange
 from dateutil import parser
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
@@ -21,6 +20,7 @@ if __name__ == "__main__" :
     change_wdir( "../.." )
     path.append(get_wdir())
 
+from link_finder.supported_websites.utils.get_with_rate_limits import get_with_rate_limits
 from link_finder.supported_websites.utils.validate_twitter_account_url import validate_twitter_account_url
 
 
@@ -47,17 +47,13 @@ class Pixiv :
     @param username Le nom d'utilisateur Pixiv du compte à utiliser pour l'API.
     @param password Le mot de passe du compte Pixiv à utiliser pour l'API.
     """
-    def __init__  ( self,
-                   username : str,
-                   password : str ) :
-        self.api = pixivpy3.AppPixivAPI()
-        self.api.login( username, password )
-        
+    def __init__  ( self ) :
         # On utilise ces attributs pour mettre en cache le résultat de l'appel
         # à l'API pour une illustration.
         # On met en cache car la demande de l'URL de l'image et la demande des
         # URLs des comptes Twitter sont souvent ensembles.
         self.cache_illust_url = None
+        self.cache_illust_id = None
         self.cache_illust_url_json = None
     
     """
@@ -86,43 +82,30 @@ class Pixiv :
     Mettre en cache le résultat de l'appel à l'API de l'illustration si ce
     n'est pas déjà fait.
     Permet de MàJ le cache, si l'URL mène bien vers une illustration.
-    param illust_id L'URL de l'illustration Pixiv.
     
+    @param illust_id L'URL de l'illustration Pixiv.
     @return True si l'URL donné est utilisable.
             False sinon.
     """
-    def cache_or_get ( self, illust_url : int, RECONNECT = True ) -> bool :
+    def cache_or_get ( self, illust_url : int ) -> bool :
         if illust_url != self.cache_illust_url :
             illust_id = self.artwork_url_to_id( illust_url )
             
             if illust_id == None :
                 return False
             
-            retry_count = 0
-            while True : # Solution très bourrin pour gèrer les Rate limits de l'API Pixiv
-                try :
-                    json = self.api.illust_detail( illust_id )
-                    break
-                except pixivpy3.utils.PixivError as error :
-                    print( error )
-                    sleep( randrange( 5, 15 ) )
-                    retry_count += 1
-                    if retry_count > 20 :
-                        raise error # Sera récupérée par le collecteur d'erreurs
+            response = get_with_rate_limits( "https://www.pixiv.net/en/artworks/" + str(illust_id) )
             
-            try :
-                print( f"[Pixiv] Erreur : {json['error']}" )
-            # S'il n'y a pas d'erreur dans le JSON retourné, c'est que c'est OK
-            except KeyError :
-                self.cache_illust_url = illust_url
-                self.cache_illust_url_json = json
-                return True
-            else :
-                if RECONNECT and  "invalid_grant" in json["error"]["message"] :
-                    print( "[Pixiv] Reconnexion à l'API..." )
-                    self.api.auth()
-                    return self.cache_or_get( illust_url, RECONNECT = False )
+            if response.status_code == 404 :
                 return False
+            
+            soup = BeautifulSoup( response.text, "html.parser" )
+            meta = soup.find( "meta", id="meta-preload-data" )
+            json = json_loads( meta["content"] )
+            
+            self.cache_illust_url = illust_url
+            self.cache_illust_id = illust_id
+            self.cache_illust_url_json = json
         
         return True
     
@@ -155,16 +138,16 @@ class Pixiv :
         # Cela serait impossible dans le cas d'un robot qui utilise notre
         # système !
         # Il faudrait donc revoir beaucoup de choses...
-        try : # Une seule illustration dans la page
-            return self.cache_illust_url_json["illust"]["meta_single_page"]["original_image_url"]
-        except KeyError : # Plusieurs illustrations dans la page
-            return self.cache_illust_url_json["illust"]["meta_pages"][0]["image_urls"]["original"]
+        return self.cache_illust_url_json["illust"][str(self.cache_illust_id)]["urls"]["original"]
     
     """
     Retourne les noms des comptes Twitter trouvés.
     
     @param illust_url L'URL de l'illustration Pixiv.
     @param force_pixiv_account_id Forcer l'ID du compte Pixiv (OPTIONNEL).
+    @param multiplexer Méthode "link_mutiplexer()" de la classe "Link_Finder"
+                       (OPTIONNEL).
+    
     @return Une liste de comptes Twitter.
             Ou une liste vide si aucun URL de compte Twitter valide n'a été
             trouvé.
@@ -172,7 +155,8 @@ class Pixiv :
             pas une illustration sur Pixiv.
     """
     def get_twitter_accounts ( self, illust_url : int,
-                               force_pixiv_account_id = None ) -> List[str] :
+                                     force_pixiv_account_id = None,
+                                     multiplexer = None ) -> List[str] :
         if force_pixiv_account_id != None :
             user_id = force_pixiv_account_id
         
@@ -180,36 +164,40 @@ class Pixiv :
             # On met en cache si ce n'est pas déjà fait
             if not self.cache_or_get( illust_url ) :
                 return None
-            user_id = self.cache_illust_url_json["illust"]["user"]["id"]
-        
-        retry_count = 0
-        while True : # Solution très bourrin pour gèrer les Rate limits de l'API Pixiv
-            try :
-                user_id_json = self.api.user_detail( user_id )
-                break
-            except pixivpy3.utils.PixivError as error :
-                print( error )
-                sleep( randrange( 5, 15 ) )
-                retry_count += 1
-                if retry_count > 20 :
-                    raise error # Sera récupérée par le collecteur d'erreurs
+            user_id = self.cache_illust_url_json["illust"][str(self.cache_illust_id)]["userId"]
         
         twitter_accounts = []
+        response = get_with_rate_limits( "https://www.pixiv.net/en/users/" + str(user_id) )
+            
+        if response.status_code == 404 :
+            return None
+        
+        soup = BeautifulSoup( response.text, "html.parser" )
+        meta = soup.find( "meta", id="meta-preload-data" )
+        json = json_loads( meta["content"] )
         
         # On peut trouver un compte Twitter dans le champs "webpage"
         try :
-            temp = user_id_json["profile"]["webpage"]
+            temp = json["user"][str(user_id)]["webpage"]
         except KeyError :
             pass
         else :
             if temp != None :
-                temp = validate_twitter_account_url( temp )
-                if temp != None :
-                    twitter_accounts.append( temp )
+                if multiplexer != None :
+                    get_multiplex = multiplexer( temp, source = "pixiv" )
+                    if get_multiplex != None :
+                        twitter_accounts += get_multiplex
+                else :
+                    temp = validate_twitter_account_url( temp )
+                    if temp != None :
+                        twitter_accounts.append( temp )
         
         # Chercher dans le champs dédié au compte Twitter
         try :
-            temp = user_id_json["profile"]["twitter_url"]
+            if json["user"][str(user_id)]["social"] != [] :
+                temp = json["user"][str(user_id)]["social"]["twitter"]["url"]
+            else :
+                temp = None
         except KeyError :
             pass
         else :
@@ -220,15 +208,16 @@ class Pixiv :
         
         # On peut aussi trouver un lien dans la bio de l'artiste, si vraiment
         # il n'a pas envie d'utiliser le champs dédié
+        # Attention : La bio ne convertit pas les liens, on peut donc en
+        # chercher qu'un seul
         try :
-            temp = user_id_json["user"]["comment"]
+            temp = json["user"][str(user_id)]["comment"]
         except KeyError :
             pass
         else :
+            temp = validate_twitter_account_url( temp )
             if temp != None :
-                temp = validate_twitter_account_url( temp )
-                if temp != None :
-                    twitter_accounts.append( temp )
+                twitter_accounts.append( temp )
         
         return twitter_accounts
     
@@ -246,4 +235,4 @@ class Pixiv :
             return None
         
         # On retourne le résultat voulu
-        return parser.isoparse( self.cache_illust_url_json["illust"]["create_date"] )
+        return parser.isoparse( self.cache_illust_url_json["illust"][str(self.cache_illust_id)]["createDate"] )

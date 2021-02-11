@@ -69,7 +69,7 @@ de prendre le compte qui l'a posté pour le compte Twitter de l'artiste !
 class Link_Finder :
     def __init__ ( self ) :
         self.deviantart = DeviantArt()
-        self.pixiv = Pixiv( param.PIXIV_USERNAME, param.PIXIV_PASSWORD )
+        self.pixiv = Pixiv()
         self.danbooru = Danbooru()
         self.derpibooru = Philomena( site_ID = 1 )
         self.furbooru = Philomena( site_ID = 2 )
@@ -122,7 +122,8 @@ class Link_Finder :
         # PIXIV
         # ====================================================================
         elif re.match( pixiv_url, illust_url ) != None :
-            twitter_accounts = self.pixiv.get_twitter_accounts( illust_url )
+            twitter_accounts = self.pixiv.get_twitter_accounts( illust_url,
+                                                                multiplexer = self.link_mutiplexer )
             if not TWITTER_ONLY and twitter_accounts != [] and twitter_accounts != None :
                 image_url = self.pixiv.get_image_url( illust_url )
                 publish_date = self.pixiv.get_datetime( illust_url )

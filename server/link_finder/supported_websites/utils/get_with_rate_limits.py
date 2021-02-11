@@ -8,6 +8,12 @@ import http
 import urllib
 
 
+# Se faire passer pour un vrai navigateur, hyper important pour Pixiv !
+headers = {
+    "User-Agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:85.0) Gecko/20100101 Firefox/85.0"
+}
+
+
 """
 Faire un GET HTTP en réessant de manière bourrin si jamais on a une erreur,
 comme par exemple une rate limit.
@@ -18,7 +24,7 @@ def get_with_rate_limits ( url, max_retry = 10, retry_on_those_http_errors = [] 
     retry_count = 0
     while True : # Solution très bourrin pour gèrer les rate limits
         try :
-            to_return = requests.get( url )
+            to_return = requests.get( url, headers = headers )
             if to_return.status_code in retry_on_those_http_errors :
                 print( f"[get_with_rate_limits] Erreur {to_return.status_code} pour : {url}" )
                 sleep( randrange( 30, 60 ) )
