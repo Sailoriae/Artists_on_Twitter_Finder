@@ -59,6 +59,7 @@ function displayStats() {
 				displayStats();
 			} else {
 				statsP.textContent = lang[ "CANNOT_DISPLAY_STATS" ];
+				statsP.innerHTML += "<br/>" + lang[ "SERVER_IS_DOWN" ];
 			}
 		}
 	});
