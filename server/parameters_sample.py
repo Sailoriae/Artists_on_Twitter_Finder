@@ -24,6 +24,9 @@ Paramètres pour l'accès à l'API Twitter.
 https://developer.twitter.com/en/apps
 Il est très recommandé de paramètrer l'app Twitter pour qu'elle un un accès en
 lecture seule.
+
+Pour obtenir OAUTH_TOKEN et OAUTH_TOKEN_SECRET, vous pouvez utiliser le script
+"get_oauth_token.py" présent dans le répertoire "misc".
 """
 API_KEY = ""
 API_SECRET = ""
@@ -51,7 +54,8 @@ Paramètres -> Confidentialité et sécurité -> Sécurité -> Filtres de recher
 Il est très recommandé d'utiliser ici des comptes "inutiles", en cas de
 piratage du serveur (Et de vol des "auth_token" ci-dessous).
 
-LES AUTH_TOKEN DOIVENT CORRESPONDRE AUX COUPLES OAUTH_TOKEN / OAUTH_TOKEN_SECRET  !
+LES AUTH_TOKEN DOIVENT CORRESPONDRE AUX COUPLES OAUTH_TOKEN / OAUTH_TOKEN_SECRET !
+C'est super méga important !
 """
 TWITTER_API_KEYS = [ {
                        "OAUTH_TOKEN" : "",

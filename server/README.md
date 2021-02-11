@@ -8,7 +8,8 @@ Lorsqu'il est démarré, il affiche une interface en ligne de commande. Tapez `h
 ## Installation
 
 1. Dupliquez le fichier `parameters_sample.py` vers `parametres.py`, et configurez-le avec vos clés d'accès aux API. Il vous faut :
-   - Un compte Twitter, avec accès à leur API publique. Pour se faire, créez un compte Twitter, et demandez un accès développeur sur le site suivant : https://developer.twitter.com
+   - Un ou plusieurs comptes Twitter qui serviront à indexer les Tweets.
+   - Un compte Twitter développeur. Pour se faire, demandez un accès développeur sur le portail suivant : https://developer.twitter.com
    - Et optionnellement un serveur MySQL (Sinon, le programme utilise SQLite).
 2. Installez les librairies Python nécessaires : `pip install -r requirements.txt`
 
