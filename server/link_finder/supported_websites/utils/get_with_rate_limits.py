@@ -30,7 +30,7 @@ def get_with_rate_limits ( url, max_retry = 10, retry_on_those_http_errors = [] 
                 sleep( randrange( 30, 60 ) )
                 retry_count += 1
                 if retry_count > max_retry :
-                    raise Exception( "Nombre maximal de tentatives pour un ré-essai sur une erreur HTTP" ) # Doit tomber dans le collecteur d'erreurs
+                    raise Exception( "Nombre maximal de tentatives pour un ré-essai sur une erreur HTTP (Ici, erreur {to_return.status_code})" ) # Doit tomber dans le collecteur d'erreurs
             else :
                 return to_return
         
@@ -41,8 +41,8 @@ def get_with_rate_limits ( url, max_retry = 10, retry_on_those_http_errors = [] 
             if retry_count > max_retry :
                 raise error # Sera récupérée par le collecteur d'erreurs
         
-        except urllib.error.HTTPError as error :
-            if error.code == 404 :
+        except urllib.error.HTTPError as error : # Je ne sais plus si c'est cette erreur peut tomber
+            if error.code == 404 : # N'arrive pas en fait, la lib laisse passer les erreurs 404
                 print( error )
                 raise error # On peut raise tout de suite car 404
             else :

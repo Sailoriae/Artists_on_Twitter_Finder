@@ -104,6 +104,10 @@ class Philomena :
             
             response = get_with_rate_limits( self.base_URL + "api/v1/json/images/" + illust_id )
             
+            # Note : Erreur 500 si l'ID est trop long
+            if response.status_code == 404 or response.status_code == 500 :
+                return False
+            
             json = response.json()
             
             self.cache_illust_url = illust_url
