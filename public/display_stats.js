@@ -2,6 +2,8 @@ var statsP = document.getElementById("display-stats");
 var warningP = document.getElementById("display-warning");
 var infosP = document.getElementById("display-infos");
 
+displayStats();
+
 // Source : https://stackoverflow.com/questions/7790811/how-do-i-put-variables-inside-javascript-strings-node-js
 function parse( str ) {
 	var args = [].slice.call(arguments, 1),

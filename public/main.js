@@ -1,9 +1,6 @@
 var errorP = document.getElementById("display-error");
 var processStatusP = document.getElementById("display-process-status");
 
-displayStats();
-displaySupportedWebites();
-
 function mainFunction ( new_loop = true ) {
 	if ( new_loop ) {
 		lockUI();

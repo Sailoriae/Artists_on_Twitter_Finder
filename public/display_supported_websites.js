@@ -1,5 +1,7 @@
 var supportedWebitesP = document.getElementById("supported-websites");
 
+displaySupportedWebites();
+
 function displaySupportedWebites() {
 	supportedWebitesP.innerHTML = "";
 
