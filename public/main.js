@@ -64,12 +64,23 @@ function unlockUI () {
 }
 
 async function waitAndUpdate ( json ) {
-	if ( ! ( json["status"] === "END" ) ) {
+	if ( json["error"] === "YOUR_IP_HAS_MAX_PROCESSING_REQUESTS" ) {
+		retryLoopOnError( waitTime = 30 )
+	} else if ( ! ( json["status"] === "END" ) ) {
 		await new Promise(r => setTimeout(r, 5000));
 		mainFunction( new_loop = false );
 	} else {
 		unlockUI();
 	}
+}
+
+async function retryLoopOnError ( waitTime = 30 ) {
+	saveErrorP = errorP.innerHTML;
+	for ( var i = waitTime; i > 0; i-- ) {
+		errorP.innerHTML = saveErrorP + "<br/>" + parse( lang[ "NEXT_TRY_IN" ], i );
+		await new Promise(r => setTimeout(r, 1000));
+	}
+	mainFunction( new_loop = false );
 }
 
 function displayError ( json ) {
