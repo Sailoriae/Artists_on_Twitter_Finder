@@ -7,7 +7,7 @@ Lorsqu'il est démarré, il affiche une interface en ligne de commande. Tapez `h
 
 ## Installation
 
-1. Dupliquez le fichier `parameters_sample.py` vers `parametres.py`, et configurez-le avec vos clés d'accès aux API. Il vous faut :
+1. Dupliquez le fichier [`parameters_sample.py`](parameters_sample.py) vers `parametres.py`, et configurez-le avec vos clés d'accès aux API. Il vous faut :
    - Un ou plusieurs comptes Twitter qui serviront à indexer les Tweets.
    - Un compte Twitter développeur. Pour se faire, demandez un accès développeur sur le portail suivant : https://developer.twitter.com
    - Et optionnellement un serveur MySQL (Sinon, le programme utilise SQLite).
@@ -27,50 +27,50 @@ Ceci lance le serveur et vous met en ligne de commande. Si vous souhaitez quitte
 * Base de données stockant les comptes et les Tweets.
 * Moteur de calcul de caractéristiques d'une image (Moteur CBIR).
 * Parallélisme : 2 pipelines de traitement, divisés en étapes séparés dans des threads de traitement, avec files d'attentes :
-  - Traitement des requêtes des utilisateurs, en 4 étapes, exécutées l'une après l'autres. Voir `app/user_pipeline`.
-  - Traitement des requêtes d'indexation / de scan d'un comte Twitter, en 4 étapes paralléles. Voir `app/scan_pipeline`.
+  - Traitement des requêtes des utilisateurs, en 4 étapes, exécutées l'une après l'autres. Voir [`app/user_pipeline`](app/user_pipeline).
+  - Traitement des requêtes d'indexation / de scan d'un comte Twitter, en 4 étapes paralléles. Voir [`app/scan_pipeline`](app/scan_pipeline).
 * Traitement des requêtes des utilisateurs en 4 étapes :
-  - Link Finder : Recherche des comptes Twitter de l'artiste, et recherche du fichier de l'illustration. Classe principale : `Link_Finder`, dans le module `link_finder`.
+  - Link Finder : Recherche des comptes Twitter de l'artiste, et recherche du fichier de l'illustration. Classe principale : [`Link_Finder`](link_finder/class_Link_Finder.py), dans le module [`link_finder`](link_finder).
   - Tweets Indexer : Lancement de l'indexation / du scan des comptes Twitter trouvés dans l'autre pipeline, et surveillance de l'avancement de ce traitement.
-  - Recherche inversée d'image. Classe principale : `Reverse_Searcher`, dans le module `tweet_finder`.
+  - Recherche inversée d'image. Classe principale : [`Reverse_Searcher`](tweet_finder/class_Reverse_Searcher.py), dans le module [`tweet_finder`](tweet_finder).
   - Filtrage des résultats de la recherche inversée, car il peut y avoir des faux positifs.
-* Traitement des requêtes de scan en 4 étapes paralléles (Module `tweet_finder`) :
-  - API de recherche : Listage des Tweets des comptes Twitter trouvés. Classe principale : `Tweets_Lister_with_SearchAPI`.
-  - API de recherche : Analyse et indexation des Tweets trouvés. L'analyse consiste au calcul des caractéristiques de l'image avec le moteur CBIR. Classe principale : `Tweets_Indexer` (Utilisée aussi pour l'API de timeline).
-  - API de timeline : Listage des Tweets des comptes Twitter trouvés. Classe principale : `Tweets_Lister_with_TimelineAPI`.
-  - API de timeline : Analyse et indexation des Tweets des comptes Twitter trouvés. Classe principale : `Tweets_Indexer` (Utilisée aussi pour l'API de recherche).
-  - Voir pourquoi il y a deux systèmes d'indexation, soit deux API utilisées, dans `../doc/Limites_de_scan_des_comptes_Twitter.md`. Pour faire simple : L'API de timeline est limitée aux 3 200 Tweets les plus récents des comptes à indexer (Retweets inclus), et l'API de recherche est limité à ce que Twitter indexent dans leur recherche. Utiliser les deux API permet d'être le plus exhaustif possible lors de l'indexation des comptes qui ont plus de 3 200 Tweets.
-* Serveur web pour l'API HTTP qui renvoit les status des requêtes, avec les éventuels résultats, ou une erreur s'il y a un problème. Voir `doc/API_HTTP.md`.
+* Traitement des requêtes de scan en 4 étapes paralléles (Module [`tweet_finder`](tweet_finder)) :
+  - API de recherche : Listage des Tweets des comptes Twitter trouvés. Classe principale : [`Tweets_Lister_with_SearchAPI`](tweet_finder/class_Tweets_Lister_with_SearchAPI.py).
+  - API de recherche : Analyse et indexation des Tweets trouvés. L'analyse consiste au calcul des caractéristiques de l'image avec le moteur CBIR. Classe principale : [`Tweets_Indexer`](tweet_finder/class_Tweets_Indexer.py) (Utilisée aussi pour l'API de timeline).
+  - API de timeline : Listage des Tweets des comptes Twitter trouvés. Classe principale : [`Tweets_Lister_with_TimelineAPI`](tweet_finder/class_Tweets_Lister_with_TimelineAPI.py).
+  - API de timeline : Analyse et indexation des Tweets des comptes Twitter trouvés. Classe principale : [`Tweets_Indexer`](tweet_finder/class_Tweets_Indexer.py) (Utilisée aussi pour l'API de recherche).
+  - Voir pourquoi il y a deux systèmes d'indexation, soit deux API utilisées, dans [`../doc/Limites_de_scan_des_comptes_Twitter.md`](../doc/Limites_de_scan_des_comptes_Twitter.md). Pour faire simple : L'API de timeline est limitée aux 3 200 Tweets les plus récents des comptes à indexer (Retweets inclus), et l'API de recherche est limité à ce que Twitter indexent dans leur recherche. Utiliser les deux API permet d'être le plus exhaustif possible lors de l'indexation des comptes qui ont plus de 3 200 Tweets.
+* Serveur web pour l'API HTTP qui renvoit les status des requêtes, avec les éventuels résultats, ou une erreur s'il y a un problème. Voir [`../doc/API_HTTP.md`](../doc/API_HTTP.md).
 * Possibilité de lancer en mode multi-processus (`ENABLE_MULTIPROCESSING`), plus lourd mais plus efficace pour traiter des requêtes (Des utilisateurs et de scans) en paralléle.
-* Mémoire partagée entre tous les threads dans l'objet `Shared_Memory` du module `shared_memory` (Avec la librairie Pyro4 si démarré en mode multi-processus).
+* Mémoire partagée entre tous les threads dans l'objet [`Shared_Memory`](shared_memory/class_Shared_Memory.py) du module [`shared_memory`](shared_memory) (Avec la librairie Pyro4 si démarré en mode multi-processus).
 * Limite du nombre de requête en cours de traitement par adresse IP.
 * Thread de délestage automatique des anciennes requêtes terminées.
 * Thread de lancement de mises à jour automatiques des comptes Twitter dans la base de données. Essaye au maximum de répartir les mises à jour dans le temps.
-* Thread de retentative d'indexation de Tweets dont au moins une image a échouée (Et que cette erreur n'est pas identifiée comme insolvable dans le code, voir `get_tweet_image()`).
+* Thread de retentative d'indexation de Tweets dont au moins une image a échouée (Et que cette erreur n'est pas identifiée comme insolvable dans le code, voir [`get_tweet_image()`](tweet_finder/utils/get_tweet_image.py)).
 * Thread de suppression des curseurs d'indexation avec l'API de recherche, car l'indexation sur le moteur de recherche de Twitter est très fluctuante. Comme le thread de mise à jour, essaye au maximum de répartir les lancement d'indexations dans le temps.
 * Collecteur d'erreurs : Tous les threads sont éxécuté dans une instance du collecteur d'erreurs. Stocke l'erreur dans un fichier, met l'éventuelle requête en cours de traitement en situation d'erreur / échec, et redémarre le thread.
 
 
 ## Architecture du code
 
-Script `app.py` : Script central, crée et gère les threads de traitement, la ligne de commande, les files d'attentes des requêtes, et le serveur HTTP.
+Script [`app.py`](app.py) : Script central, crée et gère les threads de traitement, la ligne de commande, les files d'attentes des requêtes, et le serveur HTTP.
 
-* Module `app` : Dépendances du script `app.py`. Contient les procédures de ses threads, et ses classes. Voir le `README.md` de ce module pour plus de détails.
-  - Module `user_pipeline` : Pipeline de traitement des requêtes utilisateurs, en 4 étapes : Link Finder, lancement si nécessaire et suivi du scan du ou des comptes Twitter dans l'autre pipeline, recherche inversée de l'image de requête, et filtrage des résultats de cette recherche.
-  - Module `scan_pipeline` : Pipeline de traitement des requêtes de scan d'un compte Twitter, en 4 étapes paralléles.
+* Module [`app`](app) : Dépendances du script [`app.py`](app.py). Contient les procédures de ses threads, et ses classes. Voir le [`README.md`](app/README.md) de ce module pour plus de détails.
+  - Module [`user_pipeline`](app/user_pipeline) : Pipeline de traitement des requêtes utilisateurs, en 4 étapes : Link Finder, lancement si nécessaire et suivi du scan du ou des comptes Twitter dans l'autre pipeline, recherche inversée de l'image de requête, et filtrage des résultats de cette recherche.
+  - Module [`scan_pipeline`](app/scan_pipeline) : Pipeline de traitement des requêtes de scan d'un compte Twitter, en 4 étapes paralléles.
 
-* Module `shared_memory` : Mémoire partagée dans un serveur, permet le multi-processing et de faire potentiellement un système distribué.
+* Module [`shared_memory`](shared_memory) : Mémoire partagée dans un serveur, permet le multi-processing et de faire potentiellement un système distribué.
   Peut être utilisée comme un serveur PYRO (Indispensable au multi-processus), ou sinon comme un simple objet Python.
 
-* Module `tweet_finder`, contenant plusieurs classes : Moteur de recherche d'image par le contenu pour des comptes Twitter et des Tweets. Gère le stockage et la recherche d'image inversée.
-  - Module `utils`: Contient un outil pour la classe ci-dessus.
-  - Module `cbir_engine` : Contient les classes du moteur de recherche d'image par le contenu. Voir le `README.md` de ce module pour plus de détails.
-  - Module `database` : Contient les classes de gestion et d'accès à la base de données.
-  - Module `twitter` : Contient les classe d'abstraction aux librairies qui permettent d'utiliser les API Twitter.
+* Module [`tweet_finder`](tweet_finder), contenant plusieurs classes : Moteur de recherche d'image par le contenu pour des comptes Twitter et des Tweets. Gère le stockage et la recherche d'image inversée.
+  - Module [`utils`](tweet_finder/utils) : Contient un outil pour la classe ci-dessus.
+  - Module [`cbir_engine`](tweet_finder/cbir_engine) : Contient les classes du moteur de recherche d'image par le contenu. Voir le [`README.md`](tweet_finder/cbir_engine/README.md) de ce module pour plus de détails.
+  - Module [`database`](tweet_finder/database) : Contient les classes de gestion et d'accès à la base de données.
+  - Module [`twitter`](tweet_finder/twitter) : Contient les classe d'abstraction aux librairies qui permettent d'utiliser les API Twitter.
 
-* Module `link_finder`, classe `Link_Finder` : Classe centrale de la partie Link Finder. Permet de trouver les URL des images et les noms des comptes Twitter des artistes.
-  - Module `supported_websites` : Contient une classe pour chaque site supporté. Voir le `README.md` de ce module pour plus de détails.
-    - Module `utils` : Contient des outils pour les classes ci-dessus.
+* Module [`link_finder`](link_finder), classe [`Link_Finder`](link_finder/class_Link_Finder.py) : Classe centrale de la partie Link Finder. Permet de trouver les URL des images et les noms des comptes Twitter des artistes.
+  - Module [`supported_websites`](link_finder/supported_websites) : Contient une classe pour chaque site supporté. Voir le [`README.md`](link_finder/supported_websites/README.md) de ce module pour plus de détails.
+    - Module [`utils`](link_finder/supported_websites/utils) : Contient des outils pour les classes ci-dessus.
 
 
 ## Architecture à l'exécution
