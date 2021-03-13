@@ -134,7 +134,7 @@ if __name__ == '__main__' :
     import parameters as param
     
     class Test :
-        def put( tweet ) : print( tweet )
+        def put( self, tweet ) : print( tweet )
     test = Test()
     
     engine = Tweets_Lister_with_TimelineAPI( param.API_KEY,
@@ -142,4 +142,4 @@ if __name__ == '__main__' :
                                              param.TWITTER_API_KEYS[0]["OAUTH_TOKEN"],
                                              param.TWITTER_API_KEYS[0]["OAUTH_TOKEN_SECRET"],
                                              DEBUG = True )
-    engine.list_searchAPI_tweets( "rikatantan2nd", test )
+    engine.list_TimelineAPI_tweets( "rikatantan2nd", test )

@@ -138,7 +138,7 @@ if __name__ == '__main__' :
     import parameters as param
     
     class Test :
-        def put( tweet ) : print( tweet )
+        def put( self, tweet ) : print( tweet )
     test = Test()
     
     engine = Tweets_Lister_with_SearchAPI( param.API_KEY,

@@ -21,6 +21,8 @@ def analyse_tweet_json ( tweet_json : dict ) -> dict :
     tweet_dict = {}
     
     # Supprimer les tweets qui sont des retweets
+    # Ne supprime pas les Tweets citant un autre Tweet (Et donc pouvant
+    # contenir des images)
     if "retweeted_status" in tweet_json or "retweeted_status_id_str" in tweet_json :
         return None
     
