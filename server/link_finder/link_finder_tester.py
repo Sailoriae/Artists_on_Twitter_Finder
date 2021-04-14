@@ -142,14 +142,14 @@ print( "TEST DE DANBOORU :" )
 
 check_list.append(
 test( "https://danbooru.donmai.us/posts/4000914",
-      "https://danbooru.donmai.us/data/139dcc6b176fb999008522b9b80a9aa8.jpg",
+      "https://danbooru.donmai.us/data/original/13/9d/139dcc6b176fb999008522b9b80a9aa8.jpg",
       ['graviqc'],
       datetime.fromisoformat( "2020-07-15 04:14:30.199000-04:00" ) ) )
 
 # Attention, test de NSFW
 check_list.append(
 test( "https://danbooru.donmai.us/posts/3878029",
-      "https://danbooru.donmai.us/data/f316f97186dab780a2a6e54b4acccd94.png",
+      "https://danbooru.donmai.us/data/original/f3/16/f316f97186dab780a2a6e54b4acccd94.png",
       ['wokada156'],
       datetime.fromisoformat( "2020-04-24 06:54:45.053000-04:00" ) ) )
 
