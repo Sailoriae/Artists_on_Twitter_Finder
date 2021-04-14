@@ -125,8 +125,15 @@ test( "https://www.deviantart.com/lifeisafiction/art/Miku-Hatsune-Cosplay-844482
 check_list.append(
 test( "https://www.deviantart.com/dandonfuga/art/Harley-x-Ivy-YURI-NUDITY-warning-674880884",
       "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/6b889eb9-85d1-4954-af79-11bad3b62aec/db5t1f8-f7ef1272-a708-4750-94a9-2b2fc2ee51dc.jpg?token=",
-      ['dandonfuga'],
+      ['dandonfuga', 'cousindandon'],
       datetime.fromisoformat( "2017-04-14 12:50:12-07:00" ),
+      image_url_contains_mode = True ) )
+
+check_list.append(
+test( "https://www.deviantart.com/curiouscatcosplay/art/Survivor-872238942",
+      "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/ca0003c1-d466-4ceb-ae8e-8561c7345493/defb3vi-e6d48d51-5fff-4fb0-ae6e-109fb5923e84.png/v1/fill/w_1280,h_1920,q_80,strp/survivor_by_curiouscatcosplay_defb3vi-fullview.jpg?token=",
+      ['curiouscatcos'],
+      datetime.fromisoformat( "2021-03-04 15:56:41-08:00" ),
       image_url_contains_mode = True ) )
 
 
@@ -169,7 +176,7 @@ test( "https://www.derpibooru.org/images/2043814",
 check_list.append(
 test( "https://derpibooru.org/images/2234605",
       "https://derpicdn.net/img/view/2019/12/31/2234605.png",
-      ['sinrinf', 'avrameow'],
+      ['avrameow', 'sinrinf'],
       datetime.fromisoformat( "2019-12-31 09:22:36+00:00" ) ) )
 
 # Test intéressant, où il est obligé de passer sur la source

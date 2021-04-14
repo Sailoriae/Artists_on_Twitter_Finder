@@ -27,6 +27,7 @@ from link_finder.supported_websites.utils.validate_deviantart_account_url import
 from link_finder.supported_websites.utils.validate_pixiv_account_url import validate_pixiv_account_url
 from link_finder.supported_websites.utils.validate_twitter_account_url import validate_twitter_account_url
 from link_finder.supported_websites.utils.validate_linktree_account_url import validate_linktree_account_url
+from link_finder.supported_websites.utils.validate_patreon_account_url import validate_patreon_account_url
 from link_finder.class_Link_Finder_Result import Link_Finder_Result
 from link_finder.class_Link_Finder_Result import Not_an_URL
 from link_finder.class_Link_Finder_Result import Unsupported_Website
@@ -226,6 +227,13 @@ class Link_Finder :
         linktree = validate_linktree_account_url( url )
         if linktree != None :
             scanner = Webpage_to_Twitter_Accounts( "https://linktr.ee/" + linktree )
+            return scanner.scan()
+        
+        # PATREON
+        patreon = validate_patreon_account_url( url )
+        if patreon != None :
+            scanner = Webpage_to_Twitter_Accounts( "https://www.patreon.com/" + patreon )
+            scanner.soup = scanner.soup.find("div", {"id": "renderPageContentWrapper"})
             return scanner.scan()
         
         # PAGE NON SUPPORTEE
