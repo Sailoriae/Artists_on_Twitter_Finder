@@ -713,7 +713,9 @@ class SQLite_or_MySQL :
     Cet itérateur donne des dictionnaires contenant les champs suivant :
     - "tweet_id" : ID du Tweet,
     - "last_retry_date" : Objet "datetime", date du dernier réessai,
+    - "images" : Liste des URL des images du Tweet,
     - "retries_count" : Compteur de réessais.
+    C'est le même format que celui de la fonction "analyse_tweet_json()".
     Les Tweets sont triés par ordre du plus récemment réessayé au plus récent.
     """
     def get_retry_tweets( self ) :
@@ -734,11 +736,11 @@ class SQLite_or_MySQL :
                 to_return["hashtags"] = data[6].split(";")
             else :
                 to_return["hashtags"] = None
-            if not param.USE_MYSQL_INSTEAD_OF_SQLITE and data[6] != None :
-                to_return["last_retry_date"] = datetime.strptime( data[6], '%Y-%m-%d %H:%M:%S' )
+            if not param.USE_MYSQL_INSTEAD_OF_SQLITE and data[7] != None :
+                to_return["last_retry_date"] = datetime.strptime( data[7], '%Y-%m-%d %H:%M:%S' )
             else :
-                to_return["last_retry_date"] = data[6]
-            to_return["retries_count"] = data[7]
+                to_return["last_retry_date"] = data[7]
+            to_return["retries_count"] = data[8]
             yield to_return
     
     """
