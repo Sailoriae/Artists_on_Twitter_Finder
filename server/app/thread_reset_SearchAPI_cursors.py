@@ -61,6 +61,10 @@ def thread_reset_SearchAPI_cursors( thread_id : int, shared_memory ) :
     # itération de la boucle "for"
     to_reset_queue = queue.Queue()
     
+    # Même que la file d'attente ci-dessus, mais permet d'éviter une boucle
+    # infinie (Les éléments y sont mis temporairement)
+    to_reset_temp_queue = queue.Queue()
+    
     # Fonction à passer à "wait_until()"
     # Passer "shared_memory.keep_running" ne fonctionne pas
     def break_wait() : return not shared_memory.keep_service_alive
@@ -175,8 +179,10 @@ def thread_reset_SearchAPI_cursors( thread_id : int, shared_memory ) :
                 except queue.Empty : break
                 
                 # On réessaye de lancer une requête toutes les 24 heures
+                # Attention : On ne remet pas directement dans la file
+                # d'attente pour éviter un bouclage infini
                 if time() - account["last_try"] <= 86400 :
-                    to_reset_queue.put( account )
+                    to_reset_temp_queue.put( account )
                     continue
                 account["last_try"] = time()
                 
@@ -195,11 +201,19 @@ def thread_reset_SearchAPI_cursors( thread_id : int, shared_memory ) :
                 
                 # Si la requête a commencé le listage avec l'API de recherche
                 # on remet le compte dans notre file d'attente
+                # Attention : On ne remet pas directement dans la file
+                # d'attente pour éviter un bouclage infini
                 if request.started_SearchAPI_listing :
-                    to_reset_queue.put( account )
+                    to_reset_temp_queue.put( account )
                 
                 # Sinon, on peut laisser ce compte tranquille, le listage
                 # prendra bien le curseur reset
+            
+            # Vider la file temporaire dans la vraie file des comptes dont il
+            # faut reset leur curseur
+            while True :
+                try : to_reset_queue.put( to_reset_temp_queue.get( block = False ) )
+                except queue.Empty : break
     
     print( f"[reset_cursors_th{thread_id}] Arrêté !" )
     return
