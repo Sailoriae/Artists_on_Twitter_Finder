@@ -83,12 +83,6 @@ def thread_reset_SearchAPI_cursors( thread_id : int, shared_memory ) :
         # Sert à être précis pour répartir les mises à jour
         start = datetime.datetime.now()
         
-        # Calculer la moyenne du temps entre chaque mise à jour
-        # Sert à répartier les mises à jour
-        # Pas besoin de le MàJ dans la boucle "for", car l'itérateur est un
-        # instantané des comptes dans la BDD
-        max_wait = reset_period / shared_memory.accounts_count
-        
         # Prendre l'itérateur sur les comptes dans la base de donnée, triés
         # dans l'ordre du moins récemment reset au plus récemment reset
         oldest_reseted_account_iterator = bdd_direct_access.get_oldest_reseted_account()
@@ -127,6 +121,7 @@ def thread_reset_SearchAPI_cursors( thread_id : int, shared_memory ) :
                 # par le nombre de comptes dans la BDD
                 # Cela permet de répartir les MàJ et d'éviter de créer des pics
                 # de charge sur le serveur
+                max_wait = reset_period / shared_memory.accounts_count
                 if wait_time > max_wait :
                     wait_time = max_wait
                 

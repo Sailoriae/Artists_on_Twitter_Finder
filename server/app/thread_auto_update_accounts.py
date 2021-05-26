@@ -68,12 +68,6 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
         # Sert à être précis pour répartir les mises à jour
         start = datetime.datetime.now()
         
-        # Calculer la moyenne du temps entre chaque mise à jour
-        # Sert à répartier les mises à jour
-        # Pas besoin de le MàJ dans la boucle "for", car l'itérateur est un
-        # instantané des comptes dans la BDD
-        max_wait = update_period / shared_memory.accounts_count
-        
         # Prendre l'itérateur sur les comptes dans la base de donnée, triés
         # dans l'ordre du moins récemment mise à jour au plus récemment mis à jour
         oldest_updated_account_iterator = bdd_direct_access.get_oldest_updated_account()
@@ -113,6 +107,7 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
                     # de MàJ divisée par le nombre de comptes dans la BDD
                     # Cela permet de répartir les MàJ et d'éviter de créer des
                     # pics de charge sur le serveur
+                    max_wait = update_period / shared_memory.accounts_count
                     if wait_time > max_wait :
                         wait_time = max_wait
                     
