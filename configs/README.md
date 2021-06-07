@@ -27,7 +27,7 @@ sudo service apache2 restart
 ```
 sudo a2dismod ssl
 sudo service apache2 restart
-sudo letsencrypt certonly --webroot -w /path/to/Artists_on_Twitter_Finder/public -d sub.domain.tld --email name@domain.tld --text --rsa-key-size 4096
+sudo letsencrypt certonly --apache -d sub.domain.tld
 sudo a2enmod ssl
 sudo service apache2 restart
 ```
