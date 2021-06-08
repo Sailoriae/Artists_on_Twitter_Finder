@@ -1,6 +1,10 @@
 var errorP = document.getElementById("display-error");
 var processStatusP = document.getElementById("display-process-status");
 
+document.getElementById("launch").onclick = function() {
+	mainFunction();
+};
+
 function mainFunction ( new_loop = true ) {
 	if ( new_loop ) {
 		lockUI();
