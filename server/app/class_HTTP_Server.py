@@ -150,7 +150,22 @@ def http_server_container ( shared_memory_uri_arg ) :
                     "indexed_tweets_count" : self.shared_memory.tweets_count,
                     "indexed_accounts_count" : self.shared_memory.accounts_count,
                     "processing_user_requests_count" : self.shared_memory.user_requests.processing_requests_count,
-                    "processing_scan_requests_count" : self.shared_memory.scan_requests.processing_requests_count,
+                    "processing_scan_requests_count" : self.shared_memory.scan_requests.processing_requests_count
+                }
+                
+                json_text = json.dumps( response_dict )
+                self.wfile.write( json_text.encode("utf-8") )
+            
+            # Si on demande les informations sur le serveur
+            # GET /config
+            elif endpoint == "/config" :
+                http_code = 200
+                self.send_response(http_code)
+                self.send_header("Content-type", "application/json")
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                
+                response_dict = {
                     "limit_per_ip_address" : param.MAX_PROCESSING_REQUESTS_PER_IP_ADDRESS,
                     "update_accounts_frequency" : param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE
                 }

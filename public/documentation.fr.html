@@ -138,7 +138,7 @@
 
 		<h2>Endpoint <code>GET /api/stats</code></h2>
 
-		<p>Recevoir des informations sur le serveur.</p>
+		<p>Recevoir des statistiques sur le serveur.</p>
 
 		<p>Retourne un JSON contenant les champs suivants&nbsp;:</p>
 		<ul>
@@ -146,8 +146,18 @@
 			<li><code>indexed_accounts_count</code><br>Nombre de comptes Twitter indexés.</li>
 			<li><code>processing_user_requests_count</code><br>Nombre de requêtes en cours de traitement. Plus cette valeur est élevée, plus votre requête va prendre du temps à être traitée.</li>
 			<li><code>processing_scan_requests_count</code><br>Nombre d'indexations ou de mise à jour d'indexation de comptes Twitter en cours. Plus cette valeur est élevée, plus votre requête risque de prendre du temps à être traitée.</li>
+		</ul>
+
+
+		<h2>Endpoint <code>GET /api/config</code></h2>
+
+		<p>Recevoir des informations sur le serveur.</p>
+
+		<p>Retourne un JSON contenant les champs suivants&nbsp;:</p>
+		<ul>
 			<li><code>limit_per_ip_address</code><br>Nombre maximale de requêtes en cours de traitement par adresse IP.</li>
 			<li><code>update_accounts_frequency</code><br>Fréquence de la mise à jour automatique des comptes Twitter indexés, en jours. Un compte peut aussi être mis à jour lors d'une requête si l'illustration est trop récente.</li>
+		</ul>
 	</main>
 
 	<footer>
