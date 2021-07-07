@@ -1,21 +1,7 @@
 var statsP = document.getElementById("display-stats");
 var warningP = document.getElementById("display-warning");
-var infosP = document.getElementById("display-infos");
 
 displayStats();
-
-// Source : https://stackoverflow.com/questions/7790811/how-do-i-put-variables-inside-javascript-strings-node-js
-function parse( str ) {
-	var args = [].slice.call(arguments, 1),
-		i = 0;
-
-	return str.replace(/%s/g, () => args[i++]);
-}
-
-// Source : https://stackoverflow.com/questions/16637051/adding-space-between-numbers
-function numberWithSpaces( x ) {
-	return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-}
 
 function displayStats() {
 	var request = new XMLHttpRequest();
@@ -46,8 +32,6 @@ function displayStats() {
 						statsP.innerHTML += lang[ "STATS_2_2_ONE" ];
 					else
 						statsP.innerHTML += parse( lang[ "STATS_2_2_PLURAL" ], numberWithSpaces( json["processing_scan_requests_count"] ) );
-
-					infosP.textContent = parse( lang[ "INFO" ], json["limit_per_ip_address"] );
 
 					if ( json["processing_user_requests_count"] > 20 ) {
 						warningP.textContent = json["processing_user_requests_count"];
