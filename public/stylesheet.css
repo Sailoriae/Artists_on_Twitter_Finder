@@ -11,6 +11,10 @@ header, footer, main {
 	margin: auto;
 }
 
+.text-align-left {
+	text-align: left;
+}
+
 header {
 	border-bottom: solid grey 1px;
 }
