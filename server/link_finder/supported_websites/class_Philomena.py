@@ -159,6 +159,13 @@ class Philomena :
         if not self.cache_or_get( illust_url ) :
             return None
         
+        # Gérer les images de redirection
+        if self.cache_illust_url_json["image"]["duplicate_of"] != None :
+            return self.get_twitter_accounts(
+                "https://derpibooru.org/images/" + str( self.cache_illust_url_json["image"]["duplicate_of"] ),
+                multiplexer, loopback_source, already_loopback
+            )
+        
         # ATTENTION ! Il peut y avoir plusieurs artistes !
         artists_tags = []
         for tag in self.cache_illust_url_json["image"]["tags"] :
