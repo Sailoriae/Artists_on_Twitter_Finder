@@ -50,6 +50,11 @@ if __name__ == "__main__" :
         from app.scan_pipeline.thread_step_C_SearchAPI_index_account_tweets import thread_step_C_SearchAPI_index_account_tweets
         from app.scan_pipeline.thread_step_D_TimelineAPI_index_account_tweets import thread_step_D_TimelineAPI_index_account_tweets
         from app.scan_pipeline.thread_retry_failed_tweets import thread_retry_failed_tweets
+        
+        if param.ENABLE_MULTIPROCESSING :
+            from shared_memory.thread_pyro_server import thread_pyro_server
+        else :
+            from shared_memory.class_Shared_Memory import Shared_Memory
     except ModuleNotFoundError as error :
         print( f"Il manque une librairie : {error}" )
         print( "Veuillez exécuter : pip install -r requirements.txt" )
@@ -86,7 +91,6 @@ if __name__ == "__main__" :
     """
     if param.ENABLE_MULTIPROCESSING :
         from random import randint
-        from shared_memory.thread_pyro_server import thread_pyro_server
         
         # On démarre le serveur sur un port aléatoire, j'en ai marre des processus
         # fantomes qui massacrent tous mes tests !
@@ -133,7 +137,6 @@ if __name__ == "__main__" :
     Créer simplement l'objet de mémoire partagée.
     """
     if not param.ENABLE_MULTIPROCESSING :
-        from shared_memory.class_Shared_Memory import Shared_Memory
         shared_memory = Shared_Memory( 0, 0 )
         shared_memory_uri = shared_memory # Pour passer aux threads
     
