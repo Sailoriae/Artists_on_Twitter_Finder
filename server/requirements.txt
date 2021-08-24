@@ -10,3 +10,4 @@ Pyro4
 -e git+https://github.com/JustAnotherArchivist/snscrape.git#egg=snscrape
 python-dateutil
 pillow
+psutil

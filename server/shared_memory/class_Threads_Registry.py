@@ -2,6 +2,8 @@
 # coding: utf-8
 
 import Pyro4
+import os
+import psutil
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
 # Ainsi, si on veut utiliser ce script indépendemment (Notemment pour des
@@ -17,6 +19,7 @@ if __name__ == "__main__" :
     path.append(get_wdir())
 
 from shared_memory.open_proxy import open_proxy
+import parameters as param
 
 
 """
@@ -78,10 +81,18 @@ class Threads_Registry :
     """
     def get_status ( self ) :
         to_print = ""
+        total_memory_size = 0
         sorted_dict = sorted( self._pid_dict.items() )
         for (key, value) in sorted_dict :
             # Affichage identique pour tous les threads
             to_print += f"[PID {value}] " + key
+            
+            # Affichage du poid en mémoire du thread
+            if param.ENABLE_MULTIPROCESSING :
+                process_size = psutil.Process( int(value) ).memory_info().rss # en octets
+                process_size = process_size / 1024 / 1024 # en megaoctets
+                to_print += " ({:.2f} Mo)".format( process_size )
+                total_memory_size += process_size
             
             try :
                 request = self._requests_dict[key]
@@ -113,5 +124,11 @@ class Threads_Registry :
                         to_print += f", {request.TimelineAPI_tweets_queue.qsize()} Tweets restant\n"
                     else :
                         to_print += "\n"
+        
+        if not param.ENABLE_MULTIPROCESSING :
+            total_memory_size = psutil.Process( os.getpid() ).memory_info().rss # en octets
+            total_memory_size = total_memory_size / 1024 / 1024 # en megaoctets
+        
+        to_print += "Taille totale d'AOTF en mémoire : {:.2f} Mo\n".format( total_memory_size )
         
         return to_print
