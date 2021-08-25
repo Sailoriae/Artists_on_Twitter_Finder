@@ -168,8 +168,9 @@ class Pixiv :
         
         twitter_accounts = []
         response = get_with_rate_limits( "https://www.pixiv.net/en/users/" + str(user_id) )
-            
-        if response.status_code == 404 :
+        
+        # Les comptes suspendus retournent HTTP 403
+        if response.status_code in [403, 404] :
             return None
         
         soup = BeautifulSoup( response.text, "html.parser" )
