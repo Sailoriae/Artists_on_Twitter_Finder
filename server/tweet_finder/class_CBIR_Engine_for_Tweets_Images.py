@@ -52,11 +52,16 @@ class CBIR_Engine_for_Tweets_Images :
                 print( error )
                 print( "[get_image_features] Abandon !" )
                 
-                file = open( "class_CBIR_Engine_for_Tweets_Images_errors.log", "a" )
-                file.write( f"Erreur avec le Tweet ID {tweet_id} !\n" )
-                traceback.print_exc( file = file )
-                file.write( "\n\n\n" )
-                file.close()
+                # Ne pas journaliser les erreurs connues qui arrivent souvent
+                # Elles ne sont pas solutionnables, ce sont des problèmes chez Twitter
+                # 502 = Bad Gateway
+                # 504 = Gateway Timeout
+                if not error.code in [502, 504] :
+                    file = open( "class_CBIR_Engine_for_Tweets_Images_errors.log", "a" )
+                    file.write( f"Erreur avec le Tweet ID {tweet_id} !\n" )
+                    traceback.print_exc( file = file )
+                    file.write( "\n\n\n" )
+                    file.close()
                 
                 CAN_RETRY[0] = True
                 return None
