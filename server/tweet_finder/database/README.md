@@ -77,6 +77,18 @@ Contient les attributs suivants :
 * `last_retry_date DATETIME` : Date locale de la dernière tentative d'indexation,
 * `retries_count TINYINT UNSIGNED DEFAULT` : Compteur de tentatives de réindexation (0 par défaut).
 
+### Avertissement : Réfléchir avant de vouloir stocker autre chose
+
+AOTF ne stocke volontairement pas les associations entre les comptes Twitter et les comptes des artistes sur les sites supportés, ainsi que les illustrations de requêtes et leurs Tweets trouvés respectifs. En effet, ces données peuvent être très facilement changeantes, leur mise à jour reviendrait alors à refaire les mêmes opérations pour chaque requête. C’est pour cela qu’il ne faut **surtout pas** les stocker dans la base de données.
+
+Il faut comprendre que ces associations sont du cache, et non des données "statiques". Ainsi, la seule possibilité pour optimiser le traitement est de les mettre en cache dans la mémoire partagée. Et c’est ce qui est actuellement fait pour les associations entre les illustrations et les Tweets, voir le module `shared_memory`.
+
+**D'une manière générale, la base de données du serveur AOTF ne doit contenir que des données "statiques", c'est à dire qu'elles ne peuvent pas être modifiées.** Les seules exceptions sont pour :
+* Les données des comptes Twitter analysées (Table `accounts`) : Leurs curseurs d'indexation, leurs dates de dernière mise à jour, et leurs dates de dernière utilisation, et leurs compteurs d'utilisations,
+* Et les données pour les Tweets qui ont besoin d'être réindexés (Table `reindex_tweets`).
+
+En effet, ce sont des données qui ont besoin de persistence lors d'un redémarrage du serveur AOTF. Elles s'opposent aux associations qui n'ont pas besoin de persistence, et encore moins d'être inclues dans une stratégie de sauvegarde.
+
 ## Objets dans ce module
 
 ### Classe `SQLite_or_MySQL`
