@@ -8,6 +8,7 @@ Veuillez d'abord lire la description générale de AOTF, c'est à dire le fichie
 * [`Limites_de_scan_des_comptes_Twitter.md`](Limites_de_scan_des_comptes_Twitter.md) : Pourquoi il peut manque des Tweets des comptes Twitter scannés.
 * [`Limites_du_moteur_CBIR.md`](Limites_du_moteur_CBIR.md) : Pourquoi le moteur CBIR peut sortir un mauvais résultat.
 * [`Pistes_explorées_pour_la_recherche.md`](Pistes_explorées_pour_la_recherche.md) : Pistes et idées explorées pour accélérer la recherche par image (LIRE et Milvus).
+* [`Stratégie_de_sauvegarde.md`](Stratégie_de_sauvegarde.md) : Idées pour sauvegarder la base de données MySQL du serveur AOTF.
 
 La documentation n'est pas seulement ici ! Il y a des fichiers `README.md` dans presque tous les répertoires de ce projet. Les plus intéressants pour compléter cette documentation sont les suivants :
 
