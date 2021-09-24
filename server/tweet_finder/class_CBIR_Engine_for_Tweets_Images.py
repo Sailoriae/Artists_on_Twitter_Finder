@@ -3,7 +3,7 @@
 
 import traceback
 import urllib
-from time import sleep
+from time import sleep, time
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
 # Ainsi, si on veut utiliser ce script indépendemment (Notemment pour des
@@ -34,17 +34,27 @@ class CBIR_Engine_for_Tweets_Images :
     
     @param image_url L'URL de l'image du Tweet.
     @param tweet_id L'ID du Tweet (Uniquement pour les "print()").
+    @param download_image_times Utilisé pour la classe "Tweets_Indexer".
+    @param calculate_features_times Utilisé pour la classe "Tweets_Indexer".
+    
     @return La liste des caractéristiques calculées par le moteur CBIR,
             OU None si il y a un un problème.
     """
-    def get_image_features ( self, image_url : str, tweet_id, CAN_RETRY = [False] ) :
+    def get_image_features ( self, image_url : str, tweet_id, CAN_RETRY = [False],
+                             download_image_times = None, calculate_features_times = None ) :
         retry_count = 0
         while True : # Solution très bourrin pour gèrer les rate limits
             try :
+                if download_image_times != None : start = time()
                 image = get_tweet_image( image_url )
                 if image == None : # Erreurs insolvables, 404 par exemple
                     return None
-                return self.cbir_engine.index_cbir( binary_image_to_cv2_image( image ) )
+                if download_image_times != None : download_image_times.append( time() - start )
+                
+                if calculate_features_times != None : start = time()
+                to_return = self.cbir_engine.index_cbir( binary_image_to_cv2_image( image ) )
+                if calculate_features_times != None : calculate_features_times.append( time() - start )
+                return to_return
             
             # Envoyé par la fonction get_tweet_image() qui n'a pas réussi
             except urllib.error.HTTPError as error :

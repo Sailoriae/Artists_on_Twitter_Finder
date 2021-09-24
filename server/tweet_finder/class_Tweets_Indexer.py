@@ -93,32 +93,39 @@ class Tweets_Indexer :
 #            print( f"[Tweets_Indexer] Indexation / scan des Tweets de @{account_name}." )
         if self.DEBUG or self.ENABLE_METRICS :
             times = [] # Liste des temps pour indexer un Tweet
+            download_image_times = [] # Liste des temps pour télécharger les images d'un Tweet
             calculate_features_times = [] # Liste des temps pour calculer les caractéristiques des images du Tweet
             insert_into_times = [] # Liste des temps pour faire le INSERT INTO
         
+        to_return = None
+        return_now = False # Evite une duplication de code
         while True :
             try :
                 tweet = tweets_queue.get( block = False )
             except queue.Empty : # Si la file d'entrée est vide
-                if self.DEBUG or self.ENABLE_METRICS :
-                    if len(times) > 0 :
-                        print( f"[Tweets_Indexer] {len(times)} Tweets indexés avec une moyenne de {mean(times)} secondes par Tweet." )
-                        print( f"[Tweets_Indexer] Temps moyens de calcul des caractéristiques : {mean(calculate_features_times)} secondes." )
-                        print( f"[Tweets_Indexer] Temps moyens d'enregistrement dans la BDD : {mean(insert_into_times)} secondes." )
-                        if add_step_C_or_D_times != None :
-                            add_step_C_or_D_times( times, calculate_features_times, insert_into_times )
-                return False
+                to_return = False
+                return_now = True
             
             # Si on a atteint la fin de la file
-            if tweet == None :
+            if not return_now and tweet == None :
+                to_return = True
+                return_now = True
+            
+            # Si il faut arrêter la boucle (Retourner)
+            if return_now :
                 if self.DEBUG or self.ENABLE_METRICS :
                     if len(times) > 0 :
                         print( f"[Tweets_Indexer] {len(times)} Tweets indexés avec une moyenne de {mean(times)} secondes par Tweet." )
+                    if len(download_image_times) > 0 :
+                        print( f"[Tweets_Indexer] Temps moyens de téléchargement : {mean(download_image_times)} secondes." )
+                    if len(calculate_features_times) > 0 :
                         print( f"[Tweets_Indexer] Temps moyens de calcul des caractéristiques : {mean(calculate_features_times)} secondes." )
+                    if len(insert_into_times) > 0 :
                         print( f"[Tweets_Indexer] Temps moyens d'enregistrement dans la BDD : {mean(insert_into_times)} secondes." )
+                    if len(times) > 0 :
                         if add_step_C_or_D_times != None :
-                            add_step_C_or_D_times( times, calculate_features_times, insert_into_times )
-                return True
+                            add_step_C_or_D_times( times, download_image_times, calculate_features_times, insert_into_times )
+                return to_return
             
             if self.DEBUG :
                 print( f"[Tweets_Indexer] Indexation Tweet ID {tweet['tweet_id']} de @{account_name}." )
@@ -160,9 +167,6 @@ class Tweets_Indexer :
             image_3_name = None
             image_4_name = None
             
-            if self.DEBUG or self.ENABLE_METRICS :
-                start_calculate_features = time()
-            
             # Mis à True si le Tweet aura besoin d'être réindexé
             # Dans une liste, car les listes sont passées par référence
             will_need_retry = [False]
@@ -170,23 +174,26 @@ class Tweets_Indexer :
             # Traitement des images du Tweet
             if length > 0 :
                 image_1_url = tweet["images"][0]
-                image_1_features = self.engine.get_image_features( image_1_url, tweet["tweet_id"], CAN_RETRY = will_need_retry )
+                image_1_features = self.engine.get_image_features( image_1_url, tweet["tweet_id"], CAN_RETRY = will_need_retry,
+                                                                   download_image_times = download_image_times, calculate_features_times = calculate_features_times )
                 image_1_name = image_1_url.replace( "https://pbs.twimg.com/media/", "" )
             if length > 1 :
                 image_2_url = tweet["images"][1]
-                image_2_features = self.engine.get_image_features( image_2_url, tweet["tweet_id"], CAN_RETRY = will_need_retry )
+                image_2_features = self.engine.get_image_features( image_2_url, tweet["tweet_id"], CAN_RETRY = will_need_retry,
+                                                                   download_image_times = download_image_times, calculate_features_times = calculate_features_times )
                 image_2_name = image_2_url.replace( "https://pbs.twimg.com/media/", "" )
             if length > 2 :
                 image_3_url = tweet["images"][2]
-                image_3_features = self.engine.get_image_features( image_3_url, tweet["tweet_id"], CAN_RETRY = will_need_retry )
+                image_3_features = self.engine.get_image_features( image_3_url, tweet["tweet_id"], CAN_RETRY = will_need_retry,
+                                                                   download_image_times = download_image_times, calculate_features_times = calculate_features_times )
                 image_3_name = image_3_url.replace( "https://pbs.twimg.com/media/", "" )
             if length > 3 :
                 image_4_url = tweet["images"][3]
-                image_4_features = self.engine.get_image_features( image_4_url, tweet["tweet_id"], CAN_RETRY = will_need_retry )
+                image_4_features = self.engine.get_image_features( image_4_url, tweet["tweet_id"], CAN_RETRY = will_need_retry,
+                                                                   download_image_times = download_image_times, calculate_features_times = calculate_features_times )
                 image_4_name = image_4_url.replace( "https://pbs.twimg.com/media/", "" )
             
             if self.DEBUG or self.ENABLE_METRICS :
-                calculate_features_times.append( time() - start_calculate_features )
                 start_insert_into = time()
             
             # Stockage des résultats
