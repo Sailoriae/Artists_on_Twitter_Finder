@@ -25,7 +25,10 @@ CBIR_LIST_LENGHT = 240
 # Utiliser des curseurs avec tampon, permet d'accélérer l'itération et la
 # recherche, mais consomme plus de mémoire vive
 # Fonctionne uniquement en cas de recherche pour un compte Twitter
-BUFFERED_CURSOR = True
+BUFFERED_CURSOR = False
+# Ralentit cependant les temps pour faire les requêtes SQL (SELECT)
+# Du coup, ça vaut plus le coup de ne pas utiliser de tampon
+# Testé avec @MayoRiyo (Plus de 20.000 images indexées)
 
 
 # Note :
@@ -62,28 +65,31 @@ class Image_Features_Iterator :
                         request_3,
                         request_4,
                         ENABLE_METRICS = False ) :
-        self.conn = conn
-        self.buffered_cursors = account_id != 0 and BUFFERED_CURSOR
-        self.current_cursor = self.conn.cursor( buffered = self.buffered_cursors )
-        self.current_table = 1
-        
-        if account_id != 0 :
-            self.current_cursor.execute( request_1, ( account_id, ) )
-        else :
-            self.current_cursor.execute( request_1 )
-        
-        self.account_id = account_id
-        self.request_2 = request_2
-        self.request_3 = request_3
-        self.request_4 = request_4
-        
         self.ENABLE_METRICS = ENABLE_METRICS
         if ENABLE_METRICS :
+            self.select_times = [] # Durées pour faire les SELECT
             self.iteration_times = [] # Durées des itérations
             self.usage_times = [] # Durées des utilisations
             self.usage_start = None
             self.iteration_start = None
             self.start = time()
+        
+        self.conn = conn
+        self.buffered_cursors = account_id != 0 and BUFFERED_CURSOR
+        self.current_cursor = self.conn.cursor( buffered = self.buffered_cursors )
+        self.current_table = 1
+        
+        if self.ENABLE_METRICS : start_select = time()
+        if account_id != 0 :
+            self.current_cursor.execute( request_1, ( account_id, ) )
+        else :
+            self.current_cursor.execute( request_1 )
+        if self.ENABLE_METRICS : self.select_times.append( time() - start_select )
+        
+        self.account_id = account_id
+        self.request_2 = request_2
+        self.request_3 = request_3
+        self.request_4 = request_4
         
         # Fonction pour enregistrer les temps d'éxécution
         self.add_step_3_times = None
@@ -114,30 +120,37 @@ class Image_Features_Iterator :
                 if self.ENABLE_METRICS :
                     if self.iteration_times != [] and self.usage_times != [] :
                         print( f"[Images_It] Itération sur {len(self.usage_times)} images en {time() - self.start} secondes." )
+                        print( f"[Images_It] Temps moyen de requête SQL : {mean(self.select_times)} secondes." )
                         print( f"[Images_It] Temps moyen d'itération : {mean(self.iteration_times)} secondes." )
                         print( f"[Images_It] Temps moyen d'utilisation : {mean(self.usage_times)} secondes." )
                     if self.add_step_3_times != None :
-                        self.add_step_3_times( time() - self.start, self.iteration_times, self.usage_times )
+                        self.add_step_3_times( time() - self.start, self.select_times, self.iteration_times, self.usage_times )
                 raise StopIteration
             
             if self.current_table == 2 :
                 self.current_cursor = self.conn.cursor( buffered = self.buffered_cursors )
+                if self.ENABLE_METRICS : start_select = time()
                 if self.account_id != 0 :
                     self.current_cursor.execute( self.request_2, ( self.account_id, ) )
                 else :
                     self.current_cursor.execute( self.request_2 )
+                if self.ENABLE_METRICS : self.select_times.append( time() - start_select )
             if self.current_table == 3 :
                 self.current_cursor = self.conn.cursor( buffered = self.buffered_cursors )
+                if self.ENABLE_METRICS : start_select = time()
                 if self.account_id != 0 :
                     self.current_cursor.execute( self.request_3, ( self.account_id, ) )
                 else :
                     self.current_cursor.execute( self.request_3 )
+                if self.ENABLE_METRICS : self.select_times.append( time() - start_select )
             if self.current_table == 4 :
                 self.current_cursor = self.conn.cursor( buffered = self.buffered_cursors )
+                if self.ENABLE_METRICS : start_select = time()
                 if self.account_id != 0 :
                     self.current_cursor.execute( self.request_4, ( self.account_id, ) )
                 else :
                     self.current_cursor.execute( self.request_4 )
+                if self.ENABLE_METRICS : self.select_times.append( time() - start_select )
             
             return self.__next__( do_not_reset_iteration_start = True )
         
