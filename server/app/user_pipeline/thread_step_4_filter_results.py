@@ -103,6 +103,16 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
             download_times = []
             compare_times = []
         
+        # Lorsqu'il y a une image avec un Khi-Deux très petit, c'est signe que l'image d'entrée est un croquis
+        # Si la distance de Bhattacharyya de cette même image est trop grande, c'est signe qu'aucun résultat n'est valide
+        # On vide donc la liste des résultats
+        if len( request.found_tweets ) > 0 :
+            temp_tweet = min( request.found_tweets, key = lambda x: x.distance_chi2 )
+            if temp_tweet.distance_chi2 < 0.001 and temp_tweet.distance_bhattacharyya > 0.1 :
+                request.found_tweets = []
+            if temp_tweet.distance_chi2 < 0.1 and temp_tweet.distance_bhattacharyya > 0.2 :
+                request.found_tweets = []
+        
         # On utilise l'image téléchargée à l'étape 3
         if USE_OPENCV and not SKIP_IMAGES_COMPARAISON :
             try :
