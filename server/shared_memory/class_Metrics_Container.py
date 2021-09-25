@@ -165,10 +165,13 @@ class Metrics_Container :
     """
     def get_metrics ( self ) :
         to_print = ""
+        
         if self._step_A_times.get_count() != 0 :
             to_print += f"Etape A : Temps moyen pour lister avec SearchAPI : {self._step_A_times.get_mean()} ({self._step_A_times.get_count()} listages)\n"
+        
         if self._step_B_times.get_count() != 0 :
             to_print += f"Etape B : Temps moyen pour lister avec TimelineAPI : {self._step_B_times.get_mean()} ({self._step_B_times.get_count()} listages)\n"
+        
         if self._step_C_times.get_count() != 0 :
             to_print += f"Etape C : Temps moyen pour indexer avec SearchAPI : {self._step_C_times.get_mean()} ({self._step_C_times.get_count()} tweets)\n"
         if self._step_C_download_image_times.get_count() != 0 :
@@ -177,6 +180,7 @@ class Metrics_Container :
             to_print += f" - Dont : Calcul CBIR d'une image : {self._step_C_calculate_features_times.get_mean()} ({self._step_C_calculate_features_times.get_count()} images)\n"
         if self._step_C_insert_into_times.get_count() != 0 :
             to_print += f" - Dont : INSERT INTO d'un Tweet : {self._step_C_insert_into_times.get_mean()} ({self._step_C_insert_into_times.get_count()} tweets)\n"
+        
         if self._step_D_times.get_count() != 0 :
             to_print += f"Etape D : Temps moyen pour indexer avec TimelineAPI : {self._step_D_times.get_mean()} ({self._step_D_times.get_count()} tweets)\n"
         if self._step_D_download_image_times.get_count() != 0 :
@@ -185,24 +189,30 @@ class Metrics_Container :
             to_print += f" - Dont : Calcul CBIR d'une image : {self._step_D_calculate_features_times.get_mean()} ({self._step_D_calculate_features_times.get_count()} images)\n"
         if self._step_D_insert_into_times.get_count() != 0 :
             to_print += f" - Dont : INSERT INTO d'un Tweet : {self._step_D_insert_into_times.get_mean()} ({self._step_D_insert_into_times.get_count()} tweets)\n"
+        
         if self._step_1_times.get_count() != 0 :
             to_print += f"Etape 1 : Temps moyen pour passer dans le Link Finder : {self._step_1_times.get_mean()} ({self._step_1_times.get_count()} éxécutions)\n"
+        
         if self._step_3_times.get_count() != 0 :
             to_print += f"Etape 3 : Temps moyen pour éxécuter la recherche inversée : {self._step_3_times.get_mean()} ({self._step_3_times.get_count()} recherches de {int(self._step_3_usage_times.get_count()/self._step_3_times.get_count())} comparaisons en moyenne)\n"
         if self._step_3_iteration_times.get_count() != 0 :
             to_print += f" - Dont : Itérer sur la base de données : {self._step_3_iteration_times.get_mean()} ({self._step_3_iteration_times.get_count()} itérations)\n"
         if self._step_3_usage_times.get_count() != 0 :
             to_print += f" - Dont : Comparer deux vecteurs : {self._step_3_usage_times.get_mean()} ({self._step_3_usage_times.get_count()} images)\n"
+        
         if self._step_4_times.get_count() != 0 :
             to_print += f"Etape 4 : Temps moyen pour filtrer la liste des résultats : {self._step_4_times.get_mean()} ({self._step_4_times.get_count()} filtrages)\n"
         if self._step_4_download_times.get_count() != 0 :
             to_print += f" - Dont : Téléchargement d'une image : {self._step_4_download_times.get_mean()} ({self._step_4_download_times.get_count()} images)\n"
         if self._step_4_compare_times.get_count() != 0 :
             to_print += f" - Dont : Comparer deux images : {self._step_4_compare_times.get_mean()} ({self._step_4_compare_times.get_count()} comparaisons)\n"
+        
         if self._user_request_full_time.get_count() != 0 :
             to_print += f"Temps moyen pour traiter une requête utilisateur : {self._user_request_full_time.get_mean()} ({self._user_request_full_time.get_count()} requêtes)\n"
         if self._scan_request_full_time.get_count() != 0 :
             to_print += f"Temps moyen pour traiter une requête de scan : {self._scan_request_full_time.get_mean()} ({self._scan_request_full_time.get_count()} requêtes)\n"
+        
         if to_print == "" :
             to_print = "Aucune moyenne disponible, car ucune requête n'a été lancée."
+        
         return to_print
