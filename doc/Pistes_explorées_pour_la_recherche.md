@@ -30,7 +30,9 @@ Il existe cependant un projet regroupant LIRE et le SGDB Solr : https://github.c
 
 C'est ce projet qui est utilisée (Sous forme modifiée) pour Trace.Moe : https://github.com/soruly/trace.moe
 
-Cependant, cette implémentation sort forcément tous les vecteurs de caractéristiques de la BDD, et donc est forcément ralentit avec de grands jeux de données.
+LIRE intégré dans Solr semble être une solution intéressante, car le moteur CBIR est dans le SGDB, donc ça rapproche les données du code. De plus, Trace.Moe a un gigantesque jeu de données, et fonctionne très bien, preuve que ce système est intéressant.
+
+Son défaut est qu'il est complexe à mettre en oeuvre.
 
 
 ## Utiliser Milvus
@@ -67,7 +69,7 @@ Installation de Milvus sans Docker : https://github.com/milvus-io/milvus/blob/ma
 **Cependant, Milvus risque d'être une surconsommation de mémoire vive pour un gain minime lors d'une recherche sur un artiste.**
 
 
-## Divers
+## Comparaison de modèles et de libraries ANN
 
 Autre article intéressant sur la construction d'un moteur de recherche par image : https://www.oreilly.com/library/view/practical-deep-learning/9781492034858/ch04.html
 
@@ -77,4 +79,20 @@ Il compare aussi des librairies ANN = Approximate Nearest Neighbors (Annoy, NGT,
 
 Les codes sources sont disponibles ici : https://github.com/PracticalDL/Practical-Deep-Learning-Book/tree/master/code/chapter-4
 
+Autre comparaison des performances des librairies ANN : http://ann-benchmarks.com
+
 **Conclusion : Milvus est plus adapté à notre cas**, pour le parallélisme, à moins qu'on crée un thread qui gére la BDD via une librairie (Par exemple NGT). Et VGG16 aussi semble pas mal : Petits vecteurs, vitesse raisonnable, et "Top-1% accuracy" par trop mal (Même si ce n'est pas le meilleur).
+
+
+## PyTables
+
+PyTables, reposant sur la librairie HDF5, est une librairie de stockage de données dans SGDB, directement dans des fichiers. Cela permettrait de stocker les vecteurs de chaque compte Twitter dans un fichier séparé. On peut même aller plus loin et complétement réécrire la classe `SQLite_or_MySQL` pour ne pas utiliser du tout de SQL.
+
+Enorme intéret : Permet d'être indépendant, et de garder AOTF simple !
+Si on l'implémente, comparer ses performances avec notre MySQL actuel !
+Documentation : http://www.pytables.org/index.html
+
+Attention cependant au parallélisme : *Unlike most RDBMs, PyTables is not intended to serve concurrent accesses to a database. It has no protections whatsoever against corruption for different (or even the same) programs accessing the same database. Opening several handles to the same database in read-only mode is safe, though.*
+
+Question que je me suis posée : Est-ce que ça ne serait pas mieux d'utiliser une librairie ANN, comme Annoy ou NMSLIB par exemple (Recommandés dans l'article ci-dessus comme des libraires simples à utiliser). Parce que ces librairies reposent aussi sur HDF5, mais elles ont en plus le moteur intégré.
+Réponse : Le problèmes de ces libs, c'est que c'est compliqué d'ajouter de nouveaux vecteurs une fois le graphe de voisinage construit.
