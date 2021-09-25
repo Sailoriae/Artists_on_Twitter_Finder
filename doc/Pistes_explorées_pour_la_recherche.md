@@ -34,6 +34,8 @@ LIRE intégré dans Solr semble être une solution intéressante, car le moteur 
 
 Son défaut est qu'il est complexe à mettre en oeuvre.
 
+Note : Trace.Moe utilise l'algorithme de hashing ColorLayout (Implémenté dans LIRE, vient de MPEG-7). Au passage, les algo de hashing pourraient être une solution intéressante... A étudier !
+
 
 ## Utiliser Milvus
 
