@@ -198,7 +198,7 @@ class Metrics_Container :
             to_print += f"Etape 1 : Temps moyen pour passer dans le Link Finder : {self._step_1_times.get_mean()} ({self._step_1_times.get_count()} éxécutions)\n"
         
         if self._step_3_times.get_count() != 0 :
-            to_print += f"Etape 3 : Temps moyen pour éxécuter la recherche inversée : {self._step_3_times.get_mean()} ({self._step_3_times.get_count()} recherches de {int(self._step_3_usage_times.get_count()/self._step_3_times.get_count())} comparaisons en moyenne)\n"
+            to_print += f"Etape 3 : Temps moyen pour rechercher sur un compte : {self._step_3_times.get_mean()} ({self._step_3_times.get_count()} recherches de {int(self._step_3_usage_times.get_count()/self._step_3_times.get_count())} comparaisons en moyenne)\n"
         if self._step_3_select_times.get_count() != 0 :
             to_print += f" - Dont : Faire une requête SQL : {self._step_3_select_times.get_mean()} ({self._step_3_select_times.get_count()} requêtes)\n"
         if self._step_3_iteration_times.get_count() != 0 :
