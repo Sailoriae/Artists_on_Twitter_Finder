@@ -23,6 +23,15 @@ Les threads de traitement sont dans le sous-module `user_pipeline` et `scan_pipe
 - `error_collector` : Procédure conteneuse de chaque thread du serveur (Exécute les procédures ci-dessus). Permet de collecter les erreurs, de les enregistrer dans des fichiers, et de redémarrer le thread. Elle met aussi la requête en échec si le thread était en train de traiter une requête.
 
 
+Les fonctions dans le script `threads_launchers.py` permettent de lancer les threads dans le collecteur d'erreurs :
+
+- `launch_thread()` : Lancer un thread ou un processus sans conteneur.
+- `launch_identical_threads_in_container()` : Lancer plusieurs threads ou processus identiques, c'est à dire qu'ils utilisent la même procédure. Si ce sont des threads et que `ENABLE_MULTIPROCESSING` est activé, ils seront placés dans processus conteneur. Cela permet de rendre leur GIL indépendant, sans prendre autant de mémoire vive si tous ces threads étaient des processus.
+- `threads_container_for_unique_threads()` : Idem, mais pour des threads ou processus uniques.
+
+Tous les threads ou processus fils du script `app.py` sont éxécutés par une de ces trois fonctions. La seule exception est le thread du serveur Pyro, qui n'est pas éxécuté dans le collecteur d'erreurs.
+
+
 ## Liste des classes
 
 - `class_HTTP_Server` : Classe du serveur HTTP. Le serveur HTTP intégré contient uniquement l'API.

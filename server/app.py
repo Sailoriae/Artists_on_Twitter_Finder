@@ -33,7 +33,7 @@ if __name__ == "__main__" :
     try :
         from app.check_parameters import check_parameters
         
-        from app.error_collector import error_collector
+        from app.threads_launchers import launch_thread, launch_identical_threads_in_container, launch_unique_threads_in_container
         
         from app.thread_auto_update_accounts import thread_auto_update_accounts
         from app.thread_reset_SearchAPI_cursors import thread_reset_SearchAPI_cursors
@@ -156,111 +156,100 @@ if __name__ == "__main__" :
     
     
     """
-    Démarrage des threads.
+    Démarrage des threads ou processus.
     Ce ne sont pas les procédures qui sont exécutées directement, mais le
     collecteur d'erreurs qui exécute la procédure.
+    
+    IMPORTANT : Si on est en Multiprocessing, aucun thread ne doit être créé
+    directement en tant que fils de "app.py", car il y a déjà le serveur Pyro.
+    Les procédures qui peuvent rester des threads afin d'économiser de la RAM
+    doivent être éxécutés dans un processus conteneur.
+    
+    Voir le fichier "threads_launchers.py"...
     """
-    if param.ENABLE_MULTIPROCESSING :
-        import multiprocessing
-        threading.Thread = multiprocessing.Process # Très bourrin, mais évite de faire plein de "if"
+    # Liste contenant tous les threads ou processus
+    threads_or_process = []
     
-    # Liste contenant tous les threads
-    threads = []
+    threads_or_process.extend( launch_identical_threads_in_container(
+        thread_step_1_link_finder,
+        param.NUMBER_OF_STEP_1_LINK_FINDER_THREADS,
+        False, # Ne nécessitent pas des processus séparés (Seront placés dans un processus conteneur sui on est en Multiprocessing)
+        shared_memory_uri ) )
     
-    for i in range( param.NUMBER_OF_STEP_1_LINK_FINDER_THREADS ) :
-        thread = threading.Thread( name = f"step_1_link_finder_th{i+1}",
-                                   target = error_collector,
-                                   args = ( thread_step_1_link_finder, i+1, shared_memory_uri, ) )
-        thread.start()
-        threads.append( thread )
+    threads_or_process.extend( launch_identical_threads_in_container(
+        thread_step_2_tweets_indexer,
+        param.NUMBER_OF_STEP_2_TWEETS_INDEXER_THREADS,
+        False, # Ne nécessitent pas des processus séparés
+        shared_memory_uri ) )
     
-    for i in range( param.NUMBER_OF_STEP_2_TWEETS_INDEXER_THREADS ) :
-        thread = threading.Thread( name = f"step_2_tweets_indexer_th{i+1}",
-                                   target = error_collector,
-                                   args = ( thread_step_2_tweets_indexer, i+1, shared_memory_uri, ) )
-        thread.start()
-        threads.append( thread )
+    threads_or_process.extend( launch_identical_threads_in_container(
+        thread_step_3_reverse_search,
+        param.NUMBER_OF_STEP_3_REVERSE_SEARCH_THREADS,
+        True, # Nécessitent des processus séparés (Car il font de la recherche de vecteurs similaires)
+        shared_memory_uri ) )
     
-    for i in range( param.NUMBER_OF_STEP_3_REVERSE_SEARCH_THREADS ) :
-        thread = threading.Thread( name = f"step_3_reverse_search_th{i+1}",
-                                   target = error_collector,
-                                   args = ( thread_step_3_reverse_search, i+1, shared_memory_uri, ) )
-        thread.start()
-        threads.append( thread )
+    threads_or_process.extend( launch_identical_threads_in_container(
+        thread_step_4_filter_results,
+        param.NUMBER_OF_STEP_4_FILTER_RESULTS_THREADS,
+        False, # Ne nécessitent pas des processus séparés
+        shared_memory_uri ) )
     
-    for i in range( param.NUMBER_OF_STEP_4_FILTER_RESULTS_THREADS ) :
-        thread = threading.Thread( name = f"step_4_filter_results_th{i+1}",
-                                   target = error_collector,
-                                   args = ( thread_step_4_filter_results, i+1, shared_memory_uri, ) )
-        thread.start()
-        threads.append( thread )
+    threads_or_process.extend( launch_identical_threads_in_container(
+        thread_step_A_SearchAPI_list_account_tweets,
+        param.NUMBER_OF_STEP_A_SEARCHAPI_LIST_ACCOUNT_TWEETS_THREADS,
+        False, # Ne nécessitent pas des processus séparés
+        shared_memory_uri ) )
     
-    for i in range( param.NUMBER_OF_STEP_A_SEARCHAPI_LIST_ACCOUNT_TWEETS_THREADS ) :
-        thread = threading.Thread( name = f"step_A_SearchAPI_list_account_tweets_th{i+1}",
-                                   target = error_collector,
-                                   args = ( thread_step_A_SearchAPI_list_account_tweets, i+1, shared_memory_uri, ) )
-        thread.start()
-        threads.append( thread )
+    threads_or_process.extend( launch_identical_threads_in_container(
+        thread_step_B_TimelineAPI_list_account_tweets,
+        param.NUMBER_OF_STEP_B_TIMELINEAPI_LIST_ACCOUNT_TWEETS_THREADS,
+        False, # Ne nécessitent pas des processus séparés
+        shared_memory_uri ) )
     
-    for i in range( param.NUMBER_OF_STEP_B_TIMELINEAPI_LIST_ACCOUNT_TWEETS_THREADS ) :
-        thread = threading.Thread( name = f"step_B_TimelineAPI_list_account_tweets_th{i+1}",
-                                   target = error_collector,
-                                   args = ( thread_step_B_TimelineAPI_list_account_tweets, i+1, shared_memory_uri, ) )
-        thread.start()
-        threads.append( thread )
+    threads_or_process.extend( launch_identical_threads_in_container(
+        thread_step_C_SearchAPI_index_account_tweets,
+        param.NUMBER_OF_STEP_C_SEARCHAPI_INDEX_ACCOUNT_TWEETS,
+        True, # Nécessitent des processus séparés (Car ils font de l'indexation, donc de l'analyse d'images)
+        shared_memory_uri ) )
     
-    for i in range( param.NUMBER_OF_STEP_C_SEARCHAPI_INDEX_ACCOUNT_TWEETS ) :
-        thread = threading.Thread( name = f"step_C_SearchAPI_index_account_tweets_th{i+1}",
-                                   target = error_collector,
-                                   args = ( thread_step_C_SearchAPI_index_account_tweets, i+1, shared_memory_uri, ) )
-        thread.start()
-        threads.append( thread )
-    
-    for i in range( param.NUMBER_OF_STEP_D_TIMELINEAPI_INDEX_ACCOUNT_TWEETS ) :
-        thread = threading.Thread( name = f"step_D_TimelineAPI_index_account_tweets_th{i+1}",
-                                   target = error_collector,
-                                   args = ( thread_step_D_TimelineAPI_index_account_tweets, i+1, shared_memory_uri, ) )
-        thread.start()
-        threads.append( thread )
+    threads_or_process.extend( launch_identical_threads_in_container(
+        thread_step_D_TimelineAPI_index_account_tweets,
+        param.NUMBER_OF_STEP_D_TIMELINEAPI_INDEX_ACCOUNT_TWEETS,
+        True, # Nécessitent des processus séparés (Car ils font de l'indexation, donc de l'analyse d'images)
+        shared_memory_uri ) )
     
     
-    # On ne crée qu'un seul thread du serveur HTTP
+    # On ne crée qu'un seul thread (ou processus) du serveur HTTP
     # C'est lui qui va créer plusieurs threads grace à la classe :
     # http.server.ThreadingHTTPServer()
-    thread = threading.Thread( name = "http_server_th1",
-                               target = error_collector,
-                               args = ( thread_http_server, 1, shared_memory_uri, ) )
-    thread.start()
-    threads.append( thread )
+    threads_or_process.append( launch_thread(
+        thread_http_server,
+        1, True, # Nécessite un processus séparé
+        shared_memory_uri ) )
     
-    # On ne crée qu'un seul thread de mise à jour automatique
-    thread = threading.Thread( name = "auto_update_accounts_th1",
-                               target = error_collector,
-                               args = ( thread_auto_update_accounts, 1, shared_memory_uri, ) )
-    thread.start()
-    threads.append( thread )
     
-    # On ne crée qu'un seul thread de reset des curseurs d'indexation avec
-    # l'API de recherche
-    thread = threading.Thread( name = "thread_reset_SearchAPI_cursors_th1",
-                               target = error_collector,
-                               args = ( thread_reset_SearchAPI_cursors, 1, shared_memory_uri, ) )
-    thread.start()
-    threads.append( thread )
+    # Liste des procédures de maintenance
+    # Elles ne nécessitent pas d'être dans des processus séparés
+    # Et elles doivent être uniques
+    maintenance_procedures = []
+    maintenance_procedures.append( thread_auto_update_accounts ) # Mise à jour automatique
+    maintenance_procedures.append( thread_reset_SearchAPI_cursors ) # Reset des curseurs d'indexation avec l'API de recherche
+    maintenance_procedures.append( thread_remove_finished_requests ) # Délestage de la liste des requêtes
     
-    # On ne crée qu'un seul thread de délestage de la liste des requêtes
-    thread = threading.Thread( name = "remove_finished_requests_th1",
-                               target = error_collector,
-                               args = ( thread_remove_finished_requests, 1, shared_memory_uri, ) )
-    thread.start()
-    threads.append( thread )
+    # Lancer les procédures de maintenance
+    threads_or_process.extend( launch_unique_threads_in_container(
+        maintenance_procedures,
+        False, # Ne nécessitent pas des processus séparés
+        "thread_maintenance", # Respecte la convention de nommage
+        shared_memory_uri ) )
     
-    # On ne crée qu'un seul thread de retentative d'indexation de Tweets
-    thread = threading.Thread( name = "thread_retry_failed_tweets_th1",
-                               target = error_collector,
-                               args = ( thread_retry_failed_tweets, 1, shared_memory_uri, ) )
-    thread.start()
-    threads.append( thread )
+    
+    # Thread (ou processus) de retentative d'indexation de Tweets
+    # Il doit être unique, et placé dans un processus, car il fait de l'indexation
+    threads_or_process.append( launch_thread(
+        thread_retry_failed_tweets,
+        1, True, # Nécessite un processus séparé
+        shared_memory_uri ) )
     
     
     """
@@ -467,7 +456,7 @@ if __name__ == "__main__" :
     # Edit : N'est plus bloquant car on lui a mis un timeout
     
     # Attendre que les threads aient fini
-    for thread in threads :
+    for thread in threads_or_process :
         thread.join()
     
     if param.ENABLE_MULTIPROCESSING :
