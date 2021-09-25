@@ -213,6 +213,6 @@ class Metrics_Container :
             to_print += f"Temps moyen pour traiter une requête de scan : {self._scan_request_full_time.get_mean()} ({self._scan_request_full_time.get_count()} requêtes)\n"
         
         if to_print == "" :
-            to_print = "Aucune moyenne disponible, car ucune requête n'a été lancée."
+            to_print = "Aucune moyenne disponible, car aucune requête n'a été lancée."
         
         return to_print
