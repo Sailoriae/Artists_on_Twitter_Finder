@@ -17,6 +17,16 @@ if USE_OPENCV :
 else :
     SEUIL = 85 # pourcents
 
+# Désactiver la comparaison des images durant l'étape 4 (Filtrage des résultats).
+# Cela permet de gagner beaucoup de temps lors de l'éxécution des requêtes
+# utilisateurs, car aucune image n'est téléchargée ni comparée.
+# Cependant, il risque d'y avoir un peu plus de faux positifs, bien qu'on ne
+# puisse pas estimer les proportions, car il n'y a pas de suite de test à AOTF.
+# De toutes manières, l'algo de comparaison des images se trompe aussi sur les
+# images en noir et blanc, comme les croquis ("sketches") par exemple.
+# Donc laisser de préférence sur "True".
+SKIP_IMAGES_COMPARAISON = True
+
 if not USE_OPENCV :
     from PIL import Image, UnidentifiedImageError
     from io import BytesIO
@@ -93,7 +103,7 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
             compare_times = []
         
         # On utilise l'image téléchargée à l'étape 3
-        if USE_OPENCV :
+        if USE_OPENCV and not SKIP_IMAGES_COMPARAISON :
             try :
                 request_image = binary_image_to_cv2_image( request.query_image_as_bytes )
             except Exception as error :
@@ -106,7 +116,7 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
                 request.release_proxy()
                 continue
         
-        else :
+        elif not SKIP_IMAGES_COMPARAISON :
             try :
                 request_image = Image.open(BytesIO( request.query_image_as_bytes ))
             
@@ -139,6 +149,11 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
                 # Si on a déjà validé 20 images, on peut arrêter là
                 if len(new_found_tweets) > 20 :
                     break
+            
+            # Si on doit passer la comparaison des images
+            if SKIP_IMAGES_COMPARAISON :
+                new_found_tweets.append( image_in_db )
+                continue
             
             if param.ENABLE_METRICS : start_download = time()
             found_image = get_image( "https://pbs.twimg.com/media/" + image_in_db.image_name )
