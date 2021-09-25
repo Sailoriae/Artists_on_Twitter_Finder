@@ -39,7 +39,10 @@ def get_image ( url ) :
     retry_count = 0
     while True :
         try :
-            return Image.open(BytesIO( get_tweet_image(url) ))
+            image = get_tweet_image(url)
+            if image == None :
+                return None
+            return Image.open(BytesIO( image ))
         
         except UnidentifiedImageError as error :
             print( f"[compare_two_images] Erreur avec l'image : {url}" )
