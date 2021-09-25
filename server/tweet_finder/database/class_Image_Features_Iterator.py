@@ -22,6 +22,12 @@ from tweet_finder.database.class_Image_in_DB import Image_in_DB
 CBIR_LIST_LENGHT = 240
 
 
+# Utiliser des curseurs avec tampon, permet d'accélérer l'itération et la
+# recherche, mais consomme plus de mémoire vive
+# Fonctionne uniquement en cas de recherche pour un compte Twitter
+BUFFERED_CURSOR = True
+
+
 # Note :
 # Ca ne sert à rien de chercher une optimisation avec fetchmany(). En effet :
 # The fetchone() method is used by fetchall() and fetchmany().
@@ -57,7 +63,8 @@ class Image_Features_Iterator :
                         request_4,
                         ENABLE_METRICS = False ) :
         self.conn = conn
-        self.current_cursor = self.conn.cursor()
+        self.buffered_cursors = account_id != 0 and BUFFERED_CURSOR
+        self.current_cursor = self.conn.cursor( buffered = self.buffered_cursors )
         self.current_table = 1
         
         if account_id != 0 :
@@ -114,19 +121,19 @@ class Image_Features_Iterator :
                 raise StopIteration
             
             if self.current_table == 2 :
-                self.current_cursor = self.conn.cursor()
+                self.current_cursor = self.conn.cursor( buffered = self.buffered_cursors )
                 if self.account_id != 0 :
                     self.current_cursor.execute( self.request_2, ( self.account_id, ) )
                 else :
                     self.current_cursor.execute( self.request_2 )
             if self.current_table == 3 :
-                self.current_cursor = self.conn.cursor()
+                self.current_cursor = self.conn.cursor( buffered = self.buffered_cursors )
                 if self.account_id != 0 :
                     self.current_cursor.execute( self.request_3, ( self.account_id, ) )
                 else :
                     self.current_cursor.execute( self.request_3 )
             if self.current_table == 4 :
-                self.current_cursor = self.conn.cursor()
+                self.current_cursor = self.conn.cursor( buffered = self.buffered_cursors )
                 if self.account_id != 0 :
                     self.current_cursor.execute( self.request_4, ( self.account_id, ) )
                 else :
