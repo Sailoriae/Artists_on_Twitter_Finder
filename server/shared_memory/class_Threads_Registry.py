@@ -38,6 +38,10 @@ class Threads_Registry :
         # Dictionnaire associant les threads à l'URI de la requête qu'il est en
         # train de traiter.
         self._requests_dict = {}
+        
+        # Se charger d'enregistrer le thread du serveur Pyro
+        # Respecte la convention de nommage des threads
+        self.register_thread( "thread_pyro_server_th1", os.getpid() )
     
     """
     Enregistrer un thread / un processus.
@@ -82,17 +86,20 @@ class Threads_Registry :
     def get_status ( self ) :
         to_print = ""
         total_memory_size = 0
+        pid_memory_size = [] # Liste des PID déjà comptés dans "total_memory_size"
         sorted_dict = sorted( self._pid_dict.items() )
         for (key, value) in sorted_dict :
             # Affichage identique pour tous les threads
             to_print += f"[PID {value}] " + key
             
             # Affichage du poid en mémoire du thread
-            if param.ENABLE_MULTIPROCESSING :
+            # On vérifie de ne pas compter deux fois le même PID
+            if param.ENABLE_MULTIPROCESSING and not int(value) in pid_memory_size :
                 process_size = psutil.Process( int(value) ).memory_info().rss # en octets
                 process_size = process_size / 1024 / 1024 # en megaoctets
                 to_print += " ({:.2f} Mo)".format( process_size )
                 total_memory_size += process_size
+                pid_memory_size.append( int(value) )
             
             try :
                 request = self._requests_dict[key]

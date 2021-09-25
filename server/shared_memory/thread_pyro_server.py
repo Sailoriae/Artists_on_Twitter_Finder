@@ -28,6 +28,7 @@ Voir la classe Shared_Memory pour la doc des paramètres.
 def thread_pyro_server( pyro_port = 3300, pool_size = 100000 ) :
     try :
         shared_memory = Shared_Memory( pyro_port, pool_size )
+        # La classe "Threads_Registry" se charge d'enregistrer le thread du serveur Pyro
         
         print( "Démarrage du serveur de mémoire partagée Pyro..." )
         shared_memory.launch_pyro_server()
