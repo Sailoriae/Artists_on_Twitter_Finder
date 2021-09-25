@@ -36,6 +36,8 @@ if __name__ == "__main__" :
 
 import parameters as param
 
+from tweet_finder.compare_two_images import get_image
+
 if USE_OPENCV :
     from tweet_finder.compare_two_images import compare_two_images_with_opencv
     from tweet_finder.utils.url_to_cv2_image import binary_image_to_cv2_image
@@ -87,6 +89,8 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
         
         if param.ENABLE_METRICS :
             start = time()
+            download_times = []
+            compare_times = []
         
         # On utilise l'image téléchargée à l'étape 3
         if USE_OPENCV :
@@ -136,13 +140,18 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
                 if len(new_found_tweets) > 20 :
                     break
             
+            if param.ENABLE_METRICS : start_download = time()
+            found_image = get_image( "https://pbs.twimg.com/media/" + image_in_db.image_name )
+            if param.ENABLE_METRICS : download_times.append( time() - start_download )
+            
             # Les deux fonctions utilisent get_tweet_image(), donc prennent
             # bien les images de Tweets en qualité maximale !
-            image_url = "https://pbs.twimg.com/media/" + image_in_db.image_name
+            if param.ENABLE_METRICS : start_compare = time()
             if USE_OPENCV :
-                similarity_percentage = compare_two_images_with_opencv( request_image, image_url, PRINT_METRICS = False )
+                similarity_percentage = compare_two_images_with_opencv( request_image, found_image, PRINT_METRICS = False )
             else :
-                similarity_percentage = compare_two_images( request_image, image_url, PRINT_METRICS = False )
+                similarity_percentage = compare_two_images( request_image, found_image, PRINT_METRICS = False )
+            if param.ENABLE_METRICS : compare_times.append( time() - start_compare )
             
             # Il faut que l'image trouvée et celle de requête se ressemblent à
             # au moins SEUIL en %
@@ -155,7 +164,7 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
         print( f"[step_3_th{thread_id}] Tweets trouvés après filtrage (Du plus au moins proche) : {[ data.tweet_id for data in request.found_tweets ]}" )
         
         if param.ENABLE_METRICS :
-            shared_memory_execution_metrics.add_step_4_times( time() - start )
+            shared_memory_execution_metrics.add_step_4_times( time() - start, download_times, compare_times )
         
         # Dire qu'on n'est plus en train de traiter cette requête
         shared_memory_threads_registry.set_request( f"thread_step_4_filter_results_th{thread_id}", None )
