@@ -68,7 +68,8 @@ méthode indépendante de celle des histogrammes pour dire que deux images sont
 les mêmes.
 
 Note : S'arrête si la distance du Khi-Carré s'éloigne de 0.5 de la première image
-validée, ou après 20 images validées.
+validée, ou si l'une des deux distance s'éloigne de x10 par rapport à la première
+image, ou après 20 images validées.
 """
 def thread_step_4_filter_results( thread_id : int, shared_memory ) :
     # Maintenir ouverts certains proxies vers la mémoire partagée
@@ -144,6 +145,12 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
                 # A moins que Twitter aient changés leur algo de compression,
                 # mais c'est pas grave (Ce qu'ils ont fait en 2019)
                 if image_in_db.distance_chi2 - new_found_tweets[0].distance_chi2 > 0.5 :
+                    break
+                
+                # Si l'une des deux distances fait x10 par rapport à la première
+                # image validée, on peut arrêter là
+                if ( image_in_db.distance_chi2 > new_found_tweets[0].distance_chi2 * 10 or
+                     image_in_db.distance_bhattacharyya > new_found_tweets[0].distance_bhattacharyya * 10 ) :
                     break
                 
                 # Si on a déjà validé 20 images, on peut arrêter là
