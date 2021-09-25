@@ -4,6 +4,7 @@
 import queue
 from time import sleep, time
 import urllib
+from math import sqrt
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
 # Ainsi, si on veut utiliser ce script indépendemment (Notemment pour des
@@ -90,6 +91,8 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
                                                add_step_3_times = shared_memory_execution_metrics.add_step_3_times,
                                                query_image_binary = request.query_image_as_bytes )
             if result != None :
+                for tweet in result : # Utilisé pour le tri des résultats
+                    tweet.euclidean = sqrt( tweet.distance_chi2 ** 2 + tweet.distance_bhattacharyya ** 2 )
                 request.found_tweets += result
             else :
                 print( f"[step_3_th{thread_id}] L'image d'entrée est intraitable." )
@@ -101,15 +104,20 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
             
             result = cbir_engine.search_tweet( request.image_url, add_step_3_times = shared_memory_execution_metrics.add_step_3_times )
             if result != None :
+                for tweet in result : # Utilisé pour le tri des résultats
+                    tweet.euclidean = sqrt( tweet.distance_chi2 ** 2 + tweet.distance_bhattacharyya ** 2 )
                 request.found_tweets += result
             else :
                 print( f"[step_3_th{thread_id}] Erreur lors de la recherche inversée d'image." )
         
         # Trier la liste des résultats
-        # On trie une liste d'objets par rapport à leur attribut "distance_chi2"
+        # On trie avec la distance euclidienne des deux tests par rapport aux centre (0,0)
+        # En gros, on fait un plan avec la distance du Khi-Deux et la distance de Bhattacharyya
+        # Intéressant dans le cas de croquis, où les deux sont très faible
+        # Autrement, si le Khi-Deux explose, et c'est lui qui est déterminant
         request.found_tweets = sorted( request.found_tweets,
-                                         key = lambda x: x.distance_chi2,
-                                         reverse = False )
+                                       key = lambda x: x.euclidean,
+                                       reverse = False )
         
         # On ne garde que les 5 Tweets les plus proches
 #        request.found_tweets = request.found_tweets[:5]

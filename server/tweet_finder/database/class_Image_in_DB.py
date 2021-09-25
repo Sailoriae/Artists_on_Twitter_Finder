@@ -32,3 +32,7 @@ class Image_in_DB :
         # l'image de requête et cette image dans la base de données
         self.distance_chi2 : int = None
         self.distance_bhattacharyya : int = None
+        
+        # Utilisé pour le tri et le filtrage des résultats
+        # Euclidienne dans le plan des deux distance avec le centre (0,0)
+        self.euclidean : float = None
