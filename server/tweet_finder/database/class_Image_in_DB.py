@@ -20,18 +20,18 @@ class Image_in_DB :
                  account_id : int,
                  tweet_id : int,
                  image_name : str,
-                 image_features : List[int],
+                 image_features : List[float],
                  image_position : int ) :
         self.account_id : int = account_id
         self.tweet_id : int = tweet_id
-        self.image_name = image_name
-        self.image_features : List[int] = image_features
+        self.image_name : str = image_name
+        self.image_features : List[float] = image_features
         self.image_position : int = image_position
         
         # Utilisé par le module "cbir_engine" pour stocker la distance entre
         # l'image de requête et cette image dans la base de données
-        self.distance_chi2 : int = None
-        self.distance_bhattacharyya : int = None
+        self.distance_chi2 : float = None
+        self.distance_bhattacharyya : float = None
         
         # Utilisé pour le tri et le filtrage des résultats
         # Euclidienne dans le plan des deux distance avec le centre (0,0)
