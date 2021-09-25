@@ -7,3 +7,11 @@ Grace au double calcul de distances (Khi-Deux et Bhattacharyya / Hellinger), si 
 D'où l'intérêt de l'étape 4 (Filtrage des résultats). Même si cette étape a aussi du mal.
 
 Il y a donc de grandes améliorations à faire, au point de pouvoir supprimer l'étape 4.
+
+## Histogramme 3D d'une image en noir et blanc
+
+![Histogramme 3D d'une image en noir et blanc](Histogramme_image_en_noir_et_blanc.png)
+
+Le problème saute aux yeux. En effet, en noir et blanc, seul "Value" change. Et comme on l'a mis sur seulement 3 échantillons, et que les images sont plus souvent claires, tout est sur un seul échantillon de l'histogramme 3D.
+
+Ce qui nous sauve un peu, c'est qu'on fait 5 histogrammes 3D par image (Dans 5 zones différentes)
