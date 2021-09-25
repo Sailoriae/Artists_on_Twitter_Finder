@@ -127,13 +127,14 @@ class Metrics_Container :
     
     """
     @param step_3_times Temps d'éxécution pour faire la recherche inversée.
+                        Doit être dans une liste.
     @param step_3_select_times Liste des temps d'éxécution des SELECT en SQL.
     @param step_3_iteration_times Liste des temps d'éxécution pour itérer sur
                                   la base de données.
     @param step_3_usage_times Liste des temps d'éxécution de l'utilisation.
     """
     def add_step_3_times ( self, step_3_times, step_3_select_times, step_3_iteration_times, step_3_usage_times ) :
-        self._step_3_times.add_one( step_3_times )
+        self._step_3_times.add_many( step_3_times )
         self._step_3_select_times.add_many( step_3_select_times )
         self._step_3_iteration_times.add_many( step_3_iteration_times )
         self._step_3_usage_times.add_many( step_3_usage_times )

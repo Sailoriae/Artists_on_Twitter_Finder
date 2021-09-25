@@ -124,7 +124,7 @@ class Image_Features_Iterator :
                         print( f"[Images_It] Temps moyen d'itération : {mean(self.iteration_times)} secondes." )
                         print( f"[Images_It] Temps moyen d'utilisation : {mean(self.usage_times)} secondes." )
                     if self.add_step_3_times != None :
-                        self.add_step_3_times( time() - self.start, self.select_times, self.iteration_times, self.usage_times )
+                        self.add_step_3_times( [], self.select_times, self.iteration_times, self.usage_times )
                 raise StopIteration
             
             if self.current_table == 2 :

@@ -91,7 +91,8 @@ class Reverse_Searcher :
             return None
         
         if self.DEBUG or self.ENABLE_METRICS :
-            print( f"La recherche s'est faite en {time() - start} secondes." )
+            print( f"[Reverse_Searcher] La recherche s'est faite en {time() - start} secondes." )
+            add_step_3_times( [ time() - start ], [], [], [] )
         
         # Suppression des attributs "image_features" pour gagner un peu de
         # mémoire
