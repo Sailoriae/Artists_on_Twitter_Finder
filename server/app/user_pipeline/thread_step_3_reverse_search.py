@@ -92,7 +92,7 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
                                                query_image_binary = request.query_image_as_bytes )
             if result != None :
                 for tweet in result : # Utilisé pour le tri des résultats
-                    tweet.euclidean = sqrt( tweet.distance_chi2 ** 2 + tweet.distance_bhattacharyya ** 2 )
+                    tweet.euclidean = sqrt( tweet.distance_chi2 ** 2 + ( tweet.distance_bhattacharyya*10 ) ** 2 )
                 request.found_tweets += result
             else :
                 print( f"[step_3_th{thread_id}] L'image d'entrée est intraitable." )
