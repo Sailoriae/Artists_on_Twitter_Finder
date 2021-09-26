@@ -1,5 +1,15 @@
 # Module Moteur CBIR
 
+Ceci est l'ancien moteur de recherche par image d'AOTF, qui utilise la méthode des histogrammes colorimétriques pour extraire le vecteur des caractéristiques d'une image.
+
+Il a été utilisé depuis le début d'AOTF (Premier commit le 1er juillet 2020), jusqu'à son remplacement le 26 septembre 2021.
+
+Le gros problème de ce moteur est que l'hitogramme colorométique prenanait beaucoup de place, souvent vide, notamment pour les images avec "peu de données" (Très claires).
+
+Il a été remplacé par le moteur actuel, qui utilise la méthode des empreintes d'images ("image hash").
+
+___
+
 Il n'existe pas de librairie pour faire du Content-Based Image Retrieval (CBIR) en Python. J'ai donc été obligé de faire mon propre système, en utilisant de préférence OpenCV afin qu'il aille plus vite.
 
 Comme le but de ce projet est plus grand que le moteur de CBIR, je me suis basé sur l'article "The complete guide to building an image search engine with Python and OpenCV", écrit par Adrian Rosebrock, et présenté sur le site www.pyimagesearch.com. Une partie des codes de cet article sont réutilisés ici, notamment l'objet ColorDescriptor qui est presque entièrement tiré de cet article.
