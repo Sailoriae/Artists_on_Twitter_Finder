@@ -19,7 +19,7 @@ if __name__ == "__main__" :
     path.append(get_wdir())
 
 from tweet_finder.cbir_engine.class_CBIR_Engine import CBIR_Engine
-from tweet_finder.utils.url_to_cv2_image import binary_image_to_cv2_image
+from tweet_finder.utils.url_to_PIL_image import binary_image_to_PIL_image
 from tweet_finder.utils.get_tweet_image import get_tweet_image
 
 
@@ -52,7 +52,7 @@ class CBIR_Engine_for_Tweets_Images :
                 if download_image_times != None : download_image_times.append( time() - start )
                 
                 if calculate_features_times != None : start = time()
-                to_return = self.cbir_engine.index_cbir( binary_image_to_cv2_image( image ) )
+                to_return = self.cbir_engine.index_cbir( binary_image_to_PIL_image( image ) )
                 if calculate_features_times != None : calculate_features_times.append( time() - start )
                 return to_return
             

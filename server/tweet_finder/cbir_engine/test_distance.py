@@ -15,7 +15,7 @@ if __name__ == "__main__" :
     path.append(get_wdir())
 
 from tweet_finder.cbir_engine.class_CBIR_Engine import CBIR_Engine, MAX_DIFFERENT_BITS
-from tweet_finder.utils.url_to_cv2_image import url_to_cv2_image
+from tweet_finder.utils.url_to_PIL_image import url_to_PIL_image
 
 
 """
@@ -26,8 +26,8 @@ lancer la comparaison comme le ferait AOTF en éxécution.
 """
 def test_distance( url1, url2 ) :
     engine = CBIR_Engine()
-    image1_hash = engine.index_cbir( url_to_cv2_image( url1 ) )
-    image2_hash = engine.index_cbir( url_to_cv2_image( url2 ) )
+    image1_hash = engine.index_cbir( url_to_PIL_image( url1 ) )
+    image2_hash = engine.index_cbir( url_to_PIL_image( url2 ) )
     
     distance = engine._hamming_distance( image1_hash, image2_hash )
     print( "Nombre de bits de différence :", distance )

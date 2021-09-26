@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-import cv2
-import numpy as np
+from PIL import Image
+import imagehash
 
 
 # Taille des empreintes. La taille des empreintes en bits sera le carré de
@@ -14,35 +14,27 @@ HASH_SIZE = 8
 # empreintes (Défini ci-dessus).
 # Le choix de 10 bits pour des empreintes de 64 vient de l'article suivant :
 # http://www.hackerfactor.com/blog/?/archives/529-Kind-of-Like-That.html
-MAX_DIFFERENT_BITS = 10
+# Sauf que pHash est tellement précis que j'ai réduit à 6 bits.
+MAX_DIFFERENT_BITS = 6
 
 
 """
 Moteur de recherche d'image par le contenu ("content-based image retrieval",
 CBIR), généraliste, mais ne stocke rien ! La comparaison entre les images se
-fait par calcul d'empreintes, grâce à l'algorithme dHash.
+fait par calcul d'empreintes, grâce à l'algorithme pHash.
+
+Apparemment, pHash génére moins de collision de dHash. Source :
+https://www.hackerfactor.com/blog/?/archives/529-Kind-of-Like-That.html
 """
 class CBIR_Engine :
     """
     Calculer l'empreinte d'une image.
-    https://www.pyimagesearch.com/2017/11/27/image-hashing-opencv-python/
-    @param image Une image, au format de la librairie Python-OpenCV (BGR).
+    @param image Une image au format PIL.Image.
     @return Son empreinte.
     """
-    def _dhash( self, image : np.ndarray ) -> int :
-        # Convertir l'image en niveaux de gris (Noir et blanc)
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        
-        # Redimensionner l'image, en ajoutant une colonne (Largeur) par rapport
-        # au lignes (Hauteur) pour pouvoir calculer le gradient horizontal
-        resized = cv2.resize(gray, (HASH_SIZE + 1, HASH_SIZE))
-        
-        # Calculer le gradient horizontalement (Relatif) entre les colonnes
-        # adjacentes
-        diff = resized[:, 1:] > resized[:, :-1]
-        
-        # Convertir cette liste en un nombre unique
-        return sum([2 ** i for (i, v) in enumerate(diff.flatten()) if v])
+    def _phash( self, image : Image ) -> int :
+        hash_list = imagehash.phash( image ).hash.flatten()
+        return int( "".join(str(b) for b in 1 * hash_list), 2 )
     
     """
     Comparaison bits à bits en calculant la distance de Hamming entre deux
@@ -56,16 +48,16 @@ class CBIR_Engine :
     
     """
     Calculer l'empreinte d'une image en vue de l'indexer.
-    @param image Une image, au format de la librairie Python-OpenCV (BGR).
+    @param image Une image au format PIL.Image.
     @return Son empreinte.
     """
-    def index_cbir( self, image : np.ndarray ) -> int :
-        return self._dhash( image )
+    def index_cbir( self, image : Image ) -> int :
+        return self._phash( image )
     
     """
     Recherche par image.
     
-    @param image Image de requête, au format de la librairie Python-OpenCV.
+    @param image Image de requête, au format PIL.Image.
     @param images_iterator Itérateur sur la base de données, revoyant des
                            objets contenant les attributs suivants :
                            - image_hash : L'empreinte de l'image,
@@ -77,14 +69,14 @@ class CBIR_Engine :
             seulement celles qui ont des distances de l'image de requête
             inférieures à la variable de seuil (Voir ci-dessus).
     """
-    def search_cbir( self, image : np.ndarray, images_iterator ) :
+    def search_cbir( self, image : Image, images_iterator ) :
         # Liste des images de l'itérateur qu'on a validées
         results = []
         
         # On commence par calculer l'empreinte de l'image de requête, afin de
         # la comparer aux empreintes des images dans la base de données (Ou
         # plutôt celles proposées par l'itérateur)
-        query_hash = self._dhash( image )
+        query_hash = self._phash( image )
         
         # On itére sur toutes les images que nous propose l'itérateur
         for image in images_iterator :

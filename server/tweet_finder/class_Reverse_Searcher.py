@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-from cv2 import error as ErrorOpenCV
 from time import time
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
@@ -20,8 +19,8 @@ if __name__ == "__main__" :
 from tweet_finder.cbir_engine.class_CBIR_Engine import CBIR_Engine
 from tweet_finder.database.class_SQLite_or_MySQL import SQLite_or_MySQL
 from tweet_finder.twitter.class_TweepyAbstraction import TweepyAbstraction
-from tweet_finder.utils.url_to_cv2_image import url_to_cv2_image
-from tweet_finder.utils.url_to_cv2_image import binary_image_to_cv2_image
+from tweet_finder.utils.url_to_PIL_image import url_to_PIL_image
+from tweet_finder.utils.url_to_PIL_image import binary_image_to_PIL_image
 import parameters as param
 
 
@@ -68,9 +67,9 @@ class Reverse_Searcher :
         
         try :
             if query_image_binary == None :
-                image = url_to_cv2_image( image_url )
+                image = url_to_PIL_image( image_url )
             else :
-                image = binary_image_to_cv2_image( query_image_binary )
+                image = binary_image_to_PIL_image( query_image_binary )
         except Exception as error :
             print( f"L'URL \"{image_url}\" ne mène pas à une image !" )
             print( error )
@@ -86,8 +85,8 @@ class Reverse_Searcher :
             to_return = self.cbir_engine.search_cbir( image, iterator )
         # Si j'amais l'image passée a un format à la noix et fait planter notre
         # moteur CBIR
-        except ErrorOpenCV :
-            print( ErrorOpenCV )
+        except Exception as error :
+            print( error )
             return None
         
         if self.DEBUG or self.ENABLE_METRICS :
