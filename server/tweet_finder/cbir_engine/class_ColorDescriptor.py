@@ -46,6 +46,7 @@ class ColorDescriptor :
     """
     def describe( self, image : np.ndarray ) -> List[float] :
         # Convertir l'image depuis RGB vers HSV
+        # Note : cv2.imdecode() décode toujours les images vers du BGR
         image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
         
         # Initialiser la liste des caractéristiques de l'image que l'on va
