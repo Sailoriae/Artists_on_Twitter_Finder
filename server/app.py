@@ -316,7 +316,7 @@ if __name__ == "__main__" :
                 request = shared_memory_user_requests.get_request( args[1] )
                 if request != None :
                     print( f"Comptes Twitter trouvés : {', '.join( [ f'@{account[0]} (ID {account[1]})' for account in request.twitter_accounts_with_id ] )}" )
-                    print( f"Résultat : {[ (data.tweet_id, data.distance_chi2, data.distance_bhattacharyya ) for data in request.found_tweets ]}" )
+                    print( f"Résultat : {[ (data.tweet_id, data.distance ) for data in request.found_tweets ]}" )
                 else :
                     print( "Requête inconnue pour cet URL !" )
             else :

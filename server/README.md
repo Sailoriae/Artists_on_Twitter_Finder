@@ -25,7 +25,7 @@ Ceci lance le serveur et vous met en ligne de commande. Si vous souhaitez quitte
 ## Fonctionnalités
 
 * Base de données stockant les comptes et les Tweets.
-* Moteur de calcul de caractéristiques d'une image (Moteur CBIR).
+* Moteur de calcul de l'empreinte d'une image (Moteur CBIR).
 * Parallélisme : 2 pipelines de traitement, divisés en étapes séparés dans des threads de traitement, avec files d'attentes :
   - Traitement des requêtes des utilisateurs, en 4 étapes, exécutées l'une après l'autres. Voir [`app/user_pipeline`](app/user_pipeline).
   - Traitement des requêtes d'indexation / de scan d'un comte Twitter, en 4 étapes paralléles. Voir [`app/scan_pipeline`](app/scan_pipeline).
@@ -36,7 +36,7 @@ Ceci lance le serveur et vous met en ligne de commande. Si vous souhaitez quitte
   - Filtrage des résultats de la recherche inversée, car il peut y avoir des faux positifs.
 * Traitement des requêtes de scan en 4 étapes paralléles (Module [`tweet_finder`](tweet_finder)) :
   - API de recherche : Listage des Tweets des comptes Twitter trouvés. Classe principale : [`Tweets_Lister_with_SearchAPI`](tweet_finder/class_Tweets_Lister_with_SearchAPI.py).
-  - API de recherche : Analyse et indexation des Tweets trouvés. L'analyse consiste au calcul des caractéristiques de l'image avec le moteur CBIR. Classe principale : [`Tweets_Indexer`](tweet_finder/class_Tweets_Indexer.py) (Utilisée aussi pour l'API de timeline).
+  - API de recherche : Analyse et indexation des Tweets trouvés. L'analyse consiste au calcul de l'empreinte ("hash") de l'image avec le moteur CBIR. Classe principale : [`Tweets_Indexer`](tweet_finder/class_Tweets_Indexer.py) (Utilisée aussi pour l'API de timeline).
   - API de timeline : Listage des Tweets des comptes Twitter trouvés. Classe principale : [`Tweets_Lister_with_TimelineAPI`](tweet_finder/class_Tweets_Lister_with_TimelineAPI.py).
   - API de timeline : Analyse et indexation des Tweets des comptes Twitter trouvés. Classe principale : [`Tweets_Indexer`](tweet_finder/class_Tweets_Indexer.py) (Utilisée aussi pour l'API de recherche).
   - Voir pourquoi il y a deux systèmes d'indexation, soit deux API utilisées, dans [`../doc/Limites_de_scan_des_comptes_Twitter.md`](../doc/Limites_de_scan_des_comptes_Twitter.md). Pour faire simple : L'API de timeline est limitée aux 3 200 Tweets les plus récents des comptes à indexer (Retweets inclus), et l'API de recherche est limité à ce que Twitter indexent dans leur recherche. Utiliser les deux API permet d'être le plus exhaustif possible lors de l'indexation des comptes qui ont plus de 3 200 Tweets.
@@ -89,7 +89,7 @@ Script [`app.py`](app.py) : Script central, crée et gère les threads de traite
 
 * La date de dernière mise à jour d'un compte Twitter est mise dans la base de données à la fin des 2 étapes d'indexation (Indexation avec l'API de recherche et indexation avec l'API de timeline). Si l'un des threads de traitement plante, la requête est mise en erreur, et aucune date n'est enregistrée. Ainsi, l'intégralité des Tweets qu'il est possible de récupérer ont étés analysés et ceux avec une ou plusieurs image sont dans la base de données.
 
-* Si l'image d'un Tweet a été perdue par Twitter, ou qu'il s'est produit une erreur, elle est de toutes manières enregistrée dans la base de données, avec des `NULL` pour liste de caractéristiques.
+* Si l'image d'un Tweet a été perdue par Twitter, ou qu'il s'est produit une erreur, elle est de toutes manières enregistrée dans la base de données, et son empreinte est mise à `NULL` (Mais son nom est quand même enregistré).
   Si il s'est produit une erreur, elle sont journalisées ici.
 
 * Les curseurs d'indexation sont enregistrés une fois l'indexation terminée. D'une manière générale, l'ajout ou la modifications de données dans la base de données est pensé pour qu'un arrêt brutal (Crash ou kill) d'un thread ou du serveur complet n'ait pas d'impact sur la cohérence des données.

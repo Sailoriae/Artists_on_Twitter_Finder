@@ -34,8 +34,7 @@ def generate_user_request_json ( request, response_dict = None ) -> dict :
         tweet_dict = { "tweet_id" : str(result.tweet_id),
                        "account_id" : str(result.account_id),
                        "image_position" : result.image_position,
-                       "distance_chi2" : result.distance_chi2,
-                       "distance_bhattacharyya" : result.distance_bhattacharyya }
+                       "distance" : result.distance }
         response_dict["results"].append( tweet_dict )
     
     response_dict["error"] = request.problem

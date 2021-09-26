@@ -3,6 +3,8 @@
 
 from typing import List
 from datetime import datetime
+from time import time
+from statistics import mean
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
 # Ainsi, si on veut utiliser ce script indépendemment (Notemment pour des
@@ -17,31 +19,42 @@ if __name__ == "__main__" :
     change_wdir( "../.." )
     path.append(get_wdir())
 
-from tweet_finder.database.class_Image_Features_Iterator import Image_Features_Iterator
-from tweet_finder.database.sql_requests_dict import sql_requests_dict
 import parameters as param
+from tweet_finder.database.class_Image_in_DB import Image_in_DB
+from tweet_finder.cbir_engine.class_CBIR_Engine import HASH_SIZE
 
 if param.USE_MYSQL_INSTEAD_OF_SQLITE :
     import mysql.connector
 else :
     import sqlite3
 
-# Nombre de valeurs dans la liste renvoyée par le moteur CBIR
-# SI CE PARAMETRE EST CHANGE, IL FAUT RESET LA BASE DE DONNEES !
-CBIR_LIST_LENGHT = 240
-
 
 # Note : Si on veut optimiser les perfs lors de la recherche, il faut :
 # 1 - Utiliser MySQLdb, doc : https://mysqlclient.readthedocs.io/index.html
-# 2 - Arrêter les "INNER JOIN" entre la table des Tweets et les tables
-#     d'images. Ca prend trop de temps par rapport à un simple "SELECT".
-# 3 - Faire des "fetchmany()" dans l'itérateur des images.
+# 2 - Faire des "fetchmany()" dans l'itérateur des images.
 # Avec MySQLdb, fait un "SELECT * FROM tweets" prend 2 secondes par millions
 # d'images. La recherche dans toute la BDD reste donc compliquée. Est-ce que ça
 # vaut le coup ?
 # Autre gros problème : MySQLdb utilise forcément des curseurs buffered. Ce qui
 # fait exploser la RAM lors d'un gros SELECT... Comme par exemple lors de la
 # recherche.
+
+
+"""
+Calcul de la taille nécessaire pour stocker les empreintes des images.
+"""
+HASH_SIZE_BYTES = HASH_SIZE**2 // 8 # en octets
+if ( HASH_SIZE**2 % 8 ) > 0 : HASH_SIZE_BYTES += 1
+
+"""
+Fonction utilisée pour le stockage des empreintes des images.
+"""
+def to_bin( value : int ) -> bytes :
+    if value != None : return value.to_bytes(HASH_SIZE_BYTES, byteorder="big")
+    return None
+def to_int( value : bytes ) -> int :
+    if value != None : return int.from_bytes(value, byteorder="big")
+    return None
 
 
 """
@@ -71,88 +84,6 @@ class SQLite_or_MySQL :
         c = self.conn.cursor()
         
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
-            tweets_table = """CREATE TABLE IF NOT EXISTS tweets (
-                                  account_id BIGINT UNSIGNED,
-                                  tweet_id BIGINT UNSIGNED PRIMARY KEY,
-                                  hashtags TEXT )"""
-            
-            tweets_images_1_table = """CREATE TABLE IF NOT EXISTS tweets_images_1 (
-                                           tweet_id BIGINT UNSIGNED PRIMARY KEY,
-                                           image_name TEXT,"""
-            tweets_images_2_table = """CREATE TABLE IF NOT EXISTS tweets_images_2 (
-                                           tweet_id BIGINT UNSIGNED PRIMARY KEY,
-                                           image_name TEXT,"""
-            tweets_images_3_table = """CREATE TABLE IF NOT EXISTS tweets_images_3 (
-                                           tweet_id BIGINT UNSIGNED PRIMARY KEY,
-                                           image_name TEXT,"""
-            tweets_images_4_table = """CREATE TABLE IF NOT EXISTS tweets_images_4 (
-                                           tweet_id BIGINT UNSIGNED PRIMARY KEY,
-                                           image_name TEXT,"""
-            
-            # On stocker les listes de caractéristiques sur plusieurs colonnes
-            # Cf. moteur CBIR, listes de 240 valeurs
-            # Comme le moteur CBIR renvoit des listes de numpy.float32, c'est à
-            # des floats sur 32 bits, on a besoin que de 4 octets pour les stocker,
-            # donc les FLOAT qui prennent 4 octets
-            for feature_id in range( 0, CBIR_LIST_LENGHT ) : # 240 valeurs à stocker
-                tweets_images_1_table += " image_1_feature_" + str(feature_id) + " FLOAT UNSIGNED,"
-                tweets_images_2_table += " image_2_feature_" + str(feature_id) + " FLOAT UNSIGNED,"
-                tweets_images_3_table += " image_3_feature_" + str(feature_id) + " FLOAT UNSIGNED,"
-                tweets_images_4_table += " image_4_feature_" + str(feature_id) + " FLOAT UNSIGNED,"
-        
-        else :
-            tweets_table = """CREATE TABLE IF NOT EXISTS tweets (
-                                  account_id UNSIGNED BIGINT,
-                                  tweet_id UNSIGNED BIGINT PRIMARY KEY,
-                                  hashtags TEXT )"""
-            
-            tweets_images_1_table = """CREATE TABLE IF NOT EXISTS tweets_images_1 (
-                                           tweet_id UNSIGNED BIGINT PRIMARY KEY,
-                                           image_name TEXT,"""
-            tweets_images_2_table = """CREATE TABLE IF NOT EXISTS tweets_images_2 (
-                                           tweet_id UNSIGNED BIGINT PRIMARY KEY,
-                                           image_name TEXT,"""
-            tweets_images_3_table = """CREATE TABLE IF NOT EXISTS tweets_images_3 (
-                                           tweet_id UNSIGNED BIGINT PRIMARY KEY,
-                                           image_name TEXT,"""
-            tweets_images_4_table = """CREATE TABLE IF NOT EXISTS tweets_images_4 (
-                                           tweet_id UNSIGNED BIGINT PRIMARY KEY,
-                                           image_name TEXT,"""
-            
-            # On stocker les listes de caractéristiques sur plusieurs colonnes
-            # Cf. moteur CBIR, listes de 240 valeurs
-            # Comme le moteur CBIR renvoit des listes de numpy.float32, c'est à
-            # des floats sur 32 bits, on a besoin que de 4 octets pour les stocker,
-            # donc les REAL qui prennent 4 octets
-            for feature_id in range( 0, CBIR_LIST_LENGHT ) : # 240 valeurs à stocker
-                tweets_images_1_table += " image_1_feature_" + str(feature_id) + " UNSIGNED REAL,"
-                tweets_images_2_table += " image_2_feature_" + str(feature_id) + " UNSIGNED REAL,"
-                tweets_images_3_table += " image_3_feature_" + str(feature_id) + " UNSIGNED REAL,"
-                tweets_images_4_table += " image_4_feature_" + str(feature_id) + " UNSIGNED REAL,"
-        
-        # Suppression de la virgule finale et ajout de la parenthèse finale
-        tweets_images_1_table = tweets_images_1_table[:-1] + " )"
-        tweets_images_2_table = tweets_images_2_table[:-1] + " )"
-        tweets_images_3_table = tweets_images_3_table[:-1] + " )"
-        tweets_images_4_table = tweets_images_4_table[:-1] + " )"
-        
-        c.execute( tweets_table )
-        c.execute( tweets_images_1_table )
-        c.execute( tweets_images_2_table )
-        c.execute( tweets_images_3_table )
-        c.execute( tweets_images_4_table )
-        
-        # Créer un index permet d'accélérer grandement la recherche sur un
-        # compte Twitter en particulier !
-        if param.USE_MYSQL_INSTEAD_OF_SQLITE :
-            try :
-                c.execute( "CREATE INDEX account_id ON tweets ( account_id )" )
-            except mysql.connector.errors.ProgrammingError : # L'index existe déjà
-                pass
-        else :
-            c.execute( "CREATE INDEX IF NOT EXISTS account_id ON tweets ( account_id )" )
-        
-        if param.USE_MYSQL_INSTEAD_OF_SQLITE :
             account_table = """CREATE TABLE IF NOT EXISTS accounts (
                                    account_id BIGINT UNSIGNED PRIMARY KEY,
                                    last_SearchAPI_indexing_api_date CHAR(10),
@@ -162,6 +93,19 @@ class SQLite_or_MySQL :
                                    last_TimelineAPI_indexing_local_date DATETIME,
                                    last_use DATETIME,
                                    uses_count BIGINT UNSIGNED DEFAULT 0 )"""
+            
+            tweets_table = """CREATE TABLE IF NOT EXISTS tweets (
+                                  account_id BIGINT UNSIGNED,
+                                  tweet_id BIGINT UNSIGNED PRIMARY KEY,
+                                  image_1_name VARCHAR(19),
+                                  image_1_hash BINARY(""" + str(HASH_SIZE_BYTES) + """),
+                                  image_2_name VARCHAR(19),
+                                  image_2_hash BINARY(""" + str(HASH_SIZE_BYTES) + """),
+                                  image_3_name VARCHAR(19),
+                                  image_3_hash BINARY(""" + str(HASH_SIZE_BYTES) + """),
+                                  image_4_name VARCHAR(19),
+                                  image_4_hash BINARY(""" + str(HASH_SIZE_BYTES) + """),
+                                  hashtags TEXT )"""
             
             reindex_tweets_table = """CREATE TABLE IF NOT EXISTS reindex_tweets (
                                           tweet_id BIGINT UNSIGNED PRIMARY KEY,
@@ -185,6 +129,19 @@ class SQLite_or_MySQL :
                                    last_use DATETIME,
                                    uses_count UNSIGNED BIGINT DEFAULT 0 )"""
             
+            tweets_table = """CREATE TABLE IF NOT EXISTS tweets (
+                                  account_id UNSIGNED BIGINT,
+                                  tweet_id UNSIGNED BIGINT PRIMARY KEY,
+                                  image_1_name VARCHAR(19),
+                                  image_1_hash BINARY(""" + str(HASH_SIZE_BYTES) + """),
+                                  image_2_name VARCHAR(19),
+                                  image_2_hash BINARY(""" + str(HASH_SIZE_BYTES) + """),
+                                  image_3_name VARCHAR(19),
+                                  image_3_hash BINARY(""" + str(HASH_SIZE_BYTES) + """),
+                                  image_4_name VARCHAR(19),
+                                  image_4_hash BINARY(""" + str(HASH_SIZE_BYTES) + """),
+                                  hashtags TEXT )"""
+            
             reindex_tweets_table = """CREATE TABLE IF NOT EXISTS reindex_tweets (
                                           tweet_id UNSIGNED BIGINT PRIMARY KEY,
                                           account_id UNSIGNED BIGINT,
@@ -197,7 +154,18 @@ class SQLite_or_MySQL :
                                           retries_count UNSIGNED TINYINT DEFAULT 0 )"""
         
         c.execute( account_table )
+        c.execute( tweets_table )
         c.execute( reindex_tweets_table )
+        
+        # Créer un index permet d'accélérer grandement la recherche sur un
+        # compte Twitter en particulier !
+        if param.USE_MYSQL_INSTEAD_OF_SQLITE :
+            try :
+                c.execute( "CREATE INDEX account_id ON tweets ( account_id )" )
+            except mysql.connector.errors.ProgrammingError : # L'index existe déjà
+                pass
+        else :
+            c.execute( "CREATE INDEX IF NOT EXISTS account_id ON tweets ( account_id )" )
         
         self.conn.commit()
     
@@ -237,29 +205,14 @@ class SQLite_or_MySQL :
     
     """
     Ajouter un tweet à la base de données
-    Attention ! Ce sont les "image_name" qui disent si une image doit être
-    stockée ! Si un cbir_features correspondant est à None, alors les
-    caractéristiques de l'image sont mises à NULL.
     
     @param account_id L'ID du compte associé au tweet
     @param tweet_id L'ID du tweet à ajouter
     
-    @param cbir_features_1 La liste des caractéristiques issues de l'analyse
-                           CBIR pour la première image du Tweet
-                           240 VALEURS MAXIMUM
-                           (OPTIONNEL)
-    @param cbir_features_2 La liste des caractéristiques issues de l'analyse
-                           CBIR pour la seconde image du Tweet
-                           240 VALEURS MAXIMUM
-                           (OPTIONNEL)
-    @param cbir_features_3 La liste des caractéristiques issues de l'analyse
-                           CBIR pour la troisième image du Tweet
-                           240 VALEURS MAXIMUM
-                           (OPTIONNEL)
-    @param cbir_features_4 La liste des caractéristiques issues de l'analyse
-                           CBIR pour la quatrième image du Tweet
-                           240 VALEURS MAXIMUM
-                           (OPTIONNEL)            
+    @param cbir_hash_1 L'empreinte de la première image du Tweet (OPTIONNEL)
+    @param cbir_hash_2 L'empreinte de la deuxième image du Tweet (OPTIONNEL)
+    @param cbir_hash_3 L'empreinte de la troisième image du Tweet (OPTIONNEL)
+    @param cbir_hash_4 L'empreinte de la quatrième image du Tweet (OPTIONNEL)
     
     @param image_name_1 Le "nom" de la première image, c'est à dire son ID,
                         pour la retrouver directement avec un GET HTTP
@@ -281,10 +234,10 @@ class SQLite_or_MySQL :
     """
     def insert_tweet( self, account_id : int,
                       tweet_id : int,
-                      cbir_features_1 : List[float] = None, # Peut être à None en fait si la première image est corrompue
-                      cbir_features_2 : List[float] = None,
-                      cbir_features_3 : List[float] = None,
-                      cbir_features_4 : List[float] = None,
+                      cbir_hash_1 : int = None, # Peut être à None en fait si la première image est corrompue
+                      cbir_hash_2 : int = None,
+                      cbir_hash_3 : int = None,
+                      cbir_hash_4 : int = None,
                       image_name_1 : str = None,
                       image_name_2 : str = None,
                       image_name_3 : str = None,
@@ -296,67 +249,16 @@ class SQLite_or_MySQL :
 #            return
         
         # Indexer même si toutes les images du Tweet sont corrompues
-#        if cbir_features_1 == None and cbir_features_2 == None and cbir_features_3 == None and cbir_features_4 == None :
+#        if cbir_hash_1 == None and cbir_hash_2 == None and cbir_hash_3 == None and cbir_hash_4 == None :
 #            return
         
         # Si il faut forcer l'indexation, on efface ce qui a déjà été insert
         if FORCE_INDEX :
             c = self.get_cursor()
             c.execute( "DELETE FROM tweets WHERE tweet_id = %s", (tweet_id,) )
-            c.execute( "DELETE FROM tweets_images_1 WHERE tweet_id = %s", (tweet_id,) )
-            c.execute( "DELETE FROM tweets_images_2 WHERE tweet_id = %s", (tweet_id,) )
-            c.execute( "DELETE FROM tweets_images_3 WHERE tweet_id = %s", (tweet_id,) )
-            c.execute( "DELETE FROM tweets_images_4 WHERE tweet_id = %s", (tweet_id,) )
             self.conn.commit()
         
         c = self.get_cursor()
-        
-        # features_list_for_db() ne devrait pas être utilisé puisque
-        # le moteur CBIR renvoit des listes fixes de 240 valeurs !
-        
-        if image_name_1 != None :
-#            cbir_features_1_formatted = features_list_for_db( cbir_features_1 )
-#            c.execute( sql_requests_dict["insert_tweet_image_1"],
-#                       tuple( [tweet_id] + cbir_features_1_formatted ) )
-            if cbir_features_1 != None :
-                cbir_features_1 = [ float(v) for v in cbir_features_1 ]
-            else :
-                cbir_features_1 = [ None ] * CBIR_LIST_LENGHT
-            c.execute( sql_requests_dict["insert_tweet_image_1"],
-                       tuple( [tweet_id, image_name_1] + cbir_features_1 ) )
-        
-        if image_name_2 != None :
-#            cbir_features_2_formatted = features_list_for_db( cbir_features_2 )
-#            c.execute( sql_requests_dict["insert_tweet_image_2"],
-#                       tuple( [tweet_id] + cbir_features_2_formatted ) )
-            if cbir_features_2 != None :
-                cbir_features_2 = [ float(v) for v in cbir_features_2 ]
-            else :
-                cbir_features_2 = [ None ] * CBIR_LIST_LENGHT
-            c.execute( sql_requests_dict["insert_tweet_image_2"],
-                       tuple( [tweet_id, image_name_2] + cbir_features_2 ) )
-        
-        if image_name_3 != None :
-#            cbir_features_3_formatted = features_list_for_db( cbir_features_3 )
-#            c.execute( sql_requests_dict["insert_tweet_image_3"],
-#                       tuple( [tweet_id] + cbir_features_3_formatted ) )
-            if cbir_features_3 != None :
-                cbir_features_3 = [ float(v) for v in cbir_features_3 ]
-            else :
-                cbir_features_3 = [ None ] * CBIR_LIST_LENGHT
-            c.execute( sql_requests_dict["insert_tweet_image_3"],
-                       tuple( [tweet_id, image_name_3] + cbir_features_3 ) )
-        
-        if image_name_4 != None :
-#            cbir_features_4_formatted = features_list_for_db( cbir_features_4  )
-#            c.execute( sql_requests_dict["insert_tweet_image_4"],
-#                       tuple( [tweet_id] + cbir_features_4_formatted ) )
-            if cbir_features_4 != None :
-                cbir_features_4 = [ float(v) for v in cbir_features_4 ]
-            else :
-                cbir_features_4 = [ None ] * CBIR_LIST_LENGHT
-            c.execute( sql_requests_dict["insert_tweet_image_4"],
-                       tuple( [tweet_id, image_name_4] + cbir_features_4 ) )
         
         if hashtags != None and hashtags != [] and hashtags != [""] :
             hashtags_str = ";".join( [ hashtag for hashtag in hashtags ] )
@@ -364,11 +266,11 @@ class SQLite_or_MySQL :
             hashtags_str = None
         
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
-            c.execute( "INSERT INTO tweets VALUES ( %s, %s, %s ) ON DUPLICATE KEY UPDATE tweets.tweet_id = tweets.tweet_id",
-                       ( account_id, tweet_id, hashtags_str ) )
+            c.execute( "INSERT INTO tweets VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s ) ON DUPLICATE KEY UPDATE tweets.tweet_id = tweets.tweet_id",
+                       ( account_id, tweet_id, image_name_1,  to_bin(cbir_hash_1),  image_name_2,  to_bin(cbir_hash_2), image_name_3, to_bin(cbir_hash_3), image_name_4, to_bin(cbir_hash_4), hashtags_str ) )
         else :
-            c.execute( "INSERT INTO tweets VALUES ( ?, ?, ? ) ON CONFLICT ( tweet_id ) DO NOTHING",
-                       ( account_id, tweet_id, hashtags_str ) )
+            c.execute( "INSERT INTO tweets VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ) ON CONFLICT ( tweet_id ) DO NOTHING",
+                       ( account_id, tweet_id, image_name_1,  to_bin(cbir_hash_1),  image_name_2,  to_bin(cbir_hash_2), image_name_3, to_bin(cbir_hash_3), image_name_4, to_bin(cbir_hash_4), hashtags_str ) )
         
         self.conn.commit()
     
@@ -376,33 +278,25 @@ class SQLite_or_MySQL :
     Récupérer les résultats CBIR de toutes les images d'un compte Twitter, ou
     de toutes les images dans la base de données.
     @param account_id L'ID du compte Twitter (OPTIONNEL)
-    @return Un itérateur sur le résultat
-            Voir le fichier "class_SQLite_Image_Features_Iterator.py"
+    @return Un itérateur d'objets Image_in_DB
     """
-    def get_images_in_db_iterator( self, account_id : int = 0 ) :
-        request_1 = """SELECT * FROM tweets
-                           INNER JOIN tweets_images_1 ON tweets.tweet_id = tweets_images_1.tweet_id"""
-        request_2 = """SELECT * FROM tweets
-                           INNER JOIN tweets_images_2 ON tweets.tweet_id = tweets_images_2.tweet_id"""
-        request_3 = """SELECT * FROM tweets
-                           INNER JOIN tweets_images_3 ON tweets.tweet_id = tweets_images_3.tweet_id"""
-        request_4 = """SELECT * FROM tweets
-                           INNER JOIN tweets_images_4 ON tweets.tweet_id = tweets_images_4.tweet_id"""
+    def get_images_in_db_iterator( self, account_id : int = 0, add_step_3_times = None ) :
+        request = "SELECT * FROM tweets"
+        
+        if param.ENABLE_METRICS :
+            select_time = [] # Durée pour faire le SELECT
+            iteration_times = [] # Durées des itérations
+            usage_times = [] # Durées des utilisations
+            start = time()
         
         if account_id != 0 :
             if param.USE_MYSQL_INSTEAD_OF_SQLITE :
-                request_1 += " WHERE account_id = %s"
-                request_2 += " WHERE account_id = %s"
-                request_3 += " WHERE account_id = %s"
-                request_4 += " WHERE account_id = %s"
+                request += " WHERE account_id = %s"
                 
                 save_date = "UPDATE accounts SET last_use = %s WHERE account_id = %s"
                 update_count = "UPDATE accounts SET uses_count = uses_count + 1 WHERE account_id = %s"
             else :
-                request_1 += " WHERE account_id = ?"
-                request_2 += " WHERE account_id = ?"
-                request_3 += " WHERE account_id = ?"
-                request_4 += " WHERE account_id = ?"
+                request += " WHERE account_id = ?"
                 
                 save_date = "UPDATE accounts SET last_use = ? WHERE account_id = ?"
                 update_count = "UPDATE accounts SET uses_count = uses_count + 1 WHERE account_id = ?"
@@ -414,7 +308,58 @@ class SQLite_or_MySQL :
             c.execute( update_count, ( account_id, ) )
             self.conn.commit()
         
-        return Image_Features_Iterator( self.conn, account_id, request_1, request_2, request_3, request_4, ENABLE_METRICS = param.ENABLE_METRICS )
+        # Note : Ca ne sert à rien que le curseur soit buffered
+        # En fait, en testant sur un gros compte (@MayoRiyo), ça fait perdre plus de temps que ça en fait gagner
+        c = self.get_cursor()
+        
+        if param.ENABLE_METRICS :
+            select_start = time()
+        if account_id != 0 :
+            c.execute( request, ( account_id, ) )
+        else :
+            c.execute( request )
+        if param.ENABLE_METRICS :
+            select_time.append( time() - select_start )
+        
+        # Itérer sur les Tweets
+        while True :
+            if param.ENABLE_METRICS :
+                iteration_start = time()
+            tweet_line = c.fetchone()
+            if param.ENABLE_METRICS :
+                iteration_times.append( time() - iteration_start )
+            
+            # Si on a fini d'itérer sur tous les Tweets
+            if tweet_line == None :
+                if param.ENABLE_METRICS :
+                    if select_time !=[] and iteration_times != [] and usage_times != [] :
+                        print( f"[Images_It] Itération sur {len(usage_times)} images en {time() - start} secondes." )
+                        print( f"[Images_It] Temps moyen de requête SQL : {mean(select_time)} secondes." )
+                        print( f"[Images_It] Temps moyen d'itération : {mean(iteration_times)} secondes." )
+                        print( f"[Images_It] Temps moyen d'utilisation : {mean(usage_times)} secondes." )
+                    if add_step_3_times != None :
+                        add_step_3_times( [], select_time, iteration_times, usage_times )
+                break
+            
+            # Itérer sur les images de Tweets
+            for i in range(4) : # i = 0, 1, 2, 3
+                # Si l'empreinte est à NULL, on passe cette image
+                if tweet_line[3+i*2] == None :
+                    continue
+                
+                if param.ENABLE_METRICS :
+                    usage_start = time()
+                
+                yield Image_in_DB (
+                           tweet_line[0], # ID du compte Twitter
+                           tweet_line[1], # ID du Tweet
+                           tweet_line[2+i*2], # Nom de l'image
+                           to_int( tweet_line[3+i*2] ), # Empreinte de l'image
+                           i+1 # Position de l'image
+                       )
+                
+                if param.ENABLE_METRICS :
+                    usage_times.append( time() - usage_start )
     
     """
     API DE RECHERCHE
@@ -797,20 +742,3 @@ class SQLite_or_MySQL :
             else :
                 to_return["last_SearchAPI_indexing_local_date"] = data[2]
             yield to_return
-
-"""
-Test du bon fonctionnement de cette classe
-"""
-# Laisser commenté ! Trop dangereux sur un serveur de production
-"""
-if __name__ == '__main__' :
-    bdd = SQLite_or_MySQL()
-    bdd.insert_tweet( 12, 42, [0.0000000001, 1000000000] )
-    bdd.insert_tweet( 12, 42, [10.01, 1.1] )
-    bdd.get_images_in_db_iterator( 12 )
-    
-    bdd.set_account_SearchAPI_last_tweet_date( 12, "2020-07-02" )
-    bdd.get_account_SearchAPI_last_tweet_date( 13 )
-    
-    bdd.conn.close()
-"""

@@ -9,44 +9,21 @@ Stocke les Tweets analysés.
 Contient les attributs suivants :
 * `account_id BIGINT UNSIGNED` : ID du compte Twitter ayant posté le Tweet,
 * `tweet_id BIGINT UNSIGNED PRIMARY KEY` : ID du Tweet,
+* `image_1_name VARCHAR(19)` : Identifiant de la première image du Tweet,
+* `image_1_hash BINARY(?)` : Empreinte de la première image (Avec ? déterminé par le moteur CBIR),
+* `image_2_name VARCHAR(19)` : Identifiant de la deuxième image du Tweet,
+* `image_2_hash BINARY(?)` : Empreinte de la deuxième image (Avec ? déterminé par le moteur CBIR),
+* `image_3_name VARCHAR(19)` : Identifiant de la troisième image du Tweet,
+* `image_3_hash BINARY(?)` : Empreinte de la troisième image (Avec ? déterminé par le moteur CBIR),
+* `image_4_name VARCHAR(19)` : Identifiant de la quatrième image du Tweet,
+* `image_4_hash BINARY(?)` : Empreinte de la quatrième image (Avec ? déterminé par le moteur CBIR),
 * `hashtags TEXT` : Liste des hashtags du Tweet, avec le croisillon "#", séparés par des points-virgules ";".
 
 Notes :
 * Seules les Tweets avec au moins une image sont stockés.
 * Un Tweet ne peut pas contenir plus de 4 images.
-* Si une image est corrompue / perdue par Twitter, on la stocke quand même, en remplissant sa liste de caractéristiques par des `NULL`.
-
-### Table `tweets_images_1`
-
-Stocke la première image des Tweets analysés.
-
-Contient les attributs suivants :
-* `account_id BIGINT UNSIGNED` : ID du Tweet associé,
-* 240 colonnes `image_1_features_i FLOAT UNSIGNED` (i allant de 0 à 239 compris) : Liste des caractéristiques de la première image du Tweet,.
-
-### Table `tweets_images_2`
-
-Stocke la deuxième image des Tweets analysés, si il y en a une. Sinon, l'ID du Tweet n'apparait pas dans cette table.
-
-Contient les attributs suivants :
-* `account_id BIGINT UNSIGNED` : ID du Tweet associé,
-* 240 colonnes `image_2_features_i FLOAT UNSIGNED` (i allant de 0 à 239 compris) : Liste des caractéristiques de la deuxième image du Tweet.
-
-### Table `tweets_images_3`
-
-Stocke la troisième image des Tweets analysés, si il y en a une. Sinon, l'ID du Tweet n'apparait pas dans cette table.
-
-Contient les attributs suivants :
-* `account_id BIGINT UNSIGNED` : ID du Tweet associé,
-* 240 colonnes `image_3_features_i FLOAT UNSIGNED` (i allant de 0 à 239 compris) : Liste des caractéristiques de la troisième image du Tweet.
-
-### Table `tweets_images_4`
-
-Stocke la quatrième image des Tweets analysés, si il y en a une. Sinon, l'ID du Tweet n'apparait pas dans cette table.
-
-Contient les attributs suivants :
-* `account_id BIGINT UNSIGNED` : ID du Tweet associé,
-* 240 colonnes `image_4_features_i FLOAT UNSIGNED` (i allant de 0 à 239 compris) : Liste des caractéristiques de la quatrième image du Tweet.
+* Si une image est corrompue / perdue par Twitter, son nom est quand même stocké (Mais son empreinte est à `NULL`).
+* Les identifiants et les empreintes peuvent être à `NULL` si il n'y a pas d'image en plus.
 
 ### Table `accounts`
 
@@ -95,29 +72,14 @@ En effet, ce sont des données qui ont besoin de persistence lors d'un redémarr
 
 Classe d'accès et de gestion de la base de données. Supporte SQLite ou MySQL. Utilise `parameters.py` pour choisir. Contient une multitude de mèthodes qu'on utilise dans "Artists on Twitter Finder".
 
-### Classe `Image_Features_Iterator`
-
-Renvoyé par la méthode `get_images_in_db_iterator()` de la classe `SQLite_or_MySQL`. Itére sur toutes les images de Tweets présentes dans la base de données. Itère des objets `Image_in_DB`.
-
 ### Classe `Image_in_DB`
 
-Classe représentant une image dans la base de données. Ces objets sont renvoyés par l'itérateur `Image_Features_Iterator`. Contient les attributs suivants :
+Classe représentant une image dans la base de données. Ces objets sont renvoyés par l'itérateur de la fonction `get_images_in_db_iterator()` (`yield`). Contient les attributs suivants :
 * `account_id` : L'ID du compte Twitter ayant posté cette image,
 * `tweet_id` : L'ID du Tweet contenant l'image,
-* `image_features` : La liste des caractéristiques de l'image,
+* `image_hash` : L'empreinte de l'image,
 * `image_position` : La position de l'image dans le Tweet (1, 2, 3 ou 4).
 
-Ces objets contiennent aussi un attribut `distance` qui est rempli par le moteur CBIR (Voir méthode `search_cbir` de la classe `CBIR_Engine` dans le module `cbir_engine`).
+Ces objets contiennent aussi un attribut `distance` qui est rempli par le moteur CBIR (Voir méthode `search_cbir()` de la classe `CBIR_Engine` dans le module `cbir_engine`).
 
-Utilisé par la classe `CBIR_Engine_with_Database` dans le thread de recherche inversée d'image (Module `user_pipeline`, procédure `thread_step_3_reverse_search`).
-
-### Fonction `features_list_for_db`
-
-Permet de forcer la taille d'une liste Python en la coupant ou la ralongeant avec des `None`. N'est pas utilisée, puisque le moteur CBIR renvoir des listes fixes de 240 valeurs ! Cette taille de 240 valeurs est définie à l'initialisation de la classe `CBIR_Engine`.
-Si cette valeur est changée, il faut :
-* Réintialiser la base de données ! Ou recalculer la liste des caractéristiques pour tous les Tweets,
-* Modifier la constante `CBIR_LIST_LENGHT` dans tous les fichiers de ce module `database`.
-
-### Dictionnaire `sql_requests_dict`
-
-Dictionnaire de requêtes SQL pré-fabriquées à l'initialisation.
+Utilisé par la classe `Reverse_Searcher` dans le thread de recherche inversée d'image (Module `user_pipeline`, procédure `thread_step_3_reverse_search`).

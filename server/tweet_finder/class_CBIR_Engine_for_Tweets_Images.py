@@ -37,11 +37,11 @@ class CBIR_Engine_for_Tweets_Images :
     @param download_image_times Utilisé pour la classe "Tweets_Indexer".
     @param calculate_features_times Utilisé pour la classe "Tweets_Indexer".
     
-    @return La liste des caractéristiques calculées par le moteur CBIR,
+    @return L'empreinte de l'image, calculées par le moteur CBIR,
             OU None si il y a un un problème.
     """
-    def get_image_features ( self, image_url : str, tweet_id, CAN_RETRY = [False],
-                             download_image_times = None, calculate_features_times = None ) :
+    def get_image_hash ( self, image_url : str, tweet_id, CAN_RETRY = [False],
+                         download_image_times = None, calculate_features_times = None ) -> int :
         retry_count = 0
         while True : # Solution très bourrin pour gèrer les rate limits
             try :
@@ -58,9 +58,9 @@ class CBIR_Engine_for_Tweets_Images :
             
             # Envoyé par la fonction get_tweet_image() qui n'a pas réussi
             except urllib.error.HTTPError as error :
-                print( f"[get_image_features] Erreur avec le Tweet ID {tweet_id} !" )
+                print( f"[get_image_hash] Erreur avec le Tweet ID {tweet_id} !" )
                 print( error )
-                print( "[get_image_features] Abandon !" )
+                print( "[get_image_hash] Abandon !" )
                 
                 # Ne pas journaliser les erreurs connues qui arrivent souvent
                 # Elles ne sont pas solutionnables, ce sont des problèmes chez Twitter
@@ -77,16 +77,16 @@ class CBIR_Engine_for_Tweets_Images :
                 return None
             
             except Exception as error :
-                print( f"[get_image_features] Erreur avec le Tweet ID {tweet_id} !" )
+                print( f"[get_image_hash] Erreur avec le Tweet ID {tweet_id} !" )
                 print( error )
                 
                 if retry_count < 1 : # Essayer un coup d'attendre
-                    print( "[get_image_features] On essaye d'attendre 10 secondes..." )
+                    print( "[get_image_hash] On essaye d'attendre 10 secondes..." )
                     sleep( 10 )
                     retry_count += 1
                 
                 else :
-                    print( "[get_image_features] Abandon !" )
+                    print( "[get_image_hash] Abandon !" )
                     
                     file = open( "class_CBIR_Engine_for_Tweets_Images_errors.log", "a" )
                     file.write( f"Erreur avec le Tweet ID {tweet_id} !\n" )

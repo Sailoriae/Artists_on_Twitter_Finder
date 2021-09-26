@@ -79,8 +79,8 @@ class Reverse_Searcher :
         if self.DEBUG or self.ENABLE_METRICS :
             start = time()
         
-        iterator = self.bdd.get_images_in_db_iterator( account_id )
-        iterator.add_step_3_times = add_step_3_times
+        iterator = self.bdd.get_images_in_db_iterator( account_id = account_id,
+                                                       add_step_3_times = add_step_3_times )
         
         try :
             to_return = self.cbir_engine.search_cbir( image, iterator )

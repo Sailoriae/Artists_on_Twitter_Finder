@@ -94,7 +94,7 @@ class Tweets_Indexer :
         if self.DEBUG or self.ENABLE_METRICS :
             times = [] # Liste des temps pour indexer un Tweet
             download_image_times = [] # Liste des temps pour télécharger les images d'un Tweet
-            calculate_features_times = [] # Liste des temps pour calculer les caractéristiques des images du Tweet
+            calculate_features_times = [] # Liste des temps pour d'éxécution du moteur CBIR pour une images d'un Tweet
             insert_into_times = [] # Liste des temps pour faire le INSERT INTO
         
         to_return = None
@@ -119,7 +119,7 @@ class Tweets_Indexer :
                     if len(download_image_times) > 0 :
                         print( f"[Tweets_Indexer] Temps moyens de téléchargement : {mean(download_image_times)} secondes." )
                     if len(calculate_features_times) > 0 :
-                        print( f"[Tweets_Indexer] Temps moyens de calcul des caractéristiques : {mean(calculate_features_times)} secondes." )
+                        print( f"[Tweets_Indexer] Temps moyens de calcul dans le moteur CBIR : {mean(calculate_features_times)} secondes." )
                     if len(insert_into_times) > 0 :
                         print( f"[Tweets_Indexer] Temps moyens d'enregistrement dans la BDD : {mean(insert_into_times)} secondes." )
                     if len(times) > 0 :
@@ -157,10 +157,10 @@ class Tweets_Indexer :
             image_3_url = None
             image_4_url = None
             
-            image_1_features = None
-            image_2_features = None
-            image_3_features = None
-            image_4_features = None
+            image_1_hash = None
+            image_2_hash = None
+            image_3_hash = None
+            image_4_hash = None
             
             image_1_name = None
             image_2_name = None
@@ -174,23 +174,23 @@ class Tweets_Indexer :
             # Traitement des images du Tweet
             if length > 0 :
                 image_1_url = tweet["images"][0]
-                image_1_features = self.engine.get_image_features( image_1_url, tweet["tweet_id"], CAN_RETRY = will_need_retry,
-                                                                   download_image_times = download_image_times, calculate_features_times = calculate_features_times )
+                image_1_hash = self.engine.get_image_hash( image_1_url, tweet["tweet_id"], CAN_RETRY = will_need_retry,
+                                                           download_image_times = download_image_times, calculate_features_times = calculate_features_times )
                 image_1_name = image_1_url.replace( "https://pbs.twimg.com/media/", "" )
             if length > 1 :
                 image_2_url = tweet["images"][1]
-                image_2_features = self.engine.get_image_features( image_2_url, tweet["tweet_id"], CAN_RETRY = will_need_retry,
-                                                                   download_image_times = download_image_times, calculate_features_times = calculate_features_times )
+                image_2_hash = self.engine.get_image_hash( image_2_url, tweet["tweet_id"], CAN_RETRY = will_need_retry,
+                                                           download_image_times = download_image_times, calculate_features_times = calculate_features_times )
                 image_2_name = image_2_url.replace( "https://pbs.twimg.com/media/", "" )
             if length > 2 :
                 image_3_url = tweet["images"][2]
-                image_3_features = self.engine.get_image_features( image_3_url, tweet["tweet_id"], CAN_RETRY = will_need_retry,
-                                                                   download_image_times = download_image_times, calculate_features_times = calculate_features_times )
+                image_3_hash = self.engine.get_image_hash( image_3_url, tweet["tweet_id"], CAN_RETRY = will_need_retry,
+                                                           download_image_times = download_image_times, calculate_features_times = calculate_features_times )
                 image_3_name = image_3_url.replace( "https://pbs.twimg.com/media/", "" )
             if length > 3 :
                 image_4_url = tweet["images"][3]
-                image_4_features = self.engine.get_image_features( image_4_url, tweet["tweet_id"], CAN_RETRY = will_need_retry,
-                                                                   download_image_times = download_image_times, calculate_features_times = calculate_features_times )
+                image_4_hash = self.engine.get_image_hash( image_4_url, tweet["tweet_id"], CAN_RETRY = will_need_retry,
+                                                           download_image_times = download_image_times, calculate_features_times = calculate_features_times )
                 image_4_name = image_4_url.replace( "https://pbs.twimg.com/media/", "" )
             
             if self.DEBUG or self.ENABLE_METRICS :
@@ -202,10 +202,10 @@ class Tweets_Indexer :
             self.bdd.insert_tweet(
                 tweet["user_id"],
                 tweet["tweet_id"],
-                cbir_features_1 = image_1_features,
-                cbir_features_2 = image_2_features,
-                cbir_features_3 = image_3_features,
-                cbir_features_4 = image_4_features,
+                cbir_hash_1 = image_1_hash,
+                cbir_hash_2 = image_2_hash,
+                cbir_hash_3 = image_3_hash,
+                cbir_hash_4 = image_4_hash,
                 image_name_1 = image_1_name,
                 image_name_2 = image_2_name,
                 image_name_3 = image_3_name,
