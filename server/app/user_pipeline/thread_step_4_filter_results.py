@@ -114,7 +114,7 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
                 request.found_tweets = []
         
         # On utilise l'image téléchargée à l'étape 3
-        if USE_OPENCV and not SKIP_IMAGES_COMPARAISON :
+        if USE_OPENCV and not SKIP_IMAGES_COMPARAISON and request.found_tweets != [] :
             try :
                 request_image = binary_image_to_cv2_image( request.query_image_as_bytes )
             except Exception as error :
@@ -127,7 +127,7 @@ def thread_step_4_filter_results( thread_id : int, shared_memory ) :
                 request.release_proxy()
                 continue
         
-        elif not SKIP_IMAGES_COMPARAISON :
+        elif not SKIP_IMAGES_COMPARAISON and request.found_tweets != [] :
             try :
                 request_image = Image.open(BytesIO( request.query_image_as_bytes ))
             
