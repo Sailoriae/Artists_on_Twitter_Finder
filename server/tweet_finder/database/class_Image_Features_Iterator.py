@@ -18,6 +18,7 @@ if __name__ == "__main__" :
     path.append(get_wdir())
 
 from tweet_finder.database.class_Image_in_DB import Image_in_DB
+import parameters as param
 
 CBIR_LIST_LENGHT = 240
 
@@ -75,8 +76,11 @@ class Image_Features_Iterator :
             self.start = time()
         
         self.conn = conn
-        self.buffered_cursors = account_id != 0 and BUFFERED_CURSOR
-        self.current_cursor = self.conn.cursor( buffered = self.buffered_cursors )
+        if param.USE_MYSQL_INSTEAD_OF_SQLITE :
+            self.buffered_cursors = account_id != 0 and BUFFERED_CURSOR
+            self.current_cursor = self.conn.cursor( buffered = self.buffered_cursors )
+        else :
+            self.current_cursor = self.conn.cursor()
         self.current_table = 1
         
         if self.ENABLE_METRICS : start_select = time()
@@ -128,7 +132,10 @@ class Image_Features_Iterator :
                 raise StopIteration
             
             if self.current_table == 2 :
-                self.current_cursor = self.conn.cursor( buffered = self.buffered_cursors )
+                if param.USE_MYSQL_INSTEAD_OF_SQLITE :
+                    self.current_cursor = self.conn.cursor( buffered = self.buffered_cursors )
+                else :
+                    self.current_cursor = self.conn.cursor()
                 if self.ENABLE_METRICS : start_select = time()
                 if self.account_id != 0 :
                     self.current_cursor.execute( self.request_2, ( self.account_id, ) )
@@ -136,7 +143,10 @@ class Image_Features_Iterator :
                     self.current_cursor.execute( self.request_2 )
                 if self.ENABLE_METRICS : self.select_times.append( time() - start_select )
             if self.current_table == 3 :
-                self.current_cursor = self.conn.cursor( buffered = self.buffered_cursors )
+                if param.USE_MYSQL_INSTEAD_OF_SQLITE :
+                    self.current_cursor = self.conn.cursor( buffered = self.buffered_cursors )
+                else :
+                    self.current_cursor = self.conn.cursor()
                 if self.ENABLE_METRICS : start_select = time()
                 if self.account_id != 0 :
                     self.current_cursor.execute( self.request_3, ( self.account_id, ) )
@@ -144,7 +154,10 @@ class Image_Features_Iterator :
                     self.current_cursor.execute( self.request_3 )
                 if self.ENABLE_METRICS : self.select_times.append( time() - start_select )
             if self.current_table == 4 :
-                self.current_cursor = self.conn.cursor( buffered = self.buffered_cursors )
+                if param.USE_MYSQL_INSTEAD_OF_SQLITE :
+                    self.current_cursor = self.conn.cursor( buffered = self.buffered_cursors )
+                else :
+                    self.current_cursor = self.conn.cursor()
                 if self.ENABLE_METRICS : start_select = time()
                 if self.account_id != 0 :
                     self.current_cursor.execute( self.request_4, ( self.account_id, ) )
