@@ -9,12 +9,11 @@ sortir le dictionnaire pour faciliter l'indexation.
 Cette fonction a été constuite de manière a émettre une erreur au moindre
 changement dans les JSON de Tweets renvoyés par l'API de Twitter.
 
-@param tweet_json Dictionnaire (JSON) d'entré, renvoyé par l'API Twitter.
+@param tweet_json Dictionnaire (JSON) d'entrée, renvoyé par l'API Twitter.
 @return Dictionnaire contenant les champs suivants :
         - "images" : Liste des URLs des images contenues dans ce Tweet,
         - "tweet_id" : ID du Tweet,
         - "user_id" : ID de l'auteur du Tweet,
-        - "hashtags" : Liste des hashtags contenus dans ce Tweet.
         Ou None si le Tweet ne contient pas d'image.
 """
 def analyse_tweet_json ( tweet_json : dict ) -> dict :
@@ -50,13 +49,5 @@ def analyse_tweet_json ( tweet_json : dict ) -> dict :
     
     if len(tweet_dict["images"]) > 4 :
         raise Exception( f"Le Tweet ID {tweet_dict['tweet_id']} a été analysé avec plus de 4 images" ) # Doit tomber dans le collecteur d'erreurs
-    
-    # Liste des hashtags contenus dans ce Tweet
-    tweet_dict["hashtags"] = []
-    try :
-        for hashtag in tweet_json["entities"]["hashtags"] :
-            tweet_dict["hashtags"].append( "#" + hashtag["text"] )
-    except KeyError : # Tweet sans hashtag
-        pass
     
     return tweet_dict

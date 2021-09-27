@@ -210,7 +210,6 @@ class Tweets_Indexer :
                 image_name_2 = image_2_name,
                 image_name_3 = image_3_name,
                 image_name_4 = image_4_name,
-                hashtags = tweet["hashtags"],
                 FORCE_INDEX = FORCE_INDEX
             )
             
@@ -226,7 +225,6 @@ class Tweets_Indexer :
                     image_2_url,
                     image_3_url,
                     image_4_url,
-                    tweet["hashtags"]
                 )
                 
                 if FAILED_TWEETS_LIST != None :

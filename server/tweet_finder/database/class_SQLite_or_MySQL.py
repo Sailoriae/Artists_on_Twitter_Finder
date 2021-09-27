@@ -104,8 +104,7 @@ class SQLite_or_MySQL :
                                   image_3_name VARCHAR(19),
                                   image_3_hash BINARY(""" + str(HASH_SIZE_BYTES) + """),
                                   image_4_name VARCHAR(19),
-                                  image_4_hash BINARY(""" + str(HASH_SIZE_BYTES) + """),
-                                  hashtags TEXT )"""
+                                  image_4_hash BINARY(""" + str(HASH_SIZE_BYTES) + """) )"""
             
             reindex_tweets_table = """CREATE TABLE IF NOT EXISTS reindex_tweets (
                                           tweet_id BIGINT UNSIGNED PRIMARY KEY,
@@ -114,7 +113,6 @@ class SQLite_or_MySQL :
                                           image_2_url TEXT,
                                           image_3_url TEXT,
                                           image_4_url TEXT,
-                                          hashtags TEXT,
                                           last_retry_date DATETIME,
                                           retries_count TINYINT UNSIGNED DEFAULT 0 )"""
         
@@ -139,8 +137,7 @@ class SQLite_or_MySQL :
                                   image_3_name VARCHAR(19),
                                   image_3_hash BINARY(""" + str(HASH_SIZE_BYTES) + """),
                                   image_4_name VARCHAR(19),
-                                  image_4_hash BINARY(""" + str(HASH_SIZE_BYTES) + """),
-                                  hashtags TEXT )"""
+                                  image_4_hash BINARY(""" + str(HASH_SIZE_BYTES) + """) )"""
             
             reindex_tweets_table = """CREATE TABLE IF NOT EXISTS reindex_tweets (
                                           tweet_id UNSIGNED BIGINT PRIMARY KEY,
@@ -149,7 +146,6 @@ class SQLite_or_MySQL :
                                           image_2_url TEXT,
                                           image_3_url TEXT,
                                           image_4_url TEXT,
-                                          hashtags TEXT,
                                           last_retry_date DATETIME,
                                           retries_count UNSIGNED TINYINT DEFAULT 0 )"""
         
@@ -227,8 +223,6 @@ class SQLite_or_MySQL :
                         pour la retrouver directement avec un GET HTTP
                         (OPTIONNEL)
     
-    @param hashtags La liste des hashtags du Tweet (OPTIONNEL)
-    
     @param FORCE_INDEX Forcer l'ajout du Tweet. Efface ce qui a déjà été
                        enregistré.
     """
@@ -242,7 +236,6 @@ class SQLite_or_MySQL :
                       image_name_2 : str = None,
                       image_name_3 : str = None,
                       image_name_4 : str = None,
-                      hashtags : List[str] = None,
                       FORCE_INDEX = True ) :
          # Ne pas re-vérifier, la classe Tweets_Indexer le fait déjà
 #        if self.is_tweet_indexed( tweet_id ) :
@@ -260,17 +253,12 @@ class SQLite_or_MySQL :
         
         c = self.get_cursor()
         
-        if hashtags != None and hashtags != [] and hashtags != [""] :
-            hashtags_str = ";".join( [ hashtag for hashtag in hashtags ] )
-        else :
-            hashtags_str = None
-        
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
-            c.execute( "INSERT INTO tweets VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s ) ON DUPLICATE KEY UPDATE tweets.tweet_id = tweets.tweet_id",
-                       ( account_id, tweet_id, image_name_1,  to_bin(cbir_hash_1),  image_name_2,  to_bin(cbir_hash_2), image_name_3, to_bin(cbir_hash_3), image_name_4, to_bin(cbir_hash_4), hashtags_str ) )
+            c.execute( "INSERT INTO tweets VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s ) ON DUPLICATE KEY UPDATE tweets.tweet_id = tweets.tweet_id",
+                       ( account_id, tweet_id, image_name_1,  to_bin(cbir_hash_1),  image_name_2,  to_bin(cbir_hash_2), image_name_3, to_bin(cbir_hash_3), image_name_4, to_bin(cbir_hash_4) ) )
         else :
-            c.execute( "INSERT INTO tweets VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ) ON CONFLICT ( tweet_id ) DO NOTHING",
-                       ( account_id, tweet_id, image_name_1,  to_bin(cbir_hash_1),  image_name_2,  to_bin(cbir_hash_2), image_name_3, to_bin(cbir_hash_3), image_name_4, to_bin(cbir_hash_4), hashtags_str ) )
+            c.execute( "INSERT INTO tweets VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ) ON CONFLICT ( tweet_id ) DO NOTHING",
+                       ( account_id, tweet_id, image_name_1,  to_bin(cbir_hash_1),  image_name_2,  to_bin(cbir_hash_2), image_name_3, to_bin(cbir_hash_3), image_name_4, to_bin(cbir_hash_4) ) )
         
         self.conn.commit()
     
@@ -619,24 +607,19 @@ class SQLite_or_MySQL :
     """
     Enregistrer un ID de Tweet à réessayer.
     """
-    def add_retry_tweet( self, tweet_id, account_id, image_1_url, image_2_url, image_3_url, image_4_url, hashtags ) :
+    def add_retry_tweet( self, tweet_id, account_id, image_1_url, image_2_url, image_3_url, image_4_url ) :
         now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         
         c = self.get_cursor()
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
-            request = """INSERT INTO reindex_tweets ( tweet_id, account_id, image_1_url, image_2_url, image_3_url, image_4_url, hashtags, last_retry_date ) VALUES ( %s, %s, %s, %s, %s, %s, %s, %s )
+            request = """INSERT INTO reindex_tweets ( tweet_id, account_id, image_1_url, image_2_url, image_3_url, image_4_url, last_retry_date ) VALUES ( %s, %s, %s, %s, %s, %s, %s )
                          ON DUPLICATE KEY UPDATE last_retry_date = %s, retries_count = retries_count+1"""
         else :
-            request = """INSERT INTO reindex_tweets ( tweet_id, account_id, image_1_url, image_2_url, image_3_url, image_4_url, hashtags, last_retry_date ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ? )
+            request = """INSERT INTO reindex_tweets ( tweet_id, account_id, image_1_url, image_2_url, image_3_url, image_4_url, last_retry_date ) VALUES ( ?, ?, ?, ?, ?, ?, ? )
                          ON CONFLICT ( tweet_id ) DO UPDATE SET last_retry_date = ?, retries_count = retries_count+1"""
         
-        if hashtags != None and hashtags != [] and hashtags != [""] :
-            hashtags_str = ";".join( [ hashtag for hashtag in hashtags ] )
-        else :
-            hashtags_str = None
-        
         c.execute( request,
-                   ( tweet_id, account_id, image_1_url, image_2_url, image_3_url, image_4_url, hashtags_str, now, now ) )
+                   ( tweet_id, account_id, image_1_url, image_2_url, image_3_url, image_4_url, now, now ) )
         self.conn.commit()
     
     """
@@ -666,7 +649,7 @@ class SQLite_or_MySQL :
     def get_retry_tweets( self ) :
         c = self.get_cursor()
         
-        c.execute( "SELECT tweet_id, account_id, image_1_url, image_2_url, image_3_url, image_4_url, hashtags, last_retry_date, retries_count FROM reindex_tweets ORDER BY last_retry_date" )
+        c.execute( "SELECT tweet_id, account_id, image_1_url, image_2_url, image_3_url, image_4_url, last_retry_date, retries_count FROM reindex_tweets ORDER BY last_retry_date" )
         
         to_return = {}
         for data in c.fetchall() :
@@ -677,15 +660,11 @@ class SQLite_or_MySQL :
             if data[3] != None : to_return["images"].append( data[3] )
             if data[4] != None : to_return["images"].append( data[4] )
             if data[5] != None : to_return["images"].append( data[5] )
-            if data[6] != None :
-                to_return["hashtags"] = data[6].split(";")
+            if not param.USE_MYSQL_INSTEAD_OF_SQLITE and data[6] != None :
+                to_return["last_retry_date"] = datetime.strptime( data[6], '%Y-%m-%d %H:%M:%S' )
             else :
-                to_return["hashtags"] = None
-            if not param.USE_MYSQL_INSTEAD_OF_SQLITE and data[7] != None :
-                to_return["last_retry_date"] = datetime.strptime( data[7], '%Y-%m-%d %H:%M:%S' )
-            else :
-                to_return["last_retry_date"] = data[7]
-            to_return["retries_count"] = data[8]
+                to_return["last_retry_date"] = data[6]
+            to_return["retries_count"] = data[7]
             yield to_return
     
     """

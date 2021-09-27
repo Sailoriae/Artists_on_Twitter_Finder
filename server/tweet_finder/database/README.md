@@ -16,8 +16,7 @@ Contient les attributs suivants :
 * `image_3_name VARCHAR(19)` : Identifiant de la troisième image du Tweet,
 * `image_3_hash BINARY(?)` : Empreinte de la troisième image (Avec ? déterminé par le moteur CBIR),
 * `image_4_name VARCHAR(19)` : Identifiant de la quatrième image du Tweet,
-* `image_4_hash BINARY(?)` : Empreinte de la quatrième image (Avec ? déterminé par le moteur CBIR),
-* `hashtags TEXT` : Liste des hashtags du Tweet, avec le croisillon "#", séparés par des points-virgules ";".
+* `image_4_hash BINARY(?)` : Empreinte de la quatrième image (Avec ? déterminé par le moteur CBIR).
 
 Notes :
 * Seules les Tweets avec au moins une image sont stockés.
@@ -50,7 +49,6 @@ Contient les attributs suivants :
 * `image_2_url TEXT` : URL de la deuxième image (`NULL` sinon),
 * `image_3_url TEXT` : URL de la troisième image (`NULL` sinon),
 * `image_4_url TEXT` : URL de la quatrième image (`NULL` sinon),
-* `hashtags TEXT` : Liste des hashtags du Tweet, avec le croisillon "#", séparés par des points-virgules ";",
 * `last_retry_date DATETIME` : Date locale de la dernière tentative d'indexation,
 * `retries_count TINYINT UNSIGNED DEFAULT` : Compteur de tentatives de réindexation (0 par défaut).
 
