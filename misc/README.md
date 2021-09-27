@@ -6,7 +6,7 @@
   Permet d'obtenir les clés d'authentification à un compte Twitter.
 
 
-## Archives
+## Archives et anciennes fonctionnalités
 
 * Module [`old_cbir_engine`](old_cbir_engine) :
   Répertoire de l'ancien moteur de recherche par image. Celui-ci utilisé des histogrammes colorimétriques pour indexer.

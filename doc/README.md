@@ -6,7 +6,6 @@ Veuillez d'abord lire la description générale de AOTF, c'est à dire le fichie
 * [`Architecture_du_serveur.png`](Architecture_du_serveur.png) : Diagramme de l'architecture du serveur.
 * [`Avertissement_utilisation.md`](Avertissement_utilisation.md) : Avertissement sur l'indexation de comptes Twitter dans la base de données.
 * [`Limites_de_scan_des_comptes_Twitter.md`](Limites_de_scan_des_comptes_Twitter.md) : Pourquoi il peut manque des Tweets des comptes Twitter scannés.
-* [`Limites_du_moteur_CBIR.md`](Limites_du_moteur_CBIR.md) : Pourquoi le moteur CBIR peut sortir un mauvais résultat.
 * [`Pistes_explorées_pour_la_recherche.md`](Pistes_explorées_pour_la_recherche.md) : Pistes et idées explorées pour accélérer la recherche par image (LIRE et Milvus).
 * [`Stratégie_de_sauvegarde.md`](Stratégie_de_sauvegarde.md) : Idées pour sauvegarder la base de données MySQL du serveur AOTF.
 

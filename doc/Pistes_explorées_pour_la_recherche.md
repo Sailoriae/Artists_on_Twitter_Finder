@@ -4,7 +4,7 @@
 
 Il existe pleins de moteurs CBIR, mais je n'en n'ai pas trouvé ayant une recherche efficace lorsque la taille de leur base de données augmente.
 
-Pour rappel, note moteur CBIR, comme la plupart des autres moteurs CBIR, extrait une liste ou un vecteur de caractéristiques. La recherche consiste donc à trouve des vecteurs similaires au vecteur de l'image de requêtes
+Pour rappel, note moteur CBIR, comme la plupart des autres moteurs CBIR, extrait une liste ou un vecteur de caractéristiques. La recherche consiste donc à trouve des vecteurs similaires au vecteur de l'image de requêtes.
 
 La première implémentation de cette recherche consiste à calculer la distance entre le vecteur de requête, et tous les autres de la base de données, et de prendre les plus proches. On pourrait appeler cela de la recherche par force brute, c'est à dire tout tester.
 

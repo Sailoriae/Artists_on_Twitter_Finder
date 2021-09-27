@@ -8,6 +8,8 @@ Le gros problème de ce moteur est que l'hitogramme colorométique prenanait bea
 
 Il a été remplacé par le moteur actuel, qui utilise la méthode des empreintes d'images ("image hash").
 
+Le document [`Limites_du_moteur_CBIR.md`](Limites_du_moteur_CBIR.md) était présent dans la documentation pour expliquer les limites de ce moteur.
+
 ___
 
 Il n'existe pas de librairie pour faire du Content-Based Image Retrieval (CBIR) en Python. J'ai donc été obligé de faire mon propre système, en utilisant de préférence OpenCV afin qu'il aille plus vite.
