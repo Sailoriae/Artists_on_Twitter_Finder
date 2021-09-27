@@ -1,5 +1,22 @@
 # Pistes et idées explorées pour accélérer la recherche par image
 
+Ce document parle des pistes explorées pour améliorer les deux problèmes principaux d'AOTF :
+- Le moteur de recherche par image qui est assez imprécis et mène à beaucoup de faux positifs (Notamment avec des croquis en nuance de gris), à cause de la méthode des histogrammes colorimétriques.
+- La recherche inversée qui est lente car elle se fait par force brute (Parcours de toute la base).
+
+Le premier problème a été solutionné par le changement de l'algorithme utilisé pour caractériser les images (26 septembre 2021). Le nouvel algorithme est **pHash**.
+Le second problème n'est pas une priorité, pour deux raisons :
+- La recherche se fait sur une fraction de la base de données (Uniquement sur les comptes Twitter trouvés par le "Link Finder" comme ceux de l'artiste à rechercher),
+- Et pHash nous a permis de stocker beaucoup moins de données (Un binaire au lieu d'un vecteur de 240 valeurs), ce qui rend l'itération dans la base beaucoup plus rapide (De l'ordre de x1000 sur les premiers tests).
+
+Cependant, il peut être intéressant d'explorer des pistes pour voir s'il n'y a pas une solution plus adaptée que MySQL.
+
+___
+
+
+Note : Ce qui est écrit n'est pas forcément éxact, j'apprends !
+
+
 ## Problème de la recherche par force brute
 
 Il existe pleins de moteurs CBIR, mais je n'en n'ai pas trouvé ayant une recherche efficace lorsque la taille de leur base de données augmente.
