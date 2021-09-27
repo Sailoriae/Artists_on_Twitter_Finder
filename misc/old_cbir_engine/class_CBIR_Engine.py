@@ -5,20 +5,7 @@ import numpy as np
 from typing import List
 import cv2
 
-# Les importations se font depuis le répertoire racine du serveur AOTF
-# Ainsi, si on veut utiliser ce script indépendemment (Notemment pour des
-# tests), il faut que son répertoire de travail soit ce même répertoire
-if __name__ == "__main__" :
-    from os.path import abspath as get_abspath
-    from os.path import dirname as get_dirname
-    from os import chdir as change_wdir
-    from os import getcwd as get_wdir
-    from sys import path
-    change_wdir(get_dirname(get_abspath(__file__)))
-    change_wdir( "../.." )
-    path.append(get_wdir())
-
-from tweet_finder.cbir_engine.class_ColorDescriptor import ColorDescriptor
+from class_ColorDescriptor import ColorDescriptor
 
 
 # En téléchargeant les images de Tweets en qualité maximale, on est globalement
