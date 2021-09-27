@@ -8,6 +8,8 @@ D'où l'intérêt de l'étape 4 (Filtrage des résultats). Même si cette étape
 
 Il y a donc de grandes améliorations à faire, au point de pouvoir supprimer l'étape 4.
 
+**Note :** L'étape 4 a été supprimée le 27 septembre 2021, après le changement du moteur CBIR.
+
 ## Histogramme 3D d'une image en noir et blanc
 
 ![Histogramme 3D d'une image en noir et blanc](Histogramme_image_en_noir_et_blanc.png)

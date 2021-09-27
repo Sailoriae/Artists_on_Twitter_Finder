@@ -50,8 +50,6 @@ Liste des status possibles (Dans l'ordre de traitement) :
   - Sinon, c'est qu'il y a un ou plusieurs comptes qui étaient inconnus dans la base de données. Cette étape va donc être longue.
 - `WAIT_IMAGE_REVERSE_SEARCH` : En attente de traitement par un thread de recherche d'image inversée.
 - `IMAGE_REVERSE_SEARCH` : En cours de traitement par un thread de recherche d'image inversée.
-- `WAIT_FILTER_RESULTS` : En attente du filtrage des résultats de la recherche inversée.
-- `FILTER_RESULTS` : Filtrage des résultats de la recherche inversée.
 - `END` : Fin de traitement.
 
 Liste des erreurs possibles :

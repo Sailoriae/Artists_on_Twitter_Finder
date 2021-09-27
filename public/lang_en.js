@@ -18,8 +18,6 @@ var lang = {
 	"STATUS" : "Processing status\xa0: ",
 
 	"END" : "End of processing.",
-	"FILTER_RESULTS" : "Filtering of reverse search results.",
-	"WAIT_FILTER_RESULTS" : "Waiting for filtering of reverse search results.",
 	"IMAGE_REVERSE_SEARCH" : "Reverse searching of the illustration.",
 	"WAIT_IMAGE_REVERSE_SEARCH" : "Waiting for reverse searching of the illustration.",
 	"INDEX_ACCOUNTS_TWEETS" : "Indexing of Tweets from Twitter accounts found.",
