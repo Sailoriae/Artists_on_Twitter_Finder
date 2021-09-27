@@ -81,13 +81,7 @@ class Reverse_Searcher :
         iterator = self.bdd.get_images_in_db_iterator( account_id = account_id,
                                                        add_step_3_times = add_step_3_times )
         
-        try :
-            to_return = self.cbir_engine.search_cbir( image, iterator )
-        # Si j'amais l'image passée a un format à la noix et fait planter notre
-        # moteur CBIR
-        except Exception as error :
-            print( error )
-            return None
+        to_return = self.cbir_engine.search_cbir( image, iterator )
         
         if self.DEBUG or self.ENABLE_METRICS :
             print( f"[Reverse_Searcher] La recherche s'est faite en {time() - start} secondes." )
