@@ -5,5 +5,5 @@
   **Attention :** Ce script supprime les comptes supprimés, suspendus ou passés en privé / protégé.
 
 * Script [`cleanup_database.py`](cleanup_database.py) :
-  Permet de vérifier que les Tweets enregistrés dans la base de données ont bien un compte enregistré correspondant, et que les images de Tweets enregistrées ont bien un Tweet enregistré correspondant.
-  Puis supprime les Tweets sans compte enregistré, et les images de Tweets sans Tweet enregistré.
+  Permet de vérifier que les Tweets enregistrés dans la base de données ont bien un compte enregistré correspondant.
+  Puis supprime les Tweets sans compte enregistré (Et ainsi les empreintes des images de ces Tweets).

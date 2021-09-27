@@ -132,18 +132,10 @@ while True :
                 for tweet_id in tweets_id :
                     print( "Suppression du Tweet :", tweet_id[0] )
                     c.execute( "DELETE FROM tweets WHERE tweet_id = %s", tweet_id )
-                    c.execute( "DELETE FROM tweets_images_1 WHERE tweet_id = %s", tweet_id )
-                    c.execute( "DELETE FROM tweets_images_2 WHERE tweet_id = %s", tweet_id )
-                    c.execute( "DELETE FROM tweets_images_3 WHERE tweet_id = %s", tweet_id )
-                    c.execute( "DELETE FROM tweets_images_4 WHERE tweet_id = %s", tweet_id )
             else :
                 for tweet_id in tweets_id :
                     print( "Suppression du Tweet :", tweet_id[0] )
                     c.execute( "DELETE FROM tweets WHERE tweet_id = ?", tweet_id )
-                    c.execute( "DELETE FROM tweets_images_1 WHERE tweet_id = ?", tweet_id )
-                    c.execute( "DELETE FROM tweets_images_2 WHERE tweet_id = ?", tweet_id )
-                    c.execute( "DELETE FROM tweets_images_3 WHERE tweet_id = ?", tweet_id )
-                    c.execute( "DELETE FROM tweets_images_4 WHERE tweet_id = ?", tweet_id )
             
             print( "Suppression du compte ID :", account_id )
             if param.USE_MYSQL_INSTEAD_OF_SQLITE :

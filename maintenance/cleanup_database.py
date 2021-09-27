@@ -2,9 +2,8 @@
 # coding: utf-8
 
 """
-Ce script permet de supprimer les Tweets dont l'ID du compte Twitter associé
-n'est pas stocké dans la BDD, puis supprime les images de ces Tweets.
-Puis, il va vérifier qu'il n'y ait pas d'images de Tweet sans Tweet enregistré.
+Ce script permet de supprimer les Tweets (Et ainsi les empreintes de leurs
+images) dont l'ID du compte Twitter associé n'est pas stocké dans la BDD.
 
 En gros, il nettoie la base de données des enregistrement en trop.
 LE SERVEUR DOIT ETRE ETEINT !
@@ -98,65 +97,9 @@ for tweet_id in tweets_id :
     print( "Suppression du Tweet :", tweet_id[0] )
     
     if param.USE_MYSQL_INSTEAD_OF_SQLITE :
-        c.execute( "DELETE FROM tweets_images_1 WHERE tweet_id = %s", tweet_id )
-        c.execute( "DELETE FROM tweets_images_2 WHERE tweet_id = %s", tweet_id )
-        c.execute( "DELETE FROM tweets_images_3 WHERE tweet_id = %s", tweet_id )
-        c.execute( "DELETE FROM tweets_images_4 WHERE tweet_id = %s", tweet_id )
         c.execute( "DELETE FROM tweets WHERE tweet_id = %s", tweet_id )
     
     else :
-        c.execute( "DELETE FROM tweets_images_1 WHERE tweet_id = ?", tweet_id )
-        c.execute( "DELETE FROM tweets_images_2 WHERE tweet_id = ?", tweet_id )
-        c.execute( "DELETE FROM tweets_images_3 WHERE tweet_id = ?", tweet_id )
-        c.execute( "DELETE FROM tweets_images_4 WHERE tweet_id = ?", tweet_id )
         c.execute( "DELETE FROM tweets WHERE tweet_id = ?", tweet_id )
     
     conn.commit()
-
-
-"""
-Vérification de l'intégrité des tables d'images de Tweets.
-C'est à dire qu'on vérifie qu'il n'y ait pas d'images de Tweet sans
-Tweet enregistré.
-"""
-while True :
-    answer = input( "Souhaitez-vous aussi vérifier l'intégrité des tables d'images de Tweets ? [y/n] " )
-    if answer == "y" :
-        break
-    elif answer == "n" :
-        sys.exit(0)
-
-for image_id in ["1", "2", "3", "4"] :
-    print( "Vérification des enregistrements dans la table des images numéro " + image_id + " de Tweets..." )
-    print( " => Nom réel de la table : tweets_images_" + image_id )
-    
-    c = conn.cursor()
-    c.execute( """SELECT tweet_id
-                  FROM tweets_images_""" + image_id + """
-                  WHERE NOT EXISTS (
-                      SELECT *
-                      FROM tweets WHERE tweets.tweet_id = tweets_images_""" + image_id + """.tweet_id
-                  )""" )
-    tweets_id = c.fetchall()
-    
-    if len(tweets_id) > 0 :
-        while True :
-            answer = input( count + " images numéro " + image_id + " de Tweets à supprimer, souhaitez-vous continuer ? [y/n] " )
-            if answer == "y" :
-                break
-            elif answer == "n" :
-                print( "Aucune image de Tweet n'a été supprimée !" )
-                sys.exit(0)
-    else :
-        print( "Aucune image de Tweet à supprimer !" )
-    
-    for tweet_id in tweets_id :
-        print( "Suppression de l'image numéro " + image_id + " du Tweet :", tweet_id[0] )
-        
-        if param.USE_MYSQL_INSTEAD_OF_SQLITE :
-            c.execute( "DELETE FROM tweets_images_" + image_id + " WHERE tweet_id = %s", tweet_id )
-        
-        else :
-            c.execute( "DELETE FROM tweets_images_" + image_id + " WHERE tweet_id = ?", tweet_id )
-        
-        conn.commit()
