@@ -240,9 +240,6 @@ class User_Requests_Pipeline :
         if request.status == 6 :
             request.finished_date = datetime.datetime.now()
             
-            # Supprimer l'image mise en cache afin de gagner de la mémoire
-            request.query_image_as_bytes = None
-            
             # Descendre le compteur de requêtes en cours de traitement dans le
             # pipeline
             self._requests_sem.acquire()

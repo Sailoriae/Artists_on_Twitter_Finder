@@ -70,12 +70,12 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
         try :
             # ATTENTION : Bien utiliser url_to_content(), car elle contient
             # une bidouille pour GET les image sur Pixiv
-            request.query_image_as_bytes = url_to_content( request.image_url )
+            query_image_as_bytes = url_to_content( request.image_url )
         except urllib.error.HTTPError as error : # On réessaye qu'une seule fois
             print( error )
             if error.code == 502 : # Et uniquement sur certaines erreurs
                 sleep(10)
-                request.query_image_as_bytes = url_to_content( request.image_url )
+                query_image_as_bytes = url_to_content( request.image_url )
             else :
                 request.release_proxy()
                 raise error
@@ -89,7 +89,7 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
                                                account_name = twitter_account[0],
                                                account_id = twitter_account[1],
                                                add_step_3_times = shared_memory_execution_metrics.add_step_3_times,
-                                               query_image_binary = request.query_image_as_bytes )
+                                               query_image_binary = query_image_as_bytes )
             if result != None :
                 request.found_tweets += result
             else :

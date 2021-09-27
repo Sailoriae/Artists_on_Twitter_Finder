@@ -67,13 +67,6 @@ class User_Request :
         self._has_first_time_scan = False
         
         # Résultat de la recherche inversée (Etape 3)
-        # Image téléchargée
-        # Permet d'être ensuite utilisée par l'étape 4 (Filtrage) sans avoir à
-        # retélécharger l'image
-        # A SUPPRIMER SI UN JOUR ON SUPPRIME L'ETAPE 4
-        self._query_image_as_bytes = None
-        
-        # Résultat de la recherche inversée (Etape 3)
         # Résultats de la recherche inversée de l'image
         # Est une liste d'objets Image_in_DB
         self._found_tweets = []
@@ -140,11 +133,6 @@ class User_Request :
     def has_first_time_scan( self ) : return self._has_first_time_scan
     @has_first_time_scan.setter
     def has_first_time_scan( self, value ) : self._has_first_time_scan = value
-    
-    @property
-    def query_image_as_bytes( self ) : return self._query_image_as_bytes
-    @query_image_as_bytes.setter
-    def query_image_as_bytes( self, value ) : self._query_image_as_bytes = value
     
     @property
     def found_tweets( self ) : return self._found_tweets
