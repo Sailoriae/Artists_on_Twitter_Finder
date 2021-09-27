@@ -72,25 +72,23 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
         # dans l'ordre du moins récemment mise à jour au plus récemment mis à jour
         oldest_updated_account_iterator = bdd_direct_access.get_oldest_updated_account()
         
-        # oldest_updated_account[0] : L'ID du compte Twitter
-        # oldest_updated_account[1] : Sa date de dernière MàJ avec l'API de recherche
-        # oldest_updated_account[2] : Sa date dernière MàJ avec l'API de timeline
+        # Pour chaque compte dans la BDD
         for oldest_updated_account in oldest_updated_account_iterator  :
             # Vérifier quand même qu'il ne faut pas s'arrêter
             if not shared_memory.keep_service_alive :
                 break
             
             # Vérifier que le compte n'est pas déjà en cours d'indexation
-            if shared_memory_scan_requests.get_request( oldest_updated_account[0] ) != None :
+            if shared_memory_scan_requests.get_request( oldest_updated_account["account_id"] ) != None :
                 continue
             
             # Si une des deux dates est à NULL, on force le scan
-            if oldest_updated_account[1] == None or oldest_updated_account[2] == None :
+            if oldest_updated_account["last_SearchAPI_indexing_local_date"] == None or oldest_updated_account["last_TimelineAPI_indexing_local_date"] == None :
                pass
             
             # Sinon, on prendre la date minimale
             else :
-                min_date = min( oldest_updated_account[1], oldest_updated_account[2] )
+                min_date = min( oldest_updated_account["last_SearchAPI_indexing_local_date"], oldest_updated_account["last_TimelineAPI_indexing_local_date"] )
                 
                 # Calculer le temps écoulé entre la dernière MàJ et maintenant
                 diff = (start - min_date).total_seconds()
@@ -113,7 +111,7 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
                     
                     end_sleep_time = time() + wait_time
                     
-                    print( f"[auto_update_th{thread_id}] Reprise dans {int(wait_time)} secondes, pour lancer le scan du compte ID {oldest_updated_account[0]}." )
+                    print( f"[auto_update_th{thread_id}] Reprise dans {int(wait_time)} secondes, pour lancer le scan du compte ID {oldest_updated_account['account_id']}." )
                     
                     # Si la boucle d'attente a été cassée, c'est que le serveur
                     # doit s'arrêter, il faut retourner à la boucle
@@ -139,35 +137,35 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
             # On le fait seulement maintenant, et pas avant la boucle d'attente
             # car la répartition des MàJ avec  un temps minimal nous ferait
             # prendre trop d'avance
-            if ( bdd_direct_access.get_account_SearchAPI_last_scan_local_date( oldest_updated_account[0] ) != oldest_updated_account[1] and
-                 bdd_direct_access.get_account_TimelineAPI_last_scan_local_date( oldest_updated_account[0] ) != oldest_updated_account[2] ) :
-                print( f"[auto_update_th{thread_id}] Le compte ID {oldest_updated_account[0]} a eu un scan provoqué par un utilisateur, on peut le sauter." )
+            if ( bdd_direct_access.get_account_SearchAPI_last_scan_local_date( oldest_updated_account["account_id"] ) != oldest_updated_account["last_SearchAPI_indexing_local_date"] and
+                 bdd_direct_access.get_account_TimelineAPI_last_scan_local_date( oldest_updated_account["account_id"] ) != oldest_updated_account["last_TimelineAPI_indexing_local_date"] ) :
+                print( f"[auto_update_th{thread_id}] Le compte ID {oldest_updated_account['account_id']} a eu un scan provoqué par un utilisateur, on peut le sauter." )
                 
                 # On peut sauter ce compte, on le reverra la prochaine fois
                 # qu'on lancera l'itérateur
                 continue
             
             # On cherche le nom du compte Twitter
-            account_name = twitter.get_account_id( oldest_updated_account[0], invert_mode = True )
+            account_name = twitter.get_account_id( oldest_updated_account["account_id"], invert_mode = True )
             
             # Si l'ID du compte Twitter n'existe plus
             if account_name == None :
-                print( f"[auto_update_th{thread_id}] L'ID de compte Twitter {oldest_updated_account[0]} n'est plus accessible ou n'existe plus !" )
+                print( f"[auto_update_th{thread_id}] L'ID de compte Twitter {oldest_updated_account['account_id']} n'est plus accessible ou n'existe plus !" )
                 
                 # On met la date locale de la dernière MàJ à aujourd'hui pour
                 # éviter de ré-avoir cet ID à la prochaine itération
                 # On peut faire ce INSERT INTO, pusiqu'il n'y a que ce thread qui
                 # utilise la date locale de dernière MàJ, et que ce thread est
                 # unique
-                bdd_direct_access.set_account_SearchAPI_last_tweet_date( oldest_updated_account[0],
-                                                                         bdd_direct_access.get_account_SearchAPI_last_tweet_date( oldest_updated_account[0] ) )
-                bdd_direct_access.set_account_TimelineAPI_last_tweet_id( oldest_updated_account[0],
-                                                                         bdd_direct_access.get_account_TimelineAPI_last_tweet_id( oldest_updated_account[0] ) )
+                bdd_direct_access.set_account_SearchAPI_last_tweet_date( oldest_updated_account["account_id"],
+                                                                         bdd_direct_access.get_account_SearchAPI_last_tweet_date( oldest_updated_account["account_id"] ) )
+                bdd_direct_access.set_account_TimelineAPI_last_tweet_id( oldest_updated_account["account_id"],
+                                                                         bdd_direct_access.get_account_TimelineAPI_last_tweet_id( oldest_updated_account["account_id"] ) )
             
             # Sinon, on lance le scan pour ce compte
             else :
-                print( f"[auto_update_th{thread_id}] Mise à jour du compte @{account_name} (ID {oldest_updated_account[0]})." )
-                shared_memory_scan_requests.launch_request( oldest_updated_account[0],
+                print( f"[auto_update_th{thread_id}] Mise à jour du compte @{account_name} (ID {oldest_updated_account['account_id']})." )
+                shared_memory_scan_requests.launch_request( oldest_updated_account["account_id"],
                                                             account_name,
                                                             is_prioritary = False )
     

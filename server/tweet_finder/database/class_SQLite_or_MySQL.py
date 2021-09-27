@@ -574,7 +574,10 @@ class SQLite_or_MySQL :
     de la date du dernier scan avec l'API de recherche et du dernier scan avec
     l'API de timeline.
     
-    @return Un itérateur sur le résultat
+    Cet itérateur donne des dictionnaires contenant les champs suivant :
+    - "account_id" : L'ID du compte Twitter,
+    - "last_SearchAPI_indexing_local_date" : Sa date de dernière MàJ avec l'API de recherche,
+    - "last_TimelineAPI_indexing_local_date" : Sa date dernière MàJ avec l'API de timeline.
     """
     def get_oldest_updated_account( self ) :
         c = self.get_cursor()
@@ -593,6 +596,7 @@ class SQLite_or_MySQL :
                           ORDER BY MIN( last_SearchAPI_indexing_local_date,
                                         last_TimelineAPI_indexing_local_date ) ASC""" )
         
+        to_return = {}
         for triplet in c.fetchall() :
             last_SearchAPI_indexing_local_date = triplet[1]
             last_TimelineAPI_indexing_local_date = triplet[2]
@@ -602,7 +606,10 @@ class SQLite_or_MySQL :
             if last_TimelineAPI_indexing_local_date != None :
                 if not param.USE_MYSQL_INSTEAD_OF_SQLITE :
                     last_TimelineAPI_indexing_local_date = datetime.strptime( last_TimelineAPI_indexing_local_date, '%Y-%m-%d %H:%M:%S' )
-            yield ( triplet[0], last_SearchAPI_indexing_local_date, last_TimelineAPI_indexing_local_date )
+            to_return["account_id"] = triplet[0]
+            to_return["last_SearchAPI_indexing_local_date"] = last_SearchAPI_indexing_local_date
+            to_return["last_TimelineAPI_indexing_local_date"] = last_TimelineAPI_indexing_local_date
+            yield to_return
     
     """
     Enregistrer un ID de Tweet à réessayer.
