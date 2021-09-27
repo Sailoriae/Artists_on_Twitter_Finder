@@ -42,7 +42,16 @@ class CBIR_Engine :
         # de passer par une étape supplémentaire. On gagne que dalle, mais
         # c'est toujours ça de gagné.
         img_size = hash_size * highfreq_factor
+        
+        # J'ai testé avec OpenCV (Librairie "OpenCV-Python"), et bizarrement,
+        # elle est plus lente pour faire le passage en nuance de gris et le
+        # redimensionnement. Pas de beaucoup, 1.3 fois plus lent environ.
+        # Code OpenCV, l'image doit être une "numpy.ndarray" (La fonction
+        # "url_to_cv2_image()" existe encore dans "old_cbir_engine") :
+        # cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        # cv2.resize(image, (img_size, img_size), interpolation = cv2.INTER_AREA)
         image = image.convert("L").resize((img_size, img_size), Image.ANTIALIAS)
+        
         pixels = numpy.asarray(image)
         dct = scipy.fftpack.dct(scipy.fftpack.dct(pixels, axis=0), axis=1)
         dctlowfreq = dct[:hash_size, :hash_size]
