@@ -1,4 +1,5 @@
 numpy
+scipy
 urllib3
 mysql-connector-python
 requests

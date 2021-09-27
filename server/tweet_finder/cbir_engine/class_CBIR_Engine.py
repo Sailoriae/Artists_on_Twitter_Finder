@@ -2,7 +2,8 @@
 # coding: utf-8
 
 from PIL import Image
-import imagehash
+import scipy.fftpack
+import numpy
 
 
 # Taille des empreintes. La taille des empreintes en bits sera le carré de
@@ -32,9 +33,25 @@ class CBIR_Engine :
     @param image Une image au format PIL.Image.
     @return Son empreinte.
     """
-    def _phash( self, image : Image ) -> int :
-        hash_list = imagehash.phash( image ).hash.flatten()
-        return int( "".join(str(b) for b in 1 * hash_list), 2 )
+    def _phash( self, image : Image,
+                hash_size : int = HASH_SIZE, highfreq_factor : int = 4 ) -> int :
+        # Code venant de la librairie Python "ImageHash" :
+        # https://github.com/JohannesBuchner/imagehash
+        # BSD 2-Clause "Simplified" License, Copyright (c) Johannes Buchner
+        # On a copié-collé ce code au lieu d'utiliser la librairie pour éviter
+        # de passer par une étape supplémentaire. On gagne que dalle, mais
+        # c'est toujours ça de gagné.
+        img_size = hash_size * highfreq_factor
+        image = image.convert("L").resize((img_size, img_size), Image.ANTIALIAS)
+        pixels = numpy.asarray(image)
+        dct = scipy.fftpack.dct(scipy.fftpack.dct(pixels, axis=0), axis=1)
+        dctlowfreq = dct[:hash_size, :hash_size]
+        med = numpy.median(dctlowfreq)
+        diff = dctlowfreq > med
+        
+        # Méthode environ 3 fois plus rapide que de passer par une string
+        # String : int( "".join(str(b) for b in 1 * diff.flatten()), 2 )
+        return sum([2 ** i for (i, v) in enumerate(diff.flatten()) if v])
     
     """
     Comparaison bits à bits en calculant la distance de Hamming entre deux
