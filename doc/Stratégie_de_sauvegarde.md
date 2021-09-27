@@ -6,7 +6,7 @@ La base de données d’AOTF est la seule donnée à sauvegarder. Mais le fichie
 
 ## Comment sauvegarder la base de données MySQL d'AOTF ?
 
-Le **dump MySQL** peut être intéressant pour des petites base de données, mais devient trop long et trop volumineux lorsque la base de données grandit. En effet, ce qui prend le plus de place dans la base de données du serveur AOTF est l'ensemble des vecteurs (Listes des caractéristiques des images), qui sont des listes de nombres flotants. Or, le dump MySQL exporte ces nombres flotants en UTF-8, ce qui fait exploser la taille qu'ils occupent.
+Le **dump MySQL** peut être intéressant pour des petites base de données, mais devient trop long et trop volumineux lorsque la base de données grandit. Attention, il est impératif d'utiliser l'option `--hex-blob`, qui permet d'exporter proprement les données binaires (Empreintes des images).
 
 Ainsi, la manière la plus efficace de sauvegarder la base de données est de faire de la **réplication MySQL**, ce qui nécessite un deuxième serveur MySQL. Ce deuxième serveur est appelé le serveur "esclave", et le serveur principal le serveur "maitre". Le serveur esclave se connecte avec un compte sur le serveur maitre **qui a uniquement des permissions de lecture**, et réplique chez lui les opérations réalisées (Grace aux journaux binaires).
 
