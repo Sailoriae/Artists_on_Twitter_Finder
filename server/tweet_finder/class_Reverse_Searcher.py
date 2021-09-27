@@ -2,6 +2,7 @@
 # coding: utf-8
 
 from time import time
+from PIL import UnidentifiedImageError
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
 # Ainsi, si on veut utiliser ce script indépendemment (Notemment pour des
@@ -70,7 +71,7 @@ class Reverse_Searcher :
                 image = url_to_PIL_image( image_url )
             else :
                 image = binary_image_to_PIL_image( query_image_binary )
-        except Exception as error :
+        except UnidentifiedImageError as error :
             print( f"L'URL \"{image_url}\" ne mène pas à une image !" )
             print( error )
             return None
