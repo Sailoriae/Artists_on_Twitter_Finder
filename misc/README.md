@@ -6,6 +6,15 @@
   Permet d'obtenir les clés d'authentification à un compte Twitter.
 
 
+## Archives
+
+* Module [`old_cbir_engine`](old_cbir_engine) :
+  Répertoire de l'ancien moteur de recherche par image. Celui-ci utilisé des histogrammes colorimétriques pour indexer.
+
+* Script [`extract_tweets_ids_from_error_file.py`](extract_tweets_ids_from_error_file.py) :
+  Ancien script de maintenance, quand le réessai des Tweets dont l'indexation a échouée n'était pas intégré au serveur.
+
+
 ## Scripts inutiles
 
 * Script [`test_tweepy_rate_limits.py`](test_tweepy_rate_limits.py) :
@@ -19,10 +28,7 @@
   A servi a corriger un bug qui a engendré des problèmes dans la BDD.
 
 * Script [`recalculate_images_features.py`](recalculate_images_features.py) :
-  Permet de recauculer tous les vecteurs de caractéristiques des images dans la BDD. **Ne jamais utiliser !** Il vaut mieux vider les tables d'images et de Tweets, et supprimer les curseurs d'indexation. Ca va beaucoup plus vite, car cela utilise le parallélisme du serveur.
-
-* Script [`extract_tweets_ids_from_error_file.py`](extract_tweets_ids_from_error_file.py) :
-  Ancien script de maintenance, quand le réessai des Tweets dont l'indexation a échouée n'était pas intégré au serveur.
+  Permet de recalculer tous les vecteurs de caractéristiques des images dans la BDD. **Ne jamais utiliser !** Il vaut mieux vider les tables d'images et de Tweets, et supprimer les curseurs d'indexation. Ca va beaucoup plus vite, car cela utilise le parallélisme du serveur.
 
 
 ## Scripts et fonctionnalités de tests
