@@ -178,8 +178,4 @@ class User_Request :
         if self._status == 5 :
             return "IMAGE_REVERSE_SEARCH"
         if self._status == 6 :
-            return "WAIT_FILTER_RESULTS"
-        if self._status == 7 :
-            return "FILTER_RESULTS"
-        if self._status == 8 :
             return "END"

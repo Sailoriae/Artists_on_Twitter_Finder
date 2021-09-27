@@ -64,11 +64,6 @@ class Metrics_Container :
         self._step_3_iteration_times = Mean_Container()
         self._step_3_usage_times = Mean_Container()
         
-        # Fonction thread_step_4_filter_results
-        self._step_4_times = Mean_Container()
-        self._step_4_download_times = Mean_Container()
-        self._step_4_compare_times = Mean_Container()
-        
         # Temps de traitement complet
         self._user_request_full_time = Mean_Container()
         self._scan_request_full_time = Mean_Container()
@@ -138,17 +133,6 @@ class Metrics_Container :
         self._step_3_usage_times.add_many( step_3_usage_times )
     
     """
-    @param step_4_times Temps d'éxécution pour filtrer la liste des résultats.
-    @param step_4_download_times Liste des temps pour télécharger les images.
-    @param step_4_compare_times Liste des temps d'éxécution pour comparer les
-                                images téléchargées avec l'image de requête.
-    """
-    def add_step_4_times ( self, step_4_times, step_4_download_times, step_4_compare_times ) :
-        self._step_4_times.add_one( step_4_times )
-        self._step_4_download_times.add_many( step_4_download_times )
-        self._step_4_compare_times.add_many( step_4_compare_times )
-    
-    """
     Enregistrer le temps de traitement complet d'une requête utilisateur.
     @param scan_request_full_time Temps d'éxécution.
     """
@@ -203,13 +187,6 @@ class Metrics_Container :
             to_print += f" - Dont : Itérer sur la base de données : {self._step_3_iteration_times.get_mean()} ({self._step_3_iteration_times.get_count()} itérations)\n"
         if self._step_3_usage_times.get_count() != 0 :
             to_print += f" - Dont : Comparer deux vecteurs : {self._step_3_usage_times.get_mean()} ({self._step_3_usage_times.get_count()} images)\n"
-        
-        if self._step_4_times.get_count() != 0 :
-            to_print += f"Etape 4 : Temps moyen pour filtrer la liste des résultats : {self._step_4_times.get_mean()} ({self._step_4_times.get_count()} filtrages)\n"
-        if self._step_4_download_times.get_count() != 0 :
-            to_print += f" - Dont : Téléchargement d'une image : {self._step_4_download_times.get_mean()} ({self._step_4_download_times.get_count()} images)\n"
-        if self._step_4_compare_times.get_count() != 0 :
-            to_print += f" - Dont : Comparer deux images : {self._step_4_compare_times.get_mean()} ({self._step_4_compare_times.get_count()} comparaisons)\n"
         
         if self._user_request_full_time.get_count() != 0 :
             to_print += f"Temps moyen pour traiter une requête utilisateur : {self._user_request_full_time.get_mean()} ({self._user_request_full_time.get_count()} requêtes)\n"

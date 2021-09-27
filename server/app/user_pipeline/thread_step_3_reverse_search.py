@@ -122,9 +122,7 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
         # Dire qu'on n'est plus en train de traiter cette requête
         shared_memory_threads_registry.set_request( f"thread_step_3_reverse_search_th{thread_id}", None )
         
-        # On passe la requête à l'étape suivante
-        # C'est la procédure shared_memory_user_requests.set_request_to_next_step
-        # qui vérifie si elle peut
+        # On passe la requête à l'étape suivante, fin du traitement
         shared_memory_user_requests.set_request_to_next_step( request )
         
         # Forcer la fermeture du proxy
