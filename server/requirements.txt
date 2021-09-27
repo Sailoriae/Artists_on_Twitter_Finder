@@ -1,7 +1,5 @@
 numpy
 urllib3
-opencv-python-headless # opencv-python mais sans les fonctionnalités de GUI
-imutils
 mysql-connector-python
 requests
 tweepy
