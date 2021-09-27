@@ -47,6 +47,10 @@ Attention : Cette fonction retourne le contenu binaire !
 
 @return L'image sous forme de bits, à décoder !
         Ou None si il y a eu une erreur connue comme insolvable !
+
+Vraiment important : None veut dire qu'on ne pourra jamais obtenir l'image.
+Par exemple, si twitter renvoit une erreur 404, c'est qu'ils ont vraiment perdu
+l'image. AOTF ne retentera donc pas de l'indexer.
 """
 def get_tweet_image ( image_url : str ) -> bytes :
     retry_count = 0

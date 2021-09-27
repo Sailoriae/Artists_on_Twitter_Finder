@@ -39,6 +39,13 @@ class CBIR_Engine_for_Tweets_Images :
     
     @return L'empreinte de l'image, calculées par le moteur CBIR,
             OU None si il y a un un problème.
+    
+    Vraiment important : Faire "CAN_RETRY[0] = True" si jamais AOTF a une
+    chance de réindexer cette image. A utiliser le plus possible, à part pour
+    les erreurs insolvables, c'est à dire quand "get_tweet_image()" renvoit
+    la valeur "None".
+    Si l'erreur n'est pas connue comme insovable, "get_tweet_image()" fait un
+    "raise" avec cette erreur.
     """
     def get_image_hash ( self, image_url : str, tweet_id, CAN_RETRY = [False],
                          download_image_times = None, calculate_features_times = None ) -> int :
