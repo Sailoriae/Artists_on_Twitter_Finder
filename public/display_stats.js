@@ -34,7 +34,13 @@ function displayStats() {
 						statsP.innerHTML += parse( lang[ "STATS_2_2_PLURAL" ], numberWithSpaces( json["processing_scan_requests_count"] ) );
 
 					if ( json["processing_user_requests_count"] > 20 ) {
-						warningP.textContent = lang[ "WARNING" ];
+						warningP.innerHTML = lang[ "WARNING_1" ];
+						if ( json["pending_tweets_count"] > 1000 ) {
+							warningP.innerHTML += "<br/>"
+							warningP.innerHTML += parse( lang[ "WARNING_2" ], numberWithSpaces( json["pending_tweets_count"] ) );
+						}
+					} else if ( json["pending_tweets_count"] > 1000 ) {
+						warningP.innerHTML = parse( lang[ "WARNING_3" ], numberWithSpaces( json["pending_tweets_count"] ) );
 					}
 
 					await new Promise(r => setTimeout(r, 30000));

@@ -146,11 +146,15 @@ def http_server_container ( shared_memory_uri_arg ) :
                 self.send_header("Access-Control-Allow-Origin", "*")
                 self.end_headers()
                 
+                # Ouvrir qu'une seule fois ce proxy
+                scan_requests = self.shared_memory.scan_requests
+                
                 response_dict = {
                     "indexed_tweets_count" : self.shared_memory.tweets_count,
                     "indexed_accounts_count" : self.shared_memory.accounts_count,
                     "processing_user_requests_count" : self.shared_memory.user_requests.processing_requests_count,
-                    "processing_scan_requests_count" : self.shared_memory.scan_requests.processing_requests_count
+                    "processing_scan_requests_count" : scan_requests.processing_requests_count,
+                    "pending_tweets_count" : scan_requests.step_C_index_account_tweets_queue.qsize()
                 }
                 
                 json_text = json.dumps( response_dict )
