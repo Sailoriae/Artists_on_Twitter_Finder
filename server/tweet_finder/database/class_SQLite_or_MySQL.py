@@ -109,10 +109,10 @@ class SQLite_or_MySQL :
             reindex_tweets_table = """CREATE TABLE IF NOT EXISTS reindex_tweets (
                                           tweet_id BIGINT UNSIGNED PRIMARY KEY,
                                           account_id BIGINT UNSIGNED,
-                                          image_1_url TEXT,
-                                          image_2_url TEXT,
-                                          image_3_url TEXT,
-                                          image_4_url TEXT,
+                                          image_1_url VARCHAR(48) CHARACTER SET ascii COLLATE ascii_bin,
+                                          image_2_url VARCHAR(48) CHARACTER SET ascii COLLATE ascii_bin,
+                                          image_3_url VARCHAR(48) CHARACTER SET ascii COLLATE ascii_bin,
+                                          image_4_url VARCHAR(48) CHARACTER SET ascii COLLATE ascii_bin,
                                           last_retry_date DATETIME,
                                           retries_count TINYINT UNSIGNED DEFAULT 0 )"""
         
@@ -142,10 +142,10 @@ class SQLite_or_MySQL :
             reindex_tweets_table = """CREATE TABLE IF NOT EXISTS reindex_tweets (
                                           tweet_id UNSIGNED BIGINT PRIMARY KEY,
                                           account_id UNSIGNED BIGINT,
-                                          image_1_url TEXT,
-                                          image_2_url TEXT,
-                                          image_3_url TEXT,
-                                          image_4_url TEXT,
+                                          image_1_url VARCHAR(48),
+                                          image_2_url VARCHAR(48),
+                                          image_3_url VARCHAR(48),
+                                          image_4_url VARCHAR(48),
                                           last_retry_date DATETIME,
                                           retries_count UNSIGNED TINYINT DEFAULT 0 )"""
         
