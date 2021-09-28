@@ -35,10 +35,13 @@ class Pyro_Queue :
         self._queue = queue.Queue()
     
     def get ( self, block = True ) :
-        if self._convert_uri :
-            return open_proxy( self._queue.get( block = block) )
-        else :
-            return self._queue.get( block = block)
+        try :
+            if self._convert_uri :
+                return open_proxy( self._queue.get( block = block) )
+            else :
+                return self._queue.get( block = block)
+        except queue.Empty :
+            return None
     
     def put ( self, item ) :
         if self._convert_uri :

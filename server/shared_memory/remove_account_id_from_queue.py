@@ -16,8 +16,9 @@ def remove_account_id_from_queue ( input_queue, account_id ) :
         try :
             request = input_queue.get( block = False ) # Passer par la méthode get() qui nous ouvre les proxies
         except queue.Empty :
+            request = None
+        if request == None :
             input_queue._queue = new_queue
             return
-        else :
-            if request.account_id != account_id :
-                new_queue.put( request )
+        if request.account_id != account_id :
+            new_queue.put( request )

@@ -113,6 +113,8 @@ class Tweets_Indexer :
             try :
                 tweet = tweets_queue.get( block = False )
             except queue.Empty :
+                tweet = None
+            if tweet == None :
                 if keep_running == None : return
                 sleep( 1 )
                 continue

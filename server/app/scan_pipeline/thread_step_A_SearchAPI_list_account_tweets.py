@@ -67,11 +67,15 @@ def thread_step_A_SearchAPI_list_account_tweets( thread_id : int, shared_memory 
             request = shared_memory_scan_requests_step_A_SearchAPI_list_account_tweets_prior_queue.get( block = False )
         # Si la queue est vide
         except queue.Empty :
+            request = None
+        if request == None :
             # On tente de sortir une requête de la file d'attente normale
             try :
                 request = shared_memory_scan_requests_step_A_SearchAPI_list_account_tweets_queue.get( block = False )
             # Si la queue est vide, on attend une seconde et on réessaye
             except queue.Empty :
+                request = None
+            if request == None :
                 shared_memory_scan_requests_queues_sem.release()
                 sleep( 1 )
                 continue

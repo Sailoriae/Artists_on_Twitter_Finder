@@ -51,6 +51,8 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
             request = shared_memory_user_requests_step_3_reverse_search_queue.get( block = False )
         # Si la queue est vide, on attend une seconde et on réessaye
         except queue.Empty :
+            request = None
+        if request == None :
             sleep( 1 )
             continue
         
