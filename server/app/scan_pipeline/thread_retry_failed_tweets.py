@@ -55,6 +55,9 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
     # Ressayer les Tweets échoués toutes les 24h
     retry_period = datetime.timedelta( hours = 24 )
     
+    # Maintenir ouverts certains proxies vers la mémoire partagée
+    step_C_index_account_tweets_queue = shared_memory.scan_requests.step_C_index_account_tweets_queue
+    
     # Fonction à passer à "wait_until()"
     # Passer "shared_memory.keep_running" ne fonctionne pas
     def break_wait() : return not shared_memory.keep_service_alive
@@ -68,17 +71,9 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
         # Prendre la date actuelle
         now = datetime.datetime.now()
         
-        # File d'attente des Tweets à réessayer
-        # Certains n'ont pas besoin d'être obtenu sur l'API
-        tweets_queue = queue.Queue()
-        
         # Liste des 100 premiers ID de Tweets à réessayer et qui n'ont pas
         # d'info dans la BDD (Ou moins)
         hundred_tweets = []
-        
-        # Liste des ID de Tweets qui ont bien des infos dans la BDD (Donc qui
-        # ne sont pas dans la liste précédente)
-        tweets_list = []
         
         # Parcourir les ID de Tweets à réessayer
         for tweet in retry_tweets_iterator :
@@ -93,7 +88,7 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
             # Si le Tweet a été réessayé il y a moins de 24h
             if tweet["last_retry_date"] != None and now - tweet["last_retry_date"] < retry_period :
                 # Si aucun Tweet n'est à réessayer, on dort
-                if len( hundred_tweets ) == 0 and tweets_queue.qsize() == 0 :
+                if len( hundred_tweets ) == 0 :
                     # Reprise dans (retry_period - (now - tweet["last_retry_date"]))
                     wait_time = int( (retry_period - (now - tweet["last_retry_date"])).total_seconds() )
                     end_sleep_time = time() + wait_time
@@ -115,7 +110,7 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
             # Ne devrait pas arriver, mais au cas où
             # Permet d'insérer manuellement des ID de Tweets dans la table
             if tweet["user_id"] == None :
-                print( f"[retry_failed_tweets_th{thread_id}] Obtention et réindexation programés du Tweet ID {tweet['tweet_id']} (Inséré manuellement)." )
+                print( f"[retry_failed_tweets_th{thread_id}] Obtention et réindexation du Tweet ID {tweet['tweet_id']} (Inséré manuellement)." )
                 
                 hundred_tweets.append( tweet["tweet_id"] )
                 if len( hundred_tweets ) >= 100 :
@@ -125,15 +120,16 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
             # Note : L'itérateur formate le dictionnaire de Tweet exactement
             # comme la fonction analyse_tweet_json()
             else :
-                print( f"[retry_failed_tweets_th{thread_id}] Réindexation programée du Tweet ID {tweet['tweet_id']}." )
-                tweets_list.append( tweet["tweet_id"] )
-                tweets_queue.put( tweet )
+                print( f"[retry_failed_tweets_th{thread_id}] Demande de réindexation du Tweet ID {tweet['tweet_id']} envoyée !" )
+                tweet["was_failed_tweet"] = True
+                tweet["force_index"] = True
+                step_C_index_account_tweets_queue.put( tweet )
         
         # Si il faut s'arrêter
         if not shared_memory.keep_service_alive : break
         
         # Si il n'y a pas de Tweet à réindexer
-        if len( hundred_tweets ) == 0 and tweets_queue.qsize() == 0  :
+        if len( hundred_tweets ) == 0  :
             print( f"[retry_failed_tweets_th{thread_id}] Aucun Tweet à réessayer d'indexer !" )
             
             # Retest dans une heure = 3600 secondes
@@ -145,28 +141,18 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
             continue
         
         # Si il y a des Tweets à aller chercher sur l'API
-        if len( hundred_tweets ) > 0 :
+        else :
             # Obtenir les JSON de tous les Tweets à réessayer
             # Ne figurent pas dans cette liste les Tweets qui ont étés supprimés
             response = twitter.api.statuses_lookup( hundred_tweets, trim_user = True, tweet_mode = "extended" )
             
             # Analyser les JSON et les mettre dans la file d'attente
             for tweet_json in response :
-                tweets_queue.put( analyse_tweet_json( tweet_json._json ) )
-            
-        # Liste des tweets ayant ré-échoué
-        refailed_tweets = []
-        
-        # Indexer les Tweets
-        # Incrémente le compteur d'essais si l'indexation ré-échoue
-        tweets_indexer.index_tweets( "", tweets_queue, FORCE_INDEX = True, FAILED_TWEETS_LIST = refailed_tweets )
-        
-        # Supprimer de la BDD les ID de Tweets à réessayer et dont le réessai
-        # a réussi, ou qui n'étaient pas dans "response", c'est à dire qu'ils
-        # ont étés supprimés
-        for tweet_id in hundred_tweets + tweets_list :
-            if not int(tweet_id) in refailed_tweets :
-                bdd_direct_access.remove_retry_tweet( tweet_id )
+                print( f"[retry_failed_tweets_th{thread_id}] Demande de réindexation du Tweet ID {tweet['tweet_id']} envoyée !" )
+                tweet = analyse_tweet_json( tweet_json._json )
+                tweet["was_failed_tweet"] = True
+                tweet["force_index"] = True
+                step_C_index_account_tweets_queue.put( tweet )
     
     print( f"[retry_failed_tweets_th{thread_id}] Arrêté !" )
     return

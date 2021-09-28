@@ -77,28 +77,21 @@ class Scan_Requests_Pipeline :
         self._step_B_TimelineAPI_list_account_tweets_queue_obj = Pyro_Queue( convert_uri = True )
         self._step_B_TimelineAPI_list_account_tweets_queue = self._root.register_obj( self._step_B_TimelineAPI_list_account_tweets_queue_obj )
         
-        # File d'attente à l'étape C du traitement : Indexation des Tweets
-        # trouvés par le listage des Tweets avec l'API de recherche.
-        self._step_C_SearchAPI_index_account_tweets_prior_queue_obj = Pyro_Queue( convert_uri = True )
-        self._step_C_SearchAPI_index_account_tweets_prior_queue = self._root.register_obj( self._step_C_SearchAPI_index_account_tweets_prior_queue_obj )
-        
-        # Version non-prioritaire de la file d'attente précédente.
-        self._step_C_SearchAPI_index_account_tweets_queue_obj = Pyro_Queue( convert_uri = True )
-        self._step_C_SearchAPI_index_account_tweets_queue = self._root.register_obj( self._step_C_SearchAPI_index_account_tweets_queue_obj )
-        
-        # File d'attente à l'étape D du traitement : Indexation des Tweets
-        # trouvés par le listage des Tweets avec l'API de timeline.
-        self._step_D_TimelineAPI_index_account_tweets_prior_queue_obj = Pyro_Queue( convert_uri = True )
-        self._step_D_TimelineAPI_index_account_tweets_prior_queue = self._root.register_obj( self._step_D_TimelineAPI_index_account_tweets_prior_queue_obj )
-        
-        # Version non-prioritaire de la file d'attente précédente.
-        self._step_D_TimelineAPI_index_account_tweets_queue_obj = Pyro_Queue( convert_uri = True )
-        self._step_D_TimelineAPI_index_account_tweets_queue = self._root.register_obj( self._step_D_TimelineAPI_index_account_tweets_queue_obj )
-        
-        # Bloquer toutes les files d'attentes. Permet de passer une requête
-        # en prioritaire sans avoir de problème.
+        # Bloquer toutes les 4 files d'attentes ci-dessus. Permet de passer une
+        # requête en prioritaire sans avoir de problème.
         self._queues_sem_obj = Pyro_Semaphore()
         self._queues_sem = self._root.register_obj( self._queues_sem_obj )
+        
+        # File d'attente à l'étape C du traitement : Indexation des Tweets.
+        # Cette file est universelle, c'est à dire qu'elle est utilisé peu
+        # importe dans quel listage le Tweet a été trouvé.
+        # Il n'y a pas de version prioritaire, de cette file, car on perdrait
+        # trop de temps à sortir les Tweets. De plus, cela casserait l'ordre
+        # des instructions d'enregistrement de curseurs. Car cette liste peut
+        # aussi contenir des instruction d'enregistrement de curseurs
+        # d'indexation, qui sont éxécutées par les threads de l'étapt C.
+        self._step_C_index_account_tweet_queue_obj = Pyro_Queue( convert_uri = False )
+        self._step_C_index_account_tweets_queue = self._root.register_obj( self._step_C_index_account_tweet_queue_obj )
         
         # Compteur du nombre de requêtes en cours de traitement dans le
         # pipeline.
@@ -120,19 +113,10 @@ class Scan_Requests_Pipeline :
     def step_B_TimelineAPI_list_account_tweets_queue( self ) : return open_proxy( self._step_B_TimelineAPI_list_account_tweets_queue )
     
     @property
-    def step_C_SearchAPI_index_account_tweets_prior_queue( self ) : return open_proxy( self._step_C_SearchAPI_index_account_tweets_prior_queue )
-    
-    @property
-    def step_C_SearchAPI_index_account_tweets_queue( self ) : return open_proxy( self._step_C_SearchAPI_index_account_tweets_queue )
-    
-    @property
-    def step_D_TimelineAPI_index_account_tweets_prior_queue( self ) : return open_proxy( self._step_D_TimelineAPI_index_account_tweets_prior_queue )
-    
-    @property
-    def step_D_TimelineAPI_index_account_tweets_queue( self ) : return open_proxy( self._step_D_TimelineAPI_index_account_tweets_queue )
-    
-    @property
     def queues_sem( self ) : return open_proxy( self._queues_sem )
+    
+    @property
+    def step_C_index_account_tweets_queue( self ) : return open_proxy( self._step_C_index_account_tweets_queue )
     
     @property
     def processing_requests_count( self ) : return self._processing_requests_count
@@ -216,40 +200,13 @@ class Scan_Requests_Pipeline :
                         
                         # On met la requête dans la file d'attente prioritaire.
                         open_proxy( self._step_B_TimelineAPI_list_account_tweets_prior_queue ).put( request )
-                    
-                    # Si est dans une file d'attente d'indexation des Tweets avec
-                    # l'API de recherche, on la sort, pour la mettre dans la même
-                    # file d'attente, mais prioritaire.
-                    if not request.is_in_SearchAPI_indexing and not request.finished_SearchAPI_indexing :
-                        # On doit démonter et remonter la file en enlevant la
-                        # requête.
-                        remove_account_id_from_queue(
-                            self._step_C_SearchAPI_index_account_tweets_queue,
-                            account_id )
-                        
-                        # On met la requête dans la file d'attente prioritaire.
-                        open_proxy( self._step_C_SearchAPI_index_account_tweets_prior_queue ).put( request )
-                    
-                    # Si est dans une file d'attente d'indexation des Tweets avec
-                    # l'API de timeline, on la sort, pour la mettre dans la même
-                    # file d'attente, mais prioritaire.
-                    if not request.is_in_TimelineAPI_indexing and not request.finished_TimelineAPI_indexing :
-                        # On doit démonter et remonter la file en enlevant la
-                        # requête.
-                        remove_account_id_from_queue(
-                            self._step_D_TimelineAPI_index_account_tweets_queue,
-                            account_id )
-                        
-                        # On met la requête dans la file d'attente prioritaire.
-                        open_proxy( self.step_D_TimelineAPI_index_account_tweets_prior_queue ).put( request )
                 
                 queues_sem.release()
                 requests_sem.release()
                 return request
         
         # Créer et ajouter l'objet Scan_Request à notre système.
-        request = self._root.register_obj( Scan_Request( self._root,
-                                                         account_id,
+        request = self._root.register_obj( Scan_Request( account_id,
                                                          account_name,
                                                          is_prioritary = is_prioritary ) )
         self._processing_requests_count += 1 # Augmenter le compteur du nombre de requêtes en cours de traitement
@@ -258,17 +215,13 @@ class Scan_Requests_Pipeline :
         request = open_proxy( request )
         
         # Comme le traitement des requêtes de scan est parallélisé, on peut
-        # mettre la requêtes dans toutes les files d'attente.
+        # mettre la requêtes dans les deux files d'attente de listage.
         if is_prioritary :
             self._step_A_SearchAPI_list_account_tweets_prior_queue_obj.put( request )
             self._step_B_TimelineAPI_list_account_tweets_prior_queue_obj.put( request )
-            self._step_C_SearchAPI_index_account_tweets_prior_queue_obj.put( request )
-            self._step_D_TimelineAPI_index_account_tweets_prior_queue_obj.put( request )
         else :
             self._step_A_SearchAPI_list_account_tweets_queue_obj.put( request )
             self._step_B_TimelineAPI_list_account_tweets_queue_obj.put( request )
-            self._step_C_SearchAPI_index_account_tweets_queue_obj.put( request )
-            self._step_D_TimelineAPI_index_account_tweets_queue_obj.put( request )
         
         queues_sem.release()
         requests_sem.release()
@@ -309,8 +262,7 @@ class Scan_Requests_Pipeline :
         
         self._requests_sem.acquire()
         
-        # Si la requête n'a pas déjà été marquée comme terminée (Car il y a
-        # deux threads, C et D, qui peut appeler cette méthode)
+        # Si la requête n'a pas déjà été marquée comme terminée
         if request.finished_date == None :
             # On indique la date de fin du scan
             request.finished_date = datetime.datetime.now()
@@ -325,17 +277,6 @@ class Scan_Requests_Pipeline :
             # On peut Màj les statistiques mises en cache dans l'objet Shared_Memory
             if get_stats != None :
                 self._root.tweets_count, self._root.accounts_count = get_stats
-            
-            # On peut supprimer l'objet Common_Tweet_IDs_List() pour gagner de la
-            # mémoire vive
-            self._root.unregister_obj( request.indexing_tweets_uri )
-            request.indexing_tweets_uri = None
-            
-            # Idem, on peut supprimer les files d'attente internes
-            self._root.unregister_obj( request.SearchAPI_tweets_queue_uri )
-            request.SearchAPI_tweets_queue_uri = None
-            self._root.unregister_obj( request.TimelineAPI_tweets_queue_uri )
-            request.TimelineAPI_tweets_queue_uri = None
             
             # Enregistrer le temps complet pour traiter cette requête
             self._root.execution_metrics.add_scan_request_full_time( time() - request.start )

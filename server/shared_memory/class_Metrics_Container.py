@@ -43,17 +43,11 @@ class Metrics_Container :
         # Classe Tweets_Lister_with_TimelineAPI
         self._step_B_times = Mean_Container()
         
-        # Classe Tweets_Indexer pour l'étape C
+        # Classe Tweets_Indexer
         self._step_C_times = Mean_Container()
         self._step_C_download_image_times = Mean_Container()
         self._step_C_cbir_engine_times = Mean_Container()
         self._step_C_insert_into_times = Mean_Container()
-        
-        # Classe Tweets_Indexer pour l'étape D
-        self._step_D_times = Mean_Container()
-        self._step_D_download_image_times = Mean_Container()
-        self._step_D_cbir_engine_times = Mean_Container()
-        self._step_D_insert_into_times = Mean_Container()
         
         # Execution complète du Link Finder
         self._step_1_times = Mean_Container()
@@ -96,21 +90,6 @@ class Metrics_Container :
         self._step_C_download_image_times.add_many( step_C_download_image_times )
         self._step_C_cbir_engine_times.add_many( step_C_cbir_engine_times )
         self._step_C_insert_into_times.add_many( step_C_insert_into_times )
-    
-    """
-    @param step_D_times Liste de temps d'éxécution pour indexer un Tweet.
-    @param step_D_download_image_times Liste des temps pour télécharger une
-                                       image d'un Tweet.
-    @param step_D_cbir_engine_times Liste des temps d'éxécution du moteur CBIR
-                                    pour une image d'un Tweet.
-    @param step_D_insert_into_times Liste des temps d'éxécution pour insérer
-                                    un Tweet dans la BDD.
-    """
-    def add_step_D_times ( self, step_D_times, step_D_download_image_times, step_D_cbir_engine_times, step_D_insert_into_times ) :
-        self._step_D_times.add_many( step_D_times )
-        self._step_D_download_image_times.add_many( step_D_download_image_times )
-        self._step_D_cbir_engine_times.add_many( step_D_cbir_engine_times )
-        self._step_D_insert_into_times.add_many( step_D_insert_into_times )
     
     """
     @param step_1_times Temps d'éxécution global à l'étape 1.
@@ -159,22 +138,13 @@ class Metrics_Container :
             to_print += f"Etape B : Temps moyen pour lister avec TimelineAPI : {self._step_B_times.get_mean()} ({self._step_B_times.get_count()} listages)\n"
         
         if self._step_C_times.get_count() != 0 :
-            to_print += f"Etape C : Temps moyen pour indexer avec SearchAPI : {self._step_C_times.get_mean()} ({self._step_C_times.get_count()} tweets)\n"
+            to_print += f"Etape C : Temps moyen pour indexer : {self._step_C_times.get_mean()} ({self._step_C_times.get_count()} tweets)\n"
         if self._step_C_download_image_times.get_count() != 0 :
             to_print += f" - Dont : Téléchargement d'une image : {self._step_C_download_image_times.get_mean()} ({self._step_C_download_image_times.get_count()} images)\n"
         if self._step_C_cbir_engine_times.get_count() != 0 :
             to_print += f" - Dont : Calcul CBIR d'une image : {self._step_C_cbir_engine_times.get_mean()} ({self._step_C_cbir_engine_times.get_count()} images)\n"
         if self._step_C_insert_into_times.get_count() != 0 :
             to_print += f" - Dont : INSERT INTO d'un Tweet : {self._step_C_insert_into_times.get_mean()} ({self._step_C_insert_into_times.get_count()} tweets)\n"
-        
-        if self._step_D_times.get_count() != 0 :
-            to_print += f"Etape D : Temps moyen pour indexer avec TimelineAPI : {self._step_D_times.get_mean()} ({self._step_D_times.get_count()} tweets)\n"
-        if self._step_D_download_image_times.get_count() != 0 :
-            to_print += f" - Dont : Téléchargement d'une image : {self._step_D_download_image_times.get_mean()} ({self._step_D_download_image_times.get_count()} images)\n"
-        if self._step_D_cbir_engine_times.get_count() != 0 :
-            to_print += f" - Dont : Calcul CBIR d'une image : {self._step_D_cbir_engine_times.get_mean()} ({self._step_D_cbir_engine_times.get_count()} images)\n"
-        if self._step_D_insert_into_times.get_count() != 0 :
-            to_print += f" - Dont : INSERT INTO d'un Tweet : {self._step_D_insert_into_times.get_mean()} ({self._step_D_insert_into_times.get_count()} tweets)\n"
         
         if self._step_1_times.get_count() != 0 :
             to_print += f"Etape 1 : Temps moyen pour passer dans le Link Finder : {self._step_1_times.get_mean()} ({self._step_1_times.get_count()} éxécutions)\n"

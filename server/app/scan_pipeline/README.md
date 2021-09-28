@@ -11,10 +11,9 @@ Ce sous-module contient les 4 threads de traitement des requêtes de scan :
 
 - `thread_step_A_SearchAPI_list_account_tweets` : Listage des Tweets avec l'API de recherche de Twitter (Limité aux Tweets indexés dans la recherche).
 - `thread_step_B_TimelineAPI_list_account_tweets` : Listage des Tweets avec l'API de timeline des comptes de Twitter (Limité aux 3 200 premiers Tweets de chaque comptes).
-- `thread_step_C_SearchAPI_index_account_tweets` : Analyse et indexation des Tweets trouvés avec l'API de recherche : Calcul des empreintes des images ("hash") avec le moteur CBIR, stockage dans la base de données.
-- `thread_step_D_TimelineAPI_index_account_tweets` : Analyse et indexation des Tweets trouvés avec l'API de timeline : Calcul des empreintes des images ("hash") avec le moteur CBIR, stockage dans la base de données.
+- `thread_step_C_index_account_tweets` : Analyse et indexation de tous les Tweets trouvés : Calcul des empreintes des images ("hash") avec le moteur CBIR, stockage dans la base de données. Ce thread traite une file d'attente commune à toutes les requêtes de scan / d'indexation.
 
-Ces 4 threads peuvent travailler en paralléle sur la même requête. En effet, la requête contient deux files, une pour les Tweets trouvés avec l'API de recherche et une pour ceux trouvés avec l'API de timeline. Les threads de listage mettent les Tweets qu'ils trouvent dans l'une des deux files, pour que les threads d'indexation les analysent et les indexent en même temps.
+Les deux threads de listatges peuvent travailler en paralléle sur la même requête. En effet, les threads de listage mettent les Tweets qu'ils trouvent dans une file unique à toutes les requêtes pour que les threads d'indexation les analysent et les indexent en même temps.
 
 Avant de passer au calcul de l'empreinte, on vérifie avant que le Tweet n'est pas déjà dans la base de données.
 

@@ -57,22 +57,32 @@ class Tweets_Lister_with_SearchAPI :
     On ne met pas le JSON complet renvoyé par l'API afin de gagner de la
     mémoire vive.
     
+    @param account_name Le nom de compte, uniquement pour faire des print().
     @param queue Objet queue.Queue() pour y stocker les Tweets trouvés.
                  Un Tweet est représenté par le dictionnaire retourné par la
                  fonction analyse_tweet_json().
     @param account_id ID du compte, vérifié récemment !
+    @param add_step_A_time Fonction de la mémoire partagée.
+    @param request_uri URI de la requête de scan associée. Permet d'être passée
+                       dans l'instruction de fin d'indexation.
     
-    @return La date du Tweet le plus récent, à enregistrer dans la base lorsque
-            l'indexation sera terminée.
-            Ou None si aucun Tweet n'a jamais été trouvé (Donc enregistrement
-            "NULL" pour ce compte dans la base de données si le compte était
-            déjà dans la base.
+    Lorsque le listage sera terminé, une instruction d'enregistrement de
+    curseur dans la base de données sera ajoutée.
+    Cette instruction est un dictionnaire contenant les champs suivants :
+    - "save_SearchAPI_cursor" : La date du Tweet le plus récent, à enregistrer
+      dans la base lorsque l'indexation pour ce compte sera terminée ou None si
+      aucun Tweet n'a jamais été trouvé (Donc enregistrement "NULL" pour ce
+      compte si il était déjà dans la base).
+    - "account_id" : L'ID du compte Twitter concerné.
+    - "account_name" : Le nom de compte Twitter concerné.
+    - "request_uri" : L'URI de la requête de scan à terminer.
     
     Peut émettre une exception "Unfound_Account_on_Lister_with_TimelineAPI" si
     le compte est introuvable.
     Peut émettre des "Blocked_by_User_with_SearchAPI" si le compte nous bloque.
     """
-    def list_searchAPI_tweets ( self, account_name, queue, account_id = None, add_step_A_time = None ) :
+    def list_searchAPI_tweets ( self, account_name, queue, account_id = None,
+                                add_step_A_time = None, request_uri = None ) :
         if account_id == None :
             account_id = self.twitter.get_account_id( account_name ) # TOUJOURS AVEC CETTE API
         if account_id == None :
@@ -118,17 +128,22 @@ class Tweets_Lister_with_SearchAPI :
                 if count > 0 :
                     add_step_A_time( (time() - start) / count )
         
-        # Indiquer qu'on a fini le listage
-        queue.put( None )
-        
-        # Retourner la date du Tweet trouvé le plus récent, ou celui enregistré
-        # dans la base de données si aucun Tweet n'a été trouvé
-        # La BDD peut retourner None si elle ne connait pas le Tweet (Donc aucun
-        # Tweet n'est enregistré pour ce compte), c'est pas grave
+        # Indiquer qu'on a fini le listage en donnant une instruction
+        # d'enregistrement de curseur dans la base de données. Ce curseur est
+        # la date du Tweet trouvé le plus récent, ou celui enregistré dans la
+        # base de données si aucun Tweet n'a été trouvé.
+        # La BDD peut retourner None si elle ne connait pas le compte (Donc aucun
+        # Tweet n'est enregistré pour ce compte), c'est pas grave.
         if count > 0 :
-            return first_tweet_date.strftime('%Y-%m-%d')
+            queue.put( {"save_SearchAPI_cursor" : first_tweet_date.strftime('%Y-%m-%d'),
+                        "account_id" : account_id,
+                        "account_name" : account_name, # Pour faire des print()
+                        "request_uri" : request_uri} )
         else :
-            return self.bdd.get_account_SearchAPI_last_tweet_date( account_id )
+            queue.put( {"save_SearchAPI_cursor" : self.bdd.get_account_SearchAPI_last_tweet_date( account_id ),
+                        "account_id" : account_id,
+                        "account_name" : account_name, # Pour faire des print()
+                        "request_uri" : request_uri} )
 
 
 """

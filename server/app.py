@@ -46,8 +46,7 @@ if __name__ == "__main__" :
         
         from app.scan_pipeline.thread_step_A_SearchAPI_list_account_tweets import thread_step_A_SearchAPI_list_account_tweets
         from app.scan_pipeline.thread_step_B_TimelineAPI_list_account_tweets import thread_step_B_TimelineAPI_list_account_tweets
-        from app.scan_pipeline.thread_step_C_SearchAPI_index_account_tweets import thread_step_C_SearchAPI_index_account_tweets
-        from app.scan_pipeline.thread_step_D_TimelineAPI_index_account_tweets import thread_step_D_TimelineAPI_index_account_tweets
+        from app.scan_pipeline.thread_step_C_index_account_tweets import thread_step_C_index_account_tweets
         from app.scan_pipeline.thread_retry_failed_tweets import thread_retry_failed_tweets
         
         if param.ENABLE_MULTIPROCESSING :
@@ -200,14 +199,8 @@ if __name__ == "__main__" :
         shared_memory_uri ) )
     
     threads_or_process.extend( launch_identical_threads_in_container(
-        thread_step_C_SearchAPI_index_account_tweets,
-        param.NUMBER_OF_STEP_C_SEARCHAPI_INDEX_ACCOUNT_TWEETS,
-        True, # Nécessitent des processus séparés (Car ils font de l'indexation, donc de l'analyse d'images)
-        shared_memory_uri ) )
-    
-    threads_or_process.extend( launch_identical_threads_in_container(
-        thread_step_D_TimelineAPI_index_account_tweets,
-        param.NUMBER_OF_STEP_D_TIMELINEAPI_INDEX_ACCOUNT_TWEETS,
+        thread_step_C_index_account_tweets,
+        param.NUMBER_OF_STEP_C_INDEX_ACCOUNT_TWEETS,
         True, # Nécessitent des processus séparés (Car ils font de l'indexation, donc de l'analyse d'images)
         shared_memory_uri ) )
     
@@ -364,19 +357,16 @@ if __name__ == "__main__" :
         
         elif args[0] == "queues" :
             if len(args) == 1 :
-                to_print = f"Taille step_1_link_finder_queue : {shared_memory_user_requests.step_1_link_finder_queue.qsize()}\n"
-                to_print += f"Taille step_2_tweets_indexer_queue : {shared_memory_user_requests.step_2_tweets_indexer_queue.qsize()}\n"
-                to_print += f"Taille step_3_reverse_search_queue : {shared_memory_user_requests.step_3_reverse_search_queue.qsize()}\n"
-                to_print += f"Taille step_A_SearchAPI_list_account_tweets_prior_queue : {shared_memory_scan_requests.step_A_SearchAPI_list_account_tweets_prior_queue.qsize()}\n"
-                to_print += f"Taille step_A_SearchAPI_list_account_tweets_queue : {shared_memory_scan_requests.step_A_SearchAPI_list_account_tweets_queue.qsize()}\n"
-                to_print += f"Taille step_B_TimelineAPI_list_account_tweets_prior_queue : {shared_memory_scan_requests.step_B_TimelineAPI_list_account_tweets_prior_queue.qsize()}\n"
-                to_print += f"Taille step_B_TimelineAPI_list_account_tweets_queue : {shared_memory_scan_requests.step_B_TimelineAPI_list_account_tweets_queue.qsize()}\n"
-                to_print += f"Taille step_C_SearchAPI_index_account_tweets_prior_queue : {shared_memory_scan_requests.step_C_SearchAPI_index_account_tweets_prior_queue.qsize()}\n"
-                to_print += f"Taille step_C_SearchAPI_index_account_tweets_queue : {shared_memory_scan_requests.step_C_SearchAPI_index_account_tweets_queue.qsize()}\n"
-                to_print += f"Taille step_D_TimelineAPI_index_account_tweets_prior_queue : {shared_memory_scan_requests.step_D_TimelineAPI_index_account_tweets_prior_queue.qsize()}\n"
-                to_print += f"Taille step_D_TimelineAPI_index_account_tweets_queue : {shared_memory_scan_requests.step_D_TimelineAPI_index_account_tweets_queue.qsize()}\n"
-                to_print += f"Taille totale pipeline utilisateur : {shared_memory_user_requests.get_size()}\n"
-                to_print += f"Taille totale pipeline de scan : {shared_memory_scan_requests.get_size()}"
+                to_print = f"Taille step_1_link_finder_queue : {shared_memory_user_requests.step_1_link_finder_queue.qsize()} requêtes\n"
+                to_print += f"Taille step_2_tweets_indexer_queue : {shared_memory_user_requests.step_2_tweets_indexer_queue.qsize()} requêtes\n"
+                to_print += f"Taille step_3_reverse_search_queue : {shared_memory_user_requests.step_3_reverse_search_queue.qsize()} requêtes\n"
+                to_print += f"Taille step_A_SearchAPI_list_account_tweets_prior_queue : {shared_memory_scan_requests.step_A_SearchAPI_list_account_tweets_prior_queue.qsize()} requêtes\n"
+                to_print += f"Taille step_A_SearchAPI_list_account_tweets_queue : {shared_memory_scan_requests.step_A_SearchAPI_list_account_tweets_queue.qsize()} requêtes\n"
+                to_print += f"Taille step_B_TimelineAPI_list_account_tweets_prior_queue : {shared_memory_scan_requests.step_B_TimelineAPI_list_account_tweets_prior_queue.qsize()} requêtes\n"
+                to_print += f"Taille step_B_TimelineAPI_list_account_tweets_queue : {shared_memory_scan_requests.step_B_TimelineAPI_list_account_tweets_queue.qsize()} requêtes\n"
+                to_print += f"Taille step_C_index_account_tweets_queue : {shared_memory_scan_requests.step_C_index_account_tweets_queue.qsize()} Tweets\n"
+                to_print += f"Taille totale pipeline utilisateur : {shared_memory_user_requests.get_size()} requêtes\n"
+                to_print += f"Taille totale pipeline de scan : {shared_memory_scan_requests.get_size()} requêtes"
                 print( to_print )
             else :
                 print( "Utilisation : queues")

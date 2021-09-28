@@ -45,6 +45,7 @@ def thread_step_B_TimelineAPI_list_account_tweets( thread_id : int, shared_memor
     shared_memory_scan_requests_queues_sem = shared_memory_scan_requests.queues_sem
     shared_memory_scan_requests_step_B_TimelineAPI_list_account_tweets_prior_queue = shared_memory_scan_requests.step_B_TimelineAPI_list_account_tweets_prior_queue
     shared_memory_scan_requests_step_B_TimelineAPI_list_account_tweets_queue = shared_memory_scan_requests.step_B_TimelineAPI_list_account_tweets_queue
+    shared_memory_scan_requests_step_C_index_account_tweets_queue = shared_memory_scan_requests.step_C_index_account_tweets_queue
     
     # Dire qu'on ne fait rien
     shared_memory_threads_registry.set_request( f"thread_step_B_TimelineAPI_list_account_tweets_th{thread_id}", None )
@@ -101,12 +102,12 @@ def thread_step_B_TimelineAPI_list_account_tweets( thread_id : int, shared_memor
         
         # On liste les Tweets du compte Twitter de la requête avec l'API de timeline
         print( f"[step_B_th{thread_id}] Listage des Tweets du compte Twitter @{request.account_name} avec l'API de timeline." )
-        request_TimelineAPI_tweets_queue = request.TimelineAPI_tweets_queue
         try :
-            request.TimelineAPI_last_tweet_id = timelineAPI_lister.list_TimelineAPI_tweets( request.account_name,
-                                                                                            request_TimelineAPI_tweets_queue,
-                                                                                            account_id = request.account_id,
-                                                                                            add_step_B_time = shared_memory_execution_metrics.add_step_B_time )
+            timelineAPI_lister.list_TimelineAPI_tweets( request.account_name,
+                                                        shared_memory_scan_requests_step_C_index_account_tweets_queue,
+                                                        account_id = request.account_id,
+                                                        add_step_B_time = shared_memory_execution_metrics.add_step_B_time,
+                                                        request_uri = request.get_URI() )
         except Unfound_Account_on_Lister_with_TimelineAPI :
             request.unfound_account = True
         
@@ -116,8 +117,6 @@ def thread_step_B_TimelineAPI_list_account_tweets( thread_id : int, shared_memor
                 shared_memory_scan_requests_step_B_TimelineAPI_list_account_tweets_prior_queue.put( request )
             else :
                 shared_memory_scan_requests_step_B_TimelineAPI_list_account_tweets_queue.put( request )
-        
-        request_TimelineAPI_tweets_queue.release_proxy()
         
         # Dire qu'on n'est plus en train de traiter cette requête
         shared_memory_threads_registry.set_request( f"thread_step_B_TimelineAPI_list_account_tweets_th{thread_id}", None )

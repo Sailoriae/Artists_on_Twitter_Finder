@@ -33,12 +33,11 @@ Ceci lance le serveur et vous met en ligne de commande. Si vous souhaitez quitte
   - Link Finder : Recherche des comptes Twitter de l'artiste, et recherche du fichier de l'illustration. Classe principale : [`Link_Finder`](link_finder/class_Link_Finder.py), dans le module [`link_finder`](link_finder).
   - Tweets Indexer : Lancement de l'indexation / du scan des comptes Twitter trouvés dans l'autre pipeline, et surveillance de l'avancement de ce traitement.
   - Recherche inversée d'image. Classe principale : [`Reverse_Searcher`](tweet_finder/class_Reverse_Searcher.py), dans le module [`tweet_finder`](tweet_finder).
-* Traitement des requêtes de scan en 4 étapes paralléles (Module [`tweet_finder`](tweet_finder)) :
+* Traitement des requêtes de scan en 3 étapes paralléles (Module [`tweet_finder`](tweet_finder)) :
   - API de recherche : Listage des Tweets des comptes Twitter trouvés. Classe principale : [`Tweets_Lister_with_SearchAPI`](tweet_finder/class_Tweets_Lister_with_SearchAPI.py).
-  - API de recherche : Analyse et indexation des Tweets trouvés. L'analyse consiste au calcul de l'empreinte ("hash") de l'image avec le moteur CBIR. Classe principale : [`Tweets_Indexer`](tweet_finder/class_Tweets_Indexer.py) (Utilisée aussi pour l'API de timeline).
   - API de timeline : Listage des Tweets des comptes Twitter trouvés. Classe principale : [`Tweets_Lister_with_TimelineAPI`](tweet_finder/class_Tweets_Lister_with_TimelineAPI.py).
-  - API de timeline : Analyse et indexation des Tweets des comptes Twitter trouvés. Classe principale : [`Tweets_Indexer`](tweet_finder/class_Tweets_Indexer.py) (Utilisée aussi pour l'API de recherche).
-  - Voir pourquoi il y a deux systèmes d'indexation, soit deux API utilisées, dans [`../doc/Limites_de_scan_des_comptes_Twitter.md`](../doc/Limites_de_scan_des_comptes_Twitter.md). Pour faire simple : L'API de timeline est limitée aux 3 200 Tweets les plus récents des comptes à indexer (Retweets inclus), et l'API de recherche est limité à ce que Twitter indexent dans leur recherche. Utiliser les deux API permet d'être le plus exhaustif possible lors de l'indexation des comptes qui ont plus de 3 200 Tweets.
+    Voir pourquoi il y a deux systèmes de listage, soit deux API utilisées, dans [`../doc/Limites_de_scan_des_comptes_Twitter.md`](../doc/Limites_de_scan_des_comptes_Twitter.md). Pour faire simple : L'API de timeline est limitée aux 3 200 Tweets les plus récents des comptes à indexer (Retweets inclus), et l'API de recherche est limité à ce que Twitter indexent dans leur recherche. Utiliser les deux API permet d'être le plus exhaustif possible lors de l'indexation des comptes qui ont plus de 3 200 Tweets.
+  - Indexeur : Analyse et indexation de tous les Tweets trouvés par les étapes de listage (Tous les comptes sont mélangés). Classe principale : [`Tweets_Indexer`](tweet_finder/class_Tweets_Indexer.py).
 * Serveur web pour l'API HTTP qui renvoit les status des requêtes, avec les éventuels résultats, ou une erreur s'il y a un problème. Voir [`../doc/API_HTTP.md`](../doc/API_HTTP.md).
 * Possibilité de lancer en mode multi-processus (`ENABLE_MULTIPROCESSING`), plus lourd mais plus efficace pour traiter des requêtes (Des utilisateurs et de scans) en paralléle.
 * Mémoire partagée entre tous les threads dans l'objet [`Shared_Memory`](shared_memory/class_Shared_Memory.py) du module [`shared_memory`](shared_memory) (Avec la librairie Pyro4 si démarré en mode multi-processus).
@@ -56,7 +55,7 @@ Script [`app.py`](app.py) : Script central, crée et gère les threads de traite
 
 * Module [`app`](app) : Dépendances du script [`app.py`](app.py). Contient les procédures de ses threads, et ses classes. Voir le [`README.md`](app/README.md) de ce module pour plus de détails.
   - Module [`user_pipeline`](app/user_pipeline) : Pipeline de traitement des requêtes utilisateurs, en 3 étapes : Link Finder, lancement si nécessaire et suivi du scan du ou des comptes Twitter dans l'autre pipeline, et recherche inversée de l'image de requête.
-  - Module [`scan_pipeline`](app/scan_pipeline) : Pipeline de traitement des requêtes de scan d'un compte Twitter, en 4 étapes paralléles.
+  - Module [`scan_pipeline`](app/scan_pipeline) : Pipeline de traitement des requêtes de scan d'un compte Twitter, en 3 étapes paralléles.
 
 * Module [`shared_memory`](shared_memory) : Mémoire partagée dans un serveur, permet le multi-processing et de faire potentiellement un système distribué.
   Peut être utilisée comme un serveur PYRO (Indispensable au multi-processus), ou sinon comme un simple objet Python.
@@ -86,7 +85,7 @@ Script [`app.py`](app.py) : Script central, crée et gère les threads de traite
   - Ceci est une URL d'illustration, elle peut être traitée par le serveur : https://danbooru.donmai.us/posts/3991989
   - Ceci est une URL menant directement à l'image, elle sera rejetée par serveur : https://danbooru.donmai.us/data/__hatsune_miku_vocaloid_drawn_by_bibboss39__cac99a60fa84a778d5b048daec05e7b1.jpg
 
-* La date de dernière mise à jour d'un compte Twitter est mise dans la base de données à la fin des 2 étapes d'indexation (Indexation avec l'API de recherche et indexation avec l'API de timeline). Si l'un des threads de traitement plante, la requête est mise en erreur, et aucune date n'est enregistrée. Ainsi, l'intégralité des Tweets qu'il est possible de récupérer ont étés analysés et ceux avec une ou plusieurs image sont dans la base de données.
+* La date de dernière mise à jour d'un compte Twitter est mise dans la base de données à la fin des indexations (Grâce à une intruction d'enregistrement passée dans la file d'attente de l'indexeur). Si l'un des threads de traitement plante, la requête est mise en erreur, et aucune date n'est enregistrée. Ainsi, l'intégralité des Tweets qu'il est possible de récupérer ont étés analysés et ceux avec une ou plusieurs image sont dans la base de données.
 
 * Si l'image d'un Tweet a été perdue par Twitter, ou qu'il s'est produit une erreur, elle est de toutes manières enregistrée dans la base de données, et son empreinte est mise à `NULL` (Mais son nom est quand même enregistré).
   Si il s'est produit une erreur, elle sont journalisées ici.
