@@ -80,7 +80,7 @@ if __name__ == "__main__" :
         # Augmenter le nombre de descripteurs de fichiers ouvrables.
         # 1024 par défaut, c'est trop peu pour nous !
         resource.setrlimit( resource.RLIMIT_NOFILE, (param.MAX_FILE_DESCRIPTORS, param.MAX_FILE_DESCRIPTORS) )
-    print( f"Nombre maximum de descripteurs de fichiers : {param.MAX_FILE_DESCRIPTORS}" )
+        print( f"Nombre maximum de descripteurs de fichiers : {param.MAX_FILE_DESCRIPTORS}" )
     
     """
     SI ON EST EN MULTIPROCESSING :
