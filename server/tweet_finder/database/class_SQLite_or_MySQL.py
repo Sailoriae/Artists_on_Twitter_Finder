@@ -485,6 +485,7 @@ class SQLite_or_MySQL :
         last_scan = c.fetchone()
         if last_scan != None :
             if not param.USE_MYSQL_INSTEAD_OF_SQLITE :
+                if last_scan[0] == None : return None
                 return datetime.strptime( last_scan[0], '%Y-%m-%d %H:%M:%S' )
             else :
                 return last_scan[0]
@@ -514,6 +515,7 @@ class SQLite_or_MySQL :
         last_scan = c.fetchone()
         if last_scan != None :
             if not param.USE_MYSQL_INSTEAD_OF_SQLITE :
+                if last_scan[0] == None : return None
                 return datetime.strptime( last_scan[0], '%Y-%m-%d %H:%M:%S' )
             else :
                 return last_scan[0]
