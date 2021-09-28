@@ -86,7 +86,7 @@ class SQLite_or_MySQL :
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
             account_table = """CREATE TABLE IF NOT EXISTS accounts (
                                    account_id BIGINT UNSIGNED PRIMARY KEY,
-                                   last_SearchAPI_indexing_api_date CHAR(10),
+                                   last_SearchAPI_indexing_api_date CHAR(10) CHARACTER SET ascii COLLATE ascii_bin,
                                    last_SearchAPI_indexing_local_date DATETIME,
                                    last_SearchAPI_indexing_cursor_reset_date DATETIME,
                                    last_TimelineAPI_indexing_tweet_id BIGINT UNSIGNED,
