@@ -34,7 +34,7 @@ function displayStats() {
 						statsP.innerHTML += parse( lang[ "STATS_2_2_PLURAL" ], numberWithSpaces( json["processing_scan_requests_count"] ) );
 
 					if ( json["processing_user_requests_count"] > 20 ) {
-						warningP.textContent = json["processing_user_requests_count"];
+						warningP.textContent = lang[ "WARNING" ];
 					}
 
 					await new Promise(r => setTimeout(r, 30000));
