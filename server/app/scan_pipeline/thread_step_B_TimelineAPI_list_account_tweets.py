@@ -30,6 +30,10 @@ Thread de listage des tweets d'un compte Twitter en utilisant l'API de timeline
 de Twitter.
 """
 def thread_step_B_TimelineAPI_list_account_tweets( thread_id : int, shared_memory ) :
+    # Vérifier qu'on a un bon numéro de thread
+    if len( param.TWITTER_API_KEYS ) < thread_id :
+        raise RuntimeError( "Il doit y avoir autant de threads de listage que de clés d'API dans \"TWITTER_API_KEYS\"." )
+    
     # Initialisation du listeur de Tweets
     timelineAPI_lister = Tweets_Lister_with_TimelineAPI( param.API_KEY,
                                                          param.API_SECRET,

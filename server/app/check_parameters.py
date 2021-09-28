@@ -17,7 +17,6 @@ if __name__ == "__main__" :
 import parameters as param
 from tweet_finder.twitter.class_SNScrapeAbstraction import SNScrapeAbstraction
 from tweet_finder.twitter.class_TweepyAbstraction import TweepyAbstraction
-from link_finder.supported_websites.class_Pixiv import Pixiv
 
 
 """
@@ -77,6 +76,12 @@ def check_parameters () :
     if len( param.TWITTER_API_KEYS ) < 1 :
         print( "Vous devez donner l'accès à au moins un compte Twitter via la liste \"TWITTER_API_KEYS\"." )
         return False
+    
+    # ========================================================================
+    
+    if ( param.NUMBER_OF_STEP_A_SEARCHAPI_LIST_ACCOUNT_TWEETS_THREADS != len(param.TWITTER_API_KEYS) and
+         param.NUMBER_OF_STEP_B_TIMELINEAPI_LIST_ACCOUNT_TWEETS_THREADS != len(param.TWITTER_API_KEYS) ) :
+        print( "Il doit y avoir autant de threads de listage que de clés d'API dans \"TWITTER_API_KEYS\"." )
     
     # ========================================================================
     

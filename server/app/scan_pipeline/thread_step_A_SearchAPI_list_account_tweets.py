@@ -30,6 +30,10 @@ Thread de listage des Tweets d'un compte Twitter en utilisant l'API de recherche
 de Twitter.
 """
 def thread_step_A_SearchAPI_list_account_tweets( thread_id : int, shared_memory ) :
+    # Vérifier qu'on a un bon numéro de thread
+    if len( param.TWITTER_API_KEYS ) < thread_id :
+        raise RuntimeError( "Il doit y avoir autant de threads de listage que de clés d'API dans \"TWITTER_API_KEYS\"." )
+    
      # Initialisation du listeur de Tweets
     searchAPI_lister = Tweets_Lister_with_SearchAPI( param.API_KEY,
                                                      param.API_SECRET,
