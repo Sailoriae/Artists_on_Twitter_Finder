@@ -94,8 +94,7 @@
 					<li><code>tweet_id</code><br>The Tweet ID.</li>
 					<li><code>account_id</code><br>The ID of the Twitter account that posted this Tweet.</li>
 					<li><code>image_position</code><br>The position of the image among the maximum 4 images.</li>
-					<li><code>distance_chi2</code><br>The chi-square distance between the query image and the found image. The smaller it is, the closer the query image is to the found image.</li>
-					<li><code>distance_bhattacharyya</code><br>The Bhattacharyya distance between the query image and the found image. Allows to eliminate some false positives.</li>
+					<li><code>distance</code><br>The number of bits of difference between the fingerprint of the query image and that of the found image. The lower it is, the closer the query image is to the found image.</li>
 				</ul>
 			</li>
 			<li><code>error</code><br>A string describing the error if the request was ever interrupted, <code>null</code> otherwise. See the list of possible errors below.</li>
