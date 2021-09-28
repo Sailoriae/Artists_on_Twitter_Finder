@@ -31,7 +31,7 @@ ATTENTION ! CE THREAD DOIT ETRE UNIQUE !
 
 Thread qui retente d'indexer les Tweets dont l'indexation d'une image au moins
 a échoué, c'est à dire que la méthode suivante a retourné "None" :
-CBIR_Engine_for_Tweets_Images.get_image_hash()
+Tweets_Indexer.get_image_hash()
 """
 def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
     # Sécurité, vérifier que le thread est unique

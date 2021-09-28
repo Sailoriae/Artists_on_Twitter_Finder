@@ -1,7 +1,9 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-from time import time, sleep
+import traceback
+import urllib
+from time import sleep, time
 from statistics import mean
 import queue
 
@@ -19,7 +21,9 @@ if __name__ == "__main__" :
     path.append(get_wdir())
 
 from tweet_finder.database.class_SQLite_or_MySQL import SQLite_or_MySQL
-from tweet_finder.class_CBIR_Engine_for_Tweets_Images import CBIR_Engine_for_Tweets_Images
+from tweet_finder.cbir_engine.class_CBIR_Engine import CBIR_Engine
+from tweet_finder.utils.url_to_PIL_image import binary_image_to_PIL_image
+from tweet_finder.utils.get_tweet_image import get_tweet_image
 from shared_memory.open_proxy import open_proxy
 
 
@@ -57,7 +61,86 @@ class Tweets_Indexer :
         self.DEBUG = DEBUG
         self.ENABLE_METRICS = ENABLE_METRICS
         self.bdd = SQLite_or_MySQL()
-        self.engine = CBIR_Engine_for_Tweets_Images( DEBUG = DEBUG )
+        self.cbir_engine = CBIR_Engine()
+        
+        if DEBUG or ENABLE_METRICS :
+            self.times = [] # Liste des temps pour indexer un Tweet
+            self.download_image_times = [] # Liste des temps pour télécharger les images d'un Tweet
+            self.calculate_features_times = [] # Liste des temps pour d'éxécution du moteur CBIR pour une images d'un Tweet
+            self.insert_into_times = [] # Liste des temps pour faire le INSERT INTO
+    
+    """
+    Permet de gèrer les erreurs HTTP, et de les logger sans avoir a descendre
+    dans le collecteur d'erreurs.
+    
+    @param image_url L'URL de l'image du Tweet.
+    @param tweet_id L'ID du Tweet (Uniquement pour les "print()").
+    
+    @return L'empreinte de l'image, calculées par le moteur CBIR,
+            OU None si il y a un un problème.
+    
+    Vraiment important : Faire "CAN_RETRY[0] = True" si jamais AOTF a une
+    chance de réindexer cette image. A utiliser le plus possible, à part pour
+    les erreurs insolvables, c'est à dire quand "get_tweet_image()" renvoit
+    la valeur "None".
+    Si l'erreur n'est pas connue comme insovable, "get_tweet_image()" fait un
+    "raise" avec cette erreur.
+    """
+    def get_image_hash ( self, image_url : str, tweet_id, CAN_RETRY = [False] ) -> int :
+        retry_count = 0
+        while True : # Solution très bourrin pour gèrer les rate limits
+            try :
+                if self.ENABLE_METRICS : start = time()
+                image = get_tweet_image( image_url )
+                if image == None : # Erreurs insolvables, 404 par exemple
+                    return None
+                if self.ENABLE_METRICS : self.download_image_times.append( time() - start )
+                
+                if self.ENABLE_METRICS : start = time()
+                to_return = self.cbir_engine.index_cbir( binary_image_to_PIL_image( image ) )
+                if self.ENABLE_METRICS : self.calculate_features_times.append( time() - start )
+                return to_return
+            
+            # Envoyé par la fonction get_tweet_image() qui n'a pas réussi
+            except urllib.error.HTTPError as error :
+                print( f"[Tweets_Indexer] Erreur avec le Tweet ID {tweet_id} !" )
+                print( error )
+                print( "[Tweets_Indexer] Abandon !" )
+                
+                # Ne pas journaliser les erreurs connues qui arrivent souvent
+                # Elles ne sont pas solutionnables, ce sont des problèmes chez Twitter
+                # 502 = Bad Gateway
+                # 504 = Gateway Timeout
+                if not error.code in [502, 504] :
+                    file = open( "method_Tweets_Indexer.get_image_hash_errors.log", "a" )
+                    file.write( f"Erreur avec le Tweet ID {tweet_id} !\n" )
+                    traceback.print_exc( file = file )
+                    file.write( "\n\n\n" )
+                    file.close()
+                
+                CAN_RETRY[0] = True
+                return None
+            
+            except Exception as error :
+                print( f"[Tweets_Indexer] Erreur avec le Tweet ID {tweet_id} !" )
+                print( error )
+                
+                if retry_count < 1 : # Essayer un coup d'attendre
+                    print( "[Tweets_Indexer] On essaye d'attendre 10 secondes..." )
+                    sleep( 10 )
+                    retry_count += 1
+                
+                else :
+                    print( "[Tweets_Indexer] Abandon !" )
+                    
+                    file = open( "method_Tweets_Indexer.get_image_hash_errors.log", "a" )
+                    file.write( f"Erreur avec le Tweet ID {tweet_id} !\n" )
+                    traceback.print_exc( file = file )
+                    file.write( "\n\n\n" )
+                    file.close()
+                    
+                    CAN_RETRY[0] = True
+                    return None
     
     """
     Enregistrer la date du Tweet listé le plus récent dans la base de données.
@@ -102,12 +185,6 @@ class Tweets_Indexer :
                              end_request = None, # Fonction de la mémoire partagée permettant de terminer les requêtes de scan
                              current_tweet = [] # Permet de place le Tweet en cours d'indexation, utilisé en cas de crash
                        ) -> bool :
-        if self.DEBUG or self.ENABLE_METRICS :
-            times = [] # Liste des temps pour indexer un Tweet
-            download_image_times = [] # Liste des temps pour télécharger les images d'un Tweet
-            calculate_features_times = [] # Liste des temps pour d'éxécution du moteur CBIR pour une images d'un Tweet
-            insert_into_times = [] # Liste des temps pour faire le INSERT INTO
-        
         while keep_running == None or keep_running() :
             current_tweet.clear()
             try :
@@ -120,23 +197,23 @@ class Tweets_Indexer :
                 continue
             
             # Enregistrer les mesures des temps d'éxécution tous les 100 Tweets.
-            if len(times) >= 100 :
-                print( f"[Tweets_Indexer] {len(times)} Tweets indexés avec une moyenne de {mean(times)} secondes par Tweet." )
+            if len(self.times) >= 100 :
+                print( f"[Tweets_Indexer] {len(self.times)} Tweets indexés avec une moyenne de {mean(self.times)} secondes par Tweet." )
                 
-                if len(download_image_times) > 0 :
-                    print( f"[Tweets_Indexer] Temps moyens de téléchargement : {mean(download_image_times)} secondes." )
-                if len(calculate_features_times) > 0 :
-                    print( f"[Tweets_Indexer] Temps moyens de calcul dans le moteur CBIR : {mean(calculate_features_times)} secondes." )
-                if len(insert_into_times) > 0 :
-                    print( f"[Tweets_Indexer] Temps moyens d'enregistrement dans la BDD : {mean(insert_into_times)} secondes." )
+                if len(self.download_image_times) > 0 :
+                    print( f"[Tweets_Indexer] Temps moyens de téléchargement : {mean(self.download_image_times)} secondes." )
+                if len(self.calculate_features_times) > 0 :
+                    print( f"[Tweets_Indexer] Temps moyens de calcul dans le moteur CBIR : {mean(self.calculate_features_times)} secondes." )
+                if len(self.insert_into_times) > 0 :
+                    print( f"[Tweets_Indexer] Temps moyens d'enregistrement dans la BDD : {mean(self.insert_into_times)} secondes." )
                 
                 if add_step_C_times != None :
-                    add_step_C_times( times, download_image_times, calculate_features_times, insert_into_times )
+                    add_step_C_times( self.times, self.download_image_times, self.calculate_features_times, self.insert_into_times )
                 
-                times.clear()
-                download_image_times.clear()
-                calculate_features_times.clear()
-                insert_into_times.clear()
+                self.times.clear()
+                self.download_image_times.clear()
+                self.calculate_features_times.clear()
+                self.insert_into_times.clear()
             
             # Traiter les instructions d'enregistrement de curseurs
             if "save_SearchAPI_cursor" in tweet :
@@ -213,23 +290,19 @@ class Tweets_Indexer :
             # Traitement des images du Tweet
             if length > 0 :
                 image_1_url = tweet["images"][0]
-                image_1_hash = self.engine.get_image_hash( image_1_url, tweet["tweet_id"], CAN_RETRY = will_need_retry,
-                                                           download_image_times = download_image_times, calculate_features_times = calculate_features_times )
+                image_1_hash = self.get_image_hash( image_1_url, tweet["tweet_id"], CAN_RETRY = will_need_retry )
                 image_1_name = image_1_url.replace( "https://pbs.twimg.com/media/", "" )
             if length > 1 :
                 image_2_url = tweet["images"][1]
-                image_2_hash = self.engine.get_image_hash( image_2_url, tweet["tweet_id"], CAN_RETRY = will_need_retry,
-                                                           download_image_times = download_image_times, calculate_features_times = calculate_features_times )
+                image_2_hash = self.get_image_hash( image_2_url, tweet["tweet_id"], CAN_RETRY = will_need_retry )
                 image_2_name = image_2_url.replace( "https://pbs.twimg.com/media/", "" )
             if length > 2 :
                 image_3_url = tweet["images"][2]
-                image_3_hash = self.engine.get_image_hash( image_3_url, tweet["tweet_id"], CAN_RETRY = will_need_retry,
-                                                           download_image_times = download_image_times, calculate_features_times = calculate_features_times )
+                image_3_hash = self.get_image_hash( image_3_url, tweet["tweet_id"], CAN_RETRY = will_need_retry )
                 image_3_name = image_3_url.replace( "https://pbs.twimg.com/media/", "" )
             if length > 3 :
                 image_4_url = tweet["images"][3]
-                image_4_hash = self.engine.get_image_hash( image_4_url, tweet["tweet_id"], CAN_RETRY = will_need_retry,
-                                                           download_image_times = download_image_times, calculate_features_times = calculate_features_times )
+                image_4_hash = self.get_image_hash( image_4_url, tweet["tweet_id"], CAN_RETRY = will_need_retry )
                 image_4_name = image_4_url.replace( "https://pbs.twimg.com/media/", "" )
             
             if self.DEBUG or self.ENABLE_METRICS :
@@ -273,5 +346,5 @@ class Tweets_Indexer :
                 self.bdd.remove_retry_tweet( tweet["tweet_id"] )
             
             if self.DEBUG or self.ENABLE_METRICS :
-                insert_into_times.append( time() - start_insert_into )
-                times.append( time() - start )
+                self.insert_into_times.append( time() - start_insert_into )
+                self.times.append( time() - start )

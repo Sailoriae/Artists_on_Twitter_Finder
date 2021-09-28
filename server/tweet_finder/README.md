@@ -8,7 +8,7 @@ Les classes `Tweets_Lister_with_SearchAPI` et `Tweets_Lister_with_TimelineAPI` l
 Elles utilisent les couches d'abstraction disponibles dans le module `twitter`.
 
 La classe `Tweets_Indexer` indexe les Tweets trouvés par les classes de listage :
-1. Calcul de l'empreinte de chaque image de chaque Tweet, module `cbir_engine`, via la classe `CBIR_Engine_for_Tweets_Images`,
+1. Calcul de l'empreinte de chaque image de chaque Tweet, module `cbir_engine`, via la classe `Tweets_Indexer`,
 2. Stockage ce dans la base de données en les associants à l'ID du Tweet, et l'ID du compte l'ayant Tweeté, module `database`.
 
 L'étape de listage communique ses Tweets trouvés à l'étape d'indexation via un objet `queue.Queue()` (File d'attente), permettant de paralléliser ces deux étapes.

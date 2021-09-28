@@ -20,7 +20,7 @@ Avant de passer au calcul de l'empreinte, on vérifie avant que le Tweet n'est p
 
 ## Procédure complémentaire
 
-La procédure de thread `thread_retry_failed_tweets` permet de réindexer les Tweets qui ont une image mise en erreur non-insolvable par la méthode `CBIR_Engine_for_Tweets_Images.get_image_hash()` lors du passage du Tweet dans l'un des deux threads d'indexation (Voir ci-dessus).
+La procédure de thread `thread_retry_failed_tweets` permet de réindexer les Tweets qui ont une image mise en erreur non-insolvable par la méthode `Tweets_Indexer.get_image_hash()` lors du passage du Tweet dans l'un des deux threads d'indexation (Voir ci-dessus).
 
 Une erreur "non-insolvable" est une erreur qui n'est pas connue comme insolvable. Les erreurs insolvables sont directement implémentées dans le code de la fonction `get_tweet_image()`.
 
