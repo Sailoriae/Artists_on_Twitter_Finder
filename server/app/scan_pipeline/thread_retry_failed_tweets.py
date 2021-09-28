@@ -52,8 +52,8 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
                                  param.OAUTH_TOKEN,
                                  param.OAUTH_TOKEN_SECRET )
     
-    # Ressayer les Tweets échoués toutes les 24h
-    retry_period = datetime.timedelta( hours = 24 )
+    # Ressayer les Tweets échoués toutes les 6h
+    retry_period = datetime.timedelta( hours = 6 )
     
     # Maintenir ouverts certains proxies vers la mémoire partagée
     step_C_index_account_tweets_queue = shared_memory.scan_requests.step_C_index_account_tweets_queue
@@ -85,7 +85,7 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
             # problème très embêtant, pour laisser le temps de réagir
             # Exemple : Coupure Internet, on ne gère pas cette erreur
             
-            # Si le Tweet a été réessayé il y a moins de 24h
+            # Si le Tweet a été réessayé il y a moins de "retry_period"
             if tweet["last_retry_date"] != None and now - tweet["last_retry_date"] < retry_period :
                 # Si aucun Tweet n'est à réessayer, on dort
                 if len( hundred_tweets ) == 0 :
