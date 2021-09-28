@@ -97,13 +97,13 @@ class SQLite_or_MySQL :
             tweets_table = """CREATE TABLE IF NOT EXISTS tweets (
                                   account_id BIGINT UNSIGNED,
                                   tweet_id BIGINT UNSIGNED PRIMARY KEY,
-                                  image_1_name VARCHAR(19),
+                                  image_1_name VARCHAR(19) CHARACTER SET ascii COLLATE ascii_bin,
                                   image_1_hash BINARY(""" + str(HASH_SIZE_BYTES) + """),
-                                  image_2_name VARCHAR(19),
+                                  image_2_name VARCHAR(19) CHARACTER SET ascii COLLATE ascii_bin,
                                   image_2_hash BINARY(""" + str(HASH_SIZE_BYTES) + """),
-                                  image_3_name VARCHAR(19),
+                                  image_3_name VARCHAR(19) CHARACTER SET ascii COLLATE ascii_bin,
                                   image_3_hash BINARY(""" + str(HASH_SIZE_BYTES) + """),
-                                  image_4_name VARCHAR(19),
+                                  image_4_name VARCHAR(19) CHARACTER SET ascii COLLATE ascii_bin,
                                   image_4_hash BINARY(""" + str(HASH_SIZE_BYTES) + """) )"""
             
             reindex_tweets_table = """CREATE TABLE IF NOT EXISTS reindex_tweets (
