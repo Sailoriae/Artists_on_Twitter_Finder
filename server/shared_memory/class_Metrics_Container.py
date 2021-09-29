@@ -144,7 +144,7 @@ class Metrics_Container :
         if self._step_C_cbir_engine_times.get_count() != 0 :
             to_print += f" - Dont : Calcul CBIR d'une image : {self._step_C_cbir_engine_times.get_mean()} ({self._step_C_cbir_engine_times.get_count()} images)\n"
         if self._step_C_insert_into_times.get_count() != 0 :
-            to_print += f" - Dont : INSERT INTO d'un Tweet : {self._step_C_insert_into_times.get_mean()} ({self._step_C_insert_into_times.get_count()} tweets)\n"
+            to_print += f" - Dont : Enregistrement d'un Tweet : {self._step_C_insert_into_times.get_mean()} ({self._step_C_insert_into_times.get_count()} tweets)\n"
         
         if self._step_1_times.get_count() != 0 :
             to_print += f"Etape 1 : Temps moyen pour passer dans le Link Finder : {self._step_1_times.get_mean()} ({self._step_1_times.get_count()} éxécutions)\n"
