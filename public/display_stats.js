@@ -41,6 +41,8 @@ function displayStats() {
 						}
 					} else if ( json["pending_tweets_count"] > 1000 ) {
 						warningP.innerHTML = parse( lang[ "WARNING_3" ], numberWithSpaces( json["pending_tweets_count"] ) );
+					} else {
+						warningP.innerHTML = "";
 					}
 
 					await new Promise(r => setTimeout(r, 30000));
