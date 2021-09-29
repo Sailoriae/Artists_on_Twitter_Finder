@@ -55,6 +55,10 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
     # Ressayer les Tweets échoués toutes les 6h
     retry_period = datetime.timedelta( hours = 6 )
     
+    # Passer le maximum de Tweets dans une requête
+    rate_limit_period = datetime.timedelta( minutes = 15 )
+    minimal_retry_period = retry_period - rate_limit_period
+    
     # Maintenir ouverts certains proxies vers la mémoire partagée
     step_C_index_account_tweets_queue = shared_memory.scan_requests.step_C_index_account_tweets_queue
     
@@ -100,6 +104,11 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
                     
                     # MàJ la date actuelle
                     now = datetime.datetime.now()
+                
+                # Sinon, si le prochain Tweet est dans moins de 15 minutes
+                # (Période des rate limits), on le réessaye
+                elif now - tweet["last_retry_date"] < minimal_retry_period :
+                    pass
                 
                 # Sinon, on arrête l'itération "for" pour indexer les Tweets
                 # qu'on a déjà à réessayer
