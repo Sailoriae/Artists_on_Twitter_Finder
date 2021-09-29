@@ -44,7 +44,7 @@ var lang = {
 	"STATS_2_2_ZERO" : " and no Twitter account being indexed.",
 	"STATS_2_2_ONE" : " and 1 Twitter account being indexed.",
 	"STATS_2_2_PLURAL" : " and %s Twitter accounts being indexed.",
-	"WARNING_1" : "There are currently a lot of requests being processed. Your request may therefore take some time.",
+	"WARNING_1" : "There are currently a lot of requests being processed. Yours may therefore take some time.",
 	"WARNING_2" : "In addition, there are %s Tweets waiting to be indexed. If your query requires indexing, it may take even longer.",
 	"WARNING_3" : "There are %s Tweets waiting to be indexed. If your query requires indexing, it may take some time.",
 	"INFO" : "The number of requests being processed per IP address is limited to %s.",

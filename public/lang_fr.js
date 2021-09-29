@@ -44,7 +44,7 @@ var lang = {
 	"STATS_2_2_ZERO" : " et aucun compte Twitter en cours d'indexation.",
 	"STATS_2_2_ONE" : " et 1 compte Twitter en cours d'indexation.",
 	"STATS_2_2_PLURAL" : " et %s comptes Twitter en cours d'indexation.",
-	"WARNING_1" : "Il y a actuellement beaucoup de requêtes en cours de traitement. Votre requête risque donc de prendre du temps.",
+	"WARNING_1" : "Il y a actuellement beaucoup de requêtes en cours de traitement. La votre risque donc de prendre du temps.",
 	"WARNING_2" : "De plus, il y a %s Tweets en attente d'indexation. Si votre requête requiert une indexation, elle risque de prendre encore plus du temps.",
 	"WARNING_3" : "Il y a %s Tweets en attente d'indexation. Si votre requête requiert une indexation, elle risque de prendre du temps.",
 	"INFO" : "Le nombre de requêtes en cours de traitement par adresse IP est limité à %s.",
