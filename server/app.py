@@ -426,17 +426,6 @@ if __name__ == "__main__" :
     """
     Arrêt du système.
     """
-    # Même si keep_service_alice a été mis à False, il faut envoyer des requêtes au
-    # serveur HTTP pour qu'il sorte de sa boucle
-    # Car http_server.handle_request() est bloquant tant qu'il n'y a pas eu de
-    # requête
-#    import requests
-#    try :
-#        requests.get( "http://localhost:" + str( param.HTTP_SERVER_PORT ) )
-#    except requests.exceptions.ConnectionError :
-#        pass
-    # Edit : N'est plus bloquant car on lui a mis un timeout
-    
     # Attendre que les threads aient fini
     for thread in threads_or_process :
         thread.join()

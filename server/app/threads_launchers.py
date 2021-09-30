@@ -91,7 +91,7 @@ def _threads_container_for_identical_threads( thread_procedure, number_of_thread
             launch_thread( thread_procedure, i+1, as_process, shared_memory_uri ) )
     if not is_a_process :
         return threads_or_process
-    for thread in threads :
+    for thread in threads_or_process :
         thread.join()
 
 """

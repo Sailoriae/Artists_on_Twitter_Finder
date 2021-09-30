@@ -7,6 +7,7 @@ from datetime import datetime
 
 """
 Classe contenant uniquement les données trouvées par le Link Finder.
+Un objet de cette classe est retournée par le Link Finder pour son utilisation.
 """
 class Link_Finder_Result :
     def __init__ ( self, image_urls : List[str],

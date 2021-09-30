@@ -3,7 +3,6 @@
 
 from time import time
 import datetime
-import queue
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
 # Ainsi, si on veut utiliser ce script indépendemment (Notemment pour des
@@ -19,7 +18,6 @@ if __name__ == "__main__" :
     path.append(get_wdir())
 
 import parameters as param
-from tweet_finder.class_Tweets_Indexer import Tweets_Indexer
 from tweet_finder.analyse_tweet_json import analyse_tweet_json
 from tweet_finder.database.class_SQLite_or_MySQL import SQLite_or_MySQL
 from tweet_finder.twitter.class_TweepyAbstraction import TweepyAbstraction
@@ -38,11 +36,8 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
     if thread_id != 1 :
         raise AssertionError( "Ce thread doit être unique, et doit pas conséquent avoir 1 comme identifiant (\"thread_id\") !" )
     
-    # Initialisation de l'indexeur de Tweets
-    tweets_indexer = Tweets_Indexer( DEBUG = param.DEBUG, ENABLE_METRICS = param.ENABLE_METRICS )
-    
     # Accès direct à la base de données
-    bdd_direct_access = SQLite_or_MySQL()
+    bdd = SQLite_or_MySQL()
     
     # Initialisation de notre couche d'abstraction à l'API Twitter
     # Ne devrait pas être utilisée en temps normal
@@ -70,7 +65,7 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
     while shared_memory.keep_service_alive :
         # Prendre l'itérateur sur les Tweets à réessayer, triés dans l'ordre du
         # moins récemment réessayé au plus récemment réessayé
-        retry_tweets_iterator = bdd_direct_access.get_retry_tweets()
+        retry_tweets_iterator = bdd.get_retry_tweets()
         
         # Prendre la date actuelle
         now = datetime.datetime.now()
@@ -83,7 +78,7 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
         for tweet in retry_tweets_iterator :
             # Si le Tweet a été réessayé déjà 3 fois, il faut le supprimer
 #            if tweet["retries_count"] > 3 :
-#                bdd_direct_access.remove_retry_tweet( tweet["tweet_id"] )
+#                bdd.remove_retry_tweet( tweet["tweet_id"] )
 #                continue
             # On ne supprime aucun tweet à réessayer, au cas où il y ait un
             # problème très embêtant, pour laisser le temps de réagir

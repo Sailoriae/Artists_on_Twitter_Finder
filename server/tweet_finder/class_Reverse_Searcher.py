@@ -20,8 +20,6 @@ if __name__ == "__main__" :
 from tweet_finder.cbir_engine.class_CBIR_Engine import CBIR_Engine
 from tweet_finder.database.class_SQLite_or_MySQL import SQLite_or_MySQL
 from tweet_finder.twitter.class_TweepyAbstraction import TweepyAbstraction
-from tweet_finder.utils.url_to_PIL_image import url_to_PIL_image
-from tweet_finder.utils.url_to_PIL_image import binary_image_to_PIL_image
 import parameters as param
 
 

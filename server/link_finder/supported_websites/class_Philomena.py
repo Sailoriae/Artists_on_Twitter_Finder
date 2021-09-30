@@ -26,7 +26,6 @@ if __name__ == "__main__" :
 from link_finder.supported_websites.utils.class_Webpage_to_Twitter_Accounts import Webpage_to_Twitter_Accounts
 from link_finder.supported_websites.utils.get_with_rate_limits import get_with_rate_limits
 from link_finder.supported_websites.utils.validate_url import validate_url
-from link_finder.class_Link_Finder_Result import Not_an_URL, Unsupported_Website
 
 
 # ^ = Début de la chaine
@@ -90,7 +89,6 @@ class Philomena :
         return None
     
     """
-    METHODE PRIVEE, NE PAS UTILISER !
     Mettre en cache le résultat de l'appel à l'API de l'illustration si ce
     n'est pas déjà fait.
     Permet de MàJ le cache, si l'URL mène bien vers une illustration.

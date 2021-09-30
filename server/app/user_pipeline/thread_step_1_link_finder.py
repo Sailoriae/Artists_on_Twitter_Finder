@@ -101,7 +101,7 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
         # avec elle (On passe donc son status à "Fin de traitement")
         if can_proceed and data == None :
             request.problem = "INVALID_URL"
-            print( f"[step_1_th{thread_id}] URL invalide ! Elle ne mène pas à une illustration." )
+            print( f"[step_1_th{thread_id}] Le site est supporté, mais l'URL ne mène pas à une illustration." )
             can_proceed = False
         
         # Si jamais aucun compte Twitter n'a été trouvé, on ne va pas plus loin

@@ -35,7 +35,7 @@ def thread_step_C_index_account_tweets( thread_id : int, shared_memory ) :
     
     # Accès direct à la base de données
     # Utilisé uniquement en cas de crash
-    bdd_direct_access = SQLite_or_MySQL()
+    bdd = SQLite_or_MySQL()
     
     # Maintenir ouverts certains proxies vers la mémoire partagée
     shared_memory_execution_metrics = shared_memory.execution_metrics
@@ -86,7 +86,7 @@ def thread_step_C_index_account_tweets( thread_id : int, shared_memory ) :
                                     image_3_url = tweet["images"][2]
                                 if length > 3 :
                                     image_4_url = tweet["images"][3]
-                        bdd_direct_access.add_retry_tweet(
+                        bdd.add_retry_tweet(
                             tweet["tweet_id"],
                             account_id,
                             image_1_url,

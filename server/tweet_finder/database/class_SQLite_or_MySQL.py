@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-from typing import List
 from datetime import datetime
 from time import time
 from statistics import mean
@@ -59,9 +58,6 @@ def to_int( value : bytes ) -> int :
 
 """
 Couche d'abstraction à la base de données SQLite.
-
-Une liste est stockée sous forme d'une chaine de caractéres.
-Le séparateur des élément est le caractère ';'.
 """
 class SQLite_or_MySQL :
     """

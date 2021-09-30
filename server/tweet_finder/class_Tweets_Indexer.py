@@ -339,7 +339,7 @@ class Tweets_Indexer :
                     image_4_url,
                 )
             
-            # Sinon, si c'était un Tweet échoué, on l'enlève de la tablee des
+            # Sinon, si c'était un Tweet échoué, on l'enlève de la table des
             # Tweets dont l'indexation a échouée
             # Ceci est la bidouille pour le thread de retentative d'indexation
             elif "was_failed_tweet" in tweet :

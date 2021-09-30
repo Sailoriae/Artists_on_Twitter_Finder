@@ -47,7 +47,7 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
     
     # Accès direct à la base de données
     # N'UTILISER QUE DES METHODES QUI FONT SEULEMENT DES SELECT !
-    bdd_direct_access = SQLite_or_MySQL()
+    bdd = SQLite_or_MySQL()
     
     # Tant que on ne nous dit pas de nous arrêter
     while shared_memory.keep_service_alive :
@@ -88,8 +88,8 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
             for (account_name, account_id) in request.twitter_accounts_with_id :
                 
                 # On prend ses deux dernières dates de scan
-                last_scan_1 = bdd_direct_access.get_account_SearchAPI_last_scan_local_date( account_id )
-                last_scan_2 = bdd_direct_access.get_account_TimelineAPI_last_scan_local_date( account_id )
+                last_scan_1 = bdd.get_account_SearchAPI_last_scan_local_date( account_id )
+                last_scan_2 = bdd.get_account_TimelineAPI_last_scan_local_date( account_id )
                 
                 # Si l'une des deux est à NULL, il faut scanner, ou se
                 # rattacher au scan du compte déjà en cours
@@ -134,8 +134,8 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
                         print( f"[step_2_th{thread_id}] @{account_name} est déjà dans la BDD, mais il faut le MàJ car l'illustration de requête est trop récente !" )
                         
                         scan_request = shared_memory_scan_requests.launch_request( account_id,
-                                                                               account_name,
-                                                                               is_prioritary = True )
+                                                                                   account_name,
+                                                                                   is_prioritary = True )
                         
                         # On suit la progression de cette requête
                         request.scan_requests += [ scan_request.get_URI() ] # Ne peut pas faire de append avec Pyro

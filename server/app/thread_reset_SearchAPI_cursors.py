@@ -40,13 +40,13 @@ def thread_reset_SearchAPI_cursors( thread_id : int, shared_memory ) :
         raise AssertionError( "Ce thread doit être unique, et doit pas conséquent avoir 1 comme identifiant (\"thread_id\") !" )
     
     # Accès direct à la base de données
-    bdd_direct_access = SQLite_or_MySQL()
+    bdd = SQLite_or_MySQL()
     
     # Initialisation de notre couche d'abstraction à l'API Twitter
     twitter = TweepyAbstraction( param.API_KEY,
-                                param.API_SECRET,
-                                param.OAUTH_TOKEN,
-                                param.OAUTH_TOKEN_SECRET )
+                                 param.API_SECRET,
+                                 param.OAUTH_TOKEN,
+                                 param.OAUTH_TOKEN_SECRET )
     
     # Maintenir ouverts certains proxies vers la mémoire partagée
     shared_memory_scan_requests = shared_memory.scan_requests
@@ -85,7 +85,7 @@ def thread_reset_SearchAPI_cursors( thread_id : int, shared_memory ) :
         
         # Prendre l'itérateur sur les comptes dans la base de donnée, triés
         # dans l'ordre du moins récemment reset au plus récemment reset
-        oldest_reseted_account_iterator = bdd_direct_access.get_oldest_reseted_account()
+        oldest_reseted_account_iterator = bdd.get_oldest_reseted_account()
         
         # Pour chaque compte dans la BDD
         for account in oldest_reseted_account_iterator :
@@ -151,7 +151,7 @@ def thread_reset_SearchAPI_cursors( thread_id : int, shared_memory ) :
             account_name = twitter.get_account_id( account["account_id"], invert_mode = True )
             
             # Dans tous les cas, on reset son curseur
-            bdd_direct_access.reset_account_SearchAPI_last_tweet_date( account["account_id"] )
+            bdd.reset_account_SearchAPI_last_tweet_date( account["account_id"] )
             
             # Si l'ID du compte Twitter n'existe plus, on le laisse tel quel,
             # avec son curseur reset

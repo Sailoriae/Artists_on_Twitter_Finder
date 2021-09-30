@@ -2,7 +2,6 @@
 # coding: utf-8
 
 import snscrape.modules.twitter
-import re
 
 
 """

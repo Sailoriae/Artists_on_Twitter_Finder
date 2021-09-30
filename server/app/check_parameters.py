@@ -110,17 +110,17 @@ def check_parameters () :
             return True
     
     twitter = TweepyAbstraction( param.API_KEY,
-                                param.API_SECRET,
-                                param.OAUTH_TOKEN,
-                                param.OAUTH_TOKEN_SECRET )
+                                 param.API_SECRET,
+                                 param.OAUTH_TOKEN,
+                                 param.OAUTH_TOKEN_SECRET )
     if not test_twitter( twitter ) :
         return False
     
     for creds in param.TWITTER_API_KEYS :
         twitter = TweepyAbstraction( param.API_KEY,
-                                    param.API_SECRET,
-                                    creds["OAUTH_TOKEN"],
-                                    creds["OAUTH_TOKEN_SECRET"] )
+                                     param.API_SECRET,
+                                     creds["OAUTH_TOKEN"],
+                                     creds["OAUTH_TOKEN_SECRET"] )
         if not test_twitter( twitter ) :
             return False
     

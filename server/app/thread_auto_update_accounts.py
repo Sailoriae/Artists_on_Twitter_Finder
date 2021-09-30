@@ -35,13 +35,13 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
         raise AssertionError( "Ce thread doit être unique, et doit pas conséquent avoir 1 comme identifiant (\"thread_id\") !" )
     
     # Accès direct à la base de données
-    bdd_direct_access = SQLite_or_MySQL()
+    bdd = SQLite_or_MySQL()
     
     # Initialisation de notre couche d'abstraction à l'API Twitter
     twitter = TweepyAbstraction( param.API_KEY,
-                                param.API_SECRET,
-                                param.OAUTH_TOKEN,
-                                param.OAUTH_TOKEN_SECRET )
+                                 param.API_SECRET,
+                                 param.OAUTH_TOKEN,
+                                 param.OAUTH_TOKEN_SECRET )
     
     # Maintenir ouverts certains proxies vers la mémoire partagée
     shared_memory_scan_requests = shared_memory.scan_requests
@@ -70,7 +70,7 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
         
         # Prendre l'itérateur sur les comptes dans la base de donnée, triés
         # dans l'ordre du moins récemment mise à jour au plus récemment mis à jour
-        oldest_updated_account_iterator = bdd_direct_access.get_oldest_updated_account()
+        oldest_updated_account_iterator = bdd.get_oldest_updated_account()
         
         # Pour chaque compte dans la BDD
         for oldest_updated_account in oldest_updated_account_iterator  :
@@ -137,8 +137,8 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
             # On le fait seulement maintenant, et pas avant la boucle d'attente
             # car la répartition des MàJ avec  un temps minimal nous ferait
             # prendre trop d'avance
-            if ( bdd_direct_access.get_account_SearchAPI_last_scan_local_date( oldest_updated_account["account_id"] ) != oldest_updated_account["last_SearchAPI_indexing_local_date"] and
-                 bdd_direct_access.get_account_TimelineAPI_last_scan_local_date( oldest_updated_account["account_id"] ) != oldest_updated_account["last_TimelineAPI_indexing_local_date"] ) :
+            if ( bdd.get_account_SearchAPI_last_scan_local_date( oldest_updated_account["account_id"] ) != oldest_updated_account["last_SearchAPI_indexing_local_date"] and
+                 bdd.get_account_TimelineAPI_last_scan_local_date( oldest_updated_account["account_id"] ) != oldest_updated_account["last_TimelineAPI_indexing_local_date"] ) :
                 print( f"[auto_update_th{thread_id}] Le compte ID {oldest_updated_account['account_id']} a eu un scan provoqué par un utilisateur, on peut le sauter." )
                 
                 # On peut sauter ce compte, on le reverra la prochaine fois
@@ -157,10 +157,10 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
                 # On peut faire ce INSERT INTO, pusiqu'il n'y a que ce thread qui
                 # utilise la date locale de dernière MàJ, et que ce thread est
                 # unique
-                bdd_direct_access.set_account_SearchAPI_last_tweet_date( oldest_updated_account["account_id"],
-                                                                         bdd_direct_access.get_account_SearchAPI_last_tweet_date( oldest_updated_account["account_id"] ) )
-                bdd_direct_access.set_account_TimelineAPI_last_tweet_id( oldest_updated_account["account_id"],
-                                                                         bdd_direct_access.get_account_TimelineAPI_last_tweet_id( oldest_updated_account["account_id"] ) )
+                bdd.set_account_SearchAPI_last_tweet_date( oldest_updated_account["account_id"],
+                                                           bdd.get_account_SearchAPI_last_tweet_date( oldest_updated_account["account_id"] ) )
+                bdd.set_account_TimelineAPI_last_tweet_id( oldest_updated_account["account_id"],
+                                                           bdd.get_account_TimelineAPI_last_tweet_id( oldest_updated_account["account_id"] ) )
             
             # Sinon, on lance le scan pour ce compte
             else :

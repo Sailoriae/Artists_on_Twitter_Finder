@@ -27,6 +27,7 @@ from shared_memory.open_proxy import open_proxy
 """
 En vérité, les procédures des threads ne sont pas exécutées directement, mais
 le sont par ce collecteur d'erreur.
+
 @param thread_procedure Procédure à exécuter.
 @param thread_id ID du thread.
 @param shared_memory_uri L'URI menant à la racine du serveur de mémoire

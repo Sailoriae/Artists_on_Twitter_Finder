@@ -55,7 +55,6 @@ class DeviantArt :
     
     
     """
-    METHODE PRIVEE, NE PAS UTILISER !
     Mettre en cache le résultat de l'appel à l'API de l'illustration si ce
     n'est pas déjà fait.
     Permet de MàJ le cache, si l'URL mène bien vers une illustration.

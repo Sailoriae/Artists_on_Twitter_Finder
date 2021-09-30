@@ -31,7 +31,6 @@ from link_finder.supported_websites.utils.validate_patreon_account_url import va
 from link_finder.class_Link_Finder_Result import Link_Finder_Result
 from link_finder.class_Link_Finder_Result import Not_an_URL
 from link_finder.class_Link_Finder_Result import Unsupported_Website
-import parameters as param
 
 
 # ^ = Début de la chaine, $ = Fin de la chaine
@@ -95,7 +94,7 @@ class Link_Finder :
             
             Afin d'optimiser, si aucune compte Twitter n'a été trouvé,
             "image_url" et "publish_date" sont à None.
-
+    
     Attention : Cette méthode émet des exceptions Unsupported_Website si le
     site n'est pas supporté !
     """
@@ -212,6 +211,11 @@ class Link_Finder :
         if twitter != None :
             return [ twitter ] # La fonction "filter_twitter_accounts_list()" est appelée à la fin du Link Finder
         
+        
+        # ====================================================================
+        # DEVIANTART
+        # ====================================================================
+        
         # PROFIL SUR DEVIANTART
         deviantart = validate_deviantart_account_url( url )
         if deviantart != None :
@@ -227,6 +231,11 @@ class Link_Finder :
                 return self._deviantart.get_twitter_accounts( url, 
                                                               multiplexer = self._link_mutiplexer )
         
+        
+        # ====================================================================
+        # PIXIV
+        # ====================================================================
+        
         # PROFIL SUR PIXIV
         pixiv = validate_pixiv_account_url( url )
         if pixiv != None :
@@ -241,6 +250,13 @@ class Link_Finder :
             if not self._already_visited( "pixiv", url ) :
                 return self._deviantart.get_twitter_accounts( url, 
                                                               multiplexer = self._link_mutiplexer )
+        
+        
+        # ====================================================================
+        # SITES NON-SUPPORTES
+        # Ils ne peuvent pas être des sites sources, mais on y cherche quand
+        # même des comptes Twitter.
+        # ====================================================================
         
         # LINKTREE
         linktree = validate_linktree_account_url( url )
@@ -275,8 +291,11 @@ class Link_Finder :
     """
     Utiliser le dictionnaire du multiplexeur de liens pour empêcher de visiter
     deux fois la même page.
+    
+    @param website Clé dans le dictionnaire (Nom du site).
+    @param page Valeur dans la liste associée à la clé.
     """
-    def _already_visited ( self, website, page ) :
+    def _already_visited ( self, website : str, page : str ) :
         if website in self._multiplexer_dict :
             if page in self._multiplexer_dict[website] :
                 return True
