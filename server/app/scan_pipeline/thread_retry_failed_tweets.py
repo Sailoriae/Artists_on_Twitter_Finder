@@ -153,7 +153,7 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
         else :
             # Obtenir les JSON de tous les Tweets à réessayer
             # Ne figurent pas dans cette liste les Tweets qui ont étés supprimés
-            response = twitter.api.statuses_lookup( hundred_tweets, trim_user = True, tweet_mode = "extended" )
+            response = twitter.get_multiple_tweets( hundred_tweets, trim_user = True )
             
             # Analyser les JSON et les mettre dans la file d'attente
             for tweet_json in response :

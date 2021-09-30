@@ -47,13 +47,27 @@ class TweepyAbstraction :
     @return Un objet Status (= Tweet de la librairie Tweepy)
             None si il y a eu un problème
     """
-    def get_tweet ( self, tweet_id ) :
+    def get_tweet ( self, tweet_id, trim_user = False ) :
         try :
-            return self.api.get_status( tweet_id, tweet_mode = 'extended' )
+            return self.api.get_status( tweet_id, trim_user = trim_user, tweet_mode = 'extended' )
         except tweepy.TweepError as error :
             print( f"[Tweepy] Erreur en récupérant les informations du Tweet ID {tweet_id}." )
             print( error.reason )
             return None # Bien laisser le "return None" pour le check_parameters()
+    
+    """
+    @param tweet_id Liste d'ID de Tweets
+    @return Liste d'objet Status (= Tweet de la librairie Tweepy)
+            None si il y a eu un problème
+    """
+    def get_multiple_tweets ( self, tweets_ids, trim_user = False ) :
+        to_return = []
+        
+        # Séparer la liste "accounts_names" en sous-listes de 100 éléments
+        for tweets_ids_sublist in [tweets_ids[i:i+100] for i in range(0,len(tweets_ids),100)] :
+            to_return += self.api.statuses_lookup( tweets_ids_sublist, trim_user = trim_user, tweet_mode = "extended" )
+        
+        return to_return
     
     """
     @param account_name Le nom d'utilisateur du compte dont on veut l'ID.
