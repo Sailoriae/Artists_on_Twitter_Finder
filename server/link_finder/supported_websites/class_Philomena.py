@@ -157,11 +157,6 @@ class Philomena :
                      Philomena.
     @param multiplexer Méthode "link_mutiplexer()" de la classe "Link_Finder"
                        (OPTIONNEL).
-    @param loopback_source Méthode "get_data()" de la classe "Link_Finder"
-                           (OPTIONNEL). Permet de reboucler si l'image a une
-                           source, car les sites Philomena sont des boorus.
-    @param already_loopback True ou False. Permet de désactiver l'utilisation
-                            de loopback_source !
     
     @return Une liste de comptes Twitter.
             Ou une liste vide si aucun URL de compte Twitter valide n'a été
@@ -170,9 +165,7 @@ class Philomena :
             pas une illustration sur un Booru utilisant Philomena.
     """
     def get_twitter_accounts ( self, illust_url : int,
-                                     multiplexer = None,
-                                     loopback_source = None,
-                                     already_loopback = True ) -> List[str] :
+                                     multiplexer = None ) -> List[str] :
         # On met en cache si ce n'est pas déjà fait
         if not self._cache_or_get( illust_url ) :
             return None
@@ -181,7 +174,7 @@ class Philomena :
         if self.cache_illust_url_json["image"]["duplicate_of"] != None :
             return self.get_twitter_accounts(
                 "https://derpibooru.org/images/" + str( self.cache_illust_url_json["image"]["duplicate_of"] ),
-                multiplexer, loopback_source, already_loopback
+                multiplexer
             )
         
         # ATTENTION ! Il peut y avoir plusieurs artistes !
@@ -219,25 +212,21 @@ class Philomena :
                         twitter_accounts += get_multiplex
         
         # Comme les Boorus sont des sites de reposts, on peut trouver la source
-        # de l'illustration. Si c'est sur un site que l'on supporte, le Link
-        # Finder peut aller y faire un tour !
-        if loopback_source != None and not already_loopback :
-            source = self.get_source( illust_url )
+        # de l'illustration. Si c'est sur un site que l'on supporte, le
+        # multiplexeur de liens peut aller y faire un tour !
+        if multiplexer != None :
+            source = self._get_source( illust_url )
             if source != None and source != "" :
-                try :
-                    data = loopback_source( source, TWITTER_ONLY = True )
-                except ( Unsupported_Website, Not_an_URL ) :
-                    pass
-                else :
-                    if data != None :
-                        twitter_accounts += data.twitter_accounts
+                get_multiplex = multiplexer( source )
+                if get_multiplex != None :
+                    twitter_accounts += get_multiplex
         
         return twitter_accounts
     
     """
     Comme les Boorus sont des sites de reposts, on peut trouver la source de
-    l'illustration. Si c'est sur un site que l'on supporte, le Link Finder peut
-    aller y faire un tour !
+    l'illustration. Si c'est sur un site que l'on supporte, le multiplexeur de
+    liens peut y aller y faire un tour !
     
     @param illust_id L'URL de l'illustration postée sur Booru utilisant
                      Philomena.
@@ -246,7 +235,7 @@ class Philomena :
             Ou None si il y a eu un problème, c'est à dire que l'ID donné n'est
             pas une illustration sur Danbooru.
     """
-    def get_source ( self, illust_url : int ) -> str :
+    def _get_source ( self, illust_url : int ) -> str :
         # On met en cache si ce n'est pas déjà fait
         if not self._cache_or_get( illust_url ) :
             return None

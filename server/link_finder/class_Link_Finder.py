@@ -78,8 +78,6 @@ class Link_Finder :
     """
     @param illust_url L'URL d'une illustration postée sur l'un des sites
                       supportés.
-    @param TWITTER_ONLY Ne retourner dans l'objet que les comptes Twitter
-                        (OPTIONNEL).
     
     @return Un objet "Link_Finder_Result" contenant les attributs suivants :
             - image_urls : Liste des URLs de l'image.  Si il y en a une, c'est
@@ -99,7 +97,7 @@ class Link_Finder :
     Attention : Cette méthode émet des exceptions Unsupported_Website si le
     site n'est pas supporté !
     """
-    def get_data ( self, illust_url : str, TWITTER_ONLY = False ) -> Link_Finder_Result :
+    def get_data ( self, illust_url : str ) -> Link_Finder_Result :
         # Ce sont les clases qui analysent les URL et vont dire si elles
         # mènent bien vers des illustrations.
         # Ici, on vérifie juste le domaine.
@@ -120,7 +118,7 @@ class Link_Finder :
         elif re.match( deviantart_url, illust_url ) != None :
             twitter_accounts = self.deviantart.get_twitter_accounts( illust_url, 
                                                                      multiplexer = self._link_mutiplexer )
-            if not TWITTER_ONLY and twitter_accounts != [] and twitter_accounts != None :
+            if twitter_accounts != [] and twitter_accounts != None :
                 image_urls = self.deviantart.get_image_urls( illust_url )
                 publish_date = self.deviantart.get_datetime( illust_url )
         
@@ -130,7 +128,7 @@ class Link_Finder :
         elif re.match( pixiv_url, illust_url ) != None :
             twitter_accounts = self.pixiv.get_twitter_accounts( illust_url,
                                                                 multiplexer = self._link_mutiplexer )
-            if not TWITTER_ONLY and twitter_accounts != [] and twitter_accounts != None :
+            if twitter_accounts != [] and twitter_accounts != None :
                 image_urls = self.pixiv.get_image_urls( illust_url )
                 publish_date = self.pixiv.get_datetime( illust_url )
         
@@ -140,7 +138,7 @@ class Link_Finder :
         elif re.match( danbooru_url, illust_url ) != None :
             twitter_accounts = self.danbooru.get_twitter_accounts( illust_url,
                                                                    multiplexer = self._link_mutiplexer )
-            if not TWITTER_ONLY and twitter_accounts != [] and twitter_accounts != None :
+            if twitter_accounts != [] and twitter_accounts != None :
                 image_urls = self.danbooru.get_image_urls( illust_url )
                 publish_date = self.danbooru.get_datetime( illust_url )
         
@@ -149,10 +147,8 @@ class Link_Finder :
         # ====================================================================
         elif re.match( derpibooru_url, illust_url ) != None :
             twitter_accounts = self.derpibooru.get_twitter_accounts( illust_url,
-                                                                     multiplexer = self._link_mutiplexer,
-                                                                     loopback_source = self.get_data,
-                                                                     already_loopback = TWITTER_ONLY )
-            if not TWITTER_ONLY and twitter_accounts != [] and twitter_accounts != None :
+                                                                     multiplexer = self._link_mutiplexer )
+            if twitter_accounts != [] and twitter_accounts != None :
                 image_urls = self.derpibooru.get_image_urls( illust_url )
                 publish_date = self.derpibooru.get_datetime( illust_url )
         
@@ -161,10 +157,8 @@ class Link_Finder :
         # ====================================================================
         elif re.match( furbooru_url, illust_url ) != None :
             twitter_accounts = self.furbooru.get_twitter_accounts( illust_url,
-                                                                   multiplexer = self._link_mutiplexer,
-                                                                   loopback_source = self.get_data,
-                                                                   already_loopback = TWITTER_ONLY )
-            if not TWITTER_ONLY and twitter_accounts != [] and twitter_accounts != None :
+                                                                   multiplexer = self._link_mutiplexer )
+            if twitter_accounts != [] and twitter_accounts != None :
                 image_urls = self.furbooru.get_image_urls( illust_url )
                 publish_date = self.furbooru.get_datetime( illust_url )
         
@@ -182,7 +176,8 @@ class Link_Finder :
         if twitter_accounts == None :
             return None
         
-        if TWITTER_ONLY or twitter_accounts == [] :
+        # Illustration trouvée, mais aucun compte Twitter trouvé
+        if twitter_accounts == [] :
             image_urls = None
             publish_date = None
         
@@ -212,7 +207,7 @@ class Link_Finder :
         if twitter != None :
             return [ twitter ] # La fonction "filter_twitter_accounts_list()" est appelée à la fin du Link Finder
         
-        # DEVIANTART
+        # PROFIL SUR DEVIANTART
         deviantart = validate_deviantart_account_url( url )
         if deviantart != None :
             if not self._already_visited( "deviantart", deviantart ) :
@@ -220,13 +215,27 @@ class Link_Finder :
                                                              multiplexer = self._link_mutiplexer )
             return []
         
-        # PIXIV
+        # ILLUSTRATION SUR DEVIANTART
+        # Permet aux boorus d'envoyer leur champs "source"
+        if re.match( deviantart_url, url ) != None :
+            if not self._already_visited( "deviantart", url ) :
+                return self.deviantart.get_twitter_accounts( url, 
+                                                             multiplexer = self._link_mutiplexer )
+        
+        # PROFIL SUR PIXIV
         pixiv = validate_pixiv_account_url( url )
         if pixiv != None :
             if not self._already_visited( "pixiv", pixiv ) :
                 return self.pixiv.get_twitter_accounts( "", force_pixiv_account_id = pixiv,
                                                             multiplexer = self._link_mutiplexer )
             return []
+        
+        # ILLUSTRATION SUR PIXIV
+        # Permet aux boorus d'envoyer leur champs "source"
+        if re.match( pixiv_url, url ) != None :
+            if not self._already_visited( "pixiv", url ) :
+                return self.deviantart.get_twitter_accounts( url, 
+                                                             multiplexer = self._link_mutiplexer )
         
         # LINKTREE
         linktree = validate_linktree_account_url( url )
