@@ -1,13 +1,11 @@
 var tweetsDiv = document.getElementById("tweets");
 
 function canDisplayTweets ( json ) {
-	if ( ( json.error === "NO_URL_FIELD" ) ||
-		 ( json.error === "NOT_AN_URL" ) ||
-		 ( json.error === "INVALID_URL" ) ||
-		 ( json.error === "UNSUPPORTED_WEBSITE" ) ||
-		 ( json.error === "NO_TWITTER_ACCOUNT_FOUND" ) ||
-		 ( json.error === "NO_VALID_TWITTER_ACCOUNT_FOUND" ) ||
-		 ( json.error === "YOUR_IP_HAS_MAX_PROCESSING_REQUESTS" ) ) {
+	if ( !canDisplayTwitterAccounts( json ) )
+		return false;
+
+	if ( ( json.error === "ERROR_DURING_REVERSE_SEARCH" ) ||
+		 ( json.error === "QUERY_IMAGE_TOO_BIG" ) ) {
 		return false;
 	}
 
