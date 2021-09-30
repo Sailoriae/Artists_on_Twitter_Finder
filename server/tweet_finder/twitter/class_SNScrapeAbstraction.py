@@ -14,8 +14,7 @@ class TwitterSearchScraper ( snscrape.modules.twitter.TwitterSearchScraper ) :
     def __init__ ( self, *args, **kwargs ) :
         super().__init__(*args, **kwargs)
         
-        
-        self.output_function = None
+        self._output_function = None
     
     # Donner en douce à SNScraper le token pour s'authentifier comme le serait
     # un utilisateur sur l'UI web
@@ -35,8 +34,8 @@ class TwitterSearchScraper ( snscrape.modules.twitter.TwitterSearchScraper ) :
     # Override : Comme SNScraper ne nous donne pas le JSON original des Tweets,
     # on remplace sa fonction pour le faire nous-même
     def _tweet_to_tweet ( self, tweet, obj ) :
-        if self.output_function != None :
-            self.output_function( tweet )
+        if self._output_function != None :
+            self._output_function( tweet )
         
         # On appel quand même sa fonction et on retourne ce qu'elle doit
         # normalement retourner
@@ -44,7 +43,7 @@ class TwitterSearchScraper ( snscrape.modules.twitter.TwitterSearchScraper ) :
     
     # Setter de la fonction d'output pour l'override juste ci-dessus
     def set_output_function ( self, output_function ) :
-        self.output_function = output_function
+        self._output_function = output_function
     
     # Override : "This request requires a matching csrf cookie and header."
     def _check_api_response ( self, r ) :

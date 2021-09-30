@@ -59,13 +59,13 @@ class Webpage_to_Twitter_Accounts :
                    retry_on_those_http_errors = [] ) :
         # Prendre le code HTML de la page
         if response == None :
-            self.response = get_with_rate_limits( url, retry_on_those_http_errors = retry_on_those_http_errors )
+            self._response = get_with_rate_limits( url, retry_on_those_http_errors = retry_on_those_http_errors )
         else :
-            self.response = response
+            self._response = response
         
         # Initialiser BeautifulSoup si besoin
         if USE_BS4 :
-            self.soup = BeautifulSoup( self.response.text, "html.parser" )
+            self.soup = BeautifulSoup( self._response.text, "html.parser" )
         self.USE_BS4 = USE_BS4
     
     """
@@ -119,7 +119,7 @@ class Webpage_to_Twitter_Accounts :
         accounts_found : List[str] = []
         
         # Pour trouver toutes les URL trouvables dans la page
-        for link in re.findall( r"(https?://[^\s]+)", self.response.text) :
+        for link in re.findall( r"(https?://[^\s]+)", self._response.text) :
             if link == None :
                 continue
             result = validator_function( link )

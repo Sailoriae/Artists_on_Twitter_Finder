@@ -58,16 +58,16 @@ ferait perdre plus de temps qu'autre chose.
 """
 class Tweets_Indexer :
     def __init__( self, DEBUG : bool = False, ENABLE_METRICS : bool = False ) :
-        self.DEBUG = DEBUG
-        self.ENABLE_METRICS = ENABLE_METRICS
-        self.bdd = SQLite_or_MySQL()
-        self.cbir_engine = CBIR_Engine()
+        self._DEBUG = DEBUG
+        self._ENABLE_METRICS = ENABLE_METRICS
+        self._bdd = SQLite_or_MySQL()
+        self._cbir_engine = CBIR_Engine()
         
         if DEBUG or ENABLE_METRICS :
-            self.times = [] # Liste des temps pour indexer un Tweet
-            self.download_image_times = [] # Liste des temps pour télécharger les images d'un Tweet
-            self.calculate_features_times = [] # Liste des temps pour d'éxécution du moteur CBIR pour une images d'un Tweet
-            self.insert_into_times = [] # Liste des temps pour faire le INSERT INTO
+            self._times = [] # Liste des temps pour indexer un Tweet
+            self._download_image_times = [] # Liste des temps pour télécharger les images d'un Tweet
+            self._calculate_features_times = [] # Liste des temps pour d'éxécution du moteur CBIR pour une images d'un Tweet
+            self._insert_into_times = [] # Liste des temps pour faire le INSERT INTO
     
     """
     Permet de gèrer les erreurs HTTP, et de les logger sans avoir a descendre
@@ -90,15 +90,15 @@ class Tweets_Indexer :
         retry_count = 0
         while True : # Solution très bourrin pour gèrer les rate limits
             try :
-                if self.ENABLE_METRICS : start = time()
+                if self._ENABLE_METRICS : start = time()
                 image = get_tweet_image( image_url )
                 if image == None : # Erreurs insolvables, 404 par exemple
                     return None
-                if self.ENABLE_METRICS : self.download_image_times.append( time() - start )
+                if self._ENABLE_METRICS : self._download_image_times.append( time() - start )
                 
-                if self.ENABLE_METRICS : start = time()
-                to_return = self.cbir_engine.index_cbir( binary_image_to_PIL_image( image ) )
-                if self.ENABLE_METRICS : self.calculate_features_times.append( time() - start )
+                if self._ENABLE_METRICS : start = time()
+                to_return = self._cbir_engine.index_cbir( binary_image_to_PIL_image( image ) )
+                if self._ENABLE_METRICS : self._calculate_features_times.append( time() - start )
                 return to_return
             
             # Envoyé par la fonction get_tweet_image() qui n'a pas réussi
@@ -151,7 +151,7 @@ class Tweets_Indexer :
     @param account_id L'ID du compte Twitter.
     """
     def _save_last_tweet_date ( self, account_id, last_tweet_date ) :
-        self.bdd.set_account_SearchAPI_last_tweet_date( account_id, last_tweet_date )
+        self._bdd.set_account_SearchAPI_last_tweet_date( account_id, last_tweet_date )
     
     """
     Enregistrer l'ID Tweet listé le plus récent dans la base de données.
@@ -162,7 +162,7 @@ class Tweets_Indexer :
     @param account_id L'ID du compte Twitter.
     """
     def _save_last_tweet_id ( self, account_id, last_tweet_id ) :
-        self.bdd.set_account_TimelineAPI_last_tweet_id( account_id, last_tweet_id )
+        self._bdd.set_account_TimelineAPI_last_tweet_id( account_id, last_tweet_id )
     
     """
     Indexer les Tweets trouvés par les des deux méthodes de listage.
@@ -197,23 +197,23 @@ class Tweets_Indexer :
                 continue
             
             # Enregistrer les mesures des temps d'éxécution tous les 100 Tweets.
-            if len(self.times) >= 100 :
-                print( f"[Tweets_Indexer] {len(self.times)} Tweets indexés avec une moyenne de {mean(self.times)} secondes par Tweet." )
+            if len(self._times) >= 100 :
+                print( f"[Tweets_Indexer] {len(self._times)} Tweets indexés avec une moyenne de {mean(self._times)} secondes par Tweet." )
                 
-                if len(self.download_image_times) > 0 :
-                    print( f"[Tweets_Indexer] Temps moyens de téléchargement : {mean(self.download_image_times)} secondes." )
-                if len(self.calculate_features_times) > 0 :
-                    print( f"[Tweets_Indexer] Temps moyens de calcul dans le moteur CBIR : {mean(self.calculate_features_times)} secondes." )
-                if len(self.insert_into_times) > 0 :
-                    print( f"[Tweets_Indexer] Temps moyens d'enregistrement dans la BDD : {mean(self.insert_into_times)} secondes." )
+                if len(self._download_image_times) > 0 :
+                    print( f"[Tweets_Indexer] Temps moyens de téléchargement : {mean(self._download_image_times)} secondes." )
+                if len(self._calculate_features_times) > 0 :
+                    print( f"[Tweets_Indexer] Temps moyens de calcul dans le moteur CBIR : {mean(self._calculate_features_times)} secondes." )
+                if len(self._insert_into_times) > 0 :
+                    print( f"[Tweets_Indexer] Temps moyens d'enregistrement dans la BDD : {mean(self._insert_into_times)} secondes." )
                 
                 if add_step_C_times != None :
-                    add_step_C_times( self.times, self.download_image_times, self.calculate_features_times, self.insert_into_times )
+                    add_step_C_times( self._times, self._download_image_times, self._calculate_features_times, self._insert_into_times )
                 
-                self.times.clear()
-                self.download_image_times.clear()
-                self.calculate_features_times.clear()
-                self.insert_into_times.clear()
+                self._times.clear()
+                self._download_image_times.clear()
+                self._calculate_features_times.clear()
+                self._insert_into_times.clear()
             
             # Traiter les instructions d'enregistrement de curseurs
             if "save_SearchAPI_cursor" in tweet :
@@ -222,7 +222,7 @@ class Tweets_Indexer :
                     request = open_proxy( tweet["request_uri"] )
                     request.finished_SearchAPI_indexing = True
                     if end_request != None :
-                        end_request( request, get_stats = self.bdd.get_stats() )
+                        end_request( request, get_stats = self._bdd.get_stats() )
                     request.release_proxy()
                 print( f"[Tweets_Indexer] Fin de l'indexation des Tweets de @{tweet['account_name']} trouvés avec l'API de recherche." )
                 continue
@@ -232,16 +232,16 @@ class Tweets_Indexer :
                     request = open_proxy( tweet["request_uri"] )
                     request.finished_TimelineAPI_indexing = True
                     if end_request != None :
-                        end_request( request, get_stats = self.bdd.get_stats() )
+                        end_request( request, get_stats = self._bdd.get_stats() )
                     request.release_proxy()
                 print( f"[Tweets_Indexer] Fin de l'indexation des Tweets de @{tweet['account_name']} trouvés avec l'API de timeline." )
                 continue
             
             # A partir d'ici, on est certain qu'on traite le JSON d'un Tweet
             current_tweet.append( tweet )
-            if self.DEBUG :
+            if self._DEBUG :
                 print( f"[Tweets_Indexer] Indexation Tweet ID {tweet['tweet_id']} du compte ID {tweet['user_id']}." )
-            if self.DEBUG or self.ENABLE_METRICS :
+            if self._DEBUG or self._ENABLE_METRICS :
                 start = time()
             
             # Pas besoin de tester si le Tweet est en train d'être traité en
@@ -256,15 +256,15 @@ class Tweets_Indexer :
             # - Le parallélisme et le fait qu'il n'y a pas d'objet dans la
             #   mémmoire partagée contenant tous les Tweets indexés,
             # - Le thread de reset des curseurs de listage avec SearchAPI.
-            if self.bdd.is_tweet_indexed( tweet["tweet_id"] ) and not "force_index" in tweet :
-                if self.DEBUG :
+            if self._bdd.is_tweet_indexed( tweet["tweet_id"] ) and not "force_index" in tweet :
+                if self._DEBUG :
                     print( "[Tweets_Indexer] Tweet déjà indexé !" )
                 continue
             
             length = len( tweet["images"] )
             
             if length == 0 :
-                if self.DEBUG :
+                if self._DEBUG :
                     print( "[Tweets_Indexer] Tweet sans image, on le passe !" )
                 continue
             
@@ -305,13 +305,13 @@ class Tweets_Indexer :
                 image_4_hash = self._get_image_hash( image_4_url, tweet["tweet_id"], CAN_RETRY = will_need_retry )
                 image_4_name = image_4_url.replace( "https://pbs.twimg.com/media/", "" )
             
-            if self.DEBUG or self.ENABLE_METRICS :
+            if self._DEBUG or self._ENABLE_METRICS :
                 start_insert_into = time()
             
             # Stockage des résultats
             # On stocke même si toutes les images sont à None
             # Car cela veut dire que toutes les images ont étées perdues par Twitter
-            self.bdd.insert_tweet(
+            self._bdd.insert_tweet(
                 tweet["user_id"],
                 tweet["tweet_id"],
                 cbir_hash_1 = image_1_hash,
@@ -330,7 +330,7 @@ class Tweets_Indexer :
             # utilisé pour réindexé est bloqué par le compte Twitter en cours
             # de scan
             if will_need_retry[0] :
-                self.bdd.add_retry_tweet(
+                self._bdd.add_retry_tweet(
                     tweet["tweet_id"],
                     tweet["user_id"],
                     image_1_url,
@@ -343,8 +343,8 @@ class Tweets_Indexer :
             # Tweets dont l'indexation a échouée
             # Ceci est la bidouille pour le thread de retentative d'indexation
             elif "was_failed_tweet" in tweet :
-                self.bdd.remove_retry_tweet( tweet["tweet_id"] )
+                self._bdd.remove_retry_tweet( tweet["tweet_id"] )
             
-            if self.DEBUG or self.ENABLE_METRICS :
-                self.insert_into_times.append( time() - start_insert_into )
-                self.times.append( time() - start )
+            if self._DEBUG or self._ENABLE_METRICS :
+                self._insert_into_times.append( time() - start_insert_into )
+                self._times.append( time() - start )

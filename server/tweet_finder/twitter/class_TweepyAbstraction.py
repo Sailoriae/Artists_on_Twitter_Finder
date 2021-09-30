@@ -36,9 +36,9 @@ class TweepyAbstraction :
         auth.set_access_token(oauth_token, oauth_token_secret)
         
         # Tweepy gère l'attente lors d'une rate limit !
-        self.api = tweepy.API( auth, 
-                               wait_on_rate_limit = True, # Gérer les rate limits
-                               wait_on_rate_limit_notify = True ) # Faire des print() lors d'une rate limit
+        self._api = tweepy.API( auth, 
+                                wait_on_rate_limit = True, # Gérer les rate limits
+                                wait_on_rate_limit_notify = True ) # Faire des print() lors d'une rate limit
         # Note : Ne pas utiliser l'option "retry_count"
         # Elle réessaye sur TOUTES les erreurs, pas seulement celles de connexion
     
@@ -49,7 +49,7 @@ class TweepyAbstraction :
     """
     def get_tweet ( self, tweet_id, trim_user = False ) :
         try :
-            return self.api.get_status( tweet_id, trim_user = trim_user, tweet_mode = 'extended' )
+            return self._api.get_status( tweet_id, trim_user = trim_user, tweet_mode = 'extended' )
         except tweepy.TweepError as error :
             print( f"[Tweepy] Erreur en récupérant les informations du Tweet ID {tweet_id}." )
             print( error.reason )
@@ -65,7 +65,7 @@ class TweepyAbstraction :
         
         # Séparer la liste "accounts_names" en sous-listes de 100 éléments
         for tweets_ids_sublist in [tweets_ids[i:i+100] for i in range(0,len(tweets_ids),100)] :
-            to_return += self.api.statuses_lookup( tweets_ids_sublist, trim_user = trim_user, tweet_mode = "extended" )
+            to_return += self._api.statuses_lookup( tweets_ids_sublist, trim_user = trim_user, tweet_mode = "extended" )
         
         return to_return
     
@@ -88,14 +88,14 @@ class TweepyAbstraction :
     def get_account_id ( self, account_name : str, invert_mode = False, retry_once = True ) -> int :
         try :
             if invert_mode :
-                json = self.api.get_user( user_id = account_name )
+                json = self._api.get_user( user_id = account_name )
                 if json._json["protected"] == True :
 #                    print( f"[Tweepy] Erreur en récupérant le nom du compte ID {account_name}." )
 #                    print( "[Tweepy] Le compte est en privé / est protégé." )
                     return None
                 return json.screen_name
             else :
-                json = self.api.get_user( screen_name = account_name )
+                json = self._api.get_user( screen_name = account_name )
                 if json._json["protected"] == True :
 #                    print( f"[Tweepy] Erreur en récupérant l'ID du compte @{account_name}." )
 #                    print( "[Tweepy] Le compte est en privé / est protégé." )
@@ -133,7 +133,7 @@ class TweepyAbstraction :
         # Séparer la liste "accounts_names" en sous-listes de 100 éléments
         for accounts_names_sublist in [accounts_names[i:i+100] for i in range(0,len(accounts_names),100)] :
             try :
-                for account in self.api.lookup_users( screen_names = accounts_names_sublist ) :
+                for account in self._api.lookup_users( screen_names = accounts_names_sublist ) :
                     # Filtrer les comptes privés
                     if account._json["protected"] == False :
                         to_return.append( ( account.screen_name, account.id ) )
@@ -165,7 +165,7 @@ class TweepyAbstraction :
         # être dans des réponses ! Laisser le code tel qu'il est.
         if since_tweet_id == None :
             return Cursor_Iterator(
-                tweepy.Cursor( self.api.user_timeline,
+                tweepy.Cursor( self._api.user_timeline,
                                user_id = account_id,
                                tweet_mode = "extended",
                                include_rts = False,
@@ -175,7 +175,7 @@ class TweepyAbstraction :
                               ).items() )
         else :
             return Cursor_Iterator(
-                tweepy.Cursor( self.api.user_timeline,
+                tweepy.Cursor( self._api.user_timeline,
                                user_id = account_id,
                                since_id = since_tweet_id,
                                tweet_mode = "extended",
@@ -195,7 +195,7 @@ class TweepyAbstraction :
     # Note : On ne peut pas savoir via cette API si le compte est en privé.
     def blocks_me ( self, account_id : int, retry_once = True ) :
         try :
-            friendship = self.api.show_friendship( target_id = account_id )
+            friendship = self._api.show_friendship( target_id = account_id )
             return friendship[0].blocked_by
         except tweepy.TweepError as error :
             if retry_once and error.api_code == None :

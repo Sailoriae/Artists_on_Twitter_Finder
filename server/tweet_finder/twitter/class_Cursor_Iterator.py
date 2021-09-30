@@ -12,7 +12,7 @@ tweepy.Cursor gère les Rate Limits, sauf les 429.
 """
 class Cursor_Iterator :
     def __init__( self, tweepy_cursor ) :
-        self.tweepy_cursor = tweepy_cursor
+        self._tweepy_cursor = tweepy_cursor
 
     def __iter__( self ) :
         return self
@@ -20,7 +20,7 @@ class Cursor_Iterator :
     def __next__( self ) :
         while True : # Solution très bourrin pour gèrer les 429
             try :
-                return self.tweepy_cursor.__next__()
+                return self._tweepy_cursor.__next__()
             except tweepy.error.TweepError as error :
                     if error.response != None : # Si le serveur nous ferme la connexion au nez
                         if error.response.status_code != 503 and error.response.status_code != 429 :

@@ -58,19 +58,19 @@ class Philomena :
                    - 2 pour https://furbooru.org/
     """
     def __init__  ( self, site_ID = 1 ) :
-        self.site_ID = site_ID
+        self._site_ID = site_ID
         
         if site_ID == 1 :
-            self.base_URL = "https://derpibooru.org/"
+            self._base_URL = "https://derpibooru.org/"
         elif site_ID == 2 :
-            self.base_URL = "https://furbooru.org/"
+            self._base_URL = "https://furbooru.org/"
         
         # On utilise ces attributs pour mettre en cache le résultat de l'appel
         # à l'API pour une illustration.
         # On met en cache car la demande de l'URL de l'image et la demande des
         # URLs des comptes Twitter sont souvent ensembles.
-        self.cache_illust_url = None
-        self.cache_illust_url_json = None
+        self._cache_illust_url = None
+        self._cache_illust_url_json = None
     
     """
     Permet d'extraire l'ID de l'URL d'une illustration postée sur un Booru
@@ -80,9 +80,9 @@ class Philomena :
             Ou None si ce n'est pas un post sur ce Booru.
     """
     def _artwork_url_to_id ( self, artwork_url : str ) :
-        if self.site_ID == 1 :
+        if self._site_ID == 1 :
             result = re.match( derpibooru_post_id_regex, artwork_url )
-        elif self.site_ID == 2 :
+        elif self._site_ID == 2 :
             result = re.match( furbooru_post_id_regex, artwork_url )
         
         if result != None :
@@ -100,7 +100,7 @@ class Philomena :
             False sinon.
     """
     def _cache_or_get ( self, illust_url : int ) -> bool :
-        if illust_url != self.cache_illust_url :
+        if illust_url != self._cache_illust_url :
             # Pour être certain de l'URL, on sort l'ID, pour reconstruire juste
             # après la même URL.
             illust_id = self._artwork_url_to_id( illust_url )
@@ -109,7 +109,7 @@ class Philomena :
             
             retry_once = True
             while True :
-                response = get_with_rate_limits( self.base_URL + "api/v1/json/images/" + illust_id )
+                response = get_with_rate_limits( self._base_URL + "api/v1/json/images/" + illust_id )
                 
                 # Note : Erreur 500 si l'ID est trop long
                 if response.status_code == 404 or response.status_code == 500 :
@@ -126,8 +126,8 @@ class Philomena :
                 
                 break
             
-            self.cache_illust_url = illust_url
-            self.cache_illust_url_json = json
+            self._cache_illust_url = illust_url
+            self._cache_illust_url_json = json
         
         return True
     
@@ -147,8 +147,8 @@ class Philomena :
             return None
         
         # On retourne le résultat voulu
-        return [ self.cache_illust_url_json["image"]["representations"]["full"],
-                 self.cache_illust_url_json["image"]["representations"]["large"] ]
+        return [ self._cache_illust_url_json["image"]["representations"]["full"],
+                 self._cache_illust_url_json["image"]["representations"]["large"] ]
     
     """
     Retourne les noms des comptes Twitter trouvés.
@@ -171,15 +171,15 @@ class Philomena :
             return None
         
         # Gérer les images de redirection
-        if self.cache_illust_url_json["image"]["duplicate_of"] != None :
+        if self._cache_illust_url_json["image"]["duplicate_of"] != None :
             return self.get_twitter_accounts(
-                "https://derpibooru.org/images/" + str( self.cache_illust_url_json["image"]["duplicate_of"] ),
+                "https://derpibooru.org/images/" + str( self._cache_illust_url_json["image"]["duplicate_of"] ),
                 multiplexer
             )
         
         # ATTENTION ! Il peut y avoir plusieurs artistes !
         artists_tags = []
-        for tag in self.cache_illust_url_json["image"]["tags"] :
+        for tag in self._cache_illust_url_json["image"]["tags"] :
             if tag[0:7] == "artist:" :
                 artists_tags.append( tag )
         
@@ -241,7 +241,7 @@ class Philomena :
             return None
         
         # On retourne le résultat voulu
-        source = self.cache_illust_url_json["image"]["source_url"]
+        source = self._cache_illust_url_json["image"]["source_url"]
         if source == None :
             return ""
         else :
@@ -261,7 +261,7 @@ class Philomena :
             return None
         
         # On retourne le résultat voulu
-        return parser.isoparse( self.cache_illust_url_json["image"]["created_at"] )
+        return parser.isoparse( self._cache_illust_url_json["image"]["created_at"] )
 
 
 """

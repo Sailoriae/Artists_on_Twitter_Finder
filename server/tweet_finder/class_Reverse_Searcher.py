@@ -27,14 +27,14 @@ import parameters as param
 
 class Reverse_Searcher :
     def __init__ ( self, DEBUG : bool = False, ENABLE_METRICS : bool = False ) :
-        self.DEBUG = DEBUG
-        self.ENABLE_METRICS = ENABLE_METRICS
-        self.cbir_engine = CBIR_Engine()
-        self.bdd = SQLite_or_MySQL()
-        self.twitter = TweepyAbstraction( param.API_KEY,
-                                         param.API_SECRET,
-                                         param.OAUTH_TOKEN,
-                                         param.OAUTH_TOKEN_SECRET )
+        self._DEBUG = DEBUG
+        self._ENABLE_METRICS = ENABLE_METRICS
+        self._cbir_engine = CBIR_Engine()
+        self._bdd = SQLite_or_MySQL()
+        self._twitter = TweepyAbstraction( param.API_KEY,
+                                           param.API_SECRET,
+                                           param.OAUTH_TOKEN,
+                                           param.OAUTH_TOKEN_SECRET )
     
     """
     Rechercher un tweet dans la base de donnée grâce à une image
@@ -59,22 +59,22 @@ class Reverse_Searcher :
                              query_image_binary : bytes = None ) :
         if account_name != None or account_id != None:
             if account_id == None :
-                account_id = self.twitter.get_account_id( account_name )
+                account_id = self._twitter.get_account_id( account_name )
             if account_id == None :
                 print( f"Compte @{account_name} inexistant, ou désactivé, ou privé !" )
                 return None
         else :
             account_id = 0
         
-        if self.DEBUG or self.ENABLE_METRICS :
+        if self._DEBUG or self._ENABLE_METRICS :
             start = time()
         
-        iterator = self.bdd.get_images_in_db_iterator( account_id = account_id,
+        iterator = self._bdd.get_images_in_db_iterator( account_id = account_id,
                                                        add_step_3_times = add_step_3_times )
         
-        to_return = self.cbir_engine.search_cbir( pil_image, iterator )
+        to_return = self._cbir_engine.search_cbir( pil_image, iterator )
         
-        if self.DEBUG or self.ENABLE_METRICS :
+        if self._DEBUG or self._ENABLE_METRICS :
             print( f"[Reverse_Searcher] La recherche s'est faite en {time() - start} secondes." )
             add_step_3_times( [ time() - start ], [], [], [] )
         

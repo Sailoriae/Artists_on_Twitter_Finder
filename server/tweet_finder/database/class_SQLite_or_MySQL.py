@@ -69,7 +69,7 @@ class SQLite_or_MySQL :
     """
     def __init__( self ) :
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
-            self.conn = mysql.connector.connect(
+            self._conn = mysql.connector.connect(
                 host = param.MYSQL_ADDRESS,
                 port = param.MYSQL_PORT,
                 user = param.MYSQL_USERNAME,
@@ -77,11 +77,11 @@ class SQLite_or_MySQL :
                 database = param.MYSQL_DATABASE_NAME
             )
         else :
-            self.conn = sqlite3.connect(
+            self._conn = sqlite3.connect(
                 param.SQLITE_DATABASE_NAME,
             )
         
-        c = self.conn.cursor()
+        c = self._conn.cursor()
         
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
             account_table = """CREATE TABLE IF NOT EXISTS accounts (
@@ -163,7 +163,7 @@ class SQLite_or_MySQL :
         else :
             c.execute( "CREATE INDEX IF NOT EXISTS account_id ON tweets ( account_id )" )
         
-        self.conn.commit()
+        self._conn.commit()
     
     """
     Destructeur
@@ -171,11 +171,11 @@ class SQLite_or_MySQL :
     def __del__( self ) :
         if not param.USE_MYSQL_INSTEAD_OF_SQLITE :
             try :
-                self.conn.close()
+                self._conn.close()
             except sqlite3.ProgrammingError :
                 pass
         else :
-            self.conn.close()
+            self._conn.close()
     
     """
     Obtenir un curseur.
@@ -185,19 +185,19 @@ class SQLite_or_MySQL :
     def _get_cursor( self, buffered = False ) :
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
             try :
-                return self.conn.cursor( buffered = buffered )
+                return self._conn.cursor( buffered = buffered )
             except ( mysql.connector.errors.OperationalError, mysql.connector.errors.InternalError ) :
                 print( "Reconnexion à la base de données MySQL..." )
-                self.conn = mysql.connector.connect(
+                self._conn = mysql.connector.connect(
                     host = param.MYSQL_ADDRESS,
                     port = param.MYSQL_PORT,
                     user = param.MYSQL_USERNAME,
                     password = param.MYSQL_PASSWORD,
                     database = param.MYSQL_DATABASE_NAME
                 )
-                return self.conn.cursor( buffered = buffered )
+                return self._conn.cursor( buffered = buffered )
         else :
-            return self.conn.cursor()
+            return self._conn.cursor()
     
     """
     Ajouter un tweet à la base de données
@@ -249,7 +249,7 @@ class SQLite_or_MySQL :
         if FORCE_INDEX :
             c = self._get_cursor()
             c.execute( "DELETE FROM tweets WHERE tweet_id = %s", (tweet_id,) )
-            self.conn.commit()
+            self._conn.commit()
         
         c = self._get_cursor()
         
@@ -260,7 +260,7 @@ class SQLite_or_MySQL :
             c.execute( "INSERT INTO tweets VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ) ON CONFLICT ( tweet_id ) DO NOTHING",
                        ( account_id, tweet_id, image_name_1,  to_bin(cbir_hash_1),  image_name_2,  to_bin(cbir_hash_2), image_name_3, to_bin(cbir_hash_3), image_name_4, to_bin(cbir_hash_4) ) )
         
-        self.conn.commit()
+        self._conn.commit()
     
     """
     Récupérer les résultats CBIR de toutes les images d'un compte Twitter, ou
@@ -294,7 +294,7 @@ class SQLite_or_MySQL :
             c = self._get_cursor() # Note : Ca ne sert à rien qu'il soit buffered
             c.execute( save_date, ( datetime.now().strftime('%Y-%m-%d %H:%M:%S'), account_id ) )
             c.execute( update_count, ( account_id, ) )
-            self.conn.commit()
+            self._conn.commit()
         
         # Note : Ca ne sert à rien que le curseur soit buffered
         # En fait, en testant sur un gros compte (@MayoRiyo), ça fait perdre plus de temps que ça en fait gagner
@@ -381,7 +381,7 @@ class SQLite_or_MySQL :
         c = self._get_cursor()
         c.execute( request,
                    ( account_id, last_update, now, now, last_update, now ) )
-        self.conn.commit()
+        self._conn.commit()
     
     """
     API DE TIMELINE
@@ -414,7 +414,7 @@ class SQLite_or_MySQL :
         
         c.execute( request,
                    ( account_id, tweet_id, now, now, tweet_id, now ) )
-        self.conn.commit()
+        self._conn.commit()
     
     """
     API DE RECHERCHE
@@ -629,7 +629,7 @@ class SQLite_or_MySQL :
         
         c.execute( request,
                    ( tweet_id, account_id, image_1_url, image_2_url, image_3_url, image_4_url, now, now ) )
-        self.conn.commit()
+        self._conn.commit()
     
     """
     Supprimer un ID de Tweet à réessayer.
@@ -643,7 +643,7 @@ class SQLite_or_MySQL :
             request = "DELETE FROM reindex_tweets WHERE tweet_id = ?"
         
         c.execute( request, ( tweet_id, ) )
-        self.conn.commit()
+        self._conn.commit()
     
     """
     Obtenir un itérateur sur les Tweets à retenter d'indexer.
@@ -699,7 +699,7 @@ class SQLite_or_MySQL :
         c = self._get_cursor()
         c.execute( request,
                    ( datetime.now().strftime('%Y-%m-%d %H:%M:%S'), account_id ) )
-        self.conn.commit()
+        self._conn.commit()
     
     """
     Obtenir un itérateur sur les comptes enregistrés dans la base, triés par

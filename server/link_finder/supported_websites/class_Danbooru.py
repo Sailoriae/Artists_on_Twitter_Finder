@@ -46,8 +46,8 @@ class Danbooru :
         # à l'API pour une illustration.
         # On met en cache car la demande de l'URL de l'image et la demande des
         # URLs des comptes Twitter sont souvent ensembles.
-        self.cache_illust_url = None
-        self.cache_illust_url_json = None
+        self._cache_illust_url = None
+        self._cache_illust_url_json = None
     
     """
     Permet d'extraire l'ID de l'URL d'une illustration postée sur Danbooru.
@@ -72,7 +72,7 @@ class Danbooru :
             False sinon.
     """
     def _cache_or_get ( self, illust_url : int ) -> bool :
-        if illust_url != self.cache_illust_url :
+        if illust_url != self._cache_illust_url :
             # Pour être certain de l'URL, on sort l'ID, pour reconstruire juste
             # après la même URL, avec juste ".json" au bout.
             illust_id = self._artwork_url_to_id( illust_url )
@@ -91,8 +91,8 @@ class Danbooru :
             except KeyError :
                 pass
             
-            self.cache_illust_url = illust_url
-            self.cache_illust_url_json = json
+            self._cache_illust_url = illust_url
+            self._cache_illust_url_json = json
         
         return True
     
@@ -111,8 +111,8 @@ class Danbooru :
             return None
         
         # On retourne le résultat voulu
-        return [ self.cache_illust_url_json["file_url"],
-                 self.cache_illust_url_json["large_file_url"] ]
+        return [ self._cache_illust_url_json["file_url"],
+                 self._cache_illust_url_json["large_file_url"] ]
     
     """
     Retourne les noms des comptes Twitter trouvés.
@@ -135,7 +135,7 @@ class Danbooru :
         
         # Il peut y avoir plusieurs artistes
         # Dans ce cas, on cherche les comptes Twitter de tous les artistes
-        artists_tags = self.cache_illust_url_json["tag_string_artist"].split(" ")
+        artists_tags = self._cache_illust_url_json["tag_string_artist"].split(" ")
         
         if artists_tags == [""] :
             return []
@@ -195,10 +195,10 @@ class Danbooru :
             return None
         
         # Exception pour Pixiv (Je ne sais pas pourquoi l'API Danbooru fait ça)
-        if "pixiv_id" in self.cache_illust_url_json :
-            source = "https://www.pixiv.net/en/artworks/" + str( self.cache_illust_url_json["pixiv_id"] )
+        if "pixiv_id" in self._cache_illust_url_json :
+            source = "https://www.pixiv.net/en/artworks/" + str( self._cache_illust_url_json["pixiv_id"] )
         else :
-            source = self.cache_illust_url_json["source"]
+            source = self._cache_illust_url_json["source"]
         
         # On retourne le résultat voulu
         if source == None :
@@ -220,7 +220,7 @@ class Danbooru :
             return None
         
         # On retourne le résultat voulu
-        return parser.isoparse( self.cache_illust_url_json["created_at"] )
+        return parser.isoparse( self._cache_illust_url_json["created_at"] )
 
 
 """

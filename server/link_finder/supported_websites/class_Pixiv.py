@@ -52,9 +52,9 @@ class Pixiv :
         # à l'API pour une illustration.
         # On met en cache car la demande de l'URL de l'image et la demande des
         # URLs des comptes Twitter sont souvent ensembles.
-        self.cache_illust_url = None
-        self.cache_illust_id = None
-        self.cache_illust_url_json = None
+        self._cache_illust_url = None
+        self._cache_illust_id = None
+        self._cache_illust_url_json = None
     
     """
     Permet d'extraire l'ID de l'URL d'une illustration postée sur Pixiv.
@@ -88,7 +88,7 @@ class Pixiv :
             False sinon.
     """
     def _cache_or_get ( self, illust_url : int ) -> bool :
-        if illust_url != self.cache_illust_url :
+        if illust_url != self._cache_illust_url :
             illust_id = self._artwork_url_to_id( illust_url )
             
             if illust_id == None :
@@ -103,9 +103,9 @@ class Pixiv :
             meta = soup.find( "meta", id="meta-preload-data" )
             json = json_loads( meta["content"] )
             
-            self.cache_illust_url = illust_url
-            self.cache_illust_id = illust_id
-            self.cache_illust_url_json = json
+            self._cache_illust_url = illust_url
+            self._cache_illust_id = illust_id
+            self._cache_illust_url_json = json
         
         return True
     
@@ -139,8 +139,8 @@ class Pixiv :
         # Cela serait impossible dans le cas d'un robot qui utilise notre
         # système !
         # Il faudrait donc revoir beaucoup de choses...
-        return [ self.cache_illust_url_json["illust"][str(self.cache_illust_id)]["urls"]["original"],
-                 self.cache_illust_url_json["illust"][str(self.cache_illust_id)]["urls"]["regular"] ]
+        return [ self._cache_illust_url_json["illust"][str(self._cache_illust_id)]["urls"]["original"],
+                 self._cache_illust_url_json["illust"][str(self._cache_illust_id)]["urls"]["regular"] ]
     
     """
     Retourne les noms des comptes Twitter trouvés.
@@ -166,7 +166,7 @@ class Pixiv :
             # On met en cache si ce n'est pas déjà fait
             if not self._cache_or_get( illust_url ) :
                 return None
-            user_id = self.cache_illust_url_json["illust"][str(self.cache_illust_id)]["userId"]
+            user_id = self._cache_illust_url_json["illust"][str(self._cache_illust_id)]["userId"]
         
         artist_pixiv_page = "https://www.pixiv.net/en/users/" + str(user_id)
         
@@ -248,4 +248,4 @@ class Pixiv :
             return None
         
         # On retourne le résultat voulu
-        return parser.isoparse( self.cache_illust_url_json["illust"][str(self.cache_illust_id)]["createDate"] )
+        return parser.isoparse( self._cache_illust_url_json["illust"][str(self._cache_illust_id)]["createDate"] )

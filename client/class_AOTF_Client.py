@@ -37,29 +37,29 @@ class AOTF_Client :
     """
     def __init__ ( self, 
                    base_api_address : str = "http://localhost:3301/" ) :
-        self.base_api_address = base_api_address
-        self.ready = True # Car on utilise get_request() pour gérer les 429
+        self._base_api_address = base_api_address
+        self._ready = True # Car on utilise get_request() pour gérer les 429
         
         # Test de contact avec le serveur
         try :
             response_json = self.get_request( "" )
         except JSONDecodeError :
             print( "Ce serveur ne renvoit pas de JSON." )
-            self.ready = False
+            self._ready = False
             raise Error_During_Server_Connection_Init( "Ce serveur ne renvoit pas de JSON." )
         except Exception :
             print( "Impossible de contacter le serveur !" )
-            self.ready = False
+            self._ready = False
             raise Error_During_Server_Connection_Init( "Impossible de contacter le serveur !" )
         
         try :
             if response_json[ "error" ] != "NO_URL_FIELD" :
                 print( "Ceci n'est pas un serveur \"Artists on Twitter Finder\"." )
-                self.ready = False
+                self._ready = False
                 raise Error_During_Server_Connection_Init( "Ceci n'est pas un serveur \"Artists on Twitter Finder\"." )
         except ( KeyError, TypeError ) :
             print( "Ceci n'est pas un serveur \"Artists on Twitter Finder\"." )
-            self.ready = False
+            self._ready = False
             raise Error_During_Server_Connection_Init( "Ceci n'est pas un serveur \"Artists on Twitter Finder\"." )
         
         print( "Connexion à \"Artists on Twitter Finder\" réussie !" )
@@ -75,11 +75,11 @@ class AOTF_Client :
             Ou None si il y a un problème de connexion.
     """
     def get_request ( self, illust_url : str ) -> dict :
-        if not self.ready :
+        if not self._ready :
             print( "La connexion au serveur n'a pas été initialisée correctement." )
             raise Server_Connection_Not_Initialised
         while True :
-            response = requests.get( self.base_api_address + "query?url=" + illust_url )
+            response = requests.get( self._base_api_address + "query?url=" + illust_url )
             if response.status_code == 429 :
                 sleep(1)
             else :

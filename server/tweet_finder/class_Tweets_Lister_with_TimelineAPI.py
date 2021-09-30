@@ -34,13 +34,13 @@ de timeline de Twitter, via la librairie Tweepy.
 class Tweets_Lister_with_TimelineAPI :
     def __init__( self, api_key, api_secret, oauth_token, oauth_token_secret,
                         DEBUG : bool = False, ENABLE_METRICS : bool = False ) :
-        self.DEBUG = DEBUG
-        self.ENABLE_METRICS = ENABLE_METRICS
-        self.bdd = SQLite_or_MySQL()
-        self.twitter = TweepyAbstraction( api_key,
-                                          api_secret,
-                                          oauth_token,
-                                          oauth_token_secret )
+        self._DEBUG = DEBUG
+        self._ENABLE_METRICS = ENABLE_METRICS
+        self._bdd = SQLite_or_MySQL()
+        self._twitter = TweepyAbstraction( api_key,
+                                           api_secret,
+                                           oauth_token,
+                                           oauth_token_secret )
     
     """
     Lister les Tweets du compte Twitter @account_name.
@@ -86,26 +86,26 @@ class Tweets_Lister_with_TimelineAPI :
     def list_TimelineAPI_tweets ( self, account_name, queue, account_id = None,
                                   add_step_B_time = None, request_uri = None ) :
         if account_id == None :
-            account_id = self.twitter.get_account_id( account_name ) # TOUJOURS AVEC CETTE API
+            account_id = self._twitter.get_account_id( account_name ) # TOUJOURS AVEC CETTE API
         if account_id == None :
             print( f"[List_TimelineAPI] Compte @{account_name} introuvable !" )
             raise Unfound_Account_on_Lister_with_TimelineAPI
         
-        if self.twitter.blocks_me( account_id ) :
+        if self._twitter.blocks_me( account_id ) :
             print( f"[List_TimelineAPI] Le compte @{account_name} nous bloque, impossible de le scanner !" )
             raise Blocked_by_User_with_TimelineAPI
         
-        if self.DEBUG :
+        if self._DEBUG :
             print( f"[List_TimelineAPI] Listage des Tweets de @{account_name}." )
-        if self.DEBUG or self.ENABLE_METRICS :
+        if self._DEBUG or self._ENABLE_METRICS :
             start = time()
         
-        since_tweet_id = self.bdd.get_account_TimelineAPI_last_tweet_id( account_id )
+        since_tweet_id = self._bdd.get_account_TimelineAPI_last_tweet_id( account_id )
         last_tweet_id = None
         count = 0
         
         # Lister tous les Tweets depuis celui enregistré dans la base
-        for tweet in self.twitter.get_account_tweets( account_id, since_tweet_id ) :
+        for tweet in self._twitter.get_account_tweets( account_id, since_tweet_id ) :
             # Le premier tweet est forcément le plus récent
             if last_tweet_id == None :
                 last_tweet_id = tweet.id
@@ -117,7 +117,7 @@ class Tweets_Lister_with_TimelineAPI :
                     queue.put( tweet_dict )
             count += 1
         
-        if self.DEBUG or self.ENABLE_METRICS :
+        if self._DEBUG or self._ENABLE_METRICS :
             print( f"[List_TimelineAPI] Il a fallu {time() - start} secondes pour lister {count} Tweets de @{account_name}." )
             if add_step_B_time != None :
                 if count > 0 :
@@ -130,7 +130,7 @@ class Tweets_Lister_with_TimelineAPI :
         # La BDD peut retourner None si elle ne connait pas le compte (Donc aucun
         # Tweet n'est enregistré pour ce compte), c'est pas grave.
         if last_tweet_id == None :
-            queue.put( {"save_TimelineAPI_cursor" : self.bdd.get_account_TimelineAPI_last_tweet_id( account_id ),
+            queue.put( {"save_TimelineAPI_cursor" : self._bdd.get_account_TimelineAPI_last_tweet_id( account_id ),
                         "account_id" : account_id,
                         "account_name" : account_name, # Pour faire des print()
                         "request_uri" : request_uri} )

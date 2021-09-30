@@ -35,14 +35,14 @@ de recherche de Twitter, via la librairie SNScrape.
 class Tweets_Lister_with_SearchAPI :
     def __init__( self, api_key, api_secret, oauth_token, oauth_token_secret, auth_token,
                         DEBUG : bool = False, ENABLE_METRICS : bool = False ) :
-        self.DEBUG = DEBUG
-        self.ENABLE_METRICS = ENABLE_METRICS
-        self.bdd = SQLite_or_MySQL()
-        self.snscrape = SNScrapeAbstraction( auth_token )
-        self.twitter = TweepyAbstraction( api_key,
-                                          api_secret,
-                                          oauth_token,
-                                          oauth_token_secret )
+        self._DEBUG = DEBUG
+        self._ENABLE_METRICS = ENABLE_METRICS
+        self._bdd = SQLite_or_MySQL()
+        self._snscrape = SNScrapeAbstraction( auth_token )
+        self._twitter = TweepyAbstraction( api_key,
+                                           api_secret,
+                                           oauth_token,
+                                           oauth_token_secret )
     
     """
     Lister les Tweets du compte Twitter @account_name.
@@ -84,21 +84,21 @@ class Tweets_Lister_with_SearchAPI :
     def list_searchAPI_tweets ( self, account_name, queue, account_id = None,
                                 add_step_A_time = None, request_uri = None ) :
         if account_id == None :
-            account_id = self.twitter.get_account_id( account_name ) # TOUJOURS AVEC CETTE API
+            account_id = self._twitter.get_account_id( account_name ) # TOUJOURS AVEC CETTE API
         if account_id == None :
             print( f"[List_SearchAPI] Compte @{account_name} introuvable !" )
             raise Unfound_Account_on_Lister_with_SearchAPI
         
-        if self.twitter.blocks_me( account_id ) :
+        if self._twitter.blocks_me( account_id ) :
             print( f"[List_SearchAPI] Le compte @{account_name} nous bloque, impossible de le scanner !" )
             raise Blocked_by_User_with_SearchAPI
         
-        if self.DEBUG :
+        if self._DEBUG :
             print( f"[List_SearchAPI] Listage des Tweets de @{account_name}." )
-        if self.DEBUG or self.ENABLE_METRICS :
+        if self._DEBUG or self._ENABLE_METRICS :
             start = time()
         
-        since_date = self.bdd.get_account_SearchAPI_last_tweet_date( account_id )
+        since_date = self._bdd.get_account_SearchAPI_last_tweet_date( account_id )
         
         
         # Fonction de converstion vers la fonction queue.put()
@@ -119,10 +119,10 @@ class Tweets_Lister_with_SearchAPI :
             query += " since:" + since_date
         
         # Lancer la recherche
-        first_tweet_date, count = self.snscrape.search( query, output_function )
+        first_tweet_date, count = self._snscrape.search( query, output_function )
         
         
-        if self.DEBUG or self.ENABLE_METRICS :
+        if self._DEBUG or self._ENABLE_METRICS :
             print( f"[List_SearchAPI] Il a fallu {time() - start} secondes pour lister {count} Tweets de @{account_name}." )
             if add_step_A_time != None :
                 if count > 0 :
@@ -140,7 +140,7 @@ class Tweets_Lister_with_SearchAPI :
                         "account_name" : account_name, # Pour faire des print()
                         "request_uri" : request_uri} )
         else :
-            queue.put( {"save_SearchAPI_cursor" : self.bdd.get_account_SearchAPI_last_tweet_date( account_id ),
+            queue.put( {"save_SearchAPI_cursor" : self._bdd.get_account_SearchAPI_last_tweet_date( account_id ),
                         "account_id" : account_id,
                         "account_name" : account_name, # Pour faire des print()
                         "request_uri" : request_uri} )

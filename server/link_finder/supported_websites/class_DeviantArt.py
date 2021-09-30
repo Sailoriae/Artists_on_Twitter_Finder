@@ -49,9 +49,9 @@ class DeviantArt :
         # à l'API pour une illustration.
         # On met en cache car la demande de l'URL de l'image et la demande des
         # URLs des comptes Twitter sont souvent ensembles.
-        self.cache_illust_url = None
-        self.cache_illust_url_json = None
-        self.cache_illust_url_html = None
+        self._cache_illust_url = None
+        self._cache_illust_url_json = None
+        self._cache_illust_url_html = None
     
     
     """
@@ -65,7 +65,7 @@ class DeviantArt :
             False sinon.
     """
     def _cache_or_get ( self, illust_url : str ) -> bool :
-        if illust_url != self.cache_illust_url :
+        if illust_url != self._cache_illust_url :
             
             response = get_with_rate_limits( "https://backend.deviantart.com/oembed?url=" + illust_url,
                                              retry_on_those_http_errors = [ 403 ] )
@@ -76,13 +76,13 @@ class DeviantArt :
             if json["type"] != "photo" :
                 return False
             
-            self.cache_illust_url = illust_url
-            self.cache_illust_url_json = json
+            self._cache_illust_url = illust_url
+            self._cache_illust_url_json = json
             
             response = get_with_rate_limits( illust_url,
                                              retry_on_those_http_errors = [ 403 ] )
             
-            self.cache_illust_url_html = response
+            self._cache_illust_url_html = response
         
         return True
     
@@ -103,7 +103,7 @@ class DeviantArt :
         
         # On va faire de l'analyse HTML avec BeautifulSoup, pour trouver l'URL
         # de l'image en bonne qualité
-        soup = BeautifulSoup( self.cache_illust_url_html.text, "html.parser" )
+        soup = BeautifulSoup( self._cache_illust_url_html.text, "html.parser" )
         
         # Coup de bol, la page HTML demande au navigateur de preload l'image
         # dans sa qualité maximale
@@ -116,11 +116,11 @@ class DeviantArt :
         # cookie, comme on le faisait avec GetOldTweets3 et comme on le fait
         # avec SNScrape
         if objet == None :
-            return [ self.cache_illust_url_json["url"] ]
+            return [ self._cache_illust_url_json["url"] ]
         
         # On retourne le résultat voulu
         return [ objet.get("href"),
-                 self.cache_illust_url_json["url"] ]
+                 self._cache_illust_url_json["url"] ]
     
     """
     Retourne les noms des comptes Twitter trouvés.
@@ -156,7 +156,7 @@ class DeviantArt :
             # On réessaye sur les erreurs 403 données par Cloudfront si on fait
             # trop de requêtes.
             scanner1 = Webpage_to_Twitter_Accounts( illust_url,
-                                                    response = self.cache_illust_url_html,
+                                                    response = self._cache_illust_url_html,
                                                     retry_on_those_http_errors = [ 403 ] )
             
             # PB : Si un petit malin met son compte Twitter en commentaire, il sera
@@ -177,7 +177,7 @@ class DeviantArt :
             
             
             # SCAN PAGE "ABOUT" DE L'ARTISTE
-            artist_about_page = self.cache_illust_url_json["author_url"] + "/about"
+            artist_about_page = self._cache_illust_url_json["author_url"] + "/about"
             
             # Si on a le multiplexeur de liens, il vaut mieux passer par lui
             # pour scanner la page "about" de l'artiste, plutôt que de le faire
@@ -224,7 +224,7 @@ class DeviantArt :
             return None
         
         # On retourne le résultat voulu
-        return parser.isoparse( self.cache_illust_url_json["pubdate"] )
+        return parser.isoparse( self._cache_illust_url_json["pubdate"] )
 
 
 """
