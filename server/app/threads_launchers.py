@@ -73,18 +73,18 @@ def launch_identical_threads_in_container( thread_procedure, number_of_threads, 
     # On crée un conteneur uniquement si ses enfants sont des threads
     if param.ENABLE_MULTIPROCESSING and not as_process :
         process = multiprocessing.Process( name = f"{thread_procedure.__name__}_th_container",
-                                           target = threads_container_for_identical_threads,
+                                           target = _threads_container_for_identical_threads,
                                            args = ( thread_procedure, number_of_threads, as_process, shared_memory_uri ) )
         process.start()
         return [ process ]
     else :
-        return threads_container_for_identical_threads( thread_procedure,
+        return _threads_container_for_identical_threads( thread_procedure,
                                                         number_of_threads,
                                                         as_process,
                                                         shared_memory_uri,
                                                         is_a_process = False )
 
-def threads_container_for_identical_threads( thread_procedure, number_of_threads, as_process, shared_memory_uri, is_a_process = False ) :
+def _threads_container_for_identical_threads( thread_procedure, number_of_threads, as_process, shared_memory_uri, is_a_process = False ) :
     threads_or_process = []
     for i in range( number_of_threads ) :
         threads_or_process.append(
@@ -118,17 +118,17 @@ def launch_unique_threads_in_container( thread_procedures, as_process, container
     # On crée un conteneur uniquement si ses enfants sont des threads
     if param.ENABLE_MULTIPROCESSING and not as_process :
         process = multiprocessing.Process( name = f"{container_name}_th_container",
-                                           target = threads_container_for_unique_threads,
+                                           target = _threads_container_for_unique_threads,
                                            args = ( thread_procedures, as_process, shared_memory_uri ) )
         process.start()
         return [ process ]
     else :
-        return threads_container_for_unique_threads( thread_procedures,
+        return _threads_container_for_unique_threads( thread_procedures,
                                                      as_process,
                                                      shared_memory_uri,
                                                      is_a_process = False )
 
-def threads_container_for_unique_threads( thread_procedures, as_process, shared_memory_uri, is_a_process = True ) :
+def _threads_container_for_unique_threads( thread_procedures, as_process, shared_memory_uri, is_a_process = True ) :
     threads_or_process = []
     for procedure in thread_procedures :
         threads_or_process.append(

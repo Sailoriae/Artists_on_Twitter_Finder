@@ -62,7 +62,7 @@ class Pixiv :
     @return L'ID de l'illustration postée sur Pixiv.
             Ou None si ce n'est pas un artwork Pixiv.
     """
-    def artwork_url_to_id ( self, artwork_url : str ) -> int :
+    def _artwork_url_to_id ( self, artwork_url : str ) -> int :
         result_new = re.match( pixiv_artwork_id_regex_new, artwork_url )
         result_old = re.match( pixiv_artwork_id_regex_old, artwork_url )
         if result_new != None :
@@ -87,9 +87,9 @@ class Pixiv :
     @return True si l'URL donné est utilisable.
             False sinon.
     """
-    def cache_or_get ( self, illust_url : int ) -> bool :
+    def _cache_or_get ( self, illust_url : int ) -> bool :
         if illust_url != self.cache_illust_url :
-            illust_id = self.artwork_url_to_id( illust_url )
+            illust_id = self._artwork_url_to_id( illust_url )
             
             if illust_id == None :
                 return False
@@ -120,7 +120,7 @@ class Pixiv :
     """
     def get_image_urls ( self, illust_url : int ) -> List[str] :
         # On met en cache si ce n'est pas déjà fait
-        if not self.cache_or_get( illust_url ) :
+        if not self._cache_or_get( illust_url ) :
             return None
         
         # On retourne le résultat voulu
@@ -164,7 +164,7 @@ class Pixiv :
         
         else :
             # On met en cache si ce n'est pas déjà fait
-            if not self.cache_or_get( illust_url ) :
+            if not self._cache_or_get( illust_url ) :
                 return None
             user_id = self.cache_illust_url_json["illust"][str(self.cache_illust_id)]["userId"]
         
@@ -244,7 +244,7 @@ class Pixiv :
     """
     def get_datetime ( self, illust_url  : str ) -> str :
         # On met en cache si ce n'est pas déjà fait
-        if not self.cache_or_get( illust_url ) :
+        if not self._cache_or_get( illust_url ) :
             return None
         
         # On retourne le résultat voulu

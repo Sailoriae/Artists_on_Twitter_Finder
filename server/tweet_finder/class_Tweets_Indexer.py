@@ -86,7 +86,7 @@ class Tweets_Indexer :
     Si l'erreur n'est pas connue comme insovable, "get_tweet_image()" fait un
     "raise" avec cette erreur.
     """
-    def get_image_hash ( self, image_url : str, tweet_id, CAN_RETRY = [False] ) -> int :
+    def _get_image_hash ( self, image_url : str, tweet_id, CAN_RETRY = [False] ) -> int :
         retry_count = 0
         while True : # Solution très bourrin pour gèrer les rate limits
             try :
@@ -150,7 +150,7 @@ class Tweets_Indexer :
     @param last_tweet_date Date à enregistrer.
     @param account_id L'ID du compte Twitter.
     """
-    def save_last_tweet_date ( self, account_id, last_tweet_date ) :
+    def _save_last_tweet_date ( self, account_id, last_tweet_date ) :
         self.bdd.set_account_SearchAPI_last_tweet_date( account_id, last_tweet_date )
     
     """
@@ -161,7 +161,7 @@ class Tweets_Indexer :
     @param last_tweet_id ID de Tweet à enregistrer.
     @param account_id L'ID du compte Twitter.
     """
-    def save_last_tweet_id ( self, account_id, last_tweet_id ) :
+    def _save_last_tweet_id ( self, account_id, last_tweet_id ) :
         self.bdd.set_account_TimelineAPI_last_tweet_id( account_id, last_tweet_id )
     
     """
@@ -217,7 +217,7 @@ class Tweets_Indexer :
             
             # Traiter les instructions d'enregistrement de curseurs
             if "save_SearchAPI_cursor" in tweet :
-                self.save_last_tweet_date( tweet["account_id"], tweet["save_SearchAPI_cursor"] )
+                self._save_last_tweet_date( tweet["account_id"], tweet["save_SearchAPI_cursor"] )
                 if "request_uri" in tweet :
                     request = open_proxy( tweet["request_uri"] )
                     request.finished_SearchAPI_indexing = True
@@ -227,7 +227,7 @@ class Tweets_Indexer :
                 print( f"[Tweets_Indexer] Fin de l'indexation des Tweets de @{tweet['account_name']} trouvés avec l'API de recherche." )
                 continue
             if "save_TimelineAPI_cursor" in tweet :
-                self.save_last_tweet_id( tweet["account_id"], tweet["save_TimelineAPI_cursor"] )
+                self._save_last_tweet_id( tweet["account_id"], tweet["save_TimelineAPI_cursor"] )
                 if "request_uri" in tweet :
                     request = open_proxy( tweet["request_uri"] )
                     request.finished_TimelineAPI_indexing = True
@@ -290,19 +290,19 @@ class Tweets_Indexer :
             # Traitement des images du Tweet
             if length > 0 :
                 image_1_url = tweet["images"][0]
-                image_1_hash = self.get_image_hash( image_1_url, tweet["tweet_id"], CAN_RETRY = will_need_retry )
+                image_1_hash = self._get_image_hash( image_1_url, tweet["tweet_id"], CAN_RETRY = will_need_retry )
                 image_1_name = image_1_url.replace( "https://pbs.twimg.com/media/", "" )
             if length > 1 :
                 image_2_url = tweet["images"][1]
-                image_2_hash = self.get_image_hash( image_2_url, tweet["tweet_id"], CAN_RETRY = will_need_retry )
+                image_2_hash = self._get_image_hash( image_2_url, tweet["tweet_id"], CAN_RETRY = will_need_retry )
                 image_2_name = image_2_url.replace( "https://pbs.twimg.com/media/", "" )
             if length > 2 :
                 image_3_url = tweet["images"][2]
-                image_3_hash = self.get_image_hash( image_3_url, tweet["tweet_id"], CAN_RETRY = will_need_retry )
+                image_3_hash = self._get_image_hash( image_3_url, tweet["tweet_id"], CAN_RETRY = will_need_retry )
                 image_3_name = image_3_url.replace( "https://pbs.twimg.com/media/", "" )
             if length > 3 :
                 image_4_url = tweet["images"][3]
-                image_4_hash = self.get_image_hash( image_4_url, tweet["tweet_id"], CAN_RETRY = will_need_retry )
+                image_4_hash = self._get_image_hash( image_4_url, tweet["tweet_id"], CAN_RETRY = will_need_retry )
                 image_4_name = image_4_url.replace( "https://pbs.twimg.com/media/", "" )
             
             if self.DEBUG or self.ENABLE_METRICS :

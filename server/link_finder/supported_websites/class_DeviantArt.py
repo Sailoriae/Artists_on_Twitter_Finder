@@ -64,7 +64,7 @@ class DeviantArt :
     @return True si l'URL donnée est utilisable.
             False sinon.
     """
-    def cache_or_get ( self, illust_url : str ) -> bool :
+    def _cache_or_get ( self, illust_url : str ) -> bool :
         if illust_url != self.cache_illust_url :
             
             response = get_with_rate_limits( "https://backend.deviantart.com/oembed?url=" + illust_url,
@@ -98,7 +98,7 @@ class DeviantArt :
     """
     def get_image_urls ( self, illust_url  : str ) -> List[str] :
         # On met en cache si ce n'est pas déjà fait
-        if not self.cache_or_get( illust_url ) :
+        if not self._cache_or_get( illust_url ) :
             return None
         
         # On va faire de l'analyse HTML avec BeautifulSoup, pour trouver l'URL
@@ -144,7 +144,7 @@ class DeviantArt :
         
         if force_deviantart_account_name == None :
             # On met en cache si ce n'est pas déjà fait
-            if not self.cache_or_get( illust_url ) :
+            if not self._cache_or_get( illust_url ) :
                 return None
             
             
@@ -220,7 +220,7 @@ class DeviantArt :
     """
     def get_datetime ( self, illust_url  : str ) -> str :
         # On met en cache si ce n'est pas déjà fait
-        if not self.cache_or_get( illust_url ) :
+        if not self._cache_or_get( illust_url ) :
             return None
         
         # On retourne le résultat voulu

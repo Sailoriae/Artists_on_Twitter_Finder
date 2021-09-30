@@ -55,7 +55,7 @@ class Danbooru :
     @return L'ID de l'illustration postée sur Danbooru.
             Ou None si ce n'est pas un post sur Danbooru.
     """
-    def artwork_url_to_id ( self, artwork_url : str ) :
+    def _artwork_url_to_id ( self, artwork_url : str ) :
         result = re.match( danbooru_post_id_regex, artwork_url )
         if result != None :
             return result.group( 1 )
@@ -71,11 +71,11 @@ class Danbooru :
     @return True si l'URL donné est utilisable.
             False sinon.
     """
-    def cache_or_get ( self, illust_url : int ) -> bool :
+    def _cache_or_get ( self, illust_url : int ) -> bool :
         if illust_url != self.cache_illust_url :
             # Pour être certain de l'URL, on sort l'ID, pour reconstruire juste
             # après la même URL, avec juste ".json" au bout.
-            illust_id = self.artwork_url_to_id( illust_url )
+            illust_id = self._artwork_url_to_id( illust_url )
             if illust_id == None :
                 return False
             
@@ -107,7 +107,7 @@ class Danbooru :
     """
     def get_image_urls ( self, illust_url : int ) -> List[str] :
         # On met en cache si ce n'est pas déjà fait
-        if not self.cache_or_get( illust_url ) :
+        if not self._cache_or_get( illust_url ) :
             return None
         
         # On retourne le résultat voulu
@@ -130,7 +130,7 @@ class Danbooru :
     def get_twitter_accounts ( self, illust_url : int,
                                      multiplexer = None ) -> List[str] :
         # On met en cache si ce n'est pas déjà fait
-        if not self.cache_or_get( illust_url ) :
+        if not self._cache_or_get( illust_url ) :
             return None
         
         # Il peut y avoir plusieurs artistes
@@ -177,7 +177,7 @@ class Danbooru :
     """
     def get_datetime ( self, illust_url  : str ) -> str :
         # On met en cache si ce n'est pas déjà fait
-        if not self.cache_or_get( illust_url ) :
+        if not self._cache_or_get( illust_url ) :
             return None
         
         # On retourne le résultat voulu

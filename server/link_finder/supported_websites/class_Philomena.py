@@ -79,7 +79,7 @@ class Philomena :
     @return L'ID de l'illustration postée sur ce Booru.
             Ou None si ce n'est pas un post sur ce Booru.
     """
-    def artwork_url_to_id ( self, artwork_url : str ) :
+    def _artwork_url_to_id ( self, artwork_url : str ) :
         if self.site_ID == 1 :
             result = re.match( derpibooru_post_id_regex, artwork_url )
         elif self.site_ID == 2 :
@@ -99,11 +99,11 @@ class Philomena :
     @return True si l'URL donné est utilisable.
             False sinon.
     """
-    def cache_or_get ( self, illust_url : int ) -> bool :
+    def _cache_or_get ( self, illust_url : int ) -> bool :
         if illust_url != self.cache_illust_url :
             # Pour être certain de l'URL, on sort l'ID, pour reconstruire juste
             # après la même URL.
-            illust_id = self.artwork_url_to_id( illust_url )
+            illust_id = self._artwork_url_to_id( illust_url )
             if illust_id == None :
                 return False
             
@@ -143,7 +143,7 @@ class Philomena :
     """
     def get_image_urls ( self, illust_url : int ) -> List[str] :
         # On met en cache si ce n'est pas déjà fait
-        if not self.cache_or_get( illust_url ) :
+        if not self._cache_or_get( illust_url ) :
             return None
         
         # On retourne le résultat voulu
@@ -174,7 +174,7 @@ class Philomena :
                                      loopback_source = None,
                                      already_loopback = True ) -> List[str] :
         # On met en cache si ce n'est pas déjà fait
-        if not self.cache_or_get( illust_url ) :
+        if not self._cache_or_get( illust_url ) :
             return None
         
         # Gérer les images de redirection
@@ -248,7 +248,7 @@ class Philomena :
     """
     def get_source ( self, illust_url : int ) -> str :
         # On met en cache si ce n'est pas déjà fait
-        if not self.cache_or_get( illust_url ) :
+        if not self._cache_or_get( illust_url ) :
             return None
         
         # On retourne le résultat voulu
@@ -268,7 +268,7 @@ class Philomena :
     """
     def get_datetime ( self, illust_url  : str ) -> str :
         # On met en cache si ce n'est pas déjà fait
-        if not self.cache_or_get( illust_url ) :
+        if not self._cache_or_get( illust_url ) :
             return None
         
         # On retourne le résultat voulu

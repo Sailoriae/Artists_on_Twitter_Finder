@@ -82,11 +82,11 @@ class Webpage_to_Twitter_Accounts :
     def scan ( self, validator_function = validate_twitter_account_url ) -> List[str] :
         # Scan avec BeautifulSoup4
         if self.USE_BS4  :
-            accounts_found = self.scan_beautifulsoup( validator_function )
+            accounts_found = self._scan_beautifulsoup( validator_function )
         
         # Scan avec Regex
         else :
-            accounts_found = self.scan_regex( validator_function )
+            accounts_found = self._scan_regex( validator_function )
         
         # Filtrer (Supprimer les doublons et les comptes officiels) et retourner
         return accounts_found
@@ -94,7 +94,7 @@ class Webpage_to_Twitter_Accounts :
     """
     Méthode privée, appelée par la méthode "scan()".
     """
-    def scan_beautifulsoup ( self, validator_function ) -> List[str] :
+    def _scan_beautifulsoup ( self, validator_function ) -> List[str] :
         # Initialiser la liste que l'on va retourner
         accounts_found : List[str] = []
         
@@ -114,7 +114,7 @@ class Webpage_to_Twitter_Accounts :
     """
     Méthode privée, appelée par la méthode "scan()".
     """
-    def scan_regex ( self, validator_function ) -> List[str] :
+    def _scan_regex ( self, validator_function ) -> List[str] :
         # Initialiser la liste que l'on va retourner
         accounts_found : List[str] = []
         
