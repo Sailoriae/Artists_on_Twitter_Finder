@@ -10,9 +10,7 @@ function displaySupportedWebites() {
 	request.addEventListener( "readystatechange", function() {
 		if ( this.readyState === 4 ) {
 			if ( request.status === 200 ) {
-				if ( request.responseText === "" ) {
-					return;
-				} else {
+				if ( request.responseText != "" ) {
 					var json = JSON.parse( request.responseText );
 					console.log( json );
 					supportedWebitesP.textContent = lang[ "SUPPORTED_WEBSITES" ];

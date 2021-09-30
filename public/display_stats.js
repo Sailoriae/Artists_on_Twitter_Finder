@@ -9,10 +9,7 @@ function displayStats() {
 	request.addEventListener( "readystatechange", async function() {
 		if ( this.readyState === 4 ) {
 			if ( request.status === 200 ) {
-				if ( request.responseText === "" ) {
-					statsP.textContent = lang[ "CANNOT_DISPLAY_STATS" ];
-					return;
-				} else {
+				if ( request.responseText != "" ) {
 					var json = JSON.parse( request.responseText );
 					console.log( json );
 					statsP.innerHTML = parse( lang[ "STATS_1" ], numberWithSpaces( json["indexed_tweets_count"] ), numberWithSpaces( json["indexed_accounts_count"] ) );
@@ -54,10 +51,20 @@ function displayStats() {
 			} else {
 				statsP.textContent = lang[ "CANNOT_DISPLAY_STATS" ];
 				statsP.innerHTML += "<br/>" + lang[ "SERVER_IS_DOWN" ];
+				retryLoopOnServerDown();
 			}
 		}
 	});
 
 	request.open("GET", "./api/stats"); // self.send_header("Access-Control-Allow-Origin", "*")
 	request.send();
+}
+
+async function retryLoopOnServerDown ( waitTime = 60 ) {
+	saveStatsP = statsP.innerHTML;
+	for ( var i = waitTime; i > 0; i-- ) {
+		statsP.innerHTML = saveStatsP + "<br/>" + parse( lang[ "NEXT_TRY_IN" ], i );
+		await new Promise(r => setTimeout(r, 1000));
+	}
+	displayStats();
 }

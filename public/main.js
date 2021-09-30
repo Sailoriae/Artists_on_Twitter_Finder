@@ -21,10 +21,7 @@ function mainFunction ( new_loop = true ) {
 	request.addEventListener( "readystatechange", async function() {
 		if ( this.readyState === 4 ) {
 			if ( request.status === 200 ) {
-				if ( request.responseText === "" ) {
-					errorP.textContent = lang["CANNOT_CONTACT_SERVER"];
-					document.getElementById("loader").style.display = "none";
-				} else {
+				if ( request.responseText != "" ) {
 					var json = JSON.parse( request.responseText );
 					console.log( json );
 					displayError( json );
@@ -39,10 +36,10 @@ function mainFunction ( new_loop = true ) {
 				mainFunction( new_loop = false );
 			} else if ( request.status === 414 ) {
 				errorP.textContent = lang["REQUEST_URI_TOO_LONG"];
-				unlockUI()
+				unlockUI();
 			} else {
 				errorP.textContent = lang["CANNOT_CONTACT_SERVER"];
-				document.getElementById("loader").style.display = "none";
+				unlockUI();
 			}
 		}
 	});
