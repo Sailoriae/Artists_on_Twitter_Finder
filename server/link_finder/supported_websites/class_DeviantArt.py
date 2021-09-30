@@ -171,15 +171,23 @@ class DeviantArt :
             # Envoyer dans le multiplexer les autres URL qu'on peut trouver
             if multiplexer != None :
                 for link in scanner1.scan( validator_function = validate_url ) :
-                    get_multiplex = multiplexer( link, source = "deviantart" )
+                    get_multiplex = multiplexer( link )
                     if get_multiplex != None :
                         twitter_accounts += get_multiplex
-        
-        
-            # SCAN PAGE "ABOUT" DE L'ARTISTE
             
-            scanner2 = Webpage_to_Twitter_Accounts(
-                self.cache_illust_url_json["author_url"] + "/about" )
+            
+            # SCAN PAGE "ABOUT" DE L'ARTISTE
+            artist_about_page = self.cache_illust_url_json["author_url"] + "/about"
+            
+            # Si on a le multiplexeur de liens, il vaut mieux passer par lui
+            # pour scanner la page "about" de l'artiste, plutôt que de le faire
+            # nous-même. Cela permet qu'il enregistre dans son dictionnaire
+            # qu'il est bien passé par cette page, et donc empêche d'y
+            # passer deux fois.
+            if multiplexer != None :
+                twitter_accounts += multiplexer( artist_about_page )
+            
+            scanner2 = Webpage_to_Twitter_Accounts( artist_about_page )
         
         else :
             scanner2 = Webpage_to_Twitter_Accounts(
@@ -195,7 +203,7 @@ class DeviantArt :
         # Envoyer dans le multiplexer les autres URL qu'on peut trouver
         if multiplexer != None :
             for link in scanner2.scan( validator_function = validate_url ) :
-                get_multiplex = multiplexer( link, source = "deviantart" )
+                get_multiplex = multiplexer( link )
                 if get_multiplex != None :
                     twitter_accounts += get_multiplex
         

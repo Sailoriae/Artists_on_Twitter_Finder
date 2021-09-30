@@ -168,8 +168,18 @@ class Pixiv :
                 return None
             user_id = self.cache_illust_url_json["illust"][str(self.cache_illust_id)]["userId"]
         
+        artist_pixiv_page = "https://www.pixiv.net/en/users/" + str(user_id)
+        
+        # Si on a le multiplexeur de liens (Et qu'on n'est pas appelé par lui),
+        # il vaut mieux passer par lui pour scanner la page de l'artiste,
+        # plutôt que de le faire nous-même. Cela  permet qu'il enregistre dans
+        # son dictionnaire qu'il est bien passé par cette page, et donc empêche
+        # d'y passer deux fois.
+        if force_pixiv_account_id == None and multiplexer != None :
+            return multiplexer( artist_pixiv_page )
+        
         twitter_accounts = []
-        response = get_with_rate_limits( "https://www.pixiv.net/en/users/" + str(user_id) )
+        response = get_with_rate_limits( artist_pixiv_page )
         
         # Les comptes suspendus retournent HTTP 403
         if response.status_code in [403, 404] :
@@ -187,7 +197,7 @@ class Pixiv :
         else :
             if temp != None :
                 if multiplexer != None :
-                    get_multiplex = multiplexer( temp, source = "pixiv" )
+                    get_multiplex = multiplexer( temp )
                     if get_multiplex != None :
                         twitter_accounts += get_multiplex
                 else :

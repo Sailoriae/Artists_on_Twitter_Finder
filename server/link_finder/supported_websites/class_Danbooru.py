@@ -161,7 +161,7 @@ class Danbooru :
             # Envoyer dans le multiplexer les autres URL qu'on peut trouver
             if multiplexer != None :
                 for link in scanner.scan( validator_function = validate_url ) :
-                    get_multiplex = multiplexer( link, source = "danbooru" )
+                    get_multiplex = multiplexer( link )
                     if get_multiplex != None :
                         twitter_accounts += get_multiplex
         

@@ -74,6 +74,9 @@ class Link_Finder :
         self.danbooru = Danbooru()
         self.derpibooru = Philomena( site_ID = 1 )
         self.furbooru = Philomena( site_ID = 2 )
+        
+        # Dictionnaire permettant au multiplexeur de ne pas reboucler
+        self.multiplexer_dict = {}
     
     """
     @param illust_url L'URL d'une illustration postée sur l'un des sites
@@ -103,6 +106,9 @@ class Link_Finder :
         # Ce sont les clases qui analysent les URL et vont dire si elles
         # mènent bien vers des illustrations.
         # Ici, on vérifie juste le domaine.
+        
+        # Vider le dictionnaire du multiplexeur de liens
+        self._multiplexer_dict.clear()
         
         # Remplacer les "&amp;" par des "&"
         illust_url = illust_url.replace( "&amp;", "&" )
@@ -191,52 +197,79 @@ class Link_Finder :
     
     
     """
+    Multiplexeur de liens.
     Rechercher des comptes Twitter dans des formats de pages webs connus.
     Par exemple, un profil DeviantArt, un profil Pixiv, ou un profil Linktree.
     Si l'URL est reconnue comme celle d'un compte Twitter, le compt sera
     retourné.
     
     @param url URL de la page web à analyser.
-    @param source Nom du site source. Voir le code ci-dessous.
-                  Pour éviter de reboucler
     
     @return Liste de comptes Twitter.
-            Ou None si la page web est inconnue.
+            Ou None la n'est pas utilisable (Site non supporté, URL ne menant
+            pas à une illustration ou un compte sur un des sites supportés).
     """
-    def link_mutiplexer ( self, url, source = "" ) :
-        # Attention : Ne pas donner cette méthode en tant que "multiplexer" aux
-        # méthodes "get_twitter_accounts()", sinon on risque de créer des
-        # boucles infinies !
-        
+    def _link_mutiplexer ( self, url ) :
         # TWITTER
         twitter = validate_twitter_account_url( url ) # Ne retourne pas de liste
         if twitter != None :
-            return [ twitter ]
+            return [ twitter ] # La fonction "filter_twitter_accounts_list()" est appelée à la fin du Link Finder
         
         # DEVIANTART
-        if source != "deviantart" :
-            deviantart = validate_deviantart_account_url( url )
-            if deviantart != None :
-                return self.deviantart.get_twitter_accounts( "", force_deviantart_account_name = deviantart )
+        deviantart = validate_deviantart_account_url( url )
+        if deviantart != None :
+            if not self._already_visited( "deviantart", deviantart ) :
+                return self.deviantart.get_twitter_accounts( "", force_deviantart_account_name = deviantart,
+                                                             multiplexer = self.link_mutiplexer )
+            return []
         
         # PIXIV
-        if source != "pixiv" :
-            pixiv = validate_pixiv_account_url( url )
-            if pixiv != None :
-                return self.pixiv.get_twitter_accounts( "", force_pixiv_account_id = pixiv )
+        pixiv = validate_pixiv_account_url( url )
+        if pixiv != None :
+            if not self._already_visited( "pixiv", pixiv ) :
+                return self.pixiv.get_twitter_accounts( "", force_pixiv_account_id = pixiv,
+                                                            multiplexer = self.link_mutiplexer )
+            return []
         
         # LINKTREE
         linktree = validate_linktree_account_url( url )
         if linktree != None :
-            scanner = Webpage_to_Twitter_Accounts( "https://linktr.ee/" + linktree )
-            return scanner.scan()
+            if not self._already_visited( "linktree", linktree ) :
+                scanner = Webpage_to_Twitter_Accounts( "https://linktr.ee/" + linktree )
+                twitter_accounts = []
+                for link in scanner.scan( validator_function = validate_url ) :
+                    get_multiplex = self._link_mutiplexer( link )
+                    if get_multiplex != None :
+                        twitter_accounts += get_multiplex
+                return twitter_accounts
+            return []
         
         # PATREON
         patreon = validate_patreon_account_url( url )
         if patreon != None :
-            scanner = Webpage_to_Twitter_Accounts( "https://www.patreon.com/" + patreon )
-            scanner.soup = scanner.soup.find("div", {"id": "renderPageContentWrapper"})
-            return scanner.scan()
+            if not self._already_visited( "patreon", patreon ) :
+                scanner = Webpage_to_Twitter_Accounts( "https://www.patreon.com/" + patreon )
+                scanner.soup = scanner.soup.find("div", {"id": "renderPageContentWrapper"})
+                twitter_accounts = []
+                for link in scanner.scan( validator_function = validate_url ) :
+                    get_multiplex = self._link_mutiplexer( link )
+                    if get_multiplex != None :
+                        twitter_accounts += get_multiplex
+                return twitter_accounts
+            return []
         
         # PAGE NON SUPPORTEE
         return None
+    
+    """
+    Utiliser le dictionnaire du multiplexeur de liens pour empêcher de visiter
+    deux fois la même page.
+    """
+    def _already_visited ( self, website, page ) :
+        if website in self.multiplexer_dict :
+            if page in self.multiplexer_dict[website] :
+                return True
+            self.multiplexer_dict[website].append( page )
+            return False
+        self.multiplexer_dict[website] = [page]
+        return False
