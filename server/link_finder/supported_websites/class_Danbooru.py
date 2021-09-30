@@ -165,7 +165,46 @@ class Danbooru :
                     if get_multiplex != None :
                         twitter_accounts += get_multiplex
         
+        # Comme les Boorus sont des sites de reposts, on peut trouver la source
+        # de l'illustration. Si c'est sur un site que l'on supporte, le
+        # multiplexeur de liens peut aller y faire un tour !
+        if multiplexer != None :
+            source = self._get_source( illust_url )
+            if source != None and source != "" :
+                get_multiplex = multiplexer( source )
+                if get_multiplex != None :
+                    twitter_accounts += get_multiplex
+        
         return twitter_accounts
+    
+    """
+    Comme les Boorus sont des sites de reposts, on peut trouver la source de
+    l'illustration. Si c'est sur un site que l'on supporte, le multiplexeur de
+    liens peut y aller y faire un tour !
+    
+    @param illust_id L'URL de l'illustration postée sur Booru utilisant
+                     Danbooru.
+    @return L'URL de la source.
+            Ou une chaine vide si il n'y a pas de source.
+            Ou None si il y a eu un problème, c'est à dire que l'ID donné n'est
+            pas une illustration sur Danbooru.
+    """
+    def _get_source ( self, illust_url : int ) -> str :
+        # On met en cache si ce n'est pas déjà fait
+        if not self._cache_or_get( illust_url ) :
+            return None
+        
+        # Exception pour Pixiv (Je ne sais pas pourquoi l'API Danbooru fait ça)
+        if "pixiv_id" in self.cache_illust_url_json :
+            source = "https://www.pixiv.net/en/artworks/" + str( self.cache_illust_url_json["pixiv_id"] )
+        else :
+            source = self.cache_illust_url_json["source"]
+        
+        # On retourne le résultat voulu
+        if source == None :
+            return ""
+        else :
+            return source
     
     """
     Obtenir la date de publication de l'illustration.
