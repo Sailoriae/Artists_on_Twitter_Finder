@@ -60,9 +60,6 @@ leurs API.
 Ainsi, afin d'optimiser l'utilisation de cette classe, il faut :
 - Initialiser un objet qu'une seule fois pour un thread, et le réutiliser.
 - Ne surtout pas partager l'objet entre plusieurs threads.
-- Et exécuter les deux méthodes get_image_url() et get_twitter_accounts() l'une
-  après l'autre pour une même illustration (C'est à dire ne pas mélanger les
-  illustrations).
 
 Note importante : Si la source d'une image est un Tweet, ne jamais être tenté
 de prendre le compte qui l'a posté pour le compte Twitter de l'artiste !
