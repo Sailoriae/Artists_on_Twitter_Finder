@@ -197,12 +197,16 @@ class Link_Finder :
     retourné.
     
     @param url URL de la page web à analyser.
+    @param from_booru_source Activer la reconnaissance d'URL d'une illustration
+                             comme le ferait la méthode "get_data()". Réservé
+                             au champs "source" des site de republications, par
+                             exemple les boorus.
     
     @return Liste de comptes Twitter.
             Ou None la n'est pas utilisable (Site non supporté, URL ne menant
             pas à une illustration ou un compte sur un des sites supportés).
     """
-    def _link_mutiplexer ( self, url ) :
+    def _link_mutiplexer ( self, url, from_booru_source = False ) :
         if self._DEBUG :
             print( f"[Link_Finder] Multiplexeur : {url}" )
         
@@ -226,7 +230,7 @@ class Link_Finder :
         
         # ILLUSTRATION SUR DEVIANTART
         # Permet aux boorus d'envoyer leur champs "source"
-        if re.match( deviantart_url, url ) != None :
+        if from_booru_source and re.match( deviantart_url, url ) != None :
             if not self._already_visited( "deviantart", url ) :
                 return self._deviantart.get_twitter_accounts( url, 
                                                               multiplexer = self._link_mutiplexer )
@@ -246,7 +250,7 @@ class Link_Finder :
         
         # ILLUSTRATION SUR PIXIV
         # Permet aux boorus d'envoyer leur champs "source"
-        if re.match( pixiv_url, url ) != None :
+        if from_booru_source and re.match( pixiv_url, url ) != None :
             if not self._already_visited( "pixiv", url ) :
                 return self._deviantart.get_twitter_accounts( url, 
                                                               multiplexer = self._link_mutiplexer )

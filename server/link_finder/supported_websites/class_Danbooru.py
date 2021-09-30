@@ -115,6 +115,7 @@ class Danbooru :
     
     """
     Retourne les noms des comptes Twitter trouvés.
+    Cette fonction ne peut pas être appelée depuis le multiplexeur de liens !
     
     @param illust_id L'URL de l'illustration postée sur Danbooru.
     @param multiplexer Méthode "link_mutiplexer()" de la classe "Link_Finder"
@@ -170,7 +171,7 @@ class Danbooru :
         if multiplexer != None :
             source = self._get_source( illust_url )
             if source != None and source != "" :
-                get_multiplex = multiplexer( source )
+                get_multiplex = multiplexer( source, from_booru_source = True )
                 if get_multiplex != None :
                     twitter_accounts += get_multiplex
         
