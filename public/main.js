@@ -37,7 +37,7 @@ function mainFunction ( new_loop = true ) {
 			} else if ( request.status === 414 ) {
 				errorP.textContent = lang["REQUEST_URI_TOO_LONG"];
 				unlockUI();
-			} else {
+			} else if ( request.status === 503 ) {
 				errorP.textContent = lang["CANNOT_CONTACT_SERVER"];
 				unlockUI();
 			}

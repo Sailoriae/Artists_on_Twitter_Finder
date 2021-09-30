@@ -48,10 +48,12 @@ function displayStats() {
 			} else if ( request.status === 429 ) {
 				await new Promise(r => setTimeout(r, 1000));
 				displayStats();
-			} else {
+			} else if ( request.status === 503 ) {
 				statsP.textContent = lang[ "CANNOT_DISPLAY_STATS" ];
 				statsP.innerHTML += "<br/>" + lang[ "SERVER_IS_DOWN" ];
 				retryLoopOnServerDown();
+			} else {
+				statsP.textContent = lang[ "WRONG_WEBSERVER_CONFIG" ];
 			}
 		}
 	});

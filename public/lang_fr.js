@@ -1,5 +1,6 @@
 var lang = {
 	"CANNOT_CONTACT_SERVER" : "Impossible de contacter le serveur.",
+	"WRONG_WEBSERVER_CONFIG" : "Le serveur web est mal configuré et ne peut pas contacter l'API d'AOTF.",
 
 	"NO_URL_FIELD" : "Aucune URL entrée.",
 	"NOT_AN_URL" : "Ceci n'est pas une URL.",
