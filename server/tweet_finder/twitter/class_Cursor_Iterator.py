@@ -3,7 +3,7 @@
 
 import tweepy
 import time
-from random import randrange
+from random import uniform
 
 
 """
@@ -27,4 +27,4 @@ class Cursor_Iterator :
                             raise error
                     print( "[Tweepy Cursor_It] Limite atteinte, on réessaye dans environ 60 secondes..." )
                     print( error )
-                    time.sleep( randrange( 50, 70 ) )
+                    time.sleep( uniform( 50, 70 ) )
