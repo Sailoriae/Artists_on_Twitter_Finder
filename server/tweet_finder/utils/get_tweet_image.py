@@ -4,6 +4,7 @@
 import urllib
 import http
 from time import sleep
+from random import uniform
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
 # Ainsi, si on veut utiliser ce script indépendemment (Notemment pour des
@@ -74,14 +75,14 @@ def get_tweet_image ( image_url : str ) -> bytes :
             else :
                 if error.code == 502 : # Il suffit d'attendre pour ce genre d'erreurs
                     if retry_count < 3 : # Essayer d'attendre, au maximum 3 coups
-                        print( "[get_tweet_image] On essaye d'attendre 10 secondes..." )
-                        sleep( 10 )
+                        print( "[get_tweet_image] On essaye d'attendre environ 10 secondes..." )
+                        sleep( uniform(8,12) )
                         retry_count += 1
                         continue
                 
                 elif retry_count < 1 : # Essayer un coup d'attendre
-                    print( "[get_tweet_image] On essaye d'attendre 10 secondes..." )
-                    sleep( 10 )
+                    print( "[get_tweet_image] On essaye d'attendre environ 10 secondes..." )
+                    sleep( uniform(8,12) )
                     retry_count += 1
                     continue
                 
@@ -93,8 +94,8 @@ def get_tweet_image ( image_url : str ) -> bytes :
             print( error )
             
             if retry_count < 1 : # Essayer un coup d'attendre
-                print( "[get_tweet_image] On essaye d'attendre 10 secondes..." )
-                sleep( 10 )
+                print( "[get_tweet_image] On essaye d'attendre environ 10 secondes..." )
+                sleep( uniform(8,12) )
                 retry_count += 1
                 continue
             
