@@ -31,17 +31,18 @@ from link_finder.class_Link_Finder import Link_Finder
 Le Link Finder étant très fragile, car les API peuvent changer, voici un
 script pour le tester !
 """
-engine = Link_Finder()
+# Modifier ici pour afficher les infos de débug
+engine = Link_Finder( DEBUG = False )
 
 def test ( url : str,
            should_get_image_url : str,
            should_get_twitter_accounts : List[str],
            should_get_datetime : str,
            image_url_contains_mode : bool = False ) :
-    data = engine.get_data( url )
-    
     print( "" )
     print( f"Test : {url}" )
+    
+    data = engine.get_data( url )
     
     if data == None :
         print( "Le site est supporté, mais l'URL ne mène pas à une illustration.")

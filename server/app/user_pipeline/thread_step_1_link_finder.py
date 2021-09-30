@@ -32,7 +32,7 @@ les valide en cherchant leur ID.
 """
 def thread_step_1_link_finder( thread_id : int, shared_memory ) :
     # Initialisation de notre moteur de recherche des comptes Twitter
-    finder_engine = Link_Finder()
+    finder_engine = Link_Finder( DEBUG = param.DEBUG )
     
     # Initialisation de notre couche d'abstraction à l'API Twitter
     twitter = TweepyAbstraction( param.API_KEY,

@@ -65,7 +65,9 @@ Note importante : Si la source d'une image est un Tweet, ne jamais être tenté
 de prendre le compte qui l'a posté pour le compte Twitter de l'artiste !
 """
 class Link_Finder :
-    def __init__ ( self ) :
+    def __init__ ( self, DEBUG = False ) :
+        self.DEBUG = DEBUG
+        
         self.deviantart = DeviantArt()
         self.pixiv = Pixiv()
         self.danbooru = Danbooru()
@@ -202,6 +204,9 @@ class Link_Finder :
             pas à une illustration ou un compte sur un des sites supportés).
     """
     def _link_mutiplexer ( self, url ) :
+        if self.DEBUG :
+            print( f"[Link_Finder] Multiplexeur : {url}" )
+        
         # TWITTER
         twitter = validate_twitter_account_url( url ) # Ne retourne pas de liste
         if twitter != None :
