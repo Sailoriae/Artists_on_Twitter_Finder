@@ -7,7 +7,7 @@ Elle contient deux fonctions :
 
 * `get_data( self, illust_url  : str ) -> Link_Finder_Result` :
   Prend en entrée une URL, vérifie qu'elle mène bien à un site supporté, et appel les méthodes de la classe du site supporté détecté pour remplir l'objet `Link_Finder_Result` avec les trois informations suivantes :
-  - `image_url` : URL menant à l'image source de l'illustration,
+  - `image_urls` : Liste d'URL menant à l'image source de l'illustration (Classés de la version la plus grande à la plus petite, permet d'éviter des `PIL.Image.DecompressionBombError` durant la recherche par image),
   - `twitter_accounts` : Liste de comptes Twitter de l'artiste trouvés (Peut être vide),
   - `publish_date` : Objet `datetime` indiquant la date de publication de cette illustration.
 
@@ -35,7 +35,7 @@ La classe `Link_Finder`, permet de savoir quel site supporté utiliser, et donc 
 Voici les différents appels réalisés pour maximiser les chances de trouver le ou les comptes Twitter de l'artiste :
 
 1. Méthode `get_data( URL )` : Détecte le site supporté, et appel les trois fonction du site supporté correspondant :
-   * `get_image_url( URL )` pour obtenir l'URL du fichier image,
+   * `get_image_urls( URL )` pour obtenir l'URL du fichier image,
    * `get_twitter_accounts( URL, link_mutiplexer )` pour obtenir les comptes Twitter de l'artiste, en lui passant la méthode `link_mutiplexer()`,
    * `get_datetime( URl )` pour obtenir la date de publication de l'illustration.
 2. Méthode `get_twitter_accounts()` : Trouve des liens pouvant être des comptes de l'artiste sur d'autres sites (Par exemple un compte DeviantArt, Pixiv, ou Twitter). Elle passe alors ces liens à la méthode `link_mutiplexer()` qui lui a été donnée.

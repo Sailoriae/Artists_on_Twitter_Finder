@@ -38,7 +38,7 @@ class User_Request :
         
         # Résultat du Link Finder (Etape 1)
         # Image source de l'illustration
-        self._image_url = None
+        self._image_urls = None
         
         # Résultat du Link Finder (Etape 1)
         # Liste de tuples (str, int), avec le nom du compte Twitter, et son ID
@@ -105,9 +105,9 @@ class User_Request :
     def problem( self, value ) : self._problem = value
     
     @property
-    def image_url( self ) : return self._image_url
-    @image_url.setter
-    def image_url( self, value ) : self._image_url = value
+    def image_urls( self ) : return self._image_urls
+    @image_urls.setter
+    def image_urls( self, value ) : self._image_urls = value
     
     @property
     def twitter_accounts_with_id( self ) : return self._twitter_accounts_with_id

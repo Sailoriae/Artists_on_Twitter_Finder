@@ -4,8 +4,8 @@ Ce module contient une classe par site supporté. Ces classes permettent de cher
 
 Chaque classe doit contenir les deux fonctions suivantes :
 
-* `get_image_url( self, illust_url  : str ) -> str` :
-  Prend en entrée l'URL de l'illustration postée sur le site, et retourne l'URL de l'image source, ou `None` si l'URL passée en entrée est invalide.
+* `get_image_urls( self, illust_url  : str ) -> List[str]` :
+  Prend en entrée l'URL de l'illustration postée sur le site, et retourne une liste d'URL de l'image source (La première doit être celle avec la meilleure résolution et qualité, les suivantes doivent être plus légères), ou `None` si l'URL passée en entrée est invalide.
   **Doit retourner les images en qualité maximale !** Déjà que Twitter compresse, on ne va pas écarter encore plus les images avec d'autres compression.
 
 * `get_twitter_accounts( self, illust_url ) -> List[str]` :

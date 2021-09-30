@@ -9,6 +9,7 @@ var lang = {
 	"NO_VALID_TWITTER_ACCOUNT_FOUND" : "No valid Twitter account found for this artist.",
 	"BLOCKED_BY_TWITTER_ACCOUNT" : "One of the Twitter accounts to be indexed blocks all scan accounts on the server. It is therefore impossible to index this account.",
 	"ERROR_DURING_REVERSE_SEARCH" : "The illustration entered has a uncommon format and is not processed. The server can only process non-animated images.",
+	"QUERY_IMAGE_TOO_BIG" : "The query illustration is too large to process.",
 	"PROCESSING_ERROR" : "Error on the server side, unable to finish processing the request.",
 	"YOUR_IP_HAS_MAX_PROCESSING_REQUESTS" : "Your IP address has reached its maximum quota of requests being processed.",
 	"REQUEST_URI_TOO_LONG" : "The URL entered is too long.",

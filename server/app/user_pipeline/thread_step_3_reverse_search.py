@@ -4,7 +4,7 @@
 import queue
 from time import sleep, time
 import urllib
-from math import sqrt
+from PIL.Image import UnidentifiedImageError, DecompressionBombError
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
 # Ainsi, si on veut utiliser ce script indépendemment (Notemment pour des
@@ -22,6 +22,7 @@ if __name__ == "__main__" :
 import parameters as param
 from tweet_finder.class_Reverse_Searcher import Reverse_Searcher
 from tweet_finder.utils.url_to_content import url_to_content
+from tweet_finder.utils.url_to_PIL_image import binary_image_to_PIL_image
 
 
 """
@@ -65,58 +66,70 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
         if request.input_url != None :
             print( f"[step_3_th{thread_id}] Recherche de l'image suivante : {request.input_url}" )
         else :
-            print( f"[step_3_th{thread_id}] Recherche de l'image suivante : {request.image_url}" )
+            print( f"[step_3_th{thread_id}] Recherche de l'image suivante : {request.image_urls[0]}" )
         
-        # Obtenir l'image et la stocker dans la mémoire partagée
-        # Permet ensuite d'être réutilisée par l'étape 4
-        try :
-            # ATTENTION : Bien utiliser url_to_content(), car elle contient
-            # une bidouille pour GET les image sur Pixiv
-            query_image_as_bytes = url_to_content( request.image_url )
-        except urllib.error.HTTPError as error : # On réessaye qu'une seule fois
-            print( error )
-            if error.code == 502 : # Et uniquement sur certaines erreurs
-                sleep(10)
-                query_image_as_bytes = url_to_content( request.image_url )
-            else :
-                request.release_proxy()
-                raise error
-        
-        # On recherche les Tweets contenant l'image de requête
-        # Et on les stocke dans l'objet de requête
-        for twitter_account in request.twitter_accounts_with_id :
-            print( f"[step_3_th{thread_id}] Recherche sur le compte Twitter @{twitter_account[0]}." )
+        # Obtenir l'image et la charger en PIL.Image
+        request_image_pil = None
+        image_id = 0
+        while True : # Pour tenter toutes les résolution d'images trouvées par le Link Finder
+            try :
+                # ATTENTION : Bien utiliser url_to_content(), car elle contient
+                # une bidouille pour GET les image sur Pixiv
+                query_image_as_bytes = url_to_content( request.image_urls[image_id] )
+            except urllib.error.HTTPError as error : # On réessaye qu'une seule fois
+                print( error )
+                if error.code == 502 : # Et uniquement sur certaines erreurs
+                    sleep(10)
+                    query_image_as_bytes = url_to_content( request.image_urls[image_id] )
+                else :
+                    request.release_proxy()
+                    raise error # Doit tomber dans le collecteur d'erreurs
             
-            result = cbir_engine.search_tweet( request.image_url,
-                                               account_name = twitter_account[0],
-                                               account_id = twitter_account[1],
-                                               add_step_3_times = shared_memory_execution_metrics.add_step_3_times,
-                                               query_image_binary = query_image_as_bytes )
-            if result != None :
-                request.found_tweets += result
-            else :
+            try :
+                request_image_pil = binary_image_to_PIL_image( query_image_as_bytes )
+            except UnidentifiedImageError as error :
                 print( f"[step_3_th{thread_id}] L'image d'entrée est intraitable." )
+                print( error )
                 request.problem = "ERROR_DURING_REVERSE_SEARCH"
-        
-        # Si il n'y a pas de compte Twitter dans la requête
-        if request.twitter_accounts_with_id == []:
-            print( f"[step_3_th{thread_id}] Recherche dans toute la base de données." )
+            except DecompressionBombError as error :
+                print( f"[step_3_th{thread_id}] L'image d'entrée est trop grande." )
+                print( error )
+                if len(request.image_urls) > image_id :
+                    image_id += 1 # Reboucler au "while True"
+                    continue
+                request.problem = "QUERY_IMAGE_TOO_BIG"
             
-            result = cbir_engine.search_tweet( request.image_url, add_step_3_times = shared_memory_execution_metrics.add_step_3_times )
-            if result != None :
-                request.found_tweets += result
-            else :
-                print( f"[step_3_th{thread_id}] Erreur lors de la recherche inversée d'image." )
+            break
         
-        # Trier la liste des résultats
-        request.found_tweets = sorted( request.found_tweets,
-                                       key = lambda x: x.distance,
-                                       reverse = False )
-        
-        # On ne garde que les 5 Tweets les plus proches
-#        request.found_tweets = request.found_tweets[:5]
-        
-        print( f"[step_3_th{thread_id}] Tweets trouvés (Du plus au moins proche) : {[ data.tweet_id for data in request.found_tweets ]}" )
+        # Si on a réussi à obtenir l'image
+        # Sinon, on va juste terminer la requête
+        if request_image_pil != None :
+            # On recherche les Tweets contenant l'image de requête
+            # Et on les stocke dans l'objet de requête
+            for twitter_account in request.twitter_accounts_with_id :
+                print( f"[step_3_th{thread_id}] Recherche sur le compte Twitter @{twitter_account[0]}." )
+                
+                result = cbir_engine.search_tweet( request_image_pil,
+                                                   account_name = twitter_account[0],
+                                                   account_id = twitter_account[1],
+                                                   add_step_3_times = shared_memory_execution_metrics.add_step_3_times )
+                if result != None :
+                    request.found_tweets += result
+            
+            # Si il n'y a pas de compte Twitter dans la requête
+            if request.twitter_accounts_with_id == []:
+                print( f"[step_3_th{thread_id}] Recherche dans toute la base de données." )
+                
+                result = cbir_engine.search_tweet( request_image_pil, add_step_3_times = shared_memory_execution_metrics.add_step_3_times )
+                if result != None :
+                    request.found_tweets += result
+            
+            # Trier la liste des résultats
+            request.found_tweets = sorted( request.found_tweets,
+                                           key = lambda x: x.distance,
+                                           reverse = False )
+            
+            print( f"[step_3_th{thread_id}] Tweets trouvés (Du plus au moins proche) : {[ data.tweet_id for data in request.found_tweets ]}" )
         
         # Enregistrer le temps complet pour traiter cette requête
         shared_memory_execution_metrics.add_user_request_full_time( time() - request.start )

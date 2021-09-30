@@ -36,7 +36,7 @@ Cette classe garde en cache le dernier appel à l'API.
 Ainsi, afin d'optimiser l'utilisation de cette classe, il faut :
 - Initialiser un objet qu'une seule fois pour un thread, et le réutiliser.
 - Ne surtout pas partager l'objet entre plusieurs threads.
-- Et exécuter les deux méthodes get_image_url() et get_twitter_accounts() l'une
+- Et exécuter les deux méthodes get_image_urls() et get_twitter_accounts() l'une
   après l'autre pour une même illustration (C'est à dire ne pas mélanger les
   illustrations).
 """
@@ -100,17 +100,19 @@ class Danbooru :
     Obtenir l'URL de l'image source à partir de l'URL de l'illustration postée.
     
     @param illust_id L'URL de l'illustration postée sur Danbooru.
-    @return L'URL de l'image.
+    @return Liste contenant deux URL de l'image (La première est la résolution
+            originale de l'image, la seconde est redimensionnée).
             Ou None si il y a eu un problème, c'est à dire que l'ID donné n'est
             pas une illustration sur Danbooru.
     """
-    def get_image_url ( self, illust_url : int ) -> str :
+    def get_image_urls ( self, illust_url : int ) -> List[str] :
         # On met en cache si ce n'est pas déjà fait
         if not self.cache_or_get( illust_url ) :
             return None
         
         # On retourne le résultat voulu
-        return self.cache_illust_url_json["file_url"]
+        return [ self.cache_illust_url_json["file_url"],
+                 self.cache_illust_url_json["large_file_url"] ]
     
     """
     Retourne les noms des comptes Twitter trouvés.

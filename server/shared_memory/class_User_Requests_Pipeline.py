@@ -189,7 +189,7 @@ class User_Requests_Pipeline :
         
         # Modifier cet objet si nécessaire
         request = open_proxy( request )
-        request.image_url = image_url
+        request.image_url = [ image_url ]
         if account_name != None and account_id != None :
             request.twitter_accounts_with_id += [ (account_name,account_id) ]
         

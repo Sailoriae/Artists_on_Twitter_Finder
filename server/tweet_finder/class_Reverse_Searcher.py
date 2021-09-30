@@ -2,7 +2,7 @@
 # coding: utf-8
 
 from time import time
-from PIL import UnidentifiedImageError
+from PIL import Image
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
 # Ainsi, si on veut utiliser ce script indépendemment (Notemment pour des
@@ -38,7 +38,7 @@ class Reverse_Searcher :
     
     """
     Rechercher un tweet dans la base de donnée grâce à une image
-    @param image_url L'URL de l'image à chercher
+    @param pil_image L'image de requête, au format PIL.Image
     @param account_name Le nom du compte Twitter dans lequel chercher, c'est à
                         dire ce qu'il y a après le @ (OPTIONNEL)
     @param account_id ID du compte, vérifié récemment ! (OPTIONNEL)
@@ -50,9 +50,9 @@ class Reverse_Searcher :
             - tweet_id : L'ID du Tweet contenant l'image
             - distance : La distance calculée avec l'image de requête
             - image_position : La position de l'image dans le Tweet (1-4)
-            None si il y a eu un problème
+            None si "account_name" est inexistant, ou désactivé, ou privé
     """
-    def search_tweet ( self, image_url : str,
+    def search_tweet ( self, pil_image : Image,
                              account_name : str = None,
                              account_id : int = None,
                              add_step_3_times = None,
@@ -66,23 +66,13 @@ class Reverse_Searcher :
         else :
             account_id = 0
         
-        try :
-            if query_image_binary == None :
-                image = url_to_PIL_image( image_url )
-            else :
-                image = binary_image_to_PIL_image( query_image_binary )
-        except UnidentifiedImageError as error :
-            print( f"L'URL \"{image_url}\" ne mène pas à une image !" )
-            print( error )
-            return None
-        
         if self.DEBUG or self.ENABLE_METRICS :
             start = time()
         
         iterator = self.bdd.get_images_in_db_iterator( account_id = account_id,
                                                        add_step_3_times = add_step_3_times )
         
-        to_return = self.cbir_engine.search_cbir( image, iterator )
+        to_return = self.cbir_engine.search_cbir( pil_image, iterator )
         
         if self.DEBUG or self.ENABLE_METRICS :
             print( f"[Reverse_Searcher] La recherche s'est faite en {time() - start} secondes." )

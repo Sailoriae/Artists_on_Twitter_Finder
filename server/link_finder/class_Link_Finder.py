@@ -82,7 +82,9 @@ class Link_Finder :
                         (OPTIONNEL).
     
     @return Un objet "Link_Finder_Result" contenant les attributs suivants :
-            - image_url : L'URL de l'image.
+            - image_urls : Liste des URLs de l'image.  Si il y en a une, c'est
+              l'image redimensionnée. Si il y en a deux, la première est la
+              résolution originale de l'image, la seconde est redimensionnée.
             - twitter_accounts : Une liste de comptes Twitter, ou une liste 
               vide si aucun URL de compte Twitter valide n'a été trouvé.
             - publish_date : L'objet datetime de la date de publication de
@@ -116,7 +118,7 @@ class Link_Finder :
             twitter_accounts = self.deviantart.get_twitter_accounts( illust_url, 
                                                                      multiplexer = self.link_mutiplexer )
             if not TWITTER_ONLY and twitter_accounts != [] and twitter_accounts != None :
-                image_url = self.deviantart.get_image_url( illust_url )
+                image_urls = self.deviantart.get_image_urls( illust_url )
                 publish_date = self.deviantart.get_datetime( illust_url )
         
         # ====================================================================
@@ -126,7 +128,7 @@ class Link_Finder :
             twitter_accounts = self.pixiv.get_twitter_accounts( illust_url,
                                                                 multiplexer = self.link_mutiplexer )
             if not TWITTER_ONLY and twitter_accounts != [] and twitter_accounts != None :
-                image_url = self.pixiv.get_image_url( illust_url )
+                image_urls = self.pixiv.get_image_urls( illust_url )
                 publish_date = self.pixiv.get_datetime( illust_url )
         
         # ====================================================================
@@ -136,7 +138,7 @@ class Link_Finder :
             twitter_accounts = self.danbooru.get_twitter_accounts( illust_url,
                                                                    multiplexer = self.link_mutiplexer )
             if not TWITTER_ONLY and twitter_accounts != [] and twitter_accounts != None :
-                image_url = self.danbooru.get_image_url( illust_url )
+                image_urls = self.danbooru.get_image_urls( illust_url )
                 publish_date = self.danbooru.get_datetime( illust_url )
         
         # ====================================================================
@@ -148,7 +150,7 @@ class Link_Finder :
                                                                      loopback_source = self.get_data,
                                                                      already_loopback = TWITTER_ONLY )
             if not TWITTER_ONLY and twitter_accounts != [] and twitter_accounts != None :
-                image_url = self.derpibooru.get_image_url( illust_url )
+                image_urls = self.derpibooru.get_image_urls( illust_url )
                 publish_date = self.derpibooru.get_datetime( illust_url )
         
         # ====================================================================
@@ -160,7 +162,7 @@ class Link_Finder :
                                                                    loopback_source = self.get_data,
                                                                    already_loopback = TWITTER_ONLY )
             if not TWITTER_ONLY and twitter_accounts != [] and twitter_accounts != None :
-                image_url = self.furbooru.get_image_url( illust_url )
+                image_urls = self.furbooru.get_image_urls( illust_url )
                 publish_date = self.furbooru.get_datetime( illust_url )
         
         # ====================================================================
@@ -178,12 +180,12 @@ class Link_Finder :
             return None
         
         if TWITTER_ONLY or twitter_accounts == [] :
-            image_url = None
+            image_urls = None
             publish_date = None
         
         # Le site est supporté et l'URL mène à une illustration
         # La liste des comptes Twitter trouvés peut alors être vide
-        return Link_Finder_Result( image_url,
+        return Link_Finder_Result( image_urls,
                                    filter_twitter_accounts_list( twitter_accounts ),
                                    publish_date )
     

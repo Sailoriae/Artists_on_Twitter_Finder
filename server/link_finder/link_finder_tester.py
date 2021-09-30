@@ -43,12 +43,12 @@ def test ( url : str,
     print( "" )
     print( f"Test : {url}" )
     
-    if data.image_url == None :
+    if data.image_urls == None :
         test = False
     elif image_url_contains_mode :
-        test = should_get_image_url in data.image_url
+        test = should_get_image_url in data.image_urls[0]
     else :
-        test = data.image_url == should_get_image_url
+        test = data.image_urls[0] == should_get_image_url
     if test :
         print( "Test images sources : OK !" )
         test_image_url = True
