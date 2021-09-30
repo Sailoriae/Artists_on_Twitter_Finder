@@ -114,22 +114,27 @@ class TweepyAbstraction :
             - Ou le compte est privé
     """
     def get_multiple_accounts_ids ( self, accounts_names, retry_once = True ) :
-        try :
-            to_return = []
-            for account in self.api.lookup_users( screen_names = accounts_names ) :
-                # Filtrer les comptes privés
-                if account._json["protected"] == False :
-                    to_return.append( ( account.screen_name, account.id ) )
-            return to_return
+        to_return = []
         
-        # Gérer le cas où aucun compte dans la liste n'est trouvable
-        except tweepy.TweepError as error :
-            if error.api_code == 17 : # No user matches for specified terms
-                return []
-            if retry_once and error.api_code == None :
-                time.sleep( 10 )
-                return self.get_multiple_accounts_ids( accounts_names, retry_once = False )
-            raise error
+        # Séparer la liste "accounts_names" en sous-listes de 100 éléments
+        for accounts_names_sublist in [accounts_names[i:i+100] for i in range(0,len(accounts_names),100)] :
+            try :
+                for account in self.api.lookup_users( screen_names = accounts_names_sublist ) :
+                    # Filtrer les comptes privés
+                    if account._json["protected"] == False :
+                        to_return.append( ( account.screen_name, account.id ) )
+            
+            # Gérer le cas où aucun compte dans la liste n'est trouvable
+            except tweepy.TweepError as error :
+                if error.api_code == 17 : # No user matches for specified terms
+                    continue
+                if retry_once and error.api_code == None :
+                    time.sleep( 10 )
+                    return self.get_multiple_accounts_ids( accounts_names, retry_once = False )
+                raise error
+        
+        return to_return
+
     
     """
     Obtenir les Tweets d'un utilisateur.
