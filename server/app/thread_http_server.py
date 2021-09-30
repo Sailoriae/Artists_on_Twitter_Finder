@@ -32,7 +32,7 @@ https://github.com/python/cpython/blob/3.9/Lib/socketserver.py
 def thread_http_server( thread_id : int, shared_memory ) :
     # Sécurité, vérifier que le thread est unique
     if thread_id != 1 :
-        raise RuntimeError( "Ce thread doit être unique, et doit pas conséquent avoir 1 comme identifiant (\"thread_id\") !" )
+        raise AssertionError( "Ce thread doit être unique, et doit pas conséquent avoir 1 comme identifiant (\"thread_id\") !" )
     
     # Obtenir la classe du serveur HTTP
     HTTP_Server = http_server_container( shared_memory.get_URI() )

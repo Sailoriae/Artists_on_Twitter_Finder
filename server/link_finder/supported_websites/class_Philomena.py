@@ -4,6 +4,11 @@
 from typing import List
 import re
 from dateutil import parser
+from time import sleep
+try:
+    from simplejson.errors import JSONDecodeError
+except ImportError:
+    from json.decoder import JSONDecodeError
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
 # Ainsi, si on veut utiliser ce script indépendemment (Notemment pour des
@@ -102,13 +107,24 @@ class Philomena :
             if illust_id == None :
                 return False
             
-            response = get_with_rate_limits( self.base_URL + "api/v1/json/images/" + illust_id )
-            
-            # Note : Erreur 500 si l'ID est trop long
-            if response.status_code == 404 or response.status_code == 500 :
-                return False
-            
-            json = response.json()
+            retry_once = True
+            while True :
+                response = get_with_rate_limits( self.base_URL + "api/v1/json/images/" + illust_id )
+                
+                # Note : Erreur 500 si l'ID est trop long
+                if response.status_code == 404 or response.status_code == 500 :
+                    return False
+                
+                try :
+                    json = response.json()
+                except JSONDecodeError as error:
+                    if retry_once :
+                        sleep(3)
+                        retry_once = False
+                        continue
+                    raise Exception( f"Philomena a renvoyé un JSON vide (Code HTTP {response.status_code})" ) from error
+                
+                break
             
             self.cache_illust_url = illust_url
             self.cache_illust_url_json = json

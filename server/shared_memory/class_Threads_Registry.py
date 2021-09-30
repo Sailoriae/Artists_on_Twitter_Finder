@@ -49,7 +49,7 @@ class Threads_Registry :
     """
     def register_thread ( self, thread_name : str, pid : int ) :
         if thread_name in self._pid_dict :
-            raise RuntimeError( f"Le thread \"{thread_name}\" a déjà été enregistré !" )
+            raise AssertionError( f"Le thread \"{thread_name}\" a déjà été enregistré !" )
         self._pid_dict[ thread_name ] = str(pid)
     
     """
@@ -59,7 +59,7 @@ class Threads_Registry :
     """
     def set_request ( self, thread_name, request ) :
         if not thread_name in self._pid_dict :
-            raise RuntimeError( f"Le thread \"{thread_name}\" n'a pas été enregistré !" )
+            raise AssertionError( f"Le thread \"{thread_name}\" n'a pas été enregistré !" )
         if request == None :
             self._requests_dict[ thread_name ] = None
         else :
@@ -72,7 +72,7 @@ class Threads_Registry :
     """
     def get_request ( self, thread_name ) :
         if not thread_name in self._pid_dict :
-            raise RuntimeError( f"Le thread \"{thread_name}\" n'a pas été enregistré !" )
+            raise AssertionError( f"Le thread \"{thread_name}\" n'a pas été enregistré !" )
         if not thread_name in self._requests_dict :
             return None
         if self._requests_dict[ thread_name ] == None :

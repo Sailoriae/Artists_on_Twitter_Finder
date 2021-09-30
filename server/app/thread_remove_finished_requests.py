@@ -28,7 +28,7 @@ et User_Requests_Pipeline.
 def thread_remove_finished_requests( thread_id : int, shared_memory ) :
     # Sécurité, vérifier que le thread est unique
     if thread_id != 1 :
-        raise RuntimeError( "Ce thread doit être unique, et doit pas conséquent avoir 1 comme identifiant (\"thread_id\") !" )
+        raise AssertionError( "Ce thread doit être unique, et doit pas conséquent avoir 1 comme identifiant (\"thread_id\") !" )
     
     # Maintenir ouverts certains proxies vers la mémoire partagée
     shared_memory_user_requests = shared_memory.user_requests

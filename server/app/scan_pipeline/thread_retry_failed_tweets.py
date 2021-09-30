@@ -36,7 +36,7 @@ Tweets_Indexer.get_image_hash()
 def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
     # Sécurité, vérifier que le thread est unique
     if thread_id != 1 :
-        raise RuntimeError( "Ce thread doit être unique, et doit pas conséquent avoir 1 comme identifiant (\"thread_id\") !" )
+        raise AssertionError( "Ce thread doit être unique, et doit pas conséquent avoir 1 comme identifiant (\"thread_id\") !" )
     
     # Initialisation de l'indexeur de Tweets
     tweets_indexer = Tweets_Indexer( DEBUG = param.DEBUG, ENABLE_METRICS = param.ENABLE_METRICS )
