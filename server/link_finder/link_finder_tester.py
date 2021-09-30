@@ -43,6 +43,10 @@ def test ( url : str,
     print( "" )
     print( f"Test : {url}" )
     
+    if data == None :
+        print( "Le site est supporté, mais l'URL ne mène pas à une illustration.")
+        return False
+    
     if data.image_urls == None :
         test = False
     elif image_url_contains_mode :
@@ -55,7 +59,7 @@ def test ( url : str,
     else :
         print( "Test images sources : ECHEC !" )
         print( f"On aurait dû avoir : {should_get_image_url}" )
-        print( f"On a eu : {data.image_url}" )
+        print( f"On a eu : {data.image_urls[0]}" )
         test_image_url = False
     
     if data.twitter_accounts == should_get_twitter_accounts :
@@ -91,10 +95,10 @@ test( "https://www.pixiv.net/en/artworks/82699500",
       datetime.fromisoformat( "2020-07-02 09:32:31+09:00" ) ) )
 
 check_list.append(
-test( "https://www.pixiv.net/en/artworks/82566405",
-      "https://i.pximg.net/img-original/img/2020/06/26/04/01/36/82566405_p0.jpg",
-      ["kazuko_art"],
-      datetime.fromisoformat( "2020-06-26 04:01:36+09:00" ) ) )
+test( "https://www.pixiv.net/en/artworks/92395381",
+      "https://i.pximg.net/img-original/img/2021/08/31/06/49/02/92395381_p0.png",
+      ["c6teu"],
+      datetime.fromisoformat( "2021-08-30 21:49:02+00:00" ) ) )
 
 check_list.append(
 # Attention, test de NSFW
@@ -142,14 +146,14 @@ print( "TEST DE DANBOORU :" )
 
 check_list.append(
 test( "https://danbooru.donmai.us/posts/4000914",
-      "https://danbooru.donmai.us/data/original/13/9d/139dcc6b176fb999008522b9b80a9aa8.jpg",
+      "https://cdn.donmai.us/original/13/9d/139dcc6b176fb999008522b9b80a9aa8.jpg",
       ['graviqc'],
       datetime.fromisoformat( "2020-07-15 04:14:30.199000-04:00" ) ) )
 
 # Attention, test de NSFW
 check_list.append(
 test( "https://danbooru.donmai.us/posts/3878029",
-      "https://danbooru.donmai.us/data/original/f3/16/f316f97186dab780a2a6e54b4acccd94.png",
+      "https://cdn.donmai.us/original/f3/16/f316f97186dab780a2a6e54b4acccd94.png",
       ['wokada156'],
       datetime.fromisoformat( "2020-04-24 06:54:45.053000-04:00" ) ) )
 
@@ -161,7 +165,7 @@ print( "TEST DE DERPIBOORU :" )
 # listé sur Derpibooru : https://www.derpibooru.org/tags/artist-colon-fidzfox
 check_list.append(
 test( "https://www.derpibooru.org/images/1851874",
-      "https://derpicdn.net/img/view/2018/10/9/1851874.jpeg",
+      "https://derpicdn.net/img/view/2018/10/9/1851874.jpg",
       ['fidzfox'],
       datetime.fromisoformat( "2018-10-09 01:30:23+00:00" ) ) )
 
