@@ -290,7 +290,7 @@ class User_Requests_Pipeline :
                         # supporté (Erreur de l'utilisateur), on garde la
                         # requête 10 minutes
                         if request.problem in [ "NOT_AN_URL",
-                                                "INVALID_URL",
+                                                "NOT_AN_ARTWORK_PAGE",
                                                 "UNSUPPORTED_WEBSITE"] :
                             if now - request.finished_date < datetime.timedelta( minutes = 10 ) :
                                 new_requests_dict[ key ] = request_uri

@@ -7,7 +7,7 @@ function canDisplayTwitterAccounts ( json ) {
 	}
 	if ( ( json.error === "NO_URL_FIELD" ) ||
 		 ( json.error === "NOT_AN_URL" ) ||
-		 ( json.error === "INVALID_URL" ) ||
+		 ( json.error === "NOT_AN_ARTWORK_PAGE" ) ||
 		 ( json.error === "UNSUPPORTED_WEBSITE" ) ||
 		 ( json.error === "NO_TWITTER_ACCOUNT_FOUND" ) ||
 		 ( json.error === "NO_VALID_TWITTER_ACCOUNT_FOUND" ) ||

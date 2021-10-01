@@ -100,7 +100,7 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
         # Si jamais l'URL de la requête est invalide, on ne va pas plus loin
         # avec elle (On passe donc son status à "Fin de traitement")
         if can_proceed and data == None :
-            request.problem = "INVALID_URL"
+            request.problem = "NOT_AN_ARTWORK_PAGE"
             print( f"[step_1_th{thread_id}] Le site est supporté, mais l'URL ne mène pas à une illustration." )
             can_proceed = False
         

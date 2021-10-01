@@ -5,7 +5,7 @@ var lang = {
 	"NO_URL_FIELD" : "No URL entered.",
 	"NOT_AN_URL" : "This is not an URL.",
 	"UNSUPPORTED_WEBSITE" : "Site of the entered URL is not supported, or the URL is invalid.",
-	"INVALID_URL" : "The site is supported, but the URL entered does not lead to an illustration.",
+	"NOT_AN_ARTWORK_PAGE" : "The site is supported, but the URL entered does not lead to an illustration.",
 	"NO_TWITTER_ACCOUNT_FOUND" : "No Twitter account found for this artist.",
 	"NO_VALID_TWITTER_ACCOUNT_FOUND" : "No valid Twitter account found for this artist.",
 	"BLOCKED_BY_TWITTER_ACCOUNT" : "One of the Twitter accounts to be indexed blocks all scan accounts on the server. It is therefore impossible to index this account.",

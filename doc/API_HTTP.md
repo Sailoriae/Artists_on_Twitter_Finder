@@ -54,7 +54,7 @@ Liste des erreurs possibles :
 - `NO_URL_FIELD` : Il n'y a pas de paramètre / argument `url` dans l'URL de requête.
 - `NOT_AN_URL` : L'entrée du paramètre / argument `url` n'est pas une URL.
 - `UNSUPPORTED_WEBSITE` : Le site passé en paramètre n'est pas supporté, ou l'URL est invalide.
-- `INVALID_URL` : Le site est supporté, mais l'URL entrée ne mène pas à une illustration.
+- `NOT_AN_ARTWORK_PAGE` : Le site est supporté, mais l'URL entrée ne mène pas à une illustration.
 - `NO_TWITTER_ACCOUNT_FOUND` : Aucun compte Twitter trouvé pour l'artiste de l'illustration.
 - `NO_VALID_TWITTER_ACCOUNT_FOUND` : Des comptes Twitter ont étés trouvés, mais ils sont invalides.
 - `BLOCKED_BY_TWITTER_ACCOUNT` : Un des comptes Twitter à indexer bloque tous les comptes de scan du serveur. Il est donc impossible d'indexer ce compte.
