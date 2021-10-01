@@ -2,6 +2,7 @@
 # coding: utf-8
 
 import re
+import inspect
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
 # Ainsi, si on veut utiliser ce script indépendemment (Notemment pour des
@@ -50,6 +51,21 @@ furbooru_url = re.compile(
 # deviantart.com.example.tld, ce qui pourrait être une faille de sécurité.
 
 
+# Profondeur maximale de recherche dans le multiplexeur de liens.
+MAX_DEPTH = 2
+# Le multiplexeur peut retourner un compte Twitter même si la profondeur est
+# dépassée.
+# Exemple : Illustration DeviantArt -> Multiplexeur -> Compte DeviantArt ->
+# Mutliplexeur -> Page Patreon -> Multiplexeur -> Compte Twitter
+# 
+# Le mutliplexeur autorise une profondeur de plus si on part d'une source sur
+# un site de republications (Un booru par exemple).
+# Exemple : Illustration Derpibooru -> Multiplexeur -> Illustration DeviantArt
+# -> Multiplexeur -> Compte DeviantArt -> Multiplexeur -> Page Linktree ->
+# Multiplexeur -> Compte Twitter
+
+
+
 """
 Moteur de recherche des comptes Twitter d'un artiste, à partir d'une
 illustration postée sur l'un des sites supportés.
@@ -75,6 +91,9 @@ class Link_Finder :
         
         # Dictionnaire permettant au multiplexeur de ne pas reboucler
         self._multiplexer_dict = {}
+        
+        # Profondeur maximal de recherche
+        self.current_max_depth = MAX_DEPTH
     
     """
     @param illust_url L'URL d'une illustration postée sur l'un des sites
@@ -105,6 +124,10 @@ class Link_Finder :
         
         # Vider le dictionnaire du multiplexeur de liens
         self._multiplexer_dict.clear()
+        
+        # Réintialiser la profondeur maximale de recherche, même le
+        # multiplexeur est censé le faire
+        self.current_max_depth = MAX_DEPTH
         
         # Remplacer les "&amp;" par des "&"
         illust_url = illust_url.replace( "&amp;", "&" )
@@ -201,10 +224,15 @@ class Link_Finder :
                              comme le ferait la méthode "get_data()". Réservé
                              au champs "source" des site de republications, par
                              exemple les boorus.
+                             Autorise une profondeur de recherche de plus si ce
+                             lien mène à une illustration sur un site supporté
+                             qui n'est pas un site de republications.
     
     @return Liste de comptes Twitter.
-            Ou None la n'est pas utilisable (Site non supporté, URL ne menant
-            pas à une illustration ou un compte sur un des sites supportés).
+            Ou None si la page n'est pas utilisable (Site non supporté, URL ne
+            menant pas à une illustration ou un compte sur un des sites
+            supportés). None peut aussi être renvoyé si on a atteint la
+            profondeur maximale de recherche
     """
     def _link_mutiplexer ( self, url, from_booru_source = False ) :
         if self._DEBUG :
@@ -215,6 +243,16 @@ class Link_Finder :
         if twitter != None :
             return [ twitter ] # La fonction "filter_twitter_accounts_list()" est appelée à la fin du Link Finder
         
+        
+        # Déterminer le nombre de fois dans la pile d'appels qu'on a été appelé
+        stack = inspect.stack()
+        me = stack[0][3]
+        call_count = 0
+        for call in stack :
+            if call[3] == me :
+                call_count += 1
+        if call_count > self.current_max_depth :
+            return None
         
         # ====================================================================
         # DEVIANTART
@@ -232,8 +270,11 @@ class Link_Finder :
         # Permet aux boorus d'envoyer leur champs "source"
         if from_booru_source and re.match( deviantart_url, url ) != None :
             if not self._already_visited( "deviantart", url ) :
-                return self._deviantart.get_twitter_accounts( url, 
-                                                              multiplexer = self._link_mutiplexer )
+                self.current_max_depth += 1 # Autoriser une profondeur de plus
+                to_return = self._deviantart.get_twitter_accounts( url,
+                                                                   multiplexer = self._link_mutiplexer )
+                self.current_max_depth -= 1
+                return to_return
         
         
         # ====================================================================
@@ -252,8 +293,11 @@ class Link_Finder :
         # Permet aux boorus d'envoyer leur champs "source"
         if from_booru_source and re.match( pixiv_url, url ) != None :
             if not self._already_visited( "pixiv", url ) :
-                return self._deviantart.get_twitter_accounts( url, 
-                                                              multiplexer = self._link_mutiplexer )
+                self.current_max_depth += 1 # Autoriser une profondeur de plus
+                to_return = self._deviantart.get_twitter_accounts( url,
+                                                                   multiplexer = self._link_mutiplexer )
+                self.current_max_depth -= 1
+                return to_return
         
         
         # ====================================================================
