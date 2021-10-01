@@ -216,6 +216,11 @@ class Tweets_Indexer :
                 if set_indexing_ids != None : #
                     set_indexing_ids( None, None )
             
+            # Si on a sorti un Tweet de la file, le dire tout de suite à notre
+            # appelant, qu'il puisse le récupérer si jamais on crash.
+            else :
+                current_tweet.append( tweet )
+            
             # Enregistrer les mesures des temps d'éxécution tous les 100 Tweets.
             if len(self._times) >= 100 :
                 print( f"[Tweets_Indexer] {len(self._times)} Tweets indexés avec une moyenne de {mean(self._times)} secondes par Tweet." )
@@ -284,7 +289,6 @@ class Tweets_Indexer :
                 continue
             
             # A partir d'ici, on est certain qu'on traite le JSON d'un Tweet
-            current_tweet.append( tweet )
             if set_indexing_ids != None :
                 set_indexing_ids( int(tweet["tweet_id"]), int(tweet["user_id"]) )
             if self._DEBUG :
