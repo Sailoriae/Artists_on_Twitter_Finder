@@ -50,6 +50,14 @@ def thread_step_C_index_account_tweets( thread_id : int, shared_memory ) :
     # Passer "shared_memory.keep_running" ne fonctionne pas
     def keep_running() : return shared_memory.keep_service_alive
     
+    # Fonction à passer à "tweets_indexer.index_tweets()"
+    # Permet de déclarer l'ID du Tweet qu'il est en train de traiter, ainsi que
+    # l'ID du compte Twitter associé
+    # Cela permet aux curseurs d'être enregistrés une fois que tous les threads
+    # d'indexation aient fini pour ce compte
+    def set_indexing_ids( tweet_id : int, account_id : int ) :
+        shared_memory_scan_requests.set_indexing_ids( f"thread_step_C_index_account_tweets_th{thread_id}", tweet_id, account_id )
+    
     # Lancer l'indexeur, il travaille tout seul, et s'arrêtera tout seul
     try :
         tweets_indexer.index_tweets(
@@ -57,6 +65,7 @@ def thread_step_C_index_account_tweets( thread_id : int, shared_memory ) :
             add_step_C_times = shared_memory_execution_metrics.add_step_C_times,
             keep_running = keep_running,
             end_request = shared_memory_scan_requests.end_request,
+            set_indexing_ids = set_indexing_ids,
             current_tweet = current_tweet )
     
     # On attrape les erreurs juste pour enregistrer le Tweet sur lequel on a

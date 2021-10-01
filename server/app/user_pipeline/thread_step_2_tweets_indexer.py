@@ -154,7 +154,11 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
         double_continue = False # Pour faire l'équivalent de deux instruction "continue"
         for scan_request_uri in request.scan_requests :
             scan_request = open_proxy( scan_request_uri )
-            check_list.append( scan_request.finished_SearchAPI_indexing and scan_request.finished_TimelineAPI_indexing )
+            
+            # C'est l'attribut "finished_date" qui permet de réellement dire
+            # qu'une requête est terminée, voir la méthode suivante :
+            # Scan_Requests_Pipeline.end_request()
+            check_list.append( scan_request.finished_date != None )
             
             # On vérifie que le scan se passe bien ou s'est bien passé, et si
             # un thread de traitement a planté avec la requête, on l'indique

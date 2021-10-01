@@ -86,7 +86,7 @@ class Shared_Memory :
         # plantage.
         # Les threads sont identifiés par la chaine suivante :
         # f"{thread_procedure.__name__}_th{thread_id}"
-        self._threads_registry = self.register_obj( Threads_Registry() )
+        self._threads_registry = self.register_obj( Threads_Registry( self ) )
     
     """
     Getters et setters pour Pyro.

@@ -4,7 +4,7 @@
 import Pyro4
 import threading
 import datetime
-from time import time
+from time import time, sleep
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
 # Ainsi, si on veut utiliser ce script indépendemment (Notemment pour des
@@ -92,6 +92,13 @@ class Scan_Requests_Pipeline :
         # d'indexation, qui sont éxécutées par les threads de l'étapt C.
         self._step_C_index_account_tweet_queue_obj = Pyro_Queue( convert_uri = False )
         self._step_C_index_account_tweets_queue = self._root.register_obj( self._step_C_index_account_tweet_queue_obj )
+        
+        # Dictionnaire des Tweets en cours d'indexation.
+        # Les threads de l'étape C déclarent dedans l'ID du Tweet qu'ils sont
+        # en train de traiter, ainsi que l'ID du compte Twitter associé. Cela
+        # permet de vérifier qu'ils  aient tous fini avant d'enregistrer les
+        # curseurs.
+        self._indexing_ids_dict = {}
         
         # Compteur du nombre de requêtes en cours de traitement dans le
         # pipeline.
@@ -254,11 +261,34 @@ class Scan_Requests_Pipeline :
     @param get_stats Le résultat de la méthode "get_stats()" de l'objet
                      "SQLite_or_MySQL". Car Pyro est multithreadé, donc on ne
                      peut pas avoir notre propre accès à la BDD !
+    
+    @return Les deux curseurs à enregistrer, sous la forme d'un tuple :
+            - Curseur de l'API de recherche (SearchAPI)
+            - Curseur de l'API de timeline (TimelineAPI)
+            Ou None si il ne faut pas enregistrer les curseurs
+    
+    Cette fonction attend que les threads d'indexation n'indexent plus un
+    Tweet du compte Twitter. Cela permet d'enregistrer les curseurs une fois
+    qu'on est certain que tous les Tweets sont enregistrés dans la BDD.
     """
     def end_request ( self, request : Scan_Request, get_stats = None ) :
-        # Vérifier avant que les deux indexation sont terminées
+        # Vérifier avant que les deux indexations soient terminées
         if not request.finished_SearchAPI_indexing or not request.finished_TimelineAPI_indexing :
-            return
+            return None
+        
+        # Vérifier que plus aucun thread d'indexation indexe un Tweet pour ce
+        # compte Twitter (Sinon, on attend qu'il ait fini)
+        for thread_name in self._indexing_ids_dict :
+            # On ne vérifie pas "keep_service_alive" car un thread d'indexation
+            # n'est pas censé prendre trop de temps sur l'indexation d'un Tweet
+            # Sinon, c'est qu'il y a un bug, et ceci permet de le détecter
+            while True :
+                tweet_id, account_id = self._indexing_ids_dict[thread_name]
+                if tweet_id != None and account_id == request.account_id :
+                    print( f"[end_request] Attente du thread {thread_name} pour terminer la requête d'indexation du compte @{request.account_name}. Il est en train d'indexer le Tweet ID {tweet_id}." )
+                    sleep( 1 )
+                else :
+                    break
         
         self._requests_sem.acquire()
         
@@ -283,6 +313,8 @@ class Scan_Requests_Pipeline :
         
         else :
             self._requests_sem.release()
+        
+        return ( request.cursor_SearchAPI, request.cursor_TimelineAPI )
     
     """
     Délester les anciennes requêtes.
@@ -328,3 +360,25 @@ class Scan_Requests_Pipeline :
         # On désenregistre les requêtes à désenregistrer
         for uri in to_unregister_list :
             self._root.unregister_obj( uri )
+    
+    """
+    Pour les threads d'indexation (Etape C), déclarer quel ID de Tweet il est
+    en train de traiter, ainsi que l'ID du compte Twitter associé.
+    
+    @param thread_name L'identifiant du thread.
+    @param tweet_id L'ID du Tweet qu'il va traiter, ou None s'il est en attente.
+    @param account_id L'ID du compte Twitter du Tweet qu'il va traiter, ou None
+                      s'il est en attente.
+    """
+    def set_indexing_ids ( self, thread_name : str, tweet_id : int, account_id : int ) :
+        self._indexing_ids_dict[ thread_name ] = (tweet_id, account_id)
+    
+    """
+    Obtenir ce qu'un thread d'indexation (Etape C) est en train de faire.
+    
+    @param thread_name L'identifiant du thread.
+    """
+    def get_indexing_ids ( self, thread_name : str ) :
+        if not thread_name in self._indexing_ids_dict :
+            raise AssertionError( f"Le thread \"{thread_name}\" ne s'est pas enregistré comme thread d'indexation (Etape C) !" )
+        return self._indexing_ids_dict[ thread_name ]

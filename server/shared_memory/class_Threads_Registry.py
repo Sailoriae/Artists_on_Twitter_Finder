@@ -31,7 +31,9 @@ nous en mode Multiprocessing) qui ne sont pas enregistrés ici !
 """
 @Pyro4.expose
 class Threads_Registry :
-    def __init__ ( self ) :
+    def __init__ ( self, root_shared_memory ) :
+        self._root = root_shared_memory
+        
         # Dictionnaire associant les threads à leur PID.
         self._pid_dict = {}
         
@@ -104,10 +106,21 @@ class Threads_Registry :
             try :
                 request = self._requests_dict[key]
             
-            # Afficher un thread spécial (C'est à dire un thread qui n'est pas
-            # un thread de traitement)
+            
             except KeyError :
-                to_print += "\n"
+                # Afficher un thread d'indexation (Etape C)
+                if "thread_step_C_index_account_tweets" in key :
+                    tweet_id, account_id = self._root.scan_requests.get_indexing_ids( key )
+                    if tweet_id != None :
+                        to_print += f" : Tweet ID {tweet_id}\n"
+                    else :
+                        to_print += " : IDLE\n"
+                
+                # Afficher un thread spécial (C'est à dire un thread qui n'est pas
+                # un thread de traitement)
+                else :
+                    to_print += "\n"
+                
                 continue
             
             if request == None :
@@ -121,16 +134,7 @@ class Threads_Registry :
                 
                 # Afficher un thread de traitement des requêtes de scan
                 elif request.request_type == "scan" :
-                    to_print += f" : @{request.account_name} (ID {request.account_id})"
-                    
-                    # Thread d'indexation des Tweets trouvés avec l'API de recherche
-                    if "thread_step_C_SearchAPI_index_account_tweets" in key :
-                        to_print += f", {request.SearchAPI_tweets_queue.qsize()} Tweets restant\n"
-                    # Thread d'indexation des Tweets trouvés avec l'API de timeline
-                    elif "thread_step_D_TimelineAPI_index_account_tweets" in key :
-                        to_print += f", {request.TimelineAPI_tweets_queue.qsize()} Tweets restant\n"
-                    else :
-                        to_print += "\n"
+                    to_print += f" : @{request.account_name} (ID {request.account_id})\n"
         
         if not param.ENABLE_MULTIPROCESSING :
             total_memory_size = psutil.Process( os.getpid() ).memory_info().rss # en octets

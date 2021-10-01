@@ -55,7 +55,14 @@ class Scan_Request :
         # ce compte
         self._blocks_list = []
         
+        # Les curseurs à enregistrer lorsque la requête sera terminée
+        self._cursor_SearchAPI = None
+        self._cursor_TimelineAPI = None
+        
         # Deux variables de fin du traitement de la requête
+        # SEULE LE THREAD D'INDEXATION (ETAPE C) A LE DROIT DE METTRE CETTE
+        # VALEUR SUR TRUE (Car mettre ces deux valeurs à True autorise
+        # l'enregistrement des curseurs)
         self._finished_SearchAPI_indexing = False
         self._finished_TimelineAPI_indexing = False
         
@@ -106,6 +113,16 @@ class Scan_Request :
     def blocks_list( self ) : return self._blocks_list
     @blocks_list.setter
     def blocks_list( self, value ) : self._blocks_list = value
+    
+    @property
+    def cursor_SearchAPI( self ) : return self._cursor_SearchAPI
+    @cursor_SearchAPI.setter
+    def cursor_SearchAPI( self, value ) : self._cursor_SearchAPI = value
+    
+    @property
+    def cursor_TimelineAPI( self ) : return self._cursor_TimelineAPI
+    @cursor_TimelineAPI.setter
+    def cursor_TimelineAPI( self, value ) : self._cursor_TimelineAPI = value
     
     @property
     def finished_SearchAPI_indexing( self ) : return self._finished_SearchAPI_indexing

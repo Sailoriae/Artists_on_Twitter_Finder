@@ -175,6 +175,9 @@ class Tweets_Indexer :
     @param keep_running Fonction de la mémoire partagée, objet "Shared_Memory".
     @param end_request Fonction de la mémoire partagée permettant de terminer
                        les requêtes de scan.
+    @param set_indexing_ids Fonction utilisant la mémoire partagée pour
+                            déclarer l'ID du Tweet qu'on est en train de
+                            traiter, ainsi que l'ID du compte Twitter associé.
     @param current_tweet Liste vide permettant d'y place le JSON du Tweet en
                          cours d'indexation. Utile en cas de crash.
     """
@@ -183,18 +186,35 @@ class Tweets_Indexer :
                              add_step_C_times = None, # Fonction de la mémoire partagée
                              keep_running = None, # Fonction qui nous dit quand nous arrêter
                              end_request = None, # Fonction de la mémoire partagée permettant de terminer les requêtes de scan
+                             set_indexing_ids = None, # Fonction permettant de déclarer les ID du Tweet et du compte en cours
                              current_tweet = [] # Permet de place le Tweet en cours d'indexation, utilisé en cas de crash
                        ) -> bool :
+        if set_indexing_ids != None :
+            set_indexing_ids( None, None )
+        
         while keep_running == None or keep_running() :
             current_tweet.clear()
+            # Ne pas effacer à chaque boucle l'ID du Tweet qu'on était en train
+            # de traiter précédemment. On l'efface uniquement si on doit
+            # attendre.
             try :
                 tweet = tweets_queue.get( block = False )
             except queue.Empty :
                 tweet = None
             if tweet == None :
                 if keep_running == None : return
+                if set_indexing_ids != None :
+                    set_indexing_ids( None, None )
                 sleep( 1 )
                 continue
+            
+            # Comme on n'efface pas à chaque boucle la déclaration du Tweet
+            # qu'on est en train de traiter, il faut au moins le faire si la
+            # dictionnaire dans la liste n'est pas un Tweet. Sinon, la méthode
+            # end_request() va attendre qu'on finisse ce Tweet.
+            if not "tweet_id" in tweet :
+                if set_indexing_ids != None : #
+                    set_indexing_ids( None, None )
             
             # Enregistrer les mesures des temps d'éxécution tous les 100 Tweets.
             if len(self._times) >= 100 :
@@ -217,28 +237,56 @@ class Tweets_Indexer :
             
             # Traiter les instructions d'enregistrement de curseurs
             if "save_SearchAPI_cursor" in tweet :
-                self._save_last_tweet_date( tweet["account_id"], tweet["save_SearchAPI_cursor"] )
+                print( f"[Tweets_Indexer] Fin de l'indexation des Tweets de @{tweet['account_name']} trouvés avec l'API de recherche." )
                 if "request_uri" in tweet :
                     request = open_proxy( tweet["request_uri"] )
-                    request.finished_SearchAPI_indexing = True
+                    request.cursor_SearchAPI = tweet["save_SearchAPI_cursor"]
+                    request.finished_SearchAPI_indexing = True # Après l'enregistrement du curseur
                     if end_request != None :
-                        end_request( request, get_stats = self._bdd.get_stats() )
+                        # C'est la fonction end_request() qui donne l'ordre d'enregistrement des curseurs
+                        # Elle attend qu'il n'y a plus un Tweet en cours d'indexation pour ce compte
+                        cursors = end_request( request, get_stats = self._bdd.get_stats() )
+                        if cursors != None : # Il faut enregistrer les deux curseurs
+                            print( f"[Tweets_Indexer] Enregistrement des deux curseurs pour le compte @{tweet['account_name']}." )
+                            # ATTENTION : Il est possible que les curseurs soient à None, pour des comptes vides par exemple
+                            self._save_last_tweet_date( tweet["account_id"], cursors[0] )
+                            self._save_last_tweet_id( tweet["account_id"], cursors[1] )
+                    else :
+                        raise RuntimeError( "Le paramètre \"end_request\" doit être défini pour des instructions d'enregistrement de curseurs qui renvoient \"request_uri\" !" )
                     request.release_proxy()
-                print( f"[Tweets_Indexer] Fin de l'indexation des Tweets de @{tweet['account_name']} trouvés avec l'API de recherche." )
+                else : # N'est pas censé être utilisé par le serveur AOTF
+                    if end_request != None :
+                        raise RuntimeError( "Le paramètre \"end_request\" est défini mais les instructions d'enregistrement de curseurs ne renvoient pas \"request_uri\" !" )
+                    self._save_last_tweet_date( tweet["account_id"], tweet["save_SearchAPI_cursor"] )
                 continue
             if "save_TimelineAPI_cursor" in tweet :
-                self._save_last_tweet_id( tweet["account_id"], tweet["save_TimelineAPI_cursor"] )
+                print( f"[Tweets_Indexer] Fin de l'indexation des Tweets de @{tweet['account_name']} trouvés avec l'API de timeline." )
                 if "request_uri" in tweet :
                     request = open_proxy( tweet["request_uri"] )
-                    request.finished_TimelineAPI_indexing = True
+                    request.cursor_TimelineAPI = tweet["save_TimelineAPI_cursor"]
+                    request.finished_TimelineAPI_indexing = True # Après l'enregistrement du curseur
                     if end_request != None :
-                        end_request( request, get_stats = self._bdd.get_stats() )
+                        # C'est la fonction end_request() qui donne l'ordre d'enregistrement des curseurs
+                        # Elle attend qu'il n'y a plus un Tweet en cours d'indexation pour ce compte
+                        cursors = end_request( request, get_stats = self._bdd.get_stats() )
+                        if cursors != None : # Il faut enregistrer les deux curseurs
+                            print( f"[Tweets_Indexer] Enregistrement des deux curseurs d'indexation pour le compte @{tweet['account_name']}." )
+                            # ATTENTION : Il est possible que les curseurs soient à None, pour des comptes vides par exemple
+                            self._save_last_tweet_date( tweet["account_id"], cursors[0] )
+                            self._save_last_tweet_id( tweet["account_id"], cursors[1] )
+                    else :
+                        raise RuntimeError( "Le paramètre \"end_request\" doit être défini pour des instructions d'enregistrement de curseurs qui renvoient \"request_uri\" !" )
                     request.release_proxy()
-                print( f"[Tweets_Indexer] Fin de l'indexation des Tweets de @{tweet['account_name']} trouvés avec l'API de timeline." )
+                else : # N'est pas censé être utilisé par le serveur AOTF
+                    if end_request != None :
+                        raise RuntimeError( "Le paramètre \"end_request\" est défini mais les instructions d'enregistrement de curseurs ne renvoient pas \"request_uri\" !" )
+                    self._save_last_tweet_id( tweet["account_id"], tweet["save_TimelineAPI_cursor"] )
                 continue
             
             # A partir d'ici, on est certain qu'on traite le JSON d'un Tweet
             current_tweet.append( tweet )
+            if set_indexing_ids != None :
+                set_indexing_ids( int(tweet["tweet_id"]), int(tweet["user_id"]) )
             if self._DEBUG :
                 print( f"[Tweets_Indexer] Indexation Tweet ID {tweet['tweet_id']} du compte ID {tweet['user_id']}." )
             if self._DEBUG or self._ENABLE_METRICS :
