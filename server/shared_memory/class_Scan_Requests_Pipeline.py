@@ -314,6 +314,11 @@ class Scan_Requests_Pipeline :
         else :
             self._requests_sem.release()
         
+        # Si la requête a été mise en échec, on ne peut pas enregistrer les
+        # curseurs du compte Twitter
+        if request.has_failed :
+            return None
+        
         return ( request.cursor_SearchAPI, request.cursor_TimelineAPI )
     
     """
