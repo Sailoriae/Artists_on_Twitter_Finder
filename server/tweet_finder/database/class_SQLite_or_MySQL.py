@@ -713,12 +713,35 @@ class SQLite_or_MySQL :
         self._conn.commit()
     
     """
+    API DE RECHERCHE
+    Egaliser la date du dernier reset du curseur d'indexation avec l'API decode
+    recherche avec celle de la date locale de ce même curseur d'indexation.
+    Est utilisée si l'ID d'un compte Twitter est ajouté manuellement.
+    
+    @param account_id ID du compte Twitter.
+    """
+    def equalize_reset_account_SearchAPI_date( self, account_id : int ):
+        if param.USE_MYSQL_INSTEAD_OF_SQLITE :
+            request = """UPDATE accounts
+                         SET last_SearchAPI_indexing_cursor_reset_date = last_SearchAPI_indexing_local_date
+                         WHERE account_id = %s"""
+        else :
+            request = """UPDATE accounts
+                         SET last_SearchAPI_indexing_cursor_reset_date = last_SearchAPI_indexing_local_date
+                         WHERE account_id = ?"""
+        
+        c = self._get_cursor()
+        c.execute( request, ( account_id, ) )
+        self._conn.commit()
+    
+    """
     Obtenir un itérateur sur les comptes enregistrés dans la base, triés par
     ordre de reset de leur curseur d'indexation avec l'API de recherche. Du
     plus ancien au plus récent.
     Cet itérateur donne des dictionnaires contenant les champs suivant :
     - "account_id" : ID du compte Twitter,
-    - "last_cursor_reset_date" : Objet "datetime", date du dernier reset.
+    - "last_cursor_reset_date" : Objet "datetime", date du dernier reset,
+    - "last_SearchAPI_indexing_local_date" : Objet "datetime".
     """
     def get_oldest_reseted_account( self ) :
         c = self._get_cursor()
