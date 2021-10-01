@@ -241,6 +241,15 @@ class SQLite_or_MySQL :
 #        if cbir_hash_1 == None and cbir_hash_2 == None and cbir_hash_3 == None and cbir_hash_4 == None :
 #            return
         
+        # Vérifier les données
+        if ( image_name_1 == None and cbir_hash_1 != None or
+             image_name_2 == None and cbir_hash_2 != None or
+             image_name_3 == None and cbir_hash_3 != None or
+             image_name_4 == None and cbir_hash_4 != None ) :
+            raise AssertionError( "L'empreinte de chaque image doit être associée à un nom !" )
+        if ( account_id == None or tweet_id == None ) :
+            raise AssertionError( "L'ID du compte et l'ID du Tweet doivent être définis !" )
+        
         # Si il faut forcer l'indexation, on efface ce qui a déjà été insert
         if FORCE_INDEX :
             c = self._get_cursor()
