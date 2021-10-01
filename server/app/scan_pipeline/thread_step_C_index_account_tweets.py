@@ -64,6 +64,7 @@ def thread_step_C_index_account_tweets( thread_id : int, shared_memory ) :
     # on est responsable de l'indexation, et donc il ne doit pas manquer un
     # seul Tweet.
     except Exception as error :
+        tweet_is_safe = False
         if len(current_tweet) > 0 :
             tweet = current_tweet[0]
             if type(tweet) == dict :
@@ -94,6 +95,7 @@ def thread_step_C_index_account_tweets( thread_id : int, shared_memory ) :
                             image_3_url,
                             image_4_url,
                         )
+                        tweet_is_safe = True
                     except Exception : # Super fail-safe
                         file = open( "thread_step_C_index_account_tweets_errors.log", "a" )
                         file.write( f"Erreur avec le Tweet ID {tweet['tweet_id']} !\n" )
@@ -104,7 +106,19 @@ def thread_step_C_index_account_tweets( thread_id : int, shared_memory ) :
                         traceback.print_exc( file = file )
                         file.write( "\n\n\n" )
                         file.close()
-        raise error # On passe au collecteur d'erreurs
+        
+        # On passe au collecteur d'erreurs
+        message = "Erreur dans un thread d'indexation !"
+        message += "\nListe \"current_tweet\" : " + str(current_tweet)
+        if tweet_is_safe :
+            message += "\nLe Tweet en cours d'indexation a été récupéré et ajouté à la table \"reindex_tweets\"."
+        elif len(current_tweet) > 0 :
+            message += "\nLe Tweet en cours d'indexation n'a pas pu être sauvé dans la table \"reindex_tweets\" !"
+            message += "\nMerci de vérifier vous même la liste \"current_tweet\" afin d'ajouter manuellement l'ID du Tweet à la table \"reindex_tweets\"."
+            message += "\nVous pouvez aussi plus simplement mettre à \"NULL\" les curseurs d'indexation pour l'ID du compte Twitter."
+        else :
+            message += "\nAucun Tweet en cours d'indexation."
+        raise Exception( message ) from error
     
     print( f"[step_C_th{thread_id}] Arrêté !" )
     return
