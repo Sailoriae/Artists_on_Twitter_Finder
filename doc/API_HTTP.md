@@ -21,7 +21,7 @@ Le serveur répond par un JSON qui contient toujours les mêmes champs :
 		{
 			"tweet_id" : 797039787534262272,
 			"account_id" : 3064686505,
-			"image_position" : 1,
+			"image_position" : "1/1",
 			"distance" : 0
 		}
 	],
@@ -31,12 +31,12 @@ Le serveur répond par un JSON qui contient toujours les mêmes champs :
 
 La liste `twitter_accounts` contient les comptes Twitter identifiés comme étant ceux de l'artiste de l'illustration de requête.
 
-La liste `results` contient les Tweets avec images trouvés, triées par distance de l'illustration de requête. Le premier élément de cette liste est donc le Tweet contenant l'image la plus proche.
+La liste `results` contient les Tweets avec images trouvés, triée par le nombre de bits de différence avec l'empreinte de l'image de requête, puis si égalité par le nombre d'images dans le Tweet, puis si encore égalité par l'ID du Tweet. Le premier élément de cette liste est donc le Tweet contenant l'image la plus proche.
 
 Liste des attributs d'un résultat dans la liste `results` :
 - `tweet_id` : L'ID du Tweet.
 - `account_id`: L'ID du compte Twitter.
-- `image_position` : La position de l'image dans le tweet, entre 1 et 4.
+- `image_position` : Chaine contenant la position de l'image dans le tweet et le nombre d'images dans le Tweet, entre 1 et 4.
 - `distance` : Le nombre de bits de différence entre l'empreinte de l'image de requête et celle de l'image trouvée.
 
 Liste des status possibles (Dans l'ordre de traitement) :

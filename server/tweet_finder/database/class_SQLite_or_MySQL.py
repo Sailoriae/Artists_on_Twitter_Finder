@@ -335,10 +335,15 @@ class SQLite_or_MySQL :
                 break
             
             # Itérer sur les images de Tweets
-            for i in range(4) : # i = 0, 1, 2, 3
+            images_count = None
+            for i in range(3,-1,-1) : # i = 3, 2, 1, 0
                 # Si l'empreinte est à NULL, on passe cette image
                 if tweet_line[3+i*2] == None :
                     continue
+                
+                # Détecter le nombre d'images dans le Tweet
+                if images_count == None :
+                    images_count = i+1
                 
                 if param.ENABLE_METRICS :
                     usage_start = time()
@@ -348,7 +353,8 @@ class SQLite_or_MySQL :
                            tweet_line[1], # ID du Tweet
                            tweet_line[2+i*2], # Nom de l'image
                            to_int( tweet_line[3+i*2] ), # Empreinte de l'image
-                           i+1 # Position de l'image
+                           i+1, # Position de l'image
+                           images_count # Nombre d'images dans le Tweet
                        )
                 
                 if param.ENABLE_METRICS :

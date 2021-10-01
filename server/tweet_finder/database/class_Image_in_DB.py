@@ -13,18 +13,21 @@ class Image_in_DB :
     @param image_hash Empreinte de l'image
     @param image_position La position de l'image (1-4) dans le Tweet (Car un
                           tweet peut contenir au maximum 4 images)
+    @param images_count Le nombre d'images dans le Tweet (1-4).
     """
     def __init__( self,
                   account_id : int,
                   tweet_id : int,
                   image_name : str,
                   image_hash : int,
-                  image_position : int ) :
+                  image_position : int,
+                  images_count : int ) :
         self.account_id : int = account_id
         self.tweet_id : int = tweet_id
         self.image_name : str = image_name
         self.image_hash : int = image_hash
         self.image_position : int = image_position
+        self.images_count : int = images_count
         
         # Utilisé par le module "cbir_engine" pour stocker la distance entre
         # l'image de requête et cette image dans la base de données

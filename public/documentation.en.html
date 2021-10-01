@@ -89,11 +89,11 @@
 					<li><code>account_id</code><br>The Twitter account ID.</li>
 				</ul>
 			</li>
-			<li><code>results</code><br>List of Tweets found, sorted in ascending order by the value <code>distance_chi2</code>. Can be an empty list. Each Tweet contains the following fields&nbsp;:
+			<li><code>results</code><br>List of Tweets found, sorted by the number of bits of difference with the query image, then if equal by the number of images in the Tweet, then if equal again by the Tweet ID. Can be an empty list. Each Tweet contains the following fields&nbsp;:
 				<ul>
 					<li><code>tweet_id</code><br>The Tweet ID.</li>
 					<li><code>account_id</code><br>The ID of the Twitter account that posted this Tweet.</li>
-					<li><code>image_position</code><br>The position of the image among the maximum 4 images.</li>
+					<li><code>image_position</code><br>A string containing the position of the image among the maximum 4 images, as well as the number of images in the Tweet. This string is in the following format&nbsp;: <code>position/number</code>, <code>1/4</code> for example.</li>
 					<li><code>distance</code><br>The number of bits of difference between the fingerprint of the query image and that of the found image. The lower it is, the closer the query image is to the found image.</li>
 				</ul>
 			</li>

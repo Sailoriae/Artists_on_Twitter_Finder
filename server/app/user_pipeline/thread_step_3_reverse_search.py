@@ -125,8 +125,12 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
                     request.found_tweets += result
             
             # Trier la liste des résultats
+            # Tri par la distance, puis si égalité par le nombre d'images dans
+            # le Tweet, puis si encore égalité par l'ID du Tweet
+            # Note : Les ID de Tweets sont dans l'ordre temporel
+            # Source : https://stackoverflow.com/a/31951852
             request.found_tweets = sorted( request.found_tweets,
-                                           key = lambda x: x.distance,
+                                           key = lambda x: (x.distance, x.images_count, x.tweet_id),
                                            reverse = False )
             
             print( f"[step_3_th{thread_id}] Tweets trouvés (Du plus au moins proche) : {[ data.tweet_id for data in request.found_tweets ]}" )

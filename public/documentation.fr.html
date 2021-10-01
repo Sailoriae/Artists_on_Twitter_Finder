@@ -89,11 +89,11 @@
 					<li><code>account_id</code><br>L'ID du compte Twitter.</li>
 				</ul>
 			</li>
-			<li><code>results</code><br>Liste des Tweets trouvés, triée dans l'ordre croissant par la valeur <code>distance_chi2</code>. Peut être une liste vide. Chaque Tweet contient les champs suivants&nbsp;:
+			<li><code>results</code><br>Liste des Tweets trouvés, triée par le nombre de bits de différence avec l'empreinte de l'image de requête, puis si égalité par le nombre d'images dans le Tweet, puis si encore égalité par l'ID du Tweet. Peut être une liste vide. Chaque Tweet contient les champs suivants&nbsp;:
 				<ul>
 					<li><code>tweet_id</code><br>L'ID du Tweet.</li>
 					<li><code>account_id</code><br>L'ID du compte Twitter ayant publié ce Tweet.</li>
-					<li><code>image_position</code><br>La position de l'image parmis les 4 images maximums.</li>
+					<li><code>image_position</code><br>Une chaine contenant la position de l'image parmis les 4 images maximums, ainsi que le nombre d'images dans le Tweet. Cette chaine est au format suivant&nbsp;: <code>position/nombre</code>, <code>1/4</code> par exemple.</li>
 					<li><code>distance</code><br>Le nombre de bits de différence entre l'empreinte de l'image de requête et celle de l'image trouvée. Plus elle est faible, plus l'image de requête est proche de l'image trouvée.</li>
 				</ul>
 			</li>
