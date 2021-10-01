@@ -85,6 +85,15 @@ def check_parameters () :
     
     # ========================================================================
     
+    import socket
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        if s.connect_ex(("localhost", param.HTTP_SERVER_PORT)) == 0 :
+            print( f"Le port {param.HTTP_SERVER_PORT} est déjà utilisé. Veuillez changer la valeur de \"HTTP_SERVER_PORT\"." )
+            print( "Vérifier que le serveur AOTF ne tourne pas déjà." )
+            return False
+    
+    # ========================================================================
+    
     # Source : https://www.sqlite.org/faq.html#q5
     # "Multiple processes can be doing a SELECT at the same time. But only one
     # process can be making changes to the database at any moment in time."
