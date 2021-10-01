@@ -9,11 +9,11 @@ import re
 
 # Nouveau format : deviantart.com/artiste
 deviantart_account_name_regex_new = re.compile(
-    r"(?:http(?:s)?:\/\/)?(?:www\.)?deviantart\.com\/([a-zA-Z0-9\-]+)" )
+    r"((?:http(?:s)?:\/\/)?(?:www\.)?deviantart\.com\/([a-zA-Z0-9\-]+))" )
 
 # Ancien format : artiste.deviantart.com
 deviantart_account_name_regex_old = re.compile(
-    r"(?:http(?:s)?:\/\/)?(?:([a-zA-Z0-9\-]+)\.)deviantart\.com" )
+    r"((?:http(?:s)?:\/\/)?(?:([a-zA-Z0-9\-]+)\.)deviantart\.com)" )
 
 
 # Attention : Certaines URL peuvent être des URL de redirection. Ainsi, la
@@ -34,14 +34,19 @@ Est ce que cet URL est l'URL d'un compte DeviantArt ?
 def validate_deviantart_account_url ( url : str ) -> str :
     result_new = re.search( deviantart_account_name_regex_new, url )
     result_old = re.search( deviantart_account_name_regex_old, url )
-    if result_new != None : result = result_new.group( 1 )
-    elif result_old != None : result = result_old.group( 1 )
+    if result_new != None :
+        full = result_new.group( 1 )
+        result = result_new.group( 2 )
+    elif result_old != None :
+        full = result_old.group( 1 )
+        result = result_old.group( 2 )
     else : return None
     
     if result in [ "tag", "art", "users" ] : # Supprimer les faux-positifs connus
         return None
-    else :
-        return result
+    if url.split(full)[-1][:5] == "/art/" : # Supprimer les pages d'illustrations
+        return None
+    return result
 
 
 """
@@ -54,8 +59,9 @@ if __name__ == '__main__' :
     test.append( validate_deviantart_account_url( "https://www.deviantart.com/mauroz" ) )
     test.append( validate_deviantart_account_url( "https://deviantart.com/mauroz/" ) )
     test.append( validate_deviantart_account_url( "https://deviantart.com" ) )
+    test.append( validate_deviantart_account_url( "https://www.deviantart.com/mauroz/art/test" ) )
     
-    if test == ['mauroz', 'mauroz', 'mauroz', 'mauroz', None] :
+    if test == ['mauroz', 'mauroz', 'mauroz', 'mauroz', None, None] :
         print( "Tests OK !" )
     else :
         print( "Tests échoués !" )

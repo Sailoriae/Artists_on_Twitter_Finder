@@ -21,3 +21,5 @@ De plus, il contient les fonctions qui permettent de valider des URL (Avec des e
 * Fonction `validate_linktree_account_url` : Vérifie qu'une URL est bien une URL d'un profile Linktree, et retourne le nom de ce profil.
 
 * Fonction `validate_url` : Vérifie qu'une URL est bien une URL, et retourne cette URL.
+
+**Attention : Les validateurs de comptes ne doivent pas valider les URL des illustrations !** Par exemple, les URL d'illustrations sur DeviantArt contiennent l'URL du compte DeviantArt associé. Passer l'URL d'une illustration sur DeviantArt à la fonction `validate_deviantart_account_url` doit renvoyer `None` !
