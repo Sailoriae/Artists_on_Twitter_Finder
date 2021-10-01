@@ -14,6 +14,8 @@ La classe `Tweets_Indexer` indexe les Tweets trouvés par les classes de listage
 L'étape de listage communique ses Tweets trouvés à l'étape d'indexation via un objet `queue.Queue()` (File d'attente), permettant de paralléliser ces deux étapes.
 Les Tweets sont insérés dans les files sous la forme de dictionnaires, créés par la fonction `analyse_tweet_json` à partie des JSON des Tweets renvoyés par les API de Twitter.
 
+Les étapes de listage peuvent aussi communiquer avec les Tweets des instructions d'enregistrement des curseur. Ces instructions peuvent aussi permettre de mettre fin à la requête de scan d'un compte Twitter (Voir le module `shared_memory`). Il est **très** important que les curseurs soient enregistrés à la fin de l'indexation de tous les Tweets trouvés par l'étape de listage. Cela permet d'avoir une base de données intègre en cas d'extinction du serveur.
+
 La classe `Reverse_Searcher` permet de rechercher un Tweet à partir d'une image, et éventuellement du compte Twitter sur lequel chercher :
 1. Calcul de l'empreinte de l'image de recherche, module `cbir_engine`,
 2. Obtient l'itérateur sur la base de données, module `database`,
