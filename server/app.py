@@ -53,6 +53,7 @@ if __name__ == "__main__" :
             from shared_memory.thread_pyro_server import thread_pyro_server
         else :
             from shared_memory.class_Shared_Memory import Shared_Memory
+        from shared_memory.open_proxy import open_proxy
     except ModuleNotFoundError as error :
         print( f"Il manque une librairie : {error}" )
         print( "Veuillez exécuter : pip install -r requirements.txt" )
@@ -117,7 +118,7 @@ if __name__ == "__main__" :
         for i in range( 30 ) :
             print( "Connexion au serveur de mémoire partagée..." )
             try :
-                shared_memory = Pyro4.Proxy( shared_memory_uri )
+                shared_memory = open_proxy( shared_memory_uri )
                 shared_memory.keep_service_alive # Test d'accès
             except ( Pyro4.errors.ConnectionClosedError, Pyro4.errors.CommunicationError, ConnectionRefusedError ) :
                 sleep(1)
@@ -285,7 +286,7 @@ if __name__ == "__main__" :
                         print( "Cette requête n'a plus de requête de scan associée." )
                     else :
                         for scan_request_uri in request.scan_requests :
-                            scan_request = Pyro4.Proxy( scan_request_uri )
+                            scan_request = open_proxy( scan_request_uri )
                             print( f" - Scan @{scan_request.account_name} (ID {scan_request.account_id}), prioritaire : {scan_request.is_prioritary}" )
                             print( f"    - A démarré le listage SearchAPI : {scan_request.started_SearchAPI_listing}, TimelineAPI : {scan_request.started_SearchAPI_listing}" )
                             print( f"    - A terminé l'indexation SearchAPI : {scan_request.finished_SearchAPI_indexing}, TimelineAPI : {scan_request.finished_TimelineAPI_indexing}" )
