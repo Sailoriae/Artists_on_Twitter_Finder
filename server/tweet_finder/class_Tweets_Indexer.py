@@ -137,6 +137,7 @@ class Tweets_Indexer :
                 if not error.code in [502, 504] :
                     file = open( "method_Tweets_Indexer.get_image_hash_errors.log", "a" )
                     file.write( f"Erreur avec le Tweet ID {tweet_id} !\n" )
+                    file.write( "Le Tweet va être inséré dans la table \"reindex_tweets\" (Sauf si une autre erreur se produit).\n" )
                     traceback.print_exc( file = file )
                     file.write( "\n\n\n" )
                     file.close()
@@ -158,6 +159,7 @@ class Tweets_Indexer :
                     
                     file = open( "method_Tweets_Indexer.get_image_hash_errors.log", "a" )
                     file.write( f"Erreur avec le Tweet ID {tweet_id} !\n" )
+                    file.write( "Le Tweet va être inséré dans la table \"reindex_tweets\" (Sauf si une autre erreur se produit).\n" )
                     traceback.print_exc( file = file )
                     file.write( "\n\n\n" )
                     file.close()
