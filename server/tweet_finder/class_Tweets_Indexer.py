@@ -39,15 +39,15 @@ d'enregistrement des curseurs, données par les deux méthodes de listage :
 - Tweets_Lister_with_SearchAPI.list_SearchAPI_tweets()
 - Tweets_Lister_with_TimelineAPI.list_TimelineAPI_tweets()
 
-Si je JSON d'instruction d'enregistrement contient le champs "request_uri", cela
+Si je dict d'instruction d'enregistrement contient le champs "request_uri", cela
 indique la fin d'une requête de scan, et permet de mettre à jour les attributs
 "finished_SearchAPI_indexing" ou "finished_TimelineAPI_indexing".
 
-Si le JSON du Tweet contient le champs "was_failed_tweet" et que son indexation
+Si le dict du Tweet contient le champs "was_failed_tweet" et que son indexation
 réussie, il sera supprimé de la table "reindex_tweets". Ceci est une bidouille
 pour le thread de retentative d'indexation.
 
-Si le JSON du Tweet contient le champs "force_index", son éventuel
+Si le dict du Tweet contient le champs "force_index", son éventuel
 enregistrement dans la base de données sera écrasé.
 Sinon, si le Tweet était déjà présent, il sera ignoré.
 
@@ -420,7 +420,7 @@ class Tweets_Indexer :
                             d'attente où sont stockés les Tweets trouvés par
                             les méthode de listage.
                             NE DOIT PAS ETRE BLOQUANTE !
-    @param current_tweet Liste vide permettant d'y place le JSON du Tweet en
+    @param current_tweet Liste vide permettant d'y place le dict du Tweet en
                          cours d'indexation. Utile en cas de crash.
     """
     
