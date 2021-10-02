@@ -34,14 +34,6 @@ def thread_step_B_TimelineAPI_list_account_tweets( thread_id : int, shared_memor
     if len( param.TWITTER_API_KEYS ) < thread_id :
         raise AssertionError( "Il doit y avoir autant de threads de listage que de clés d'API dans \"TWITTER_API_KEYS\"." )
     
-    # Initialisation du listeur de Tweets
-    timelineAPI_lister = Tweets_Lister_with_TimelineAPI( param.API_KEY,
-                                                         param.API_SECRET,
-                                                         param.TWITTER_API_KEYS[ thread_id - 1 ]["OAUTH_TOKEN"],
-                                                         param.TWITTER_API_KEYS[ thread_id - 1 ]["OAUTH_TOKEN_SECRET"],
-                                                         DEBUG = param.DEBUG,
-                                                         ENABLE_METRICS = param.ENABLE_METRICS )
-    
     # Maintenir ouverts certains proxies vers la mémoire partagée
     shared_memory_threads_registry = shared_memory.threads_registry
     shared_memory_scan_requests = shared_memory.scan_requests
@@ -51,6 +43,23 @@ def thread_step_B_TimelineAPI_list_account_tweets( thread_id : int, shared_memor
     shared_memory_scan_requests_step_B_TimelineAPI_list_account_tweets_queue = shared_memory_scan_requests.step_B_TimelineAPI_list_account_tweets_queue
     shared_memory_scan_requests_step_C_index_account_tweets_queue = shared_memory_scan_requests.step_C_index_account_tweets_queue
     
+    # Initialisation du listeur de Tweets
+    timelineAPI_lister = Tweets_Lister_with_TimelineAPI( param.API_KEY,
+                                                         param.API_SECRET,
+                                                         param.TWITTER_API_KEYS[ thread_id - 1 ]["OAUTH_TOKEN"],
+                                                         param.TWITTER_API_KEYS[ thread_id - 1 ]["OAUTH_TOKEN_SECRET"],
+                                                         DEBUG = param.DEBUG,
+                                                         ENABLE_METRICS = param.ENABLE_METRICS,
+                                                         add_step_B_time = shared_memory_execution_metrics.add_step_B_time )
+    
+    # Fonction à passer à la méthode
+    # "Tweets_Lister_with_TimelineAPI.list_TimelineAPI_tweets()"
+    # Permet de mettre les Tweets trouvés dans la file d'attente des Tweets à
+    # indexer (Il n'y a pas de vérification de doublon car cela prendrait trop
+    # de temps, alors que l'indexation vérifie déjà que le Tweet ne soit pas
+    # indexé dans la BDD)
+    def tweets_queue_put( tweet_dict : dict ) -> None :
+        shared_memory_scan_requests_step_C_index_account_tweets_queue.put( tweet_dict )
     # Dire qu'on ne fait rien
     shared_memory_threads_registry.set_request( f"thread_step_B_TimelineAPI_list_account_tweets_th{thread_id}", None )
     
@@ -112,9 +121,8 @@ def thread_step_B_TimelineAPI_list_account_tweets( thread_id : int, shared_memor
         print( f"[step_B_th{thread_id}] Listage des Tweets du compte Twitter @{request.account_name} avec l'API de timeline." )
         try :
             timelineAPI_lister.list_TimelineAPI_tweets( request.account_name,
-                                                        shared_memory_scan_requests_step_C_index_account_tweets_queue,
+                                                        tweets_queue_put,
                                                         account_id = request.account_id,
-                                                        add_step_B_time = shared_memory_execution_metrics.add_step_B_time,
                                                         request_uri = request.get_URI() )
         except Unfound_Account_on_Lister_with_TimelineAPI :
             request.unfound_account = True

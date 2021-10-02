@@ -24,9 +24,19 @@ import parameters as param
 
 
 class Reverse_Searcher :
-    def __init__ ( self, DEBUG : bool = False, ENABLE_METRICS : bool = False ) :
+    """
+    Constructeur.
+    
+    @param add_step_3_times Fonction de la mémoire, objet
+                            "Metrics_Container".
+    """
+    def __init__ ( self, DEBUG : bool = False, ENABLE_METRICS : bool = False,
+                         add_step_3_times = None, # Fonction de la mémoire partagée
+                  ) -> None :
         self._DEBUG = DEBUG
         self._ENABLE_METRICS = ENABLE_METRICS
+        self._add_step_3_times = add_step_3_times
+        
         self._cbir_engine = CBIR_Engine()
         self._bdd = SQLite_or_MySQL()
         self._twitter = TweepyAbstraction( param.API_KEY,
@@ -41,8 +51,6 @@ class Reverse_Searcher :
                         dire ce qu'il y a après le @ (OPTIONNEL)
     @param account_id ID du compte, vérifié récemment ! (OPTIONNEL)
                       Prime sur "account_name" si nen correspondent pas
-    @param query_image_binary Ne pas faire de GET à l'URL passée, mais prendre
-                              plutôt cette image déjà téléchargée (OPTIONNEL)
     @return Liste d'objets Image_in_DB, contenant les attributs suivants :
             - account_id : L'ID du compte Twitter
             - tweet_id : L'ID du Tweet contenant l'image
@@ -52,9 +60,7 @@ class Reverse_Searcher :
     """
     def search_tweet ( self, pil_image : Image,
                              account_name : str = None,
-                             account_id : int = None,
-                             add_step_3_times = None,
-                             query_image_binary : bytes = None ) :
+                             account_id : int = None ) :
         if account_name != None or account_id != None:
             if account_id == None :
                 account_id = self._twitter.get_account_id( account_name )
@@ -68,13 +74,13 @@ class Reverse_Searcher :
             start = time()
         
         iterator = self._bdd.get_images_in_db_iterator( account_id = account_id,
-                                                       add_step_3_times = add_step_3_times )
+                                                        add_step_3_times = self._add_step_3_times )
         
         to_return = self._cbir_engine.search_cbir( pil_image, iterator )
         
         if self._DEBUG or self._ENABLE_METRICS :
             print( f"[Reverse_Searcher] La recherche s'est faite en {time() - start} secondes." )
-            add_step_3_times( [ time() - start ], [], [], [] )
+            self._add_step_3_times( [ time() - start ], [], [], [] )
         
         # Suppression des attributs "image_features" pour gagner un peu de
         # mémoire
