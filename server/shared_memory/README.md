@@ -42,6 +42,8 @@ En effet, Pyro permet d'éxécuter les méthodes des objets sur le serveur, mais
 Ainsi, l'utilisation est transparente dans le module `app` !
 De plus, toutes les méthodes de tous les objets présents dans ce module sont exécutées coté serveur Pyro !
 
+**Attention :** Eviter d'ouvrir des proxies en interne de la mémoire partagée ! Garder les objets originaux en attributs privés, afin qu'ils puissent être utilisés en interne comme des objets Pythons normaux. Cela permet de ne pas ouvrir de proxies quand ce n'est pas nécessaire. Une exception peut être faire pour les requêtes, notamment si elle doit être retournée par la fonction.
+
 Arbre des objets :
 - `Shared_Memory` : Objet racine.
 

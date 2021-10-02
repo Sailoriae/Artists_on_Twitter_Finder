@@ -79,7 +79,8 @@ class User_Requests_Pipeline :
         # Sémaphore du "if request.scan_requests == None" de la procédure de
         # thread "thread_step_2_tweets_indexer". Permet d'éviter des problèmes
         # en cas de lancement d'un scan.
-        self._thread_step_2_tweets_indexer_sem = self._root.register_obj( Pyro_Semaphore() )
+        self._thread_step_2_tweets_indexer_sem_obj = Pyro_Semaphore()
+        self._thread_step_2_tweets_indexer_sem = self._root.register_obj( self._thread_step_2_tweets_indexer_sem_obj )
         
         # Compteur du nombre de requêtes en cours de traitement dans le
         # pipeline.

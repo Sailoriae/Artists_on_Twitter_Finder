@@ -199,7 +199,7 @@ class Scan_Requests_Pipeline :
                             account_id )
                         
                         # On met la requête dans la file d'attente prioritaire.
-                        open_proxy( self._step_A_SearchAPI_list_account_tweets_prior_queue ).put( request )
+                        self._step_A_SearchAPI_list_account_tweets_prior_queue_obj.put( request )
                     
                     # Si est dans une file d'attente de listage des Tweets avec
                     # l'API de timeline, on la sort, pour la mettre dans la même
@@ -212,7 +212,7 @@ class Scan_Requests_Pipeline :
                             account_id )
                         
                         # On met la requête dans la file d'attente prioritaire.
-                        open_proxy( self._step_B_TimelineAPI_list_account_tweets_prior_queue ).put( request )
+                        self._step_B_TimelineAPI_list_account_tweets_prior_queue_obj.put( request )
                 
                 queues_sem.release()
                 requests_sem.release()
@@ -318,7 +318,7 @@ class Scan_Requests_Pipeline :
                 self._root.tweets_count, self._root.accounts_count = get_stats
             
             # Enregistrer le temps complet pour traiter cette requête
-            self._root.execution_metrics.add_scan_request_full_time( time() - request.start )
+            self._root._execution_metrics_obj.add_scan_request_full_time( time() - request.start )
         
         else :
             self._requests_sem.release()

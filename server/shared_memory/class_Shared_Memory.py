@@ -63,10 +63,12 @@ class Shared_Memory :
         self._keep_pyro_alive = True
         
         # Pipeline des requêtes des utilisateur.
-        self._user_requests = self.register_obj( User_Requests_Pipeline( self ) )
+        self._user_requests_obj = User_Requests_Pipeline( self )
+        self._user_requests = self.register_obj( self._user_requests_obj )
         
         # Pipeline des requêtes d'indexation de comptes Twitter.
-        self._scan_requests = self.register_obj( Scan_Requests_Pipeline( self ) )
+        self._scan_requests_obj = Scan_Requests_Pipeline( self )
+        self._scan_requests = self.register_obj( self._scan_requests_obj )
         
         # Cache des statistiques, permet de faire moins d'appels à la méthode
         # get_stats().
@@ -75,10 +77,12 @@ class Shared_Memory :
         
         # Limitateur du nombre de requêtes sur le serveur HTTP / l'API par
         # secondes
-        self._http_limitator = self.register_obj( HTTP_Requests_Limitator() )
+        self._http_limitator_obj = HTTP_Requests_Limitator()
+        self._http_limitator = self.register_obj( self._http_limitator_obj )
         
         # Conteneur des mesures de temps d'éxécution.
-        self._execution_metrics = self.register_obj( Metrics_Container() )
+        self._execution_metrics_obj = Metrics_Container()
+        self._execution_metrics = self.register_obj( self._execution_metrics_obj )
         
         # Objet où les threads s'enregistrent.
         # Ils y mettent aussi leur requête en cours de traitement, afin que
@@ -86,7 +90,8 @@ class Shared_Memory :
         # plantage.
         # Les threads sont identifiés par la chaine suivante :
         # f"{thread_procedure.__name__}_th{thread_id}"
-        self._threads_registry = self.register_obj( Threads_Registry( self ) )
+        self._threads_registry_obj = Threads_Registry( self )
+        self._threads_registry = self.register_obj( self._threads_registry_obj )
     
     """
     Getters et setters pour Pyro.
