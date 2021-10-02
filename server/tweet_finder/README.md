@@ -3,8 +3,8 @@
 Le Tweet Finder est l'une des deux grandes parties du serveur "Artists on Twitter Finder", avec le Link Finder.
 
 Les classes `Tweets_Lister_with_SearchAPI` et `Tweets_Lister_with_TimelineAPI` listent les Tweets de comptes Twitter à partir du dernier scan (Ou tous les Tweet si le compte n'a pas été encore scanné) :
-* `Tweets_Indexer_with_SearchAPI` utilise la librairie SNScraper pour l'API Twitter utilisée par l'UI web https://twitter.com/search,
-* Et `Tweets_Indexer_with_TimelineAPI` utilise la librairie Tweepy pour l'API Twitter publique.
+* `Tweets_Lister_with_SearchAPI` utilise la librairie SNScraper pour l'API Twitter utilisée par l'UI web https://twitter.com/search,
+* Et `Tweets_Lister_with_TimelineAPI` utilise la librairie Tweepy pour l'API Twitter publique.
 Elles utilisent les couches d'abstraction disponibles dans le module `twitter`.
 
 La classe `Tweets_Indexer` indexe les Tweets trouvés par les classes de listage :
@@ -12,9 +12,10 @@ La classe `Tweets_Indexer` indexe les Tweets trouvés par les classes de listage
 2. Stockage ce dans la base de données en les associants à l'ID du Tweet, et l'ID du compte l'ayant Tweeté, module `database`.
 
 L'étape de listage communique ses Tweets trouvés à l'étape d'indexation via un objet `queue.Queue()` (File d'attente), permettant de paralléliser ces deux étapes.
-Les Tweets sont insérés dans les files sous la forme de dictionnaires, créés par la fonction `analyse_tweet_json` à partie des JSON des Tweets renvoyés par les API de Twitter.
+Cet objet est stocké dans le pipeline de traitement des requêtes de scan (Objet `Scan_Requests_Pipeline`) de la mémoire partagée.
+Les Tweets sont insérés dans cette file sous la forme de dictionnaires, créés par la fonction `analyse_tweet_json` à partie des JSON des Tweets renvoyés par les API de Twitter.
 
-Les étapes de listage peuvent aussi communiquer avec les Tweets des instructions d'enregistrement des curseur. Ces instructions peuvent aussi permettre de mettre fin à la requête de scan d'un compte Twitter (Voir le module `shared_memory`). Il est **très** important que les curseurs soient enregistrés à la fin de l'indexation de tous les Tweets trouvés par l'étape de listage. Cela permet d'avoir une base de données intègre en cas d'extinction du serveur.
+Les étapes de listage peuvent aussi communiquer avec les Tweets des instructions d'enregistrement des curseur. Ces instructions peuvent aussi permettre de mettre fin à la requête de scan d'un compte Twitter (Comment la classe `Tweets_Indexer` les utilise). Il est **très** important que les curseurs soient enregistrés à la fin de l'indexation de tous les Tweets trouvés par l'étape de listage. Cela permet d'avoir une base de données intègre en cas d'extinction du serveur.
 
 La classe `Reverse_Searcher` permet de rechercher un Tweet à partir d'une image, et éventuellement du compte Twitter sur lequel chercher :
 1. Calcul de l'empreinte de l'image de recherche, module `cbir_engine`,
