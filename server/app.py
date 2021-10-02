@@ -222,20 +222,13 @@ if __name__ == "__main__" :
     maintenance_procedures.append( thread_auto_update_accounts ) # Mise à jour automatique
     maintenance_procedures.append( thread_reset_SearchAPI_cursors ) # Reset des curseurs d'indexation avec l'API de recherche
     maintenance_procedures.append( thread_remove_finished_requests ) # Délestage de la liste des requêtes
+    maintenance_procedures.append( thread_retry_failed_tweets ) # Retentative d'indexation de Tweets
     
     # Lancer les procédures de maintenance
     threads_or_process.extend( launch_unique_threads_in_container(
         maintenance_procedures,
         False, # Ne nécessitent pas des processus séparés
         "thread_maintenance", # Respecte la convention de nommage
-        shared_memory_uri ) )
-    
-    
-    # Thread (ou processus) de retentative d'indexation de Tweets
-    # Il doit être unique, et placé dans un processus, car il fait de l'indexation
-    threads_or_process.append( launch_thread(
-        thread_retry_failed_tweets,
-        1, True, # Nécessite un processus séparé
         shared_memory_uri ) )
     
     
