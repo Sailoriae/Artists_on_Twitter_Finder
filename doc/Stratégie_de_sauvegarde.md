@@ -6,7 +6,11 @@ La base de données d’AOTF est la seule donnée à sauvegarder. Mais le fichie
 
 ## Comment sauvegarder la base de données MySQL d'AOTF ?
 
-Le **dump MySQL** peut être intéressant pour des petites base de données, mais devient trop long et trop volumineux lorsque la base de données grandit. Attention, il est impératif d'utiliser l'option `--hex-blob`, qui permet d'exporter proprement les données binaires (Empreintes des images).
+Le **dump MySQL** peut être intéressant pour des petites base de données, mais devient trop long et trop volumineux lorsque la base de données grandit. Attention, il est impératif d'utiliser l'option `--hex-blob`, qui permet d'exporter proprement les données binaires (Empreintes des images). De plus, l'utilisation de l'option `--single-transaction` peut être intéressante afin de ne pas vérouiller les tables, permettant de ne pas avoir à éteindre le serveur AOTF.
+```
+MYSQL_PWD="motdepasse" mysqldump -u Artists_on_Twitter_Finder --hex-blob --single-transaction --no-tablespaces Artists_on_Twitter_Finder accounts tweets reindex_tweets > AOTF_$(date '+%Y-%m-%d').sql
+```
+*(90 Mo pour une BDD de 800k Tweets et 1300 comptes Twitter)*
 
 Ainsi, la manière la plus efficace de sauvegarder la base de données est de faire de la **réplication MySQL**, ce qui nécessite un deuxième serveur MySQL. Ce deuxième serveur est appelé le serveur "esclave", et le serveur principal le serveur "maitre". Le serveur esclave se connecte avec un compte sur le serveur maitre **qui a uniquement des permissions de lecture**, et réplique chez lui les opérations réalisées (Grace aux journaux binaires).
 
