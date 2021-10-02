@@ -30,27 +30,16 @@ Traite la file d'attente suivante (Dans la mémoire partagée) :
 shared_memory.scan_requests.step_C_SearchAPI_index_account_tweets_queue
 """
 def thread_step_C_index_account_tweets( thread_id : int, shared_memory ) :
-    # Initialisation de l'indexeur de Tweets
-    tweets_indexer = Tweets_Indexer( DEBUG = param.DEBUG, ENABLE_METRICS = param.ENABLE_METRICS )
-    
-    # Accès direct à la base de données
-    # Utilisé uniquement en cas de crash
-    bdd = SQLite_or_MySQL()
-    
     # Maintenir ouverts certains proxies vers la mémoire partagée
     shared_memory_execution_metrics = shared_memory.execution_metrics
     shared_memory_scan_requests = shared_memory.scan_requests
     shared_memory_scan_requests_step_C_index_account_tweets_queue = shared_memory_scan_requests.step_C_index_account_tweets_queue
     
-    # Liste permettant d'enregistrer dans la BDD les Tweets sur lesquels
-    # l'indexeur a éventuellement crashé
-    current_tweet = []
-    
-    # Fonction à passer à "tweets_indexer.index_tweets()"
+    # Fonction à passer à la classe "Tweets_Indexer"
     # Passer "shared_memory.keep_running" ne fonctionne pas
     def keep_running() : return shared_memory.keep_service_alive
     
-    # Fonction à passer à "tweets_indexer.index_tweets()"
+    # Fonction à passer à la classe "Tweets_Indexer"
     # Permet de déclarer l'ID du Tweet qu'il est en train de traiter, ainsi que
     # l'ID du compte Twitter associé
     # Cela permet aux curseurs d'être enregistrés une fois que tous les threads
@@ -58,14 +47,23 @@ def thread_step_C_index_account_tweets( thread_id : int, shared_memory ) :
     def set_indexing_ids( tweet_id : int, account_id : int ) :
         shared_memory_scan_requests.set_indexing_ids( f"thread_step_C_index_account_tweets_th{thread_id}", tweet_id, account_id )
     
+    # Initialisation de l'indexeur de Tweets
+    tweets_indexer = Tweets_Indexer(
+        DEBUG = param.DEBUG,
+        ENABLE_METRICS = param.ENABLE_METRICS,
+        add_step_C_times = shared_memory_execution_metrics.add_step_C_times,
+        keep_running = keep_running,
+        end_request = shared_memory_scan_requests.end_request,
+        set_indexing_ids = set_indexing_ids )
+    
+    # Liste permettant d'enregistrer dans la BDD les Tweets sur lesquels
+    # l'indexeur a éventuellement crashé
+    current_tweet = []
+    
     # Lancer l'indexeur, il travaille tout seul, et s'arrêtera tout seul
     try :
         tweets_indexer.index_tweets(
             shared_memory_scan_requests_step_C_index_account_tweets_queue,
-            add_step_C_times = shared_memory_execution_metrics.add_step_C_times,
-            keep_running = keep_running,
-            end_request = shared_memory_scan_requests.end_request,
-            set_indexing_ids = set_indexing_ids,
             current_tweet = current_tweet )
     
     # On attrape les erreurs juste pour enregistrer le Tweet sur lequel on a
@@ -98,6 +96,7 @@ def thread_step_C_index_account_tweets( thread_id : int, shared_memory ) :
                                     image_3_url = tweet["images"][2]
                                 if length > 3 :
                                     image_4_url = tweet["images"][3]
+                        bdd = SQLite_or_MySQL()
                         bdd.add_retry_tweet(
                             tweet["tweet_id"],
                             account_id,

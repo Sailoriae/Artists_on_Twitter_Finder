@@ -57,9 +57,38 @@ La probabilité que cela arrive est très faible, et implémenter des mesures co
 ferait perdre plus de temps qu'autre chose.
 """
 class Tweets_Indexer :
-    def __init__( self, DEBUG : bool = False, ENABLE_METRICS : bool = False ) :
+    """
+    Constructeur.
+    Tous les paramètres sont optionnels, mais ils doivent correspondre
+    à l'utilisation. Dans le cas d'un serveur AOTF, tous les paramètres
+    doivent être utilisés.
+    
+    @param add_step_C_times Fonction de la mémoire partagée, objet
+                            "Metrics_Container".
+    @param keep_running Fonction de la mémoire partagée, objet "Shared_Memory".
+    @param end_request Fonction de la mémoire partagée permettant de terminer
+                       les requêtes de scan (Pipeline de traitement des
+                       requêtes de scan).
+    @param set_indexing_ids Fonction utilisant la mémoire partagée pour
+                            déclarer l'ID du Tweet qu'on est en train de
+                            traiter, ainsi que l'ID du compte Twitter associé
+                            (Pipeline de traitement des requêtes de scan).
+    """
+    def __init__( self, DEBUG : bool = False,
+                        ENABLE_METRICS : bool = False,
+                        add_step_C_times = None, # Fonction de la mémoire partagée
+                        keep_running = None, # Fonction qui nous dit quand nous arrêter
+                        end_request = None, # Fonction de la mémoire partagée permettant de terminer les requêtes de scan
+                        set_indexing_ids = None, # Fonction permettant de déclarer les ID du Tweet et du compte en cours
+                 ) -> None :
         self._DEBUG = DEBUG
         self._ENABLE_METRICS = ENABLE_METRICS
+        
+        self._add_step_C_times = add_step_C_times
+        self._set_indexing_ids_function = set_indexing_ids
+        self._keep_running = keep_running
+        self._end_request_function = end_request
+        
         self._bdd = SQLite_or_MySQL()
         self._cbir_engine = CBIR_Engine()
         
@@ -68,6 +97,17 @@ class Tweets_Indexer :
             self._download_image_times = [] # Liste des temps pour télécharger les images d'un Tweet
             self._calculate_features_times = [] # Liste des temps pour d'éxécution du moteur CBIR pour une images d'un Tweet
             self._insert_into_times = [] # Liste des temps pour faire le INSERT INTO
+    
+    """
+    Déclarer dans la mémoire partagée quel Tweet on est en train de traiter.
+    Fonction afin éviter de répéter trois fois ce bout de code.
+    
+    @param tweet_id L'ID du Tweet.
+    @param account_id L'ID du compte Twitter associé.
+    """
+    def _set_indexing_ids ( self, tweet_id, account_id ) -> None :
+        if self._set_indexing_ids_function != None :
+            self._set_indexing_ids_function( tweet_id, account_id )
     
     """
     Permet de gèrer les erreurs HTTP, et de les logger sans avoir a descendre
@@ -143,6 +183,133 @@ class Tweets_Indexer :
                     return None
     
     """
+    Extraire l'empreinte des images d'un Tweet et l'indexer dans la BDD.
+    Cette fonction ne déclare pas quel Tweet elle est en train de traiter.
+    
+    @param tweet Le dictionnaire du Tweet, au format de la fonction
+                 "analyse_tweet_json()".
+    
+    @return True si le dictionnaire passé était une Tweet et qu'il a été
+            indexé.
+            False si ce n'était pas un Tweet, ou qu'il n'a pas été indexé.
+    """
+    def _index_tweet ( self, tweet : dict ) -> bool :
+        if not "tweet_id" in tweet :
+            return False
+        
+        if self._DEBUG :
+            print( f"[Tweets_Indexer] Indexation Tweet ID {tweet['tweet_id']} du compte ID {tweet['user_id']}." )
+        if self._DEBUG or self._ENABLE_METRICS :
+            start = time()
+        
+        # Pas besoin de tester si le Tweet est en train d'être traité en
+        # parallèle, car la file "Tweets_to_Index_Queue" empêche qu'un Tweet
+        # y soit présent deux fois
+        
+        # Tester avant d'indexer si le tweet n'est pas déjà dans la BDD
+        # Ne jamais enlever cette vérification, il y a pleins de raisons qui
+        # justifient de passer un peu de temps à toujours vérifier que le Tweet
+        # existe, car sinon on perd trop de temps à faire le calcul CBIR pour
+        # pour rien. Exemples de raisons :
+        # - Le parallélisme et le fait qu'il n'y a pas d'objet dans la mémoire
+        #   partagée contenant tous les Tweets indexés,
+        # - Le thread de reset des curseurs de listage avec SearchAPI.
+        if self._bdd.is_tweet_indexed( tweet["tweet_id"] ) and not "force_index" in tweet :
+            if self._DEBUG :
+                print( "[Tweets_Indexer] Tweet déjà indexé !" )
+            return False
+        
+        length = len( tweet["images"] )
+        
+        if length == 0 :
+            if self._DEBUG :
+                print( "[Tweets_Indexer] Tweet sans image, on le passe !" )
+            return False
+        
+        image_1_url = None
+        image_2_url = None
+        image_3_url = None
+        image_4_url = None
+        
+        image_1_hash = None
+        image_2_hash = None
+        image_3_hash = None
+        image_4_hash = None
+        
+        image_1_name = None
+        image_2_name = None
+        image_3_name = None
+        image_4_name = None
+        
+        # Mis à True si le Tweet aura besoin d'être réindexé
+        # Dans une liste, car les listes sont passées par référence
+        will_need_retry = [False]
+        
+        # Traitement des images du Tweet
+        if length > 0 :
+            image_1_url = tweet["images"][0]
+            image_1_hash = self._get_image_hash( image_1_url, tweet["tweet_id"], CAN_RETRY = will_need_retry )
+            image_1_name = image_1_url.replace( "https://pbs.twimg.com/media/", "" )
+        if length > 1 :
+            image_2_url = tweet["images"][1]
+            image_2_hash = self._get_image_hash( image_2_url, tweet["tweet_id"], CAN_RETRY = will_need_retry )
+            image_2_name = image_2_url.replace( "https://pbs.twimg.com/media/", "" )
+        if length > 2 :
+            image_3_url = tweet["images"][2]
+            image_3_hash = self._get_image_hash( image_3_url, tweet["tweet_id"], CAN_RETRY = will_need_retry )
+            image_3_name = image_3_url.replace( "https://pbs.twimg.com/media/", "" )
+        if length > 3 :
+            image_4_url = tweet["images"][3]
+            image_4_hash = self._get_image_hash( image_4_url, tweet["tweet_id"], CAN_RETRY = will_need_retry )
+            image_4_name = image_4_url.replace( "https://pbs.twimg.com/media/", "" )
+        
+        if self._DEBUG or self._ENABLE_METRICS :
+            start_insert_into = time()
+        
+        # Stockage des résultats
+        # On stocke même si toutes les images sont à None
+        # Car cela veut dire que toutes les images ont étées perdues par Twitter
+        self._bdd.insert_tweet(
+            tweet["user_id"],
+            tweet["tweet_id"],
+            cbir_hash_1 = image_1_hash,
+            cbir_hash_2 = image_2_hash,
+            cbir_hash_3 = image_3_hash,
+            cbir_hash_4 = image_4_hash,
+            image_name_1 = image_1_name,
+            image_name_2 = image_2_name,
+            image_name_3 = image_3_name,
+            image_name_4 = image_4_name,
+            FORCE_INDEX = "force_index" in tweet
+        )
+        
+        # Si une image a échoué, le Tweet devra être réindexé
+        # On le fait après le vrai enregistrement si jamais le compte
+        # utilisé pour réindexé est bloqué par le compte Twitter en cours
+        # de scan
+        if will_need_retry[0] :
+            self._bdd.add_retry_tweet(
+                tweet["tweet_id"],
+                tweet["user_id"],
+                image_1_url,
+                image_2_url,
+                image_3_url,
+                image_4_url,
+            )
+        
+        # Sinon, si c'était un Tweet échoué, on l'enlève de la table des
+        # Tweets dont l'indexation a échouée
+        # Ceci est la bidouille pour le thread de retentative d'indexation
+        elif "was_failed_tweet" in tweet :
+            self._bdd.remove_retry_tweet( tweet["tweet_id"] )
+        
+        if self._DEBUG or self._ENABLE_METRICS :
+            self._insert_into_times.append( time() - start_insert_into )
+            self._times.append( time() - start )
+        
+        return True
+    
+    """
     Enregistrer la date du Tweet listé le plus récent dans la base de données.
     Cette date est renvoyée par la méthode
     Tweet_Lister_with_SearchAPI.list_SearchAPI_tweets().
@@ -150,7 +317,7 @@ class Tweets_Indexer :
     @param last_tweet_date Date à enregistrer.
     @param account_id L'ID du compte Twitter.
     """
-    def _save_last_tweet_date ( self, account_id, last_tweet_date ) :
+    def _save_last_tweet_date ( self, account_id : int, last_tweet_date : str ) -> None :
         self._bdd.set_account_SearchAPI_last_tweet_date( account_id, last_tweet_date )
     
     """
@@ -161,8 +328,106 @@ class Tweets_Indexer :
     @param last_tweet_id ID de Tweet à enregistrer.
     @param account_id L'ID du compte Twitter.
     """
-    def _save_last_tweet_id ( self, account_id, last_tweet_id ) :
+    def _save_last_tweet_id ( self, account_id : int, last_tweet_id : int ) -> None :
         self._bdd.set_account_TimelineAPI_last_tweet_id( account_id, last_tweet_id )
+    
+    """
+    Appeler la fonction de la mémoire partagée pour mettre fin à une requête de
+    scan, et traiter son ordre d'enregistrer les curseurs d'indexation.
+    
+    @param account_id L'ID du compte Twitter dont il faut enregistrer les
+                      curseurs. On ne prend pas celui de la requête au cas où
+                      il y aurait un bug.
+    @param account_name Le nom du compte Twitter, juste pour faire des print().
+    @param request La requête de scan à terminer. Le proxy doit être ouvert.
+    """
+    def _end_request ( self, account_id : int, account_name : str, request ) -> None :
+        if self._end_request_function != None :
+            # C'est la fonction end_request() qui donne l'ordre d'enregistrement des curseurs
+            # Elle attend qu'il n'y a plus un Tweet en cours d'indexation pour ce compte
+            cursors = self._end_request_function( request, get_stats = self._bdd.get_stats() )
+            
+            if cursors != None : # Il faut enregistrer les deux curseurs
+                print( f"[Tweets_Indexer] Enregistrement des deux curseurs d'indexation pour le compte @{account_name}." )
+                
+                # ATTENTION : Il est possible que les curseurs soient à None, pour des comptes vides par exemple
+                self._save_last_tweet_date( account_id, cursors[0] )
+                self._save_last_tweet_id( account_id, cursors[1] )
+        
+        else :
+            raise RuntimeError( "L'attribut \"end_request\" doit être défini pour des instructions d'enregistrement de curseurs qui renvoient \"request_uri\" !" )
+    
+    """
+    Sauvegarder les curseurs dans la base de données
+    Cette fonction permet de traiter les instructions de sauvegarde de curseurs
+    envoyées par les threads de listage.
+    
+    @param instruction Instruction envoyée sous la forme d'un dictionnaire.
+    
+    @return True si le dictionnaire passé était une instruction d'enregistrement
+            du curseurs et a été traitée.
+            False sinon.
+    """
+    def _save_cursors ( self, instruction : dict ) -> bool :
+        # Instruction de sauvegarde du curseur de l'API de recherche
+        if "save_SearchAPI_cursor" in instruction :
+            print( f"[Tweets_Indexer] Fin de l'indexation des Tweets de @{instruction['account_name']} trouvés avec l'API de recherche." )
+            
+            if "request_uri" in instruction :
+                request = open_proxy( instruction["request_uri"] )
+                request.cursor_SearchAPI = instruction["save_SearchAPI_cursor"]
+                request.finished_SearchAPI_indexing = True # Après l'enregistrement du curseur
+                self._end_request( instruction["account_id"], instruction["account_name"], request )
+                request.release_proxy()
+            
+            else : # N'est pas censé être utilisé par le serveur AOTF
+                if self._end_request_function != None :
+                    raise RuntimeError( "L'attribut \"end_request\" est défini mais les instructions d'enregistrement de curseurs ne renvoient pas \"request_uri\" !" )
+                self._save_last_tweet_date( instruction["account_id"], instruction["save_SearchAPI_cursor"] )
+            
+            return True
+        
+        # Instruction de sauvegarde du curseur de l'API de timeline
+        if "save_TimelineAPI_cursor" in instruction :
+            print( f"[Tweets_Indexer] Fin de l'indexation des Tweets de @{instruction['account_name']} trouvés avec l'API de timeline." )
+            
+            if "request_uri" in instruction :
+                request = open_proxy( instruction["request_uri"] )
+                request.cursor_TimelineAPI = instruction["save_TimelineAPI_cursor"]
+                request.finished_TimelineAPI_indexing = True # Après l'enregistrement du curseur
+                self._end_request( instruction["account_id"], instruction["account_name"], request )
+                request.release_proxy()
+           
+            else : # N'est pas censé être utilisé par le serveur AOTF
+                if self._end_request_function != None :
+                    raise RuntimeError( "L'attribut \"end_request\" est défini mais les instructions d'enregistrement de curseurs ne renvoient pas \"request_uri\" !" )
+                self._save_last_tweet_id( instruction["account_id"], instruction["save_TimelineAPI_cursor"] )
+            
+            return True
+        
+        return False
+    
+    """
+    Afficher et enregistrer les mesures des temps d'éxécution (Si on a accès
+    à la mémoire partagée).
+    """
+    def _display_and_save_metrics ( self ) -> None :
+        print( f"[Tweets_Indexer] {len(self._times)} Tweets indexés avec une moyenne de {mean(self._times)} secondes par Tweet." )
+        
+        if len(self._download_image_times) > 0 :
+            print( f"[Tweets_Indexer] Temps moyens de téléchargement : {mean(self._download_image_times)} secondes." )
+        if len(self._calculate_features_times) > 0 :
+            print( f"[Tweets_Indexer] Temps moyens de calcul dans le moteur CBIR : {mean(self._calculate_features_times)} secondes." )
+        if len(self._insert_into_times) > 0 :
+            print( f"[Tweets_Indexer] Temps moyens d'enregistrement dans la BDD : {mean(self._insert_into_times)} secondes." )
+        
+        if self._add_step_C_times != None :
+            self._add_step_C_times( self._times, self._download_image_times, self._calculate_features_times, self._insert_into_times )
+        
+        self._times.clear()
+        self._download_image_times.clear()
+        self._calculate_features_times.clear()
+        self._insert_into_times.clear()
     
     """
     Indexer les Tweets trouvés par les des deux méthodes de listage.
@@ -170,29 +435,18 @@ class Tweets_Indexer :
     
     @param tweets_queue File d'attente où sont stockés les Tweets trouvés par
                         les méthode de listage.
-    @param add_step_C_times Fonction de la mémoire partagée, objet
-                            "Metrics_Container".
-    @param keep_running Fonction de la mémoire partagée, objet "Shared_Memory".
-    @param end_request Fonction de la mémoire partagée permettant de terminer
-                       les requêtes de scan.
-    @param set_indexing_ids Fonction utilisant la mémoire partagée pour
-                            déclarer l'ID du Tweet qu'on est en train de
-                            traiter, ainsi que l'ID du compte Twitter associé.
     @param current_tweet Liste vide permettant d'y place le JSON du Tweet en
                          cours d'indexation. Utile en cas de crash.
     """
     
     def index_tweets ( self, tweets_queue, # File d'attente d'entrée
-                             add_step_C_times = None, # Fonction de la mémoire partagée
-                             keep_running = None, # Fonction qui nous dit quand nous arrêter
-                             end_request = None, # Fonction de la mémoire partagée permettant de terminer les requêtes de scan
-                             set_indexing_ids = None, # Fonction permettant de déclarer les ID du Tweet et du compte en cours
                              current_tweet = [] # Permet de place le Tweet en cours d'indexation, utilisé en cas de crash
-                       ) -> bool :
-        if set_indexing_ids != None :
-            set_indexing_ids( None, None )
+                       ) -> None :
+        # Se déclarer comme en attente dans la mémoire partagée (Pipeline de
+        # traitement des requêtes de scan).
+        self._set_indexing_ids( None, None )
         
-        while keep_running == None or keep_running() :
+        while self._keep_running == None or self._keep_running() :
             current_tweet.clear()
             # Ne pas effacer à chaque boucle l'ID du Tweet qu'on était en train
             # de traiter précédemment. On l'efface uniquement si on doit
@@ -202,201 +456,39 @@ class Tweets_Indexer :
             except queue.Empty :
                 tweet = None
             if tweet == None :
-                if keep_running == None : return
-                if set_indexing_ids != None :
-                    set_indexing_ids( None, None )
+                if self._keep_running == None : return
+                self._set_indexing_ids( None, None )
                 sleep( 1 )
                 continue
             
-            # Comme on n'efface pas à chaque boucle la déclaration du Tweet
-            # qu'on est en train de traiter, il faut au moins le faire si la
-            # dictionnaire dans la liste n'est pas un Tweet. Sinon, la méthode
-            # end_request() va attendre qu'on finisse ce Tweet.
-            if not "tweet_id" in tweet :
-                if set_indexing_ids != None : #
-                    set_indexing_ids( None, None )
-            
-            # Si on a sorti un Tweet de la file, le dire tout de suite à notre
-            # appelant, qu'il puisse le récupérer si jamais on crash.
-            else :
+            # Si on a sorti un Tweet, il faut le déclarer le plus rapidement
+            # possible. En cas de crash, et en cas d'enregistrement de curseurs
+            # par un autre thread.
+            if "tweet_id" in tweet :
+                # D'abord pour notre thread, en cas de crash
                 current_tweet.append( tweet )
+                
+                # Et ensuite pour la mémoire partagée
+                self._set_indexing_ids( int(tweet["tweet_id"]), int(tweet["user_id"]) )
             
-            # Enregistrer les mesures des temps d'éxécution tous les 100 Tweets.
+            # Si on n'a pas sorti un Tweet, comme on n'efface pas à chaque
+            # boucle la déclaration du Tweet qu'on est en train de traiter, il
+            # faut au moins le faire. Sinon, la méthode "end_request()" va
+            # croire qu'on traite encore un Tweet.
+            else :
+                self._set_indexing_ids( None, None )
+                # Pas besoin d'efface pour notre thread, on le fait à chaque
+                # boucle.
+            
+            # Enregistrer les mesures des temps d'éxécution tous les 100
+            # Tweets (Ces temps sont calculés par la méthode "_index_tweet()").
             if len(self._times) >= 100 :
-                print( f"[Tweets_Indexer] {len(self._times)} Tweets indexés avec une moyenne de {mean(self._times)} secondes par Tweet." )
-                
-                if len(self._download_image_times) > 0 :
-                    print( f"[Tweets_Indexer] Temps moyens de téléchargement : {mean(self._download_image_times)} secondes." )
-                if len(self._calculate_features_times) > 0 :
-                    print( f"[Tweets_Indexer] Temps moyens de calcul dans le moteur CBIR : {mean(self._calculate_features_times)} secondes." )
-                if len(self._insert_into_times) > 0 :
-                    print( f"[Tweets_Indexer] Temps moyens d'enregistrement dans la BDD : {mean(self._insert_into_times)} secondes." )
-                
-                if add_step_C_times != None :
-                    add_step_C_times( self._times, self._download_image_times, self._calculate_features_times, self._insert_into_times )
-                
-                self._times.clear()
-                self._download_image_times.clear()
-                self._calculate_features_times.clear()
-                self._insert_into_times.clear()
+                self._display_and_save_metrics()
             
             # Traiter les instructions d'enregistrement de curseurs
-            if "save_SearchAPI_cursor" in tweet :
-                print( f"[Tweets_Indexer] Fin de l'indexation des Tweets de @{tweet['account_name']} trouvés avec l'API de recherche." )
-                if "request_uri" in tweet :
-                    request = open_proxy( tweet["request_uri"] )
-                    request.cursor_SearchAPI = tweet["save_SearchAPI_cursor"]
-                    request.finished_SearchAPI_indexing = True # Après l'enregistrement du curseur
-                    if end_request != None :
-                        # C'est la fonction end_request() qui donne l'ordre d'enregistrement des curseurs
-                        # Elle attend qu'il n'y a plus un Tweet en cours d'indexation pour ce compte
-                        cursors = end_request( request, get_stats = self._bdd.get_stats() )
-                        if cursors != None : # Il faut enregistrer les deux curseurs
-                            print( f"[Tweets_Indexer] Enregistrement des deux curseurs pour le compte @{tweet['account_name']}." )
-                            # ATTENTION : Il est possible que les curseurs soient à None, pour des comptes vides par exemple
-                            self._save_last_tweet_date( tweet["account_id"], cursors[0] )
-                            self._save_last_tweet_id( tweet["account_id"], cursors[1] )
-                    else :
-                        raise RuntimeError( "Le paramètre \"end_request\" doit être défini pour des instructions d'enregistrement de curseurs qui renvoient \"request_uri\" !" )
-                    request.release_proxy()
-                else : # N'est pas censé être utilisé par le serveur AOTF
-                    if end_request != None :
-                        raise RuntimeError( "Le paramètre \"end_request\" est défini mais les instructions d'enregistrement de curseurs ne renvoient pas \"request_uri\" !" )
-                    self._save_last_tweet_date( tweet["account_id"], tweet["save_SearchAPI_cursor"] )
-                continue
-            if "save_TimelineAPI_cursor" in tweet :
-                print( f"[Tweets_Indexer] Fin de l'indexation des Tweets de @{tweet['account_name']} trouvés avec l'API de timeline." )
-                if "request_uri" in tweet :
-                    request = open_proxy( tweet["request_uri"] )
-                    request.cursor_TimelineAPI = tweet["save_TimelineAPI_cursor"]
-                    request.finished_TimelineAPI_indexing = True # Après l'enregistrement du curseur
-                    if end_request != None :
-                        # C'est la fonction end_request() qui donne l'ordre d'enregistrement des curseurs
-                        # Elle attend qu'il n'y a plus un Tweet en cours d'indexation pour ce compte
-                        cursors = end_request( request, get_stats = self._bdd.get_stats() )
-                        if cursors != None : # Il faut enregistrer les deux curseurs
-                            print( f"[Tweets_Indexer] Enregistrement des deux curseurs d'indexation pour le compte @{tweet['account_name']}." )
-                            # ATTENTION : Il est possible que les curseurs soient à None, pour des comptes vides par exemple
-                            self._save_last_tweet_date( tweet["account_id"], cursors[0] )
-                            self._save_last_tweet_id( tweet["account_id"], cursors[1] )
-                    else :
-                        raise RuntimeError( "Le paramètre \"end_request\" doit être défini pour des instructions d'enregistrement de curseurs qui renvoient \"request_uri\" !" )
-                    request.release_proxy()
-                else : # N'est pas censé être utilisé par le serveur AOTF
-                    if end_request != None :
-                        raise RuntimeError( "Le paramètre \"end_request\" est défini mais les instructions d'enregistrement de curseurs ne renvoient pas \"request_uri\" !" )
-                    self._save_last_tweet_id( tweet["account_id"], tweet["save_TimelineAPI_cursor"] )
+            # Cette fonction permet de vérifier que c'est bien une instruction
+            if self._save_cursors( tweet ) :
                 continue
             
             # A partir d'ici, on est certain qu'on traite le JSON d'un Tweet
-            if set_indexing_ids != None :
-                set_indexing_ids( int(tweet["tweet_id"]), int(tweet["user_id"]) )
-            if self._DEBUG :
-                print( f"[Tweets_Indexer] Indexation Tweet ID {tweet['tweet_id']} du compte ID {tweet['user_id']}." )
-            if self._DEBUG or self._ENABLE_METRICS :
-                start = time()
-            
-            # Pas besoin de tester si le Tweet est en train d'être traité en
-            # parallèle, car la file "Tweets_to_Index_Queue" empêche qu'un
-            # Tweet y soit présent deux fois
-            
-            # Tester avant d'indexer si le tweet n'est pas déjà dans la BDD
-            # Ne jamais enlever cette vérification, il y a pleins de raisons
-            # qui justifient de passer un peu de temps à toujours vérifier que
-            # le Tweet existe, car sinon on perd trop de temps à faire le
-            # calcul CBIR pour rien. Exemples de raisons :
-            # - Le parallélisme et le fait qu'il n'y a pas d'objet dans la
-            #   mémmoire partagée contenant tous les Tweets indexés,
-            # - Le thread de reset des curseurs de listage avec SearchAPI.
-            if self._bdd.is_tweet_indexed( tweet["tweet_id"] ) and not "force_index" in tweet :
-                if self._DEBUG :
-                    print( "[Tweets_Indexer] Tweet déjà indexé !" )
-                continue
-            
-            length = len( tweet["images"] )
-            
-            if length == 0 :
-                if self._DEBUG :
-                    print( "[Tweets_Indexer] Tweet sans image, on le passe !" )
-                continue
-            
-            image_1_url = None
-            image_2_url = None
-            image_3_url = None
-            image_4_url = None
-            
-            image_1_hash = None
-            image_2_hash = None
-            image_3_hash = None
-            image_4_hash = None
-            
-            image_1_name = None
-            image_2_name = None
-            image_3_name = None
-            image_4_name = None
-            
-            # Mis à True si le Tweet aura besoin d'être réindexé
-            # Dans une liste, car les listes sont passées par référence
-            will_need_retry = [False]
-            
-            # Traitement des images du Tweet
-            if length > 0 :
-                image_1_url = tweet["images"][0]
-                image_1_hash = self._get_image_hash( image_1_url, tweet["tweet_id"], CAN_RETRY = will_need_retry )
-                image_1_name = image_1_url.replace( "https://pbs.twimg.com/media/", "" )
-            if length > 1 :
-                image_2_url = tweet["images"][1]
-                image_2_hash = self._get_image_hash( image_2_url, tweet["tweet_id"], CAN_RETRY = will_need_retry )
-                image_2_name = image_2_url.replace( "https://pbs.twimg.com/media/", "" )
-            if length > 2 :
-                image_3_url = tweet["images"][2]
-                image_3_hash = self._get_image_hash( image_3_url, tweet["tweet_id"], CAN_RETRY = will_need_retry )
-                image_3_name = image_3_url.replace( "https://pbs.twimg.com/media/", "" )
-            if length > 3 :
-                image_4_url = tweet["images"][3]
-                image_4_hash = self._get_image_hash( image_4_url, tweet["tweet_id"], CAN_RETRY = will_need_retry )
-                image_4_name = image_4_url.replace( "https://pbs.twimg.com/media/", "" )
-            
-            if self._DEBUG or self._ENABLE_METRICS :
-                start_insert_into = time()
-            
-            # Stockage des résultats
-            # On stocke même si toutes les images sont à None
-            # Car cela veut dire que toutes les images ont étées perdues par Twitter
-            self._bdd.insert_tweet(
-                tweet["user_id"],
-                tweet["tweet_id"],
-                cbir_hash_1 = image_1_hash,
-                cbir_hash_2 = image_2_hash,
-                cbir_hash_3 = image_3_hash,
-                cbir_hash_4 = image_4_hash,
-                image_name_1 = image_1_name,
-                image_name_2 = image_2_name,
-                image_name_3 = image_3_name,
-                image_name_4 = image_4_name,
-                FORCE_INDEX = "force_index" in tweet
-            )
-            
-            # Si une image a échoué, le Tweet devra être réindexé
-            # On le fait après le vrai enregistrement si jamais le compte
-            # utilisé pour réindexé est bloqué par le compte Twitter en cours
-            # de scan
-            if will_need_retry[0] :
-                self._bdd.add_retry_tweet(
-                    tweet["tweet_id"],
-                    tweet["user_id"],
-                    image_1_url,
-                    image_2_url,
-                    image_3_url,
-                    image_4_url,
-                )
-            
-            # Sinon, si c'était un Tweet échoué, on l'enlève de la table des
-            # Tweets dont l'indexation a échouée
-            # Ceci est la bidouille pour le thread de retentative d'indexation
-            elif "was_failed_tweet" in tweet :
-                self._bdd.remove_retry_tweet( tweet["tweet_id"] )
-            
-            if self._DEBUG or self._ENABLE_METRICS :
-                self._insert_into_times.append( time() - start_insert_into )
-                self._times.append( time() - start )
+            self._index_tweet( tweet )
