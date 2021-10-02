@@ -5,6 +5,7 @@ import Pyro4
 import threading
 import datetime
 from time import time, sleep
+import queue
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
 # Ainsi, si on veut utiliser ce script indépendemment (Notemment pour des
@@ -99,6 +100,11 @@ class Scan_Requests_Pipeline :
         # permet de vérifier qu'ils  aient tous fini avant d'enregistrer les
         # curseurs.
         self._indexing_ids_dict = {}
+        
+        # Sémaphore de protection de sortie de la file d'attente de l'étape C
+        # et du dictionnaire des Tweets en cours d'indexation. Permet d'être
+        # certain qu'un Tweet sorti soit déclaré. Resté interne.
+        self._step_C_sem = Pyro_Semaphore()
         
         # Compteur du nombre de requêtes en cours de traitement dans le
         # pipeline.
@@ -278,6 +284,9 @@ class Scan_Requests_Pipeline :
         
         # Vérifier que plus aucun thread d'indexation indexe un Tweet pour ce
         # compte Twitter (Sinon, on attend qu'il ait fini)
+        # Pas besoin de prendre le sémaphore "self._step_C_sem", car il nous
+        # garanti déjà la déclaration, donc on a forcément ici les bons
+        # Tweets déclarés, sans aucun qui traine
         for thread_name in self._indexing_ids_dict :
             # On ne vérifie pas "keep_service_alive" car un thread d'indexation
             # n'est pas censé prendre trop de temps sur l'indexation d'un Tweet
@@ -367,17 +376,36 @@ class Scan_Requests_Pipeline :
             self._root.unregister_obj( uri )
     
     """
-    Pour les threads d'indexation (Etape C), déclarer quel ID de Tweet il est
-    en train de traiter, ainsi que l'ID du compte Twitter associé.
+    Pour les threads d'indexation (Etape C), obtenir un Tweet dans la file des
+    Tweets à indexer, et déclarer cet ID de Tweet, ainsi que l'ID du compte
+    Twitter associé, le tout dans un sémaphore.
+    Permet de sécuriser la fin d'une requête de scan, et l'enregistrement
+    des curseurs.
+    Si il n'y a pas de Tweet à sortir, ou que le dictionnaire n'est pas un
+    Tweet, le thread est automatiquement déclaré comme en attente.
     
     @param thread_name L'identifiant du thread.
-    @param tweet_id L'ID du Tweet qu'il va traiter, ou None s'il est en attente.
-    @param account_id L'ID du compte Twitter du Tweet qu'il va traiter, ou None
-                      s'il est en attente.
+    @return Un dictionnaire de Tweet à indexer, au format de sortie de la
+            fonction "analyse_tweet_json()".
+            Ou None si la file est vide.
     """
-    def set_indexing_ids ( self, thread_name : str, tweet_id : int, account_id : int ) :
-        self._indexing_ids_dict[ thread_name ] = (tweet_id, account_id)
-    
+    def get_tweet_to_index ( self, thread_name ) -> dict :
+        self._step_C_sem.acquire()
+        try :
+            tweet = self._step_C_index_account_tweet_queue_obj.get( block = False )
+        except queue.Empty :
+            tweet = None
+        if tweet == None :
+            self._indexing_ids_dict[ thread_name ] = (None, None)
+            self._step_C_sem.release()
+            return None
+        if "tweet_id" in tweet :
+            self._indexing_ids_dict[ thread_name ] = ( int(tweet["tweet_id"]), int(tweet["user_id"]) )
+        else :
+            self._indexing_ids_dict[ thread_name ] = (None, None)
+        self._step_C_sem.release()
+        return tweet
+        
     """
     Obtenir ce qu'un thread d'indexation (Etape C) est en train de faire.
     

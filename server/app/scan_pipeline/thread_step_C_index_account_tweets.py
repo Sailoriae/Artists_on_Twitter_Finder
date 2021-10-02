@@ -33,19 +33,10 @@ def thread_step_C_index_account_tweets( thread_id : int, shared_memory ) :
     # Maintenir ouverts certains proxies vers la mémoire partagée
     shared_memory_execution_metrics = shared_memory.execution_metrics
     shared_memory_scan_requests = shared_memory.scan_requests
-    shared_memory_scan_requests_step_C_index_account_tweets_queue = shared_memory_scan_requests.step_C_index_account_tweets_queue
     
     # Fonction à passer à la classe "Tweets_Indexer"
     # Passer "shared_memory.keep_running" ne fonctionne pas
     def keep_running() : return shared_memory.keep_service_alive
-    
-    # Fonction à passer à la classe "Tweets_Indexer"
-    # Permet de déclarer l'ID du Tweet qu'il est en train de traiter, ainsi que
-    # l'ID du compte Twitter associé
-    # Cela permet aux curseurs d'être enregistrés une fois que tous les threads
-    # d'indexation aient fini pour ce compte
-    def set_indexing_ids( tweet_id : int, account_id : int ) :
-        shared_memory_scan_requests.set_indexing_ids( f"thread_step_C_index_account_tweets_th{thread_id}", tweet_id, account_id )
     
     # Initialisation de l'indexeur de Tweets
     tweets_indexer = Tweets_Indexer(
@@ -53,8 +44,14 @@ def thread_step_C_index_account_tweets( thread_id : int, shared_memory ) :
         ENABLE_METRICS = param.ENABLE_METRICS,
         add_step_C_times = shared_memory_execution_metrics.add_step_C_times,
         keep_running = keep_running,
-        end_request = shared_memory_scan_requests.end_request,
-        set_indexing_ids = set_indexing_ids )
+        end_request = shared_memory_scan_requests.end_request )
+    
+    # Fonction à passer à la méthode "Tweets_Indexer.index_tweets()"
+    # Permet de sortir un Tweet de la file d'attente des Tweets à indexer.
+    # Ceci se fait avec déclaration de manière sécurisé, voir la méthode
+    # "Scan_Requests_Pipeline.get_tweet_to_index()".
+    def tweets_queue_get() -> dict :
+        return shared_memory_scan_requests.get_tweet_to_index( f"thread_step_C_index_account_tweets_th{thread_id}" )
     
     # Liste permettant d'enregistrer dans la BDD les Tweets sur lesquels
     # l'indexeur a éventuellement crashé
@@ -62,9 +59,8 @@ def thread_step_C_index_account_tweets( thread_id : int, shared_memory ) :
     
     # Lancer l'indexeur, il travaille tout seul, et s'arrêtera tout seul
     try :
-        tweets_indexer.index_tweets(
-            shared_memory_scan_requests_step_C_index_account_tweets_queue,
-            current_tweet = current_tweet )
+        tweets_indexer.index_tweets( tweets_queue_get,
+                                     current_tweet = current_tweet )
     
     # On attrape les erreurs juste pour enregistrer le Tweet sur lequel on a
     # crashé. Il est important que le code ci-dessous soit très fail-safe, car

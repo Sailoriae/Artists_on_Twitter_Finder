@@ -69,23 +69,17 @@ class Tweets_Indexer :
     @param end_request Fonction de la mémoire partagée permettant de terminer
                        les requêtes de scan (Pipeline de traitement des
                        requêtes de scan).
-    @param set_indexing_ids Fonction utilisant la mémoire partagée pour
-                            déclarer l'ID du Tweet qu'on est en train de
-                            traiter, ainsi que l'ID du compte Twitter associé
-                            (Pipeline de traitement des requêtes de scan).
     """
     def __init__( self, DEBUG : bool = False,
                         ENABLE_METRICS : bool = False,
                         add_step_C_times = None, # Fonction de la mémoire partagée
                         keep_running = None, # Fonction qui nous dit quand nous arrêter
-                        end_request = None, # Fonction de la mémoire partagée permettant de terminer les requêtes de scan
-                        set_indexing_ids = None, # Fonction permettant de déclarer les ID du Tweet et du compte en cours
+                        end_request = None # Fonction de la mémoire partagée permettant de terminer les requêtes de scan
                  ) -> None :
         self._DEBUG = DEBUG
         self._ENABLE_METRICS = ENABLE_METRICS
         
         self._add_step_C_times = add_step_C_times
-        self._set_indexing_ids_function = set_indexing_ids
         self._keep_running = keep_running
         self._end_request_function = end_request
         
@@ -97,17 +91,6 @@ class Tweets_Indexer :
             self._download_image_times = [] # Liste des temps pour télécharger les images d'un Tweet
             self._calculate_features_times = [] # Liste des temps pour d'éxécution du moteur CBIR pour une images d'un Tweet
             self._insert_into_times = [] # Liste des temps pour faire le INSERT INTO
-    
-    """
-    Déclarer dans la mémoire partagée quel Tweet on est en train de traiter.
-    Fonction afin éviter de répéter trois fois ce bout de code.
-    
-    @param tweet_id L'ID du Tweet.
-    @param account_id L'ID du compte Twitter associé.
-    """
-    def _set_indexing_ids ( self, tweet_id, account_id ) -> None :
-        if self._set_indexing_ids_function != None :
-            self._set_indexing_ids_function( tweet_id, account_id )
     
     """
     Permet de gèrer les erreurs HTTP, et de les logger sans avoir a descendre
@@ -433,52 +416,38 @@ class Tweets_Indexer :
     Indexer les Tweets trouvés par les des deux méthodes de listage.
     Ce sont ces méthodes qui vérifient que "account_name" est valide !
     
-    @param tweets_queue File d'attente où sont stockés les Tweets trouvés par
-                        les méthode de listage.
+    @param tweets_queue_get Fonction pour obtenir un Tweet dans la file
+                            d'attente où sont stockés les Tweets trouvés par
+                            les méthode de listage.
+                            NE DOIT PAS ETRE BLOQUANTE !
     @param current_tweet Liste vide permettant d'y place le JSON du Tweet en
                          cours d'indexation. Utile en cas de crash.
     """
     
-    def index_tweets ( self, tweets_queue, # File d'attente d'entrée
+    def index_tweets ( self, tweets_queue_get, # Fonction get() de la file d'attente d'entrée
                              current_tweet = [] # Permet de place le Tweet en cours d'indexation, utilisé en cas de crash
                        ) -> None :
-        # Se déclarer comme en attente dans la mémoire partagée (Pipeline de
-        # traitement des requêtes de scan).
-        self._set_indexing_ids( None, None )
-        
         while self._keep_running == None or self._keep_running() :
             current_tweet.clear()
-            # Ne pas effacer à chaque boucle l'ID du Tweet qu'on était en train
-            # de traiter précédemment. On l'efface uniquement si on doit
-            # attendre.
             try :
-                tweet = tweets_queue.get( block = False )
+                # La fonction "get_tweet_to_index()" du pipeline de traitement
+                # des requêtes de scan déclare automatiquement (Et de manière
+                # sécurisée) le Tweet qu'on est en train de traiter.
+                # Si il n'y en a pas, elle nous déclare automatiquement comme
+                # en attente.
+                tweet = tweets_queue_get()
             except queue.Empty :
                 tweet = None
             if tweet == None :
                 if self._keep_running == None : return
-                self._set_indexing_ids( None, None )
                 sleep( 1 )
                 continue
             
             # Si on a sorti un Tweet, il faut le déclarer le plus rapidement
-            # possible. En cas de crash, et en cas d'enregistrement de curseurs
-            # par un autre thread.
+            # possible à notre thread.
             if "tweet_id" in tweet :
                 # D'abord pour notre thread, en cas de crash
                 current_tweet.append( tweet )
-                
-                # Et ensuite pour la mémoire partagée
-                self._set_indexing_ids( int(tweet["tweet_id"]), int(tweet["user_id"]) )
-            
-            # Si on n'a pas sorti un Tweet, comme on n'efface pas à chaque
-            # boucle la déclaration du Tweet qu'on est en train de traiter, il
-            # faut au moins le faire. Sinon, la méthode "end_request()" va
-            # croire qu'on traite encore un Tweet.
-            else :
-                self._set_indexing_ids( None, None )
-                # Pas besoin d'efface pour notre thread, on le fait à chaque
-                # boucle.
             
             # Enregistrer les mesures des temps d'éxécution tous les 100
             # Tweets (Ces temps sont calculés par la méthode "_index_tweet()").
