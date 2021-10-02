@@ -88,8 +88,8 @@ class Tweets_Lister_with_TimelineAPI :
     - "account_name" : Le nom de compte Twitter concerné.
     - "request_uri" : L'URI de la requête de scan à terminer.
     Les curseurs doivent toujours être enregistrés après l'indexation de tous
-    les Tweets listés. Cela permet de garder une base de données intègre en cas
-    de crash.
+    les Tweets listés. Cela permet de garder une base de données cohérente en
+    cas de crash.
     
     Peut émettre une exception "Unfound_Account_on_Lister_with_TimelineAPI" si
     le compte est introuvable.

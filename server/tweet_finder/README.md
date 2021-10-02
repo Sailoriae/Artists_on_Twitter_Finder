@@ -15,7 +15,7 @@ L'étape de listage communique ses Tweets trouvés à l'étape d'indexation via 
 Cet objet est stocké dans le pipeline de traitement des requêtes de scan (Objet `Scan_Requests_Pipeline`) de la mémoire partagée.
 Les Tweets sont insérés dans cette file sous la forme de dictionnaires, créés par la fonction `analyse_tweet_json` à partie des JSON des Tweets renvoyés par les API de Twitter.
 
-Les étapes de listage peuvent aussi communiquer avec les Tweets des instructions d'enregistrement des curseur. Ces instructions peuvent aussi permettre de mettre fin à la requête de scan d'un compte Twitter (Comment la classe `Tweets_Indexer` les utilise). Il est **très** important que les curseurs soient enregistrés à la fin de l'indexation de tous les Tweets trouvés par l'étape de listage. Cela permet d'avoir une base de données intègre en cas d'extinction du serveur.
+Les étapes de listage peuvent aussi communiquer avec les Tweets des instructions d'enregistrement des curseur. Ces instructions peuvent aussi permettre de mettre fin à la requête de scan d'un compte Twitter (Comment la classe `Tweets_Indexer` les utilise). Il est **très** important que les curseurs soient enregistrés à la fin de l'indexation de tous les Tweets trouvés par l'étape de listage. Cela permet d'avoir une base de données cohérente en cas d'extinction du serveur.
 
 La classe `Reverse_Searcher` permet de rechercher un Tweet à partir d'une image, et éventuellement du compte Twitter sur lequel chercher :
 1. Calcul de l'empreinte de l'image de recherche, module `cbir_engine`,
