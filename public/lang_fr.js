@@ -4,7 +4,7 @@ var lang = {
 
 	"NO_URL_FIELD" : "Aucune URL entrée.",
 	"NOT_AN_URL" : "Ceci n'est pas une URL.",
-	"UNSUPPORTED_WEBSITE" : "Site de l'URL entrée non supporté, ou l'URL est invalide.",
+	"UNSUPPORTED_WEBSITE" : "Site de l'URL entrée non supporté. Le serveur recherche les comptes Twitter des artistes, et il sait le faire uniquement sur certains sites. Ceux-ci sont listés en bas de cette page.",
 	"NOT_AN_ARTWORK_PAGE" : "Le site est supporté, mais l'URL entrée ne mène pas à une illustration.",
 	"NO_TWITTER_ACCOUNT_FOUND" : "Aucun compte Twitter trouvé pour cet artiste.",
 	"NO_VALID_TWITTER_ACCOUNT_FOUND" : "Aucun compte Twitter valide trouvé pour cet artiste.",

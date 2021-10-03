@@ -4,8 +4,8 @@ var lang = {
 
 	"NO_URL_FIELD" : "No URL entered.",
 	"NOT_AN_URL" : "This is not an URL.",
-	"UNSUPPORTED_WEBSITE" : "Site of the entered URL is not supported, or the URL is invalid.",
-	"NOT_AN_ARTWORK_PAGE" : "The site is supported, but the URL entered does not lead to an illustration.",
+	"UNSUPPORTED_WEBSITE" : "Website of the entered URL is not supported. The server searches for artists' Twitter accounts, and it only knows how to do so on certain websites. These are listed at the bottom of this page.",
+	"NOT_AN_ARTWORK_PAGE" : "The website is supported, but the URL entered does not lead to an illustration.",
 	"NO_TWITTER_ACCOUNT_FOUND" : "No Twitter account found for this artist.",
 	"NO_VALID_TWITTER_ACCOUNT_FOUND" : "No valid Twitter account found for this artist.",
 	"BLOCKED_BY_TWITTER_ACCOUNT" : "One of the Twitter accounts to be indexed blocks all scan accounts on the server. It is therefore impossible to index this account.",
@@ -51,5 +51,5 @@ var lang = {
 	"WARNING_3" : "There are %s Tweets waiting to be indexed. If your query requires indexing, it may take some time.",
 	"INFO" : "The number of requests being processed per IP address is limited to %s.",
 
-	"SUPPORTED_WEBSITES" : "Currently supported sites\xa0: "
+	"SUPPORTED_WEBSITES" : "Currently supported websites\xa0: "
 };
