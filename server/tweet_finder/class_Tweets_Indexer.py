@@ -7,6 +7,11 @@ from time import sleep, time
 from statistics import mean
 import queue
 
+# On autorise le chargement des images tronquées dans PIL, car HTTP nous
+# garantie qu'on a bien le fichier complet
+from PIL import ImageFile
+ImageFile.LOAD_TRUNCATED_IMAGES = True
+
 # Les importations se font depuis le répertoire racine du serveur AOTF
 # Ainsi, si on veut utiliser ce script indépendemment (Notemment pour des
 # tests), il faut que son répertoire de travail soit ce même répertoire
@@ -29,7 +34,7 @@ from shared_memory.open_proxy import open_proxy
 
 # Très très très important :
 # 1 - On analyse les images en qualité maximale.
-# 2 - Si l'image n'est plus accessible, on remplit ses champs avec NULL !
+# 2 - Si l'image n'est plus accessible, on met son empreinte à NULL !
 
 
 """
