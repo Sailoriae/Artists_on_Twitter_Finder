@@ -5,6 +5,8 @@
 * Script [`get_oauth_token.py`](get_oauth_token.py) :
   Permet d'obtenir les clés d'authentification à un compte Twitter.
 
+* Script [`analyze_results.py`](analyze_results.py) :
+  Permet d'analyser les résultats du serveur AOTF.
 
 ## Archives et anciennes fonctionnalités
 
