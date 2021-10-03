@@ -185,6 +185,7 @@ class DeviantArt :
             # passer deux fois.
             if multiplexer != None :
                 twitter_accounts += multiplexer( artist_about_page )
+                return twitter_accounts
             
             scanner2 = Webpage_to_Twitter_Accounts( artist_about_page )
         
