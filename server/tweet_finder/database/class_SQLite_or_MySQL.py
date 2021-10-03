@@ -88,10 +88,10 @@ class SQLite_or_MySQL :
                                    last_TimelineAPI_indexing_tweet_id BIGINT UNSIGNED,
                                    last_TimelineAPI_indexing_local_date DATETIME,
                                    last_use DATETIME,
-                                   uses_count BIGINT UNSIGNED DEFAULT 0 )"""
+                                   uses_count BIGINT UNSIGNED DEFAULT 0 NOT NULL )"""
             
             tweets_table = """CREATE TABLE IF NOT EXISTS tweets (
-                                  account_id BIGINT UNSIGNED,
+                                  account_id BIGINT UNSIGNED NOT NULL,
                                   tweet_id BIGINT UNSIGNED PRIMARY KEY,
                                   image_1_name VARCHAR(19) CHARACTER SET ascii COLLATE ascii_bin,
                                   image_1_hash BINARY(""" + str(HASH_SIZE_BYTES) + """),
@@ -110,7 +110,7 @@ class SQLite_or_MySQL :
                                           image_3_url VARCHAR(48) CHARACTER SET ascii COLLATE ascii_bin,
                                           image_4_url VARCHAR(48) CHARACTER SET ascii COLLATE ascii_bin,
                                           last_retry_date DATETIME,
-                                          retries_count TINYINT UNSIGNED DEFAULT 0 )"""
+                                          retries_count TINYINT UNSIGNED DEFAULT 0 NOT NULL )"""
         
         else :
             account_table = """CREATE TABLE IF NOT EXISTS accounts (
@@ -121,10 +121,10 @@ class SQLite_or_MySQL :
                                    last_TimelineAPI_indexing_tweet_id UNSIGNED BIGINT,
                                    last_TimelineAPI_indexing_local_date DATETIME,
                                    last_use DATETIME,
-                                   uses_count UNSIGNED BIGINT DEFAULT 0 )"""
+                                   uses_count UNSIGNED BIGINT DEFAULT 0 NOT NULL )"""
             
             tweets_table = """CREATE TABLE IF NOT EXISTS tweets (
-                                  account_id UNSIGNED BIGINT,
+                                  account_id UNSIGNED BIGINT NOT NULL,
                                   tweet_id UNSIGNED BIGINT PRIMARY KEY,
                                   image_1_name VARCHAR(19),
                                   image_1_hash BINARY(""" + str(HASH_SIZE_BYTES) + """),
@@ -143,7 +143,7 @@ class SQLite_or_MySQL :
                                           image_3_url VARCHAR(48),
                                           image_4_url VARCHAR(48),
                                           last_retry_date DATETIME,
-                                          retries_count UNSIGNED TINYINT DEFAULT 0 )"""
+                                          retries_count UNSIGNED TINYINT DEFAULT 0 NOT NULL )"""
         
         c.execute( account_table )
         c.execute( tweets_table )
