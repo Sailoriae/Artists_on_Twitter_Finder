@@ -9,6 +9,19 @@ import numpy
 # Taille des empreintes. La taille des empreintes en bits sera le carré de
 # cette valeur. Si cette valeur est changé, la base de données doit être reset.
 HASH_SIZE = 8
+# J'ai testé de monter à 144 bits. Déjà, les images qui avaient une distance de
+# 6 bits passent à 14. Il faut donc augmenter le seuil si on veut garder notre
+# tolérance aux légères modifications.
+# Sauf que les faux positifs qui étaient égaux (Distance 0 en 64 bits) passent
+# à 18-20 bits. Normal, pHash est plus précis quand on augmente la taille.
+# Après, est-ce que c'est utile ? Car les faux positifs sont souvent des images
+# à la con (Couleur unie avec une petite crotte à un endroit).
+# A 256 bits, la distance entre les faux positifs explose, et notre seuil de
+# tolérance passerait à 20.
+# Le problème est qu'augmenter la taille des hash conduirait à plus de
+# résultats ayant une distance strictement supérieure à zéro, et donc
+# limiterait les résultas dans le cas d'une recherche dans toute la base de
+# données.
 
 # Nombre maximum de bits de différence pour considérer que des images sont les
 # mêmes. Cette valeur doit être ajustée en fonction de la taille des
