@@ -3,7 +3,7 @@ scipy
 urllib3
 mysql-connector-python
 requests
-tweepy
+tweepy>=4.0.0
 beautifulsoup4
 Pyro4
 -e git+https://github.com/JustAnotherArchivist/snscrape.git#egg=snscrape

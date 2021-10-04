@@ -37,12 +37,14 @@ class TweepyAbstraction :
         
         # Tweepy gère l'attente lors d'une rate limit !
         self._api = tweepy.API( auth, 
-                                wait_on_rate_limit = True, # Gérer les rate limits
-                                wait_on_rate_limit_notify = True ) # Faire des print() lors d'une rate limit
+                                wait_on_rate_limit = True # Gérer les rate limits
+                               )
         # Note : Ne pas utiliser l'option "retry_count"
         # Elle réessaye sur TOUTES les erreurs, pas seulement celles de connexion
     
     """
+    Cette fonction est uniquement à utiliser dans "check_parameters()".
+    
     @param tweet_id L'ID du Tweet
     @return Un objet Status (= Tweet de la librairie Tweepy)
             None si il y a eu un problème
@@ -50,7 +52,7 @@ class TweepyAbstraction :
     def get_tweet ( self, tweet_id, trim_user = False ) :
         try :
             return self._api.get_status( tweet_id, trim_user = trim_user, tweet_mode = 'extended' )
-        except tweepy.TweepError as error :
+        except tweepy.errors.HTTPException as error :
             print( f"[Tweepy] Erreur en récupérant les informations du Tweet ID {tweet_id}." )
             print( error.reason )
             return None # Bien laisser le "return None" pour le check_parameters()
@@ -65,7 +67,7 @@ class TweepyAbstraction :
         
         # Séparer la liste "accounts_names" en sous-listes de 100 éléments
         for tweets_ids_sublist in [tweets_ids[i:i+100] for i in range(0,len(tweets_ids),100)] :
-            to_return += self._api.statuses_lookup( tweets_ids_sublist, trim_user = trim_user, tweet_mode = "extended" )
+            to_return += self._api.lookup_statuses( tweets_ids_sublist, trim_user = trim_user, tweet_mode = "extended" )
         
         return to_return
     
@@ -101,17 +103,17 @@ class TweepyAbstraction :
 #                    print( "[Tweepy] Le compte est en privé / est protégé." )
                     return None
                 return json.id
-        except tweepy.TweepError as error :
+        except tweepy.errors.HTTPException as error :
 #            if invert_mode :
 #                print( f"[Tweepy] Erreur en récupérant le nom du compte ID {account_name}." )
 #            else :
 #                print( f"[Tweepy] Erreur en récupérant l'ID du compte @{account_name}." )
 #            print( error.reason )
-            if error.api_code == 50 : # User not found
+            if 50 in error.api_codes : # User not found
                 return None
-            if error.api_code == 63 : # User has been suspended
+            if 63 in error.api_codes : # User has been suspended
                 return None
-            if retry_once and error.api_code == None :
+            if retry_once and error.api_codes == [] :
                 time.sleep( 10 )
                 return self.get_account_id( account_name, invert_mode = invert_mode, retry_once = False )
             raise error
@@ -133,16 +135,16 @@ class TweepyAbstraction :
         # Séparer la liste "accounts_names" en sous-listes de 100 éléments
         for accounts_names_sublist in [accounts_names[i:i+100] for i in range(0,len(accounts_names),100)] :
             try :
-                for account in self._api.lookup_users( screen_names = accounts_names_sublist ) :
+                for account in self._api.lookup_users( screen_name = accounts_names_sublist ) :
                     # Filtrer les comptes privés
                     if account._json["protected"] == False :
                         to_return.append( ( account.screen_name, account.id ) )
             
             # Gérer le cas où aucun compte dans la liste n'est trouvable
-            except tweepy.TweepError as error :
-                if error.api_code == 17 : # No user matches for specified terms
+            except tweepy.errors.HTTPException as error :
+                if 17 in error.api_codes : # No user matches for specified terms
                     continue
-                if retry_once and error.api_code == None :
+                if retry_once and error.api_codes == [] :
                     time.sleep( 10 )
                     return self.get_multiple_accounts_ids( accounts_names, retry_once = False )
                 raise error
@@ -195,10 +197,10 @@ class TweepyAbstraction :
     # Note : On ne peut pas savoir via cette API si le compte est en privé.
     def blocks_me ( self, account_id : int, retry_once = True ) :
         try :
-            friendship = self._api.show_friendship( target_id = account_id )
+            friendship = self._api.get_friendship( target_id = account_id )
             return friendship[0].blocked_by
-        except tweepy.TweepError as error :
-            if retry_once and error.api_code == None :
+        except tweepy.errors.HTTPException as error :
+            if retry_once and error.api_codes == [] :
                 time.sleep( 10 )
                 return self.blocks_me( account_id, retry_once = False )
             raise error
