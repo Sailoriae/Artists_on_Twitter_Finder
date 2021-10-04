@@ -52,6 +52,12 @@ Attention : Cette fonction retourne le contenu binaire !
 Vraiment important : None veut dire qu'on ne pourra jamais obtenir l'image.
 Par exemple, si twitter renvoit une erreur 404, c'est qu'ils ont vraiment perdu
 l'image. AOTF ne retentera donc pas de l'indexer.
+
+Note : J'ai découvert que sur certains Tweets où l'image "large" est corrompue,
+l'image "medium" ne l'est pas. Ce qui crée des Tweets bizarres, qui ont l'air
+buggés. On pourrait changer le comportement de cette fonction, puis mettre dans
+la table "reindex_tweets" les Tweets avec une image marquée comme corrompue
+(Hash à NULL mais pas le nom de l'image).
 """
 def get_tweet_image ( image_url : str ) -> bytes :
     retry_count = 0
