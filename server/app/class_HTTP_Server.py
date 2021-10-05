@@ -30,10 +30,18 @@ Serveur HTTP
 # Fonction contenant la classe, permettant de passer le paramètre shared_memory
 def http_server_container ( shared_memory_uri_arg ) :
     class HTTP_Server( BaseHTTPRequestHandler ) :
-        shared_memory_uri = shared_memory_uri_arg # Attribut de classe
+        # Pyro permet de partager un Proxy entre threads, et un thread est
+        # créé à chaque requête HTTP, avec cet objet, et est détruit à la fin
+        # de la requête.
+        # On peut donc garder en attribut de classe des proxies vers la mémoire
+        # partagée. Cela permet de ne pas ouvrir un proxy à chaque requête.
+        shared_memory = open_proxy( shared_memory_uri_arg )
+        http_limitator = shared_memory.http_limitator
+        user_requests = shared_memory.user_requests
+        scan_requests = shared_memory.scan_requests
+        step_C_index_account_tweets_queue = scan_requests.step_C_index_account_tweets_queue
         
         def __init__( self, *args, **kwargs ) :
-            self.shared_memory = open_proxy( self.shared_memory_uri )
             super(BaseHTTPRequestHandler, self).__init__(*args, **kwargs)
         
         # Ne pas afficher les logs par défaut dans la console
@@ -78,7 +86,7 @@ def http_server_container ( shared_memory_uri_arg ) :
             # HTTP 429
             # =================================================================
             # Vérifier que l'utilisateur ne fait pas trop de requêtes
-            elif not self.shared_memory.http_limitator.can_request( client_ip ) :
+            elif not self.http_limitator.can_request( client_ip ) :
                 http_code = 429
                 self.send_response(http_code)
                 self.send_header("Content-type", "text/plain")
@@ -119,8 +127,8 @@ def http_server_container ( shared_memory_uri_arg ) :
                 
                 else :
                     # Lance une nouvelle requête, ou donne la requête déjà existante
-                    request = self.shared_memory.user_requests.launch_request( illust_url,
-                                                                               ip_address = client_ip )
+                    request = self.user_requests.launch_request( illust_url,
+                                                                 ip_address = client_ip )
                     
                     # Si request == None, c'est qu'on ne peut pas lancer une
                     # nouvelle requête car l'addresse IP a trop de requêtes en
@@ -146,15 +154,12 @@ def http_server_container ( shared_memory_uri_arg ) :
                 self.send_header("Access-Control-Allow-Origin", "*")
                 self.end_headers()
                 
-                # Ouvrir qu'une seule fois ce proxy
-                scan_requests = self.shared_memory.scan_requests
-                
                 response_dict = {
                     "indexed_tweets_count" : self.shared_memory.tweets_count,
                     "indexed_accounts_count" : self.shared_memory.accounts_count,
-                    "processing_user_requests_count" : self.shared_memory.user_requests.processing_requests_count,
-                    "processing_scan_requests_count" : scan_requests.processing_requests_count,
-                    "pending_tweets_count" : scan_requests.step_C_index_account_tweets_queue.qsize()
+                    "processing_user_requests_count" : self.user_requests.processing_requests_count,
+                    "processing_scan_requests_count" : self.scan_requests.processing_requests_count,
+                    "pending_tweets_count" : self.step_C_index_account_tweets_queue.qsize()
                 }
                 
                 json_text = json.dumps( response_dict )
