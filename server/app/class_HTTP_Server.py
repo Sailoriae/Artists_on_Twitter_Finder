@@ -41,6 +41,10 @@ def http_server_container ( shared_memory_uri_arg ) :
         scan_requests = shared_memory.scan_requests
         step_C_index_account_tweets_queue = scan_requests.step_C_index_account_tweets_queue
         
+        # Envoyer un header "Server" personnalisé
+        server_version = "Artists on Twitter Finder"
+        sys_version = ""
+        
         def __init__( self, *args, **kwargs ) :
             super(BaseHTTPRequestHandler, self).__init__(*args, **kwargs)
         
