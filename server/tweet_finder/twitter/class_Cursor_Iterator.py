@@ -26,7 +26,7 @@ class Cursor_Iterator :
             # les curseurs. Donc on peut rappeler "__next__()" en cas de crash.
             except tweepy.errors.HTTPException as error :
                     if error.response != None : # Si le serveur nous ferme la connexion au nez
-                        if error.response.status_code != 503 and error.response.status_code != 429 :
+                        if not error.response.status_code in [503, 429, 500] :
                             raise error
                     print( "[Tweepy Cursor_It] Limite atteinte, on réessaye dans environ 60 secondes..." )
                     print( error )
