@@ -137,8 +137,12 @@ class Danbooru :
         # Dans ce cas, on cherche les comptes Twitter de tous les artistes
         artists_tags = self._cache_illust_url_json["tag_string_artist"].split(" ")
         
+#        if artists_tags == [""] :
+#            return []
+        # Ne pas retourner tout de suite, il faut aller voir la source
+        # Faire en sorte qu'il n'y ait aucune itération dans la boucle "for"
         if artists_tags == [""] :
-            return []
+            artists_tags = []
         
         twitter_accounts = []
         

@@ -182,8 +182,9 @@ class Philomena :
             if tag[0:7] == "artist:" :
                 artists_tags.append( tag )
         
-        if artists_tags == [] :
-            return []
+#        if artists_tags == [] :
+#            return []
+        # Ne pas retourner tout de suite, il faut aller voir la source
         
         twitter_accounts = []
         
