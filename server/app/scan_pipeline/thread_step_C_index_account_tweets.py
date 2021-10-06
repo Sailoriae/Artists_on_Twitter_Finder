@@ -28,6 +28,10 @@ Thread d'indexation de n'importe quel Tweet trouvé par les méthodes de listage
 ou par les Tweets du thread de retentative d'indexation.
 Traite la file d'attente suivante (Dans la mémoire partagée) :
 shared_memory.scan_requests.step_C_SearchAPI_index_account_tweets_queue
+
+Il y a dans ce thread plusieurs sécurité pour éviter au maximum de perdre un
+Tweet listé. Cela peut sembler redondant, mais c'est nécessaire, car on est un
+thread assez critique.
 """
 def thread_step_C_index_account_tweets( thread_id : int, shared_memory ) :
     # Maintenir ouverts certains proxies vers la mémoire partagée
@@ -46,11 +50,40 @@ def thread_step_C_index_account_tweets( thread_id : int, shared_memory ) :
         keep_running = keep_running,
         end_request = shared_memory_scan_requests.end_request )
     
+    # Sécurité donnée à la mémoire partagée lors de l'obtention d'un Tweet.
+    # Permet de détecter un thread avec le même nom déjà démarré (Ce qui serait
+    # embêtant, car on s'écraserait mutuellement les Tweets que l'on déclare en
+    # cours d'indexation, et donc pourrait mener à des Tweets perdus lors de
+    # l'enregistrement des curseurs.
+    first_get_tweet_to_index = True
+    
     # Fonction à passer à la méthode "Tweets_Indexer.index_tweets()"
     # Permet de sortir un Tweet de la file d'attente des Tweets à indexer.
     # Ceci se fait avec déclaration de manière sécurisé, voir la méthode
     # "Scan_Requests_Pipeline.get_tweet_to_index()".
     def tweets_queue_get() -> dict :
+        nonlocal first_get_tweet_to_index
+        if first_get_tweet_to_index :
+            first_get_tweet_to_index = False
+            try :
+                return shared_memory_scan_requests.get_tweet_to_index( f"thread_step_C_index_account_tweets_th{thread_id}", first_time = True )
+            
+            # Si ce thread a déjà démarré une fois, il faut mettre le Tweet
+            # qu'on risque d'écraser dans la table des Tweets à réessayer
+            # d'indexer.
+            # Note : Un thread qui redémarre est forcément un crash, et un
+            # redémarrage via le collecteur d'erreurs. Car le registre des
+            # threads ("Threads_Registry") empêche de démarrer deux fois un
+            # thread avec le même nom.
+            except AssertionError :
+                print( f"[step_C_th{thread_id}] Redémarrage après un crash détecté. Sauvegarde du Tweet qui était en cours d'indexation." )
+                tweet_id, _ = shared_memory_scan_requests.get_indexing_ids( f"thread_step_C_index_account_tweets_th{thread_id}" )
+                SQLite_or_MySQL().add_retry_tweet_id( tweet_id )
+                
+                # Si on arrive ici sans crasher, c'est qu'on peut obtenir le
+                # Tweet en écrasant le précédent.
+                return shared_memory_scan_requests.get_tweet_to_index( f"thread_step_C_index_account_tweets_th{thread_id}" )
+        
         return shared_memory_scan_requests.get_tweet_to_index( f"thread_step_C_index_account_tweets_th{thread_id}" )
     
     # Liste permettant d'enregistrer dans la BDD les Tweets sur lesquels

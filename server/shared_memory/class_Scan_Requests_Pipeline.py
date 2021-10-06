@@ -385,12 +385,19 @@ class Scan_Requests_Pipeline :
     Tweet, le thread est automatiquement déclaré comme en attente.
     
     @param thread_name L'identifiant du thread.
+    @param first_time Permet de dire que c'est notre première déclaration, et
+                      donc vérifie qu'on n'écrase pas un Tweet ans le
+                      dictionnaire des Tweets en cours d'indexation.
     @return Un dictionnaire de Tweet à indexer, au format de sortie de la
             fonction "analyse_tweet_json()".
             Ou None si la file est vide.
     """
-    def get_tweet_to_index ( self, thread_name ) -> dict :
+    def get_tweet_to_index ( self, thread_name, first_time = False ) -> dict :
         self._step_C_sem.acquire()
+        if first_time and thread_name in self._indexing_ids_dict :
+            if self._indexing_ids_dict[ thread_name ] != (None, None) :
+                self._step_C_sem.release()
+                raise AssertionError( f"Le thread \"{thread_name}\" déclare sa première indexation, mais il y a déjà un Tweet dans le dictionnaire des Tweets en cours d'indexation associé à ce nom de thread." )
         try :
             tweet = self._step_C_index_account_tweet_queue_obj.get( block = False )
         except queue.Empty :
@@ -410,6 +417,8 @@ class Scan_Requests_Pipeline :
     Obtenir ce qu'un thread d'indexation (Etape C) est en train de faire.
     
     @param thread_name L'identifiant du thread.
+    @return Un tuple, contenant l'ID du Tweet, et l'ID du compte Twitter
+            associé, ou (None, None) se le thread est en attente.
     """
     def get_indexing_ids ( self, thread_name : str ) :
         if not thread_name in self._indexing_ids_dict :

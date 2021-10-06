@@ -643,6 +643,21 @@ class SQLite_or_MySQL :
         self._conn.commit()
     
     """
+    Enregistrement de secours d'un ID de Tweet à réessayer.
+    """
+    def add_retry_tweet_id( self, tweet_id ) :
+        c = self._get_cursor()
+        if param.USE_MYSQL_INSTEAD_OF_SQLITE :
+            request = """INSERT INTO reindex_tweets ( tweet_id ) VALUES ( %s )
+                         ON DUPLICATE KEY UPDATE tweet_id = tweet_id"""
+        else :
+            request = """INSERT INTO reindex_tweets ( tweet_id ) VALUES ( ? )
+                         ON CONFLICT ( tweet_id ) DO NOTHING"""
+        
+        c.execute( request, ( tweet_id, ) )
+        self._conn.commit()
+    
+    """
     Supprimer un ID de Tweet à réessayer.
     """
     def remove_retry_tweet( self, tweet_id ) :
