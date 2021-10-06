@@ -199,7 +199,9 @@ class Danbooru :
             return None
         
         # Exception pour Pixiv (Je ne sais pas pourquoi l'API Danbooru fait ça)
-        if "pixiv_id" in self._cache_illust_url_json :
+        if ( "pixiv_id" in self._cache_illust_url_json and
+             self._cache_illust_url_json["pixiv_id"] != None and
+             self._cache_illust_url_json["pixiv_id"] != "" ) :
             source = "https://www.pixiv.net/en/artworks/" + str( self._cache_illust_url_json["pixiv_id"] )
         else :
             source = self._cache_illust_url_json["source"]
