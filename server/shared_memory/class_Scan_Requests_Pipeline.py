@@ -195,7 +195,7 @@ class Scan_Requests_Pipeline :
                         # On doit démonter et remonter la file en enlevant la
                         # requête.
                         remove_account_id_from_queue(
-                            self._step_A_SearchAPI_list_account_tweets_queue,
+                            self._step_A_SearchAPI_list_account_tweets_queue_obj,
                             account_id )
                         
                         # On met la requête dans la file d'attente prioritaire.
@@ -208,7 +208,7 @@ class Scan_Requests_Pipeline :
                         # On doit démonter et remonter la file en enlevant la
                         # requête.
                         remove_account_id_from_queue(
-                            self._step_B_TimelineAPI_list_account_tweets_queue,
+                            self._step_B_TimelineAPI_list_account_tweets_queue_obj,
                             account_id )
                         
                         # On met la requête dans la file d'attente prioritaire.
