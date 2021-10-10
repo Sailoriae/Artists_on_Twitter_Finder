@@ -83,6 +83,11 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
         # Analyser les JSON et les mettre dans la file d'attente
         for tweet_json in response :
             tweet = analyse_tweet_json( tweet_json._json )
+            if tweet == None :
+                # C'est possible que Twitter perdent des images et que les
+                # Tweets n'aient plus d'image associée
+                print( f"[retry_failed_tweets_th{thread_id}] Le Tweet ID {tweet_json._json['id_str']} n'a pas d'image associée." )
+                continue
             print( f"[retry_failed_tweets_th{thread_id}] Demande de réindexation du Tweet ID {tweet['tweet_id']} envoyée !" )
             tweet["was_failed_tweet"] = True
             tweet["force_index"] = True
