@@ -137,9 +137,11 @@ def thread_step_C_index_account_tweets( thread_id : int, shared_memory ) :
                         tweet_is_safe = True
                     except Exception :
                         file = open( "thread_step_C_index_account_tweets_errors.log", "a" )
+                        file.write( "ICI UN COLLECTEUR D'ERREURS DU THREAD C !\n" )
+                        file.write( "Je suis dans le fichier suivant : app/scan_pipeline/thread_step_C_index_account_tweets.py\n" )
                         file.write( f"Erreur avec le Tweet ID {tweet['tweet_id']} !\n" )
-                        file.write( "Il y a eu un problème lors de la tentative d'enregistrer le Tweet dans la table des Tweets à réessayer d'indexer.")
-                        file.write( "Il est recommandé d'insérer manuellement l'ID du Tweet dans la table \"retry_tweets\" !" )
+                        file.write( "Il y a eu un problème lors de la tentative d'enregistrer le Tweet dans la table des Tweets à réessayer d'indexer.\n")
+                        file.write( "Il est recommandé d'insérer manuellement l'ID du Tweet dans la table \"retry_tweets\" !\n" )
                         file.write( "Traceback du problème :" )
                         traceback.print_exc( file = file )
                         file.write( "\n\n\n" )
@@ -155,9 +157,11 @@ def thread_step_C_index_account_tweets( thread_id : int, shared_memory ) :
                                 scan_request_on_error = True
                     except Exception :
                         file = open( "thread_step_C_index_account_tweets_errors.log", "a" )
+                        file.write( "ICI UN COLLECTEUR D'ERREURS DU THREAD C !\n" )
+                        file.write( "Je suis dans le fichier suivant : app/scan_pipeline/thread_step_C_index_account_tweets.py\n" )
                         file.write( f"Erreur avec le Tweet ID {tweet['tweet_id']} !\n" )
-                        file.write( "Il y a eu un problème lors de la tentative de mettre la requête de scan associée en échec.")
-                        file.write( "Il est recommandé d'insérer manuellement l'ID du Tweet dans la table \"retry_tweets\" !" )
+                        file.write( "Il y a eu un problème lors de la tentative de mettre la requête de scan associée en échec.\n")
+                        file.write( "Il est recommandé d'insérer manuellement l'ID du Tweet dans la table \"retry_tweets\" !\n" )
                         file.write( "Traceback du problème :" )
                         traceback.print_exc( file = file )
                         file.write( "\n\n\n" )
@@ -176,6 +180,7 @@ def thread_step_C_index_account_tweets( thread_id : int, shared_memory ) :
             message += "\nVous pouvez aussi plus simplement mettre à \"NULL\" les curseurs d'indexation pour l'ID du compte Twitter."
         else :
             message += "\nAucun Tweet en cours d'indexation."
+        message += "\nCes informations sont données au collecteur d'erreurs général par fonction \"thread_step_C_index_account_tweets\"."
         raise Exception( message ) from error
     
     print( f"[step_C_th{thread_id}] Arrêté !" )

@@ -141,6 +141,8 @@ class Tweets_Indexer :
                 # 504 = Gateway Timeout
                 if not error.code in [502, 504] :
                     file = open( "method_Tweets_Indexer.get_image_hash_errors.log", "a" )
+                    file.write( "ICI LE COLLECTEUR D'ERREURS DE L'INDEXEUR DE TWEETS !\n" )
+                    file.write( "Je suis dans le fichier suivant : tweet_finder/Tweets_Indexer.py\n" )
                     file.write( f"Erreur avec le Tweet ID {tweet_id} !\n" )
                     file.write( "Le Tweet va être inséré dans la table \"reindex_tweets\" (Sauf si une autre erreur se produit).\n" )
                     traceback.print_exc( file = file )
