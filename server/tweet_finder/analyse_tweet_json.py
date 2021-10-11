@@ -42,6 +42,11 @@ def analyse_tweet_json ( tweet_json : dict ) -> dict :
         return None
     for tweet_media in tweet_medias :
         if tweet_media["type"] == "photo" :
+            # Sortir les vignettes de vidéos (De toutes manières, la BDD ne
+            # peut pas stocker leur URL, car différent des images)
+            if tweet_media["media_url_https"][:42] == "https://pbs.twimg.com/amplify_video_thumb/" :
+                continue
+            
             tweet_dict["images"].append( tweet_media["media_url_https"] )
     
     if len(tweet_dict["images"]) == 0 :
