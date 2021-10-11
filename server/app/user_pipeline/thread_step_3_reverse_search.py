@@ -133,7 +133,11 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
                                            key = lambda x: (x.distance, x.images_count, x.tweet_id),
                                            reverse = False )
             
-            print( f"[step_3_th{thread_id}] Tweets trouvés (Du plus au moins proche) : {[ data.tweet_id for data in request.found_tweets ]}" )
+            if len( request.found_tweets ) > 0 :
+                s = f"{'s' if len( request.found_tweets ) > 1 else ''}"
+                print( f"[step_3_th{thread_id}] Tweet{s} trouvé{s} (Du plus au moins proche) : {', '.join( [ f'ID {tweet.tweet_id} (Distance {tweet.distance})' for tweet in request.found_tweets ] )}" )
+            else :
+                print( f"[step_3_th{thread_id}] Aucun Tweet trouvé !" )
         
         # Enregistrer le temps complet pour traiter cette requête
         shared_memory_execution_metrics.add_user_request_full_time( time() - request.start )

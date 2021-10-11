@@ -165,5 +165,7 @@ class Metrics_Container :
         
         if to_print == "" :
             to_print = "Aucune moyenne disponible, car aucune requête n'a été lancée."
+        else :
+            to_print = "Les temps suivants sont exprimés en secondes.\n" + to_print[:-1] # On enlève le dernier \n
         
         return to_print

@@ -140,6 +140,6 @@ class Threads_Registry :
             total_memory_size = psutil.Process( os.getpid() ).memory_info().rss # en octets
             total_memory_size = total_memory_size / 1024 / 1024 # en megaoctets
         
-        to_print += "Taille totale d'AOTF en mémoire : {:.2f} Mo\n".format( total_memory_size )
+        to_print += "Taille totale d'AOTF en mémoire : {:.2f} Mo".format( total_memory_size )
         
         return to_print

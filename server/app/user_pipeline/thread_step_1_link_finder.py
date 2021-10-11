@@ -134,7 +134,8 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
         
         # Si la requête peut continuer dans le pipeline utilisateur
         else :
-            print( f"[step_1_th{thread_id}] Comptes Twitter valides trouvés pour cet artiste : {[ account[0] for account in request.twitter_accounts_with_id ]}" )
+            s = f"{'s' if len( request.twitter_accounts_with_id ) > 1 else ''}"
+            print( f"[step_1_th{thread_id}] Compte{s} Twitter valide{s} trouvé{s} pour cet artiste : {', '.join( [ f'@{account[0]} (ID {account[1]})' for account in request.twitter_accounts_with_id ] )}" )
             print( f"[step_1_th{thread_id}] URL de l'image trouvée : {data.image_urls[0]}" )
             
             # Enregistrer les données trouvées dans l'objet User_Request

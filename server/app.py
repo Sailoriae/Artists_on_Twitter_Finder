@@ -260,7 +260,7 @@ if __name__ == "__main__" :
         
         if args[0] == "request" :
             if len(args) == 2 :
-                print( "Lancement de la procédure !" )
+                print( "Lancement de la procédure ! Si rien ne se passe, c'est peut-être qu'une requête existe déjà pour cet URL." )
                 shared_memory_user_requests.launch_request( args[1] )
             else :
                 print( "Utilisation : request [URL de l'illustration]" )
@@ -274,15 +274,18 @@ if __name__ == "__main__" :
                         print( f"Problème : {request.problem}" )
                     
                     if request.scan_requests == None :
-                        print( "Cette requête n'a pas (encore ?) de requête de scan associée." )
+                        if request.status < 3 :
+                            print( "Cette requête n'a pas (encore ?) de requête de scan associée." )
+                        else :
+                            print( "Cette requête n'a pas de requête de scan associée." )
                     elif request.scan_requests == [] :
                         print( "Cette requête n'a plus de requête de scan associée." )
                     else :
                         for scan_request_uri in request.scan_requests :
                             scan_request = open_proxy( scan_request_uri )
-                            print( f" - Scan @{scan_request.account_name} (ID {scan_request.account_id}), prioritaire : {scan_request.is_prioritary}" )
-                            print( f"    - A démarré le listage SearchAPI : {scan_request.started_SearchAPI_listing}, TimelineAPI : {scan_request.started_TimelineAPI_listing}" )
-                            print( f"    - A terminé l'indexation SearchAPI : {scan_request.finished_SearchAPI_indexing}, TimelineAPI : {scan_request.finished_TimelineAPI_indexing}" )
+                            print( f" - Scan @{scan_request.account_name} (ID {scan_request.account_id}), prioritaire : {'OUI' if scan_request.is_prioritary else 'NON'}" )
+                            print( f"    - A démarré le listage SearchAPI : {'OUI' if scan_request.started_SearchAPI_listing else 'NON'}, TimelineAPI : {'OUI' if scan_request.started_TimelineAPI_listing else 'NON'}" )
+                            print( f"    - A terminé l'indexation SearchAPI : {'OUI' if scan_request.finished_SearchAPI_indexing else 'NON'}, TimelineAPI : {'OUI' if scan_request.finished_TimelineAPI_indexing else 'NON'}" )
                     
                     if request.finished_date != None :
                         print( f"Fin du traitement : {request.finished_date}" )
@@ -295,8 +298,16 @@ if __name__ == "__main__" :
             if len(args) == 2 :
                 request = shared_memory_user_requests.get_request( args[1] )
                 if request != None :
-                    print( f"Comptes Twitter trouvés : {', '.join( [ f'@{account[0]} (ID {account[1]})' for account in request.twitter_accounts_with_id ] )}" )
-                    print( f"Résultat : {[ (data.tweet_id, data.distance ) for data in request.found_tweets ]}" )
+                    if len( request.twitter_accounts_with_id ) > 0 :
+                        s = f"{'s' if len( request.twitter_accounts_with_id ) > 1 else ''}"
+                        print( f"Compte{s} Twitter trouvé{s} : {', '.join( [ f'@{account[0]} (ID {account[1]})' for account in request.twitter_accounts_with_id ] )}" )
+                    else :
+                        print( "Aucun compte Twitter trouvé !" )
+                    if len( request.found_tweets ) > 0 :
+                        s = f"{'s' if len( request.found_tweets ) > 1 else ''}"
+                        print( f"Tweet{s} trouvé{s} : {', '.join( [ f'ID {tweet.tweet_id} (Distance {tweet.distance})' for tweet in request.found_tweets ] )}" )
+                    else :
+                        print( "Aucun Tweet trouvé !" )
                 else :
                     print( "Requête inconnue pour cet URL !" )
             else :
@@ -402,11 +413,11 @@ if __name__ == "__main__" :
                        " - Une requête est une procédure complète pour un illustration\n" +
                        " - Les requêtes sont identifiées par l'URL de l'illustration.\n" +
                        "\n" +
-                       "Forcer l'indexation de tous les tweets d'un compte : scan [Nom du compte à scanner]\n" +
+                       "Indexer ou mettre à jour l'indexation des Tweets d'un compte : scan [Nom du compte à scanner]\n" +
                        "Rechercher une image dans la base de données : search [URL de l'image] [Nom du compte Twitter (OPTIONNEL)]\n" +
                        "\n" +
                        "Afficher des statistiques de la base de données : stats\n" +
-                       "Afficher ce que font les threads de traitement : threads\n" +
+                       f"Afficher les {'processus et threads' if param.ENABLE_MULTIPROCESSING else 'threads'} et ce qu'ils font : threads\n" +
                        "Afficher la taille des files d'attente : queues\n" +
                        "Arrêter le service : stop\n" +
                        "Afficher l'aide : help\n" )
