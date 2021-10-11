@@ -370,8 +370,8 @@ if __name__ == "__main__" :
                 to_print += f"Taille step_B_TimelineAPI_list_account_tweets_prior_queue : {shared_memory_scan_requests.step_B_TimelineAPI_list_account_tweets_prior_queue.qsize()} requêtes\n"
                 to_print += f"Taille step_B_TimelineAPI_list_account_tweets_queue : {shared_memory_scan_requests.step_B_TimelineAPI_list_account_tweets_queue.qsize()} requêtes\n"
                 to_print += f"Taille step_C_index_account_tweets_queue : {shared_memory_scan_requests.step_C_index_account_tweets_queue.qsize()} Tweets\n"
-                to_print += f"Taille totale pipeline utilisateur : {shared_memory_user_requests.get_size()} requêtes\n"
-                to_print += f"Taille totale pipeline de scan : {shared_memory_scan_requests.get_size()} requêtes"
+                to_print += f"Nombre de requêtes utilisateur en cours de traitement : {shared_memory_user_requests.processing_requests_count} requêtes\n"
+                to_print += f"Nombre de requêtes de scan en cours de traitement : {shared_memory_scan_requests.processing_requests_count} requêtes"
                 print( to_print )
             else :
                 print( "Utilisation : queues")
