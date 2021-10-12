@@ -37,4 +37,4 @@ def url_to_content ( url : str ) -> bytes :
     request.add_header("User-Agent", param.USER_AGENT)
     
     # Télécharger et retourner le contenu
-    return urllib.request.urlopen( request ).read()
+    return urllib.request.urlopen( request, timeout = 60 ).read()

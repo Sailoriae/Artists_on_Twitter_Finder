@@ -41,6 +41,7 @@ class TweepyAbstraction :
                                )
         # Note : Ne pas utiliser l'option "retry_count"
         # Elle réessaye sur TOUTES les erreurs, pas seulement celles de connexion
+        # Note : Tweepy met des timeouts de 60 secondes par défaut
     
     """
     Cette fonction est uniquement à utiliser dans "check_parameters()".
