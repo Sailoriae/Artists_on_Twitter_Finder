@@ -325,26 +325,19 @@ class Tweets_Indexer :
     
     """
     Appeler la fonction de la mémoire partagée pour mettre fin à une requête de
-    scan, et traiter son ordre d'enregistrer les curseurs d'indexation.
+    scan.
     
-    @param account_id L'ID du compte Twitter dont il faut enregistrer les
-                      curseurs. On ne prend pas celui de la requête au cas où
-                      il y aurait un bug.
-    @param account_name Le nom du compte Twitter, juste pour faire des print().
     @param request La requête de scan à terminer. Le proxy doit être ouvert.
+    @return True si on peut enregistrer le curseur, False sinon.
     """
-    def _end_request ( self, account_id : int, account_name : str, request ) -> None :
+    def _end_request ( self, request ) -> None :
         if self._end_request_function != None :
-            # C'est la fonction end_request() qui donne l'ordre d'enregistrement des curseurs
-            # Elle attend qu'il n'y a plus un Tweet en cours d'indexation pour ce compte
-            cursors = self._end_request_function( request, get_stats = self._bdd.get_stats() )
-            
-            if cursors != None : # Il faut enregistrer les deux curseurs
-                print( f"[Tweets_Indexer] Enregistrement des deux curseurs d'indexation pour le compte @{account_name}." )
-                
-                # ATTENTION : Il est possible que les curseurs soient à None, pour des comptes vides par exemple
-                self._save_last_tweet_date( account_id, cursors[0] )
-                self._save_last_tweet_id( account_id, cursors[1] )
+            # La fonction end_request() attend que les autres threads
+            # d'indexation avancent avant de retourner
+            # Cela permet de ne pas enregistrer un curseur avant un Tweet
+            # Ca ne sert à rien d'attendre et d'enregistrer les deux curseurs
+            # en même temps
+            return self._end_request_function( request, get_stats = self._bdd.get_stats() )
         
         else :
             raise RuntimeError( "L'attribut \"end_request\" doit être défini pour des instructions d'enregistrement de curseurs qui renvoient \"request_uri\" !" )
@@ -367,10 +360,11 @@ class Tweets_Indexer :
             
             if "request_uri" in instruction :
                 request = open_proxy( instruction["request_uri"] )
-                request.cursor_SearchAPI = instruction["save_SearchAPI_cursor"]
-                request.finished_SearchAPI_indexing = True # Après l'enregistrement du curseur
-                self._end_request( instruction["account_id"], instruction["account_name"], request )
+                request.finished_SearchAPI_indexing = True
+                can_save_cursor = self._end_request( request )
                 request.release_proxy()
+                if can_save_cursor :
+                    self._save_last_tweet_date( instruction["account_id"], instruction["save_SearchAPI_cursor"] )
             
             else : # N'est pas censé être utilisé par le serveur AOTF
                 if self._end_request_function != None :
@@ -385,10 +379,11 @@ class Tweets_Indexer :
             
             if "request_uri" in instruction :
                 request = open_proxy( instruction["request_uri"] )
-                request.cursor_TimelineAPI = instruction["save_TimelineAPI_cursor"]
-                request.finished_TimelineAPI_indexing = True # Après l'enregistrement du curseur
-                self._end_request( instruction["account_id"], instruction["account_name"], request )
+                request.finished_TimelineAPI_indexing = True
+                can_save_cursor = self._end_request( request )
                 request.release_proxy()
+                if can_save_cursor :
+                    self._save_last_tweet_id( instruction["account_id"], instruction["save_TimelineAPI_cursor"] )
            
             else : # N'est pas censé être utilisé par le serveur AOTF
                 if self._end_request_function != None :

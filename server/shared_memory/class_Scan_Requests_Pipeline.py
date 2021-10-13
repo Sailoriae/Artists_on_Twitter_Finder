@@ -6,6 +6,7 @@ import threading
 import datetime
 from time import time, sleep
 import queue
+import copy
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
 # Ainsi, si on veut utiliser ce script indépendemment (Notemment pour des
@@ -263,41 +264,67 @@ class Scan_Requests_Pipeline :
     
     """
     Marquer une requête comme terminée.
+    Fonction à appeler par un thread d'indexation (Etape C) lors de chaque
+    instruction d'enregistrement de curseur.
+    
     @param Un objet Scan_Request.
     @param get_stats Le résultat de la méthode "get_stats()" de l'objet
                      "SQLite_or_MySQL". Car Pyro est multithreadé, donc on ne
                      peut pas avoir notre propre accès à la BDD !
     
-    @return Les deux curseurs à enregistrer, sous la forme d'un tuple :
-            - Curseur de l'API de recherche (SearchAPI)
-            - Curseur de l'API de timeline (TimelineAPI)
-            Ou None si il ne faut pas enregistrer les curseurs
+    @retrun True si les threads d'indexation ont tous avancé et donc qu'on peut
+            enregistrer le curseur. False sinon, ou si un thread a planté (La
+            requête de scan a été mise en échec).
     
     Cette fonction attend que les threads d'indexation n'indexent plus un
-    Tweet du compte Twitter. Cela permet d'enregistrer les curseurs une fois
-    qu'on est certain que tous les Tweets sont enregistrés dans la BDD.
+    Tweet du compte Twitter placé dans la file avant l'appel à cette fonction.
+    Cela permet d'enregistrer les curseurs une fois qu'on est certain que tous
+    les Tweets trouvé avec un listeur sont enregistrés dans la BDD.
+    Il faut donc appeler cette fonction à chaque fois qu'un thread d'indexation
+    rencontre une instruction d'enregistrement de curseur.
     """
     def end_request ( self, request : Scan_Request, get_stats = None ) :
-        # Vérifier avant que les deux indexations soient terminées
-        if not request.finished_SearchAPI_indexing or not request.finished_TimelineAPI_indexing :
-            return None
-        
-        # Vérifier que plus aucun thread d'indexation indexe un Tweet pour ce
-        # compte Twitter (Sinon, on attend qu'il ait fini)
-        # Pas besoin de prendre le sémaphore "self._step_C_sem", car il nous
-        # garanti déjà la déclaration, donc on a forcément ici les bons
-        # Tweets déclarés, sans aucun qui traine
+        # Vérifier que les threads d'indexations avancent et ne sont pas
+        # bloqués avec un Tweet placé dans la file de l'étape C avant
+        # l'instruction d'enregistrement du curseur
+        # Cela permet d'être certain que tous les Tweets listés par un des
+        # listeurs sont enregistrés dans la base de données (Car les Tweets
+        # listés sont placés dans la file avant le curseur)
+        # On commence par prendre une snapshot du dictionnaire des Tweets
+        # en cours d'indexation, puis on attend que chaque thread avance pour
+        # le compte Twitter de la requête de scan
+        self._step_C_sem.acquire()
+        indexing_ids_dict_snapshot = copy.deepcopy( self._indexing_ids_dict )
+        self._step_C_sem.release()
         for thread_name in self._indexing_ids_dict :
+            count = 0 # Pour ne pas afficher le message les premières fois
             # On ne vérifie pas "keep_service_alive" car un thread d'indexation
             # n'est pas censé prendre trop de temps sur l'indexation d'un Tweet
             # Sinon, c'est qu'il y a un bug, et ceci permet de le détecter
             while True :
+                count += 1
                 tweet_id, account_id = self._indexing_ids_dict[thread_name]
-                if tweet_id != None and account_id == request.account_id :
-                    print( f"[end_request] Attente du thread {thread_name} pour terminer la requête d'indexation du compte @{request.account_name}. Il est en train d'indexer le Tweet ID {tweet_id}." )
+                if ( tweet_id != None and
+                     account_id == request.account_id and
+                     tweet_id == indexing_ids_dict_snapshot[thread_name][0] ) :
+                    if count > 10 :
+                        print( f"[end_request] Attente du thread {thread_name}, il est en train d'indexer le Tweet ID {tweet_id} de @{request.account_name}." )
                     sleep( 1 )
                 else :
                     break
+        
+        # On peut Màj les statistiques mises en cache dans l'objet racine
+        # Pas besoin de sémaphore, le GIL de Python nous garantie qu'il n'y
+        # aura pas deux écritures en même temps
+        if get_stats != None :
+            self._root.tweets_count, self._root.accounts_count = get_stats
+        
+        # On passe maintenant à l'éventuelle fin de la requête de scan, et donc
+        # on vérifie avant que les deux indexations soient terminées
+        if not request.finished_SearchAPI_indexing or not request.finished_TimelineAPI_indexing :
+            # Vérifier que la requête de scan n'ait pas été mise en échec
+            if request.has_failed : return False
+            return True
         
         self._requests_sem.acquire()
         
@@ -309,13 +336,8 @@ class Scan_Requests_Pipeline :
             # On fais -1 au compteur du nombre de requêtes en cours de traitement
             self._processing_requests_count -= 1
             
-            # On peut lacher le sémaphore, tant pis pour les statistiques, car
-            # Python nous garantie qu'il n'y aura pas deux écritures en même temps
+            # On peut lacher le sémaphore
             self._requests_sem.release()
-            
-            # On peut Màj les statistiques mises en cache dans l'objet Shared_Memory
-            if get_stats != None :
-                self._root.tweets_count, self._root.accounts_count = get_stats
             
             # Enregistrer le temps complet pour traiter cette requête
             self._root._execution_metrics_obj.add_scan_request_full_time( time() - request.start )
@@ -323,12 +345,9 @@ class Scan_Requests_Pipeline :
         else :
             self._requests_sem.release()
         
-        # Si la requête a été mise en échec, on ne peut pas enregistrer les
-        # curseurs du compte Twitter
-        if request.has_failed :
-            return None
-        
-        return ( request.cursor_SearchAPI, request.cursor_TimelineAPI )
+        # Vérifier que la requête de scan n'ait pas été mise en échec
+        if request.has_failed : return False
+        return True
     
     """
     Délester les anciennes requêtes.
