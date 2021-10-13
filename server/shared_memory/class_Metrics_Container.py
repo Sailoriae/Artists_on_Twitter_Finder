@@ -138,13 +138,13 @@ class Metrics_Container :
             to_print += f"Etape B : Temps moyen pour lister avec TimelineAPI : {self._step_B_times.get_mean()} ({self._step_B_times.get_count()} listages)\n"
         
         if self._step_C_times.get_count() != 0 :
-            to_print += f"Etape C : Temps moyen pour indexer : {self._step_C_times.get_mean()} ({self._step_C_times.get_count()} tweets)\n"
+            to_print += f"Etape C : Temps moyen pour indexer : {self._step_C_times.get_mean()} ({self._step_C_times.get_count()} Tweets)\n"
         if self._step_C_download_image_times.get_count() != 0 :
             to_print += f" - Dont : Téléchargement d'une image : {self._step_C_download_image_times.get_mean()} ({self._step_C_download_image_times.get_count()} images)\n"
         if self._step_C_cbir_engine_times.get_count() != 0 :
             to_print += f" - Dont : Calcul CBIR d'une image : {self._step_C_cbir_engine_times.get_mean()} ({self._step_C_cbir_engine_times.get_count()} images)\n"
         if self._step_C_insert_into_times.get_count() != 0 :
-            to_print += f" - Dont : Enregistrement d'un Tweet : {self._step_C_insert_into_times.get_mean()} ({self._step_C_insert_into_times.get_count()} tweets)\n"
+            to_print += f" - Dont : Enregistrement d'un Tweet : {self._step_C_insert_into_times.get_mean()} ({self._step_C_insert_into_times.get_count()} Tweets)\n"
         
         if self._step_1_times.get_count() != 0 :
             to_print += f"Etape 1 : Temps moyen pour passer dans le Link Finder : {self._step_1_times.get_mean()} ({self._step_1_times.get_count()} éxécutions)\n"
