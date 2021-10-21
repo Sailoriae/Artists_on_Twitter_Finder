@@ -25,3 +25,6 @@ __pycache__/
 
 # Configuration Systemd modifiée
 /configs/artist-on-twitter.service
+
+# Dumps MySQL
+/backups/*.sql

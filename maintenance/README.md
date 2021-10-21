@@ -7,3 +7,10 @@
 * Script [`cleanup_database.py`](cleanup_database.py) :
   Permet de vérifier que les Tweets enregistrés dans la base de données ont bien un compte enregistré correspondant.
   Puis supprime les Tweets sans compte enregistré (Et ainsi les empreintes des images de ces Tweets).
+
+* Script [`mysqldump_backup.py`](mysqldump_backup.py) :
+  Ce script permet de sauvegarder la base de données en faisant un Dump MySQL.
+  Au passage, il supprime les anciennes sauvegardes qui ont plus de 6 semaines.
+  La raison de ce script est qu'il va chercher tout seul les paramètres dans le fichier "parameters.py".
+  Il peut ainsi être utilisé facilement en tant que tâche dans une table Cron.
+  Les Dumps sont enregistrés dans le répertoire [`../backups`](../backups).

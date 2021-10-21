@@ -45,6 +45,7 @@ Lorsqu'on parle d'un "site supporté" par le serveur, on parle de l'un des sites
 * [`client`](client) : Client à l'API du serveur, et scripts exemples.
 * [`public`](public) : Interface web pour utiliser l'API du serveur.
 * [`doc`](doc) : Documentation diverse. Note : Le code est bien documenté, et il y a des fichiers `README.md` dans tous les répertoires.
+* [`backups`](backups) : Répertoire pour placer les Dumps de la base de données.
 * [`misc`](misc) : Sauvegarde de scripts divers.
 
 
