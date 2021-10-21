@@ -38,8 +38,7 @@ auth.set_access_token(param.OAUTH_TOKEN, param.OAUTH_TOKEN_SECRET)
 
 # Tweepy gère l'attente lors d'une rate limit !
 api = tweepy.API( auth, 
-                  wait_on_rate_limit = True,
-                  wait_on_rate_limit_notify  = True )
+                  wait_on_rate_limit = True )
 
 
 """
@@ -89,8 +88,15 @@ while True :
         print( "Fin du listage des ID de comptes Twitter qui existent encore." )
         break
     
-    for account in api.lookup_users( user_ids = hundred_accounts ) :
-        accounts_on_twitter.append( account.id )
+    try :
+        for account in api.lookup_users( user_id = hundred_accounts ) :
+            accounts_on_twitter.append( account.id )
+    except tweepy.errors.NotFound as error :
+        if 17 in error.api_codes : # No user matches for specified terms
+            print( "C'est étrange que 100 comptes d'un bloc ne soient plus valides..." )
+            pass
+        else :
+            raise error
     
     print( "Comptes analysés :", cursor, "/", str(len(accounts_in_db)) + ", valides :", len(accounts_on_twitter) )
     cursor += 100
