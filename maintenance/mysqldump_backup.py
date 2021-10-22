@@ -10,6 +10,7 @@ le fichier "parameters.py".
 
 import os
 import sys
+from datetime import datetime
 
 # On travaille dans le répertoire racine du serveur AOTF
 # On bouge dedans, et on l'ajoute au PATH
@@ -33,6 +34,9 @@ if not param.USE_MYSQL_INSTEAD_OF_SQLITE :
     print( "Le paramètre \"USE_MYSQL_INSTEAD_OF_SQLITE\" est sur \"False\"." )
     sys.exit(0)
 
+if os.path.isfile( "../backups/AOTF_" + datetime.today().strftime("%Y-%m-%d") + ".sql" ) :
+    print( "Une sauvegarde de la base de données a déjà été éxécutée aujourd'hui." )
+    sys.exit(0)
 
 print( "Sauvegarde de la base de données d'Artists on Twitter Finder..." )
 os.system( "mkdir -p ../backups" )
