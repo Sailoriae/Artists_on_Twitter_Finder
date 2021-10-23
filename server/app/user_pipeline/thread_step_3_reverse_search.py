@@ -124,6 +124,17 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
                 if result != None :
                     request.found_tweets += result
             
+            # Avant de trier la liste des résultats, on pourrait utiliser l'API
+            # Twitter pour vérifier que les Tweets trouvés existent encore. On
+            # a déjà une fonction dans la classe "TweepyAbstraction" qui fait
+            # ça : "get_multiple_tweets()". Cependant, cela ferait une requête
+            # en plus sur l'API Twitter, et je n'ai pas trop envie pour le
+            # moment. Surtout que le widget Twitter n'affiche pas les Tweets
+            # supprimés.
+            # Si on change d'avis, penser à supprimer la ligne dans la page de
+            # documentation de l'UI web, où l'on dit que AOTF peut retourner
+            # des Tweets supprimés.
+            
             # Trier la liste des résultats
             # Tri par la distance, puis si égalité par le nombre d'images dans
             # le Tweet, puis si encore égalité par l'ID du Tweet
