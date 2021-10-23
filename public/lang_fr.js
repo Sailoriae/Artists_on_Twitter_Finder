@@ -28,6 +28,7 @@ var lang = {
 	"WAIT_LINK_FINDER" : "En attente de recherche des comptes Twitter de l'artiste.",
 
 	"WARNING_FIRST_TIME_INDEX_ACCOUNTS_TWEETS" : "Attention\xa0: Certains comptes étaient inconnus, et donc sont en train d'être indexés pour la première fois. Cette étape peut être très longue.",
+	"INDEX_ONLY_FOR_UPDATE" : "L'illustration est récente, une mise à jour de l'index de ces comptes est donc nécessaire. Cette étape ne devrait pas prendre longtemps.",
 
 //	"NO_TWITTER_ACCOUNT_FOUND" : "Aucun compte Twitter trouvé.",
 	"TWITTER_ACCOUNT_FOUND" : "Compte Twitter trouvé\xa0: ",

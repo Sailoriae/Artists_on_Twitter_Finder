@@ -89,7 +89,10 @@ function displayStatus ( json ) {
 	processStatusP.textContent = lang[ "STATUS" ];
 	processStatusP.textContent += lang[ json["status"] ]
 	
-	if ( ( json[ "has_first_time_scan" ] ) && ( json["status"] === "INDEX_ACCOUNTS_TWEETS" ) ) {
-		processStatusP.textContent += " " + lang[ "WARNING_FIRST_TIME_INDEX_ACCOUNTS_TWEETS" ];
+	if ( json["status"] === "INDEX_ACCOUNTS_TWEETS" ) {
+		if ( json[ "has_first_time_scan" ] )
+			processStatusP.textContent += " " + lang[ "WARNING_FIRST_TIME_INDEX_ACCOUNTS_TWEETS" ];
+		else
+			processStatusP.textContent += " " + lang[ "INDEX_ONLY_FOR_UPDATE" ];
 	}
 }
