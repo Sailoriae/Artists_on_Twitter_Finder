@@ -156,7 +156,7 @@ class Metrics_Container :
         if self._step_3_iteration_times.get_count() != 0 :
             to_print += f" - Dont : Itérer sur la base de données : {self._step_3_iteration_times.get_mean()} ({self._step_3_iteration_times.get_count()} itérations)\n"
         if self._step_3_usage_times.get_count() != 0 :
-            to_print += f" - Dont : Comparer deux vecteurs : {self._step_3_usage_times.get_mean()} ({self._step_3_usage_times.get_count()} images)\n"
+            to_print += f" - Dont : Comparer deux empreintes : {self._step_3_usage_times.get_mean()} ({self._step_3_usage_times.get_count()} images)\n"
         
         if self._user_request_full_time.get_count() != 0 :
             to_print += f"Temps moyen pour traiter une requête utilisateur : {self._user_request_full_time.get_mean()} ({self._user_request_full_time.get_count()} requêtes)\n"
