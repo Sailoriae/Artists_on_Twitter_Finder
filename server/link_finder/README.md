@@ -11,7 +11,7 @@ Elle contient deux fonctions :
   - `twitter_accounts` : Liste de comptes Twitter de l'artiste trouvés (Peut être vide),
   - `publish_date` : Objet `datetime` indiquant la date de publication de cette illustration.
 
-* `link_mutiplexer ( self, url, source = "" ) -> List[str]` :
+* `link_mutiplexer ( self, url : str, source : str = "" ) -> List[str]` :
   Multiplexeur des potentiels profiles de l'artiste. Prend en entrée une URL, et retourne une liste de comptes Twitter. A sa propre liste de sites supportés. Permet d'analyser des pages Linktree par exemple, si un site supporté trouve un lien vers une profil Linktree.
 
 Le script `link_finder_tester` permet de tester que la classe `Link_Finder` fonctionne bien.

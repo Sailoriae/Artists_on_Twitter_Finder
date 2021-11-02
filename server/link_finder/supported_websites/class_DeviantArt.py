@@ -201,9 +201,12 @@ class DeviantArt :
             twitter_accounts += scanner2.scan()
         
         # Envoyer dans le multiplexer les autres URL qu'on peut trouver
+        # On bloque la détection d'un compte DeviantArt, car les artistes ont
+        # très très rarement deux comptes DeviantArt, et mettent plutôt des
+        # liens vers les pages de leurs ami(e)s
         if multiplexer != None :
             for link in scanner2.scan( validator_function = validate_url ) :
-                get_multiplex = multiplexer( link )
+                get_multiplex = multiplexer( link, source = "block_deviantart_account" )
                 if get_multiplex != None :
                     twitter_accounts += get_multiplex
         

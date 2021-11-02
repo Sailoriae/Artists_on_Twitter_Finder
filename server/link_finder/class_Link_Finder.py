@@ -220,13 +220,22 @@ class Link_Finder :
     retourné.
     
     @param url URL de la page web à analyser.
-    @param from_booru_source Activer la reconnaissance d'URL d'une illustration
-                             comme le ferait la méthode "get_data()". Réservé
-                             au champs "source" des site de republications, par
-                             exemple les boorus.
-                             Autorise une profondeur de recherche de plus si ce
-                             lien mène à une illustration sur un site supporté
-                             qui n'est pas un site de republications.
+    
+    @param source Dans quel contexte est appelée cette méthode ? Liste des
+                  valeurs utilisées (Chaines de caractères) :
+                  - "booru_source" : Champs "source" sur un site de
+                    republications, par exemple Derpibooru ou Danbooru. Ceci
+                    active la reconnaissance d'URL d'une illustration comme le
+                    ferait la méthode "get_data()". De plus, ceci autorise une
+                    profondeur de recherche de plus si le lien mène à une
+                    illustration sur un site supporté qui n'est pas un site de
+                    republications.
+                  - "deviantart_textarea" : Description d'une illustration sur
+                    DeviantArt, ou biographique d'un utilisateur sur sa page
+                    "/about". Cela permet de ne pas aller voir vers un autre
+                    compte DeviantArt, car beaucoup de gens utilisent ces
+                    champs pour citer leurs ami(e)s ou inspirations. Ceci
+                    empêche donc de détecter un compte DeviantArt.
     
     @return Liste de comptes Twitter.
             Ou None si la page n'est pas utilisable (Site non supporté, URL ne
@@ -234,7 +243,7 @@ class Link_Finder :
             supportés). None peut aussi être renvoyé si on a atteint la
             profondeur maximale de recherche
     """
-    def _link_mutiplexer ( self, url, from_booru_source = False ) :
+    def _link_mutiplexer ( self, url : str, source : str = "" ) :
         if self._DEBUG :
             print( f"[Link_Finder] Multiplexeur : {url}" )
         
@@ -260,7 +269,7 @@ class Link_Finder :
         
         # PROFIL SUR DEVIANTART
         deviantart = validate_deviantart_account_url( url )
-        if deviantart != None :
+        if source != "deviantart_textarea" and deviantart != None :
             if not self._already_visited( "deviantart", deviantart ) :
                 return self._deviantart.get_twitter_accounts( "", force_deviantart_account_name = deviantart,
                                                               multiplexer = self._link_mutiplexer )
@@ -268,7 +277,7 @@ class Link_Finder :
         
         # ILLUSTRATION SUR DEVIANTART
         # Permet aux boorus d'envoyer leur champs "source"
-        if from_booru_source and re.match( deviantart_url, url ) != None :
+        if source == "booru_source" and re.match( deviantart_url, url ) != None :
             if not self._already_visited( "deviantart", url ) :
                 self.current_max_depth += 1 # Autoriser une profondeur de plus
                 to_return = self._deviantart.get_twitter_accounts( url,
@@ -291,7 +300,7 @@ class Link_Finder :
         
         # ILLUSTRATION SUR PIXIV
         # Permet aux boorus d'envoyer leur champs "source"
-        if from_booru_source and re.match( pixiv_url, url ) != None :
+        if source == "booru_source" and re.match( pixiv_url, url ) != None :
             if not self._already_visited( "pixiv", url ) :
                 self.current_max_depth += 1 # Autoriser une profondeur de plus
                 to_return = self._deviantart.get_twitter_accounts( url,

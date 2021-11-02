@@ -217,7 +217,7 @@ class Philomena :
         if multiplexer != None :
             source = self._get_source( illust_url )
             if source != None and source != "" :
-                get_multiplex = multiplexer( source, from_booru_source = True )
+                get_multiplex = multiplexer( source, source = "booru_source" )
                 if get_multiplex != None :
                     twitter_accounts += get_multiplex
         
