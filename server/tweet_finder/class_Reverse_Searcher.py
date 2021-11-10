@@ -45,12 +45,14 @@ class Reverse_Searcher :
                                            param.OAUTH_TOKEN_SECRET )
     
     """
-    Rechercher un tweet dans la base de donnée grâce à une image
+    Recherche d'un Tweet dans la base de donnée à partir d'une image.
+    
     @param pil_image L'image de requête, au format PIL.Image
     @param account_name Le nom du compte Twitter dans lequel chercher, c'est à
                         dire ce qu'il y a après le @ (OPTIONNEL)
     @param account_id ID du compte, vérifié récemment ! (OPTIONNEL)
                       Prime sur "account_name" si nen correspondent pas
+    
     @return Liste d'objets Image_in_DB, contenant les attributs suivants :
             - account_id : L'ID du compte Twitter
             - tweet_id : L'ID du Tweet contenant l'image
@@ -82,5 +84,59 @@ class Reverse_Searcher :
             print( f"[Reverse_Searcher] La recherche s'est faite en {time() - start} secondes." )
             self._add_step_3_times( [ time() - start ], [], [], [] )
         
-        # Retourner
+        return to_return
+    
+    """
+    Recherche exacte d'un Tweet dans la base de donnée à partir d'une image.
+    A la différence de la méthode précédente, cette méthode fait une recherche
+    exacte, c'est à dire que les images retournées ont la même empreinte que
+    l'image de requête.
+    
+    Cette recherche est beaucoup plus rapide, permettant une recherche dans
+    toute la base de données.
+    Cependant, à cause de la compression Twitter, il y a environ 10% de faux
+    négatifs (C'est à dire des résultats qui ont une distance > à 0 avec la
+    méthode de recherche précédente).
+    
+    Cette méthode n'enregistre pas les temps de processus !
+    
+    ATTENTION : Malgré sa vitesse, cette méthode reste lente lors d'une
+    recherche dans toute la base de données ! Ce n'est pas forcément une bonne
+    idée de la proposer sur le front-end ou sur l'API.
+    
+    @param pil_image L'image de requête, au format PIL.Image
+    @param account_name Le nom du compte Twitter dans lequel chercher, c'est à
+                        dire ce qu'il y a après le @ (OPTIONNEL)
+    @param account_id ID du compte, vérifié récemment ! (OPTIONNEL)
+                      Prime sur "account_name" si nen correspondent pas
+    
+    @return Liste d'objets Image_in_DB, contenant les attributs suivants :
+            - account_id : L'ID du compte Twitter
+            - tweet_id : L'ID du Tweet contenant l'image
+            - distance : La distance calculée avec l'image de requête
+                         Ici, cette distance est forcément de 0
+            - image_position : La position de l'image dans le Tweet (1-4)
+            None si "account_name" est inexistant, ou désactivé, ou privé
+    """
+    def search_exact_tweet ( self, pil_image : Image,
+                                   account_name : str = None,
+                                   account_id : int = None ) :
+        if account_name != None or account_id != None:
+            if account_id == None :
+                account_id = self._twitter.get_account_id( account_name )
+            if account_id == None :
+                print( f"Compte @{account_name} inexistant, ou désactivé, ou privé !" )
+                return None
+        else :
+            account_id = 0
+        
+        if self._DEBUG or self._ENABLE_METRICS :
+            start = time()
+        
+        image_hash = self._cbir_engine.index_cbir( pil_image )
+        to_return = list( self._bdd.exact_image_hash_search( image_hash, account_id = account_id ) )
+        
+        if self._DEBUG or self._ENABLE_METRICS :
+            print( f"[Reverse_Searcher] La recherche exacte s'est faite en {time() - start} secondes." )
+        
         return to_return

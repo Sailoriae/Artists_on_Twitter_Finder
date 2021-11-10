@@ -118,9 +118,9 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
             
             # Si il n'y a pas de compte Twitter dans la requête
             if request.twitter_accounts_with_id == []:
-                print( f"[step_3_th{thread_id}] Recherche dans toute la base de données." )
+                print( f"[step_3_th{thread_id}] Recherche dans toute la base de données. Attention cela peut mener à des faux-négatifs (<10%) !" )
                 
-                result = cbir_engine.search_tweet( request_image_pil )
+                result = cbir_engine.search_exact_tweet( request_image_pil )
                 if result != None :
                     request.found_tweets += result
             

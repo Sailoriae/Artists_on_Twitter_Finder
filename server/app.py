@@ -346,11 +346,9 @@ if __name__ == "__main__" :
                     else :
                         print( "Nom de compte Twitter impossible !" )
                 else :
-                    if shared_memory.tweets_count > 100000 :
-                        print( "Il y a plus de 100 000 Tweets indexés dans votre base de données, la recherche prendrait trop de temps. Merci de préciser un compte Twitter sur lequel rechercher." )
-                    else :
-                        print( "Recherche dans toute la base de données !" )
-                        shared_memory_user_requests.launch_reverse_search_only( args[1] )
+                    print( "Recherche dans toute la base de données !" )
+                    print( "ATTENTION : Pour des raisons de performances, seules les images de Tweets ayant exactement la même empreinte seront retournées. Cela mène à un peu moins de 10% de faux-négatifs !" )
+                    shared_memory_user_requests.launch_reverse_search_only( args[1] )
             else :
                 print( "Utilisation : search [URL de l'image à chercher] [Nom du compte Twitter (OPTIONNEL)]" )
         

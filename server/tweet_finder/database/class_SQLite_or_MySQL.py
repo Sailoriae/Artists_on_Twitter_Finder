@@ -296,7 +296,7 @@ class SQLite_or_MySQL :
             
             # Sauvegarder la date d'utilisation de ce compte, et faire +1 au
             # compteur d'utilisations
-            c = self._get_cursor() # Note : Ca ne sert à rien qu'il soit buffered
+            c = self._get_cursor()
             c.execute( save_date, ( datetime.now().strftime('%Y-%m-%d %H:%M:%S'), account_id ) )
             c.execute( update_count, ( account_id, ) )
             self._conn.commit()
@@ -334,7 +334,7 @@ class SQLite_or_MySQL :
                         add_step_3_times( [], select_time, iteration_times, usage_times )
                 break
             
-            # Itérer sur les images de Tweets
+            # Itérer sur les images du Tweet
             images_count = None
             for i in range(3,-1,-1) : # i = 3, 2, 1, 0
                 # Si l'empreinte est à NULL, on passe cette image
@@ -359,6 +359,80 @@ class SQLite_or_MySQL :
                 
                 if param.ENABLE_METRICS :
                     usage_times.append( time() - usage_start )
+    
+    """
+    Executer une recherche exacte d'empreinte sur toutes les images présentes
+    dans la base de données.
+    @param image_hash Le hash de l'image à chercher
+    @param account_id L'ID du compte Twitter (OPTIONNEL)
+    @return Un itérateur d'objets Image_in_DB
+    """
+    def exact_image_hash_search( self, request_image_hash : int, account_id : int = 0 ) :
+        if param.USE_MYSQL_INSTEAD_OF_SQLITE :
+            request = "SELECT * FROM tweets WHERE ( image_1_hash = %s OR image_2_hash = %s OR image_3_hash = %s OR image_4_hash = %s )"
+            
+            if account_id != 0 :
+                request += " AND account_id = %s"
+                
+                save_date = "UPDATE accounts SET last_use = %s WHERE account_id = %s"
+                update_count = "UPDATE accounts SET uses_count = uses_count + 1 WHERE account_id = %s"
+        else :
+            request = "SELECT * FROM tweets WHERE ( image_1_hash = ? OR image_2_hash = ? OR image_3_hash = ? OR image_4_hash = ? )"
+            
+            if account_id != 0 :
+                request += " AND account_id = ?"
+                
+                save_date = "UPDATE accounts SET last_use = ? WHERE account_id = ?"
+                update_count = "UPDATE accounts SET uses_count = uses_count + 1 WHERE account_id = ?"
+            
+        # Sauvegarder la date d'utilisation de ce compte, et faire +1 au
+        # compteur d'utilisations
+        if account_id != 0 :
+            c = self._get_cursor()
+            c.execute( save_date, ( datetime.now().strftime('%Y-%m-%d %H:%M:%S'), account_id ) )
+            c.execute( update_count, ( account_id, ) )
+            self._conn.commit()
+        
+        c = self._get_cursor()
+        if account_id != 0 :
+            c.execute( request, ( request_image_hash, request_image_hash, request_image_hash, request_image_hash, account_id ) )
+        else :
+            c.execute( request, ( request_image_hash, request_image_hash, request_image_hash, request_image_hash ) )
+        
+        # Itérer sur les Tweets ayant une image avec le même hash
+        while True :
+            tweet_line = c.fetchone()
+            
+            # Si on a fini d'itérer sur tous les Tweets
+            if tweet_line == None :
+                break
+            
+            # Itérer sur les images du Tweet
+            images_count = None
+            for i in range(3,-1,-1) : # i = 3, 2, 1, 0
+                # Si l'empreinte est à NULL, on passe cette image
+                if tweet_line[3+i*2] == None :
+                    continue
+                
+                # Détecter le nombre d'images dans le Tweet
+                if images_count == None :
+                    images_count = i+1
+                
+                # On est obligé de vérifier que le hash correspond, car notre
+                # requête SQL ne différencie pas les 4 images de Tweets (Ce qui
+                # est plus rapide à éxécuter pour le serveur SQL)
+                image_hash = to_int( tweet_line[3+i*2] )
+                if image_hash != request_image_hash :
+                    continue
+                
+                yield Image_in_DB (
+                           tweet_line[0], # ID du compte Twitter
+                           tweet_line[1], # ID du Tweet
+                           tweet_line[2+i*2], # Nom de l'image
+                           image_hash, # Empreinte de l'image
+                           i+1, # Position de l'image
+                           images_count # Nombre d'images dans le Tweet
+                       )
     
     """
     API DE RECHERCHE
