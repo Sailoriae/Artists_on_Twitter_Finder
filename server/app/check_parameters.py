@@ -25,50 +25,101 @@ Fonction de vérification des paramètres.
 """
 def check_parameters () :
     print( "Vérification des types des paramètres..." )
-    try :
-        check_list = []
-        check_list.append( type( param.ENABLE_MULTIPROCESSING ) == bool )
-        check_list.append( type( param.API_KEY ) == str )
-        check_list.append( type( param.API_SECRET ) == str )
-        check_list.append( type( param.OAUTH_TOKEN ) == str )
-        check_list.append( type( param.OAUTH_TOKEN_SECRET ) == str )
-        for creds in param.TWITTER_API_KEYS :
-            check_list.append( type( creds["OAUTH_TOKEN"] ) == str )
-            check_list.append( type( creds["OAUTH_TOKEN_SECRET" ]) == str )
-            check_list.append( type( creds["AUTH_TOKEN" ]) == str )
-        check_list.append( type( param.SQLITE_DATABASE_NAME ) == str )
-        check_list.append( type( param.USE_MYSQL_INSTEAD_OF_SQLITE ) == bool )
-        check_list.append( type( param.MYSQL_ADDRESS ) == str )
-        check_list.append( type( param.MYSQL_PORT ) == int and param.MYSQL_PORT > 0 )
-        check_list.append( type( param.MYSQL_USERNAME ) == str )
-        check_list.append( type( param.MYSQL_PASSWORD ) == str )
-        check_list.append( type( param.MYSQL_DATABASE_NAME ) == str )
-        check_list.append( type( param.HTTP_SERVER_PORT ) == int and param.HTTP_SERVER_PORT > 0 )
-        check_list.append( type( param.NUMBER_OF_STEP_1_LINK_FINDER_THREADS ) == int and param.NUMBER_OF_STEP_1_LINK_FINDER_THREADS > 0 )
-        check_list.append( type( param.NUMBER_OF_STEP_2_TWEETS_INDEXER_THREADS ) == int and param.NUMBER_OF_STEP_2_TWEETS_INDEXER_THREADS > 0 )
-        check_list.append( type( param.NUMBER_OF_STEP_3_REVERSE_SEARCH_THREADS ) == int and param.NUMBER_OF_STEP_3_REVERSE_SEARCH_THREADS > 0 )
-        check_list.append( type( param.NUMBER_OF_STEP_A_SEARCHAPI_LIST_ACCOUNT_TWEETS_THREADS ) == int and param.NUMBER_OF_STEP_A_SEARCHAPI_LIST_ACCOUNT_TWEETS_THREADS > 0 )
-        check_list.append( type( param.NUMBER_OF_STEP_B_TIMELINEAPI_LIST_ACCOUNT_TWEETS_THREADS ) == int and param.NUMBER_OF_STEP_B_TIMELINEAPI_LIST_ACCOUNT_TWEETS_THREADS > 0 )
-        check_list.append( type( param.NUMBER_OF_STEP_C_INDEX_ACCOUNT_TWEETS ) == int and param.NUMBER_OF_STEP_C_INDEX_ACCOUNT_TWEETS > 0 )
-        check_list.append( type( param.MAX_FILE_DESCRIPTORS ) == int and param.MAX_FILE_DESCRIPTORS > 0 )
-        check_list.append( type( param.DEBUG ) == bool )
-        check_list.append( type( param.ENABLE_METRICS ) == bool )
-        check_list.append( type( param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE ) == int and param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE > 0 )
-        check_list.append( type( param.RESET_SEARCHAPI_CURSORS_PERIOD ) == int and param.RESET_SEARCHAPI_CURSORS_PERIOD > 0 )
-        check_list.append( type( param.MAX_PROCESSING_REQUESTS_PER_IP_ADDRESS ) == int and param.MAX_PROCESSING_REQUESTS_PER_IP_ADDRESS > 0 )
-        check_list.append( type( param.UNLIMITED_IP_ADDRESSES ) == list )
-        check_list.append( type( param.ENABLE_LOGGING ) == bool )
-        
-        if all( check_list ) :
-            print( "Vérification réussie !" )
-        else :
-            print( "Veuillez réinitialiser votre fichier \"parameters.py\" et le re-configurer !")
-            return False
     
-    except (NameError, AttributeError) as error :
-        print( "Il y a un paramètre manquant !" )
-        print( error )
-        print( "Veuillez réinitialiser votre fichier \"parameters.py\" et le re-configurer !")
+    # Tester le type d'une variable
+    def test_parameter_type ( name : str, # Sert uniquement à faire des "print()"
+                              value, # Valeur dont on veut tester le type
+                              expected_type : type # Type que l'on doit obtenir
+                             ) -> bool :
+        if type( value ) == expected_type :
+            return True
+        print( f"Le paramètre \"{name}\" est de type \"{type( value )}\" alors qu'il doit être de type \"{expected_type}\" !" )
+        return False
+    
+    # Tester l'existence et le type d'un paramètre
+    def test_parameter ( name : str, # Nom du paramètre dont on veut tester le type
+                         expected_type : type # Type que l'on doit obtenir
+                        ) -> bool :
+        try :
+            value = getattr( param, name )
+        except AttributeError :
+            print( f"Le paramètre \"{name}\" n'existe pas !" )
+            return False
+        return test_parameter_type( name, value, expected_type )
+    
+    # Tester l'existence, le type, et la positivé stricte d'un paramètre
+    def test_strictly_postive_int_parameter ( name : str # Nom du paramètre à tester
+                                             ) -> bool :
+        if not test_parameter ( name, int ) : return False
+        if getattr( param, name ) > 0 : return True
+        print( f"Le paramètre \"{name}\" doit être strictement positif !" )
+        return False
+    
+    # Tester l'existence d'une clé dans un dictionnaire, ainsi que le type de son contenu
+    def test_dict_content ( dict_name : str, # Sert uniquement à faire des "print()"
+                            dict_obj : dict, # Dictionnaire à tester
+                            key : str, # Clé dont il faut déterminer l'existence
+                            expected_type : type # Type du contenu de cette clé
+                           ) -> bool :
+        if not key in dict_obj :
+            print( f"Le dictionnaire \"{dict_name}\" doit contenir une clé \"{key}\" !" )
+            return False
+        return test_parameter_type( f"{dict_name}[\"{key}\"", dict_obj[key], expected_type )
+    
+    check_list = []
+    check_list.append( test_parameter( "ENABLE_MULTIPROCESSING", bool ) )
+    
+    check_list.append( test_parameter( "API_KEY", str ) )
+    check_list.append( test_parameter( "API_SECRET", str ) )
+    check_list.append( test_parameter( "OAUTH_TOKEN", str ) )
+    check_list.append( test_parameter( "OAUTH_TOKEN_SECRET", str ) )
+    
+    check_list.append( test_parameter( "TWITTER_API_KEYS", list ) )
+    if check_list[-1] : # Eviter de crash si ce n'est pas une liste
+        for i in range( len( param.TWITTER_API_KEYS ) ) :
+            creds = param.TWITTER_API_KEYS[i]
+            check_list.append( test_parameter_type( f"TWITTER_API_KEYS[{i}]", creds, dict ) )
+            if check_list[-1] : # Eviter de crash si ce n'est pas un dict
+                check_list.append( test_dict_content( f"TWITTER_API_KEYS[{i}]", creds, "OAUTH_TOKEN", str ) )
+                check_list.append( test_dict_content( f"TWITTER_API_KEYS[{i}]", creds, "OAUTH_TOKEN_SECRET", str ) )
+                check_list.append( test_dict_content( f"TWITTER_API_KEYS[{i}]", creds, "AUTH_TOKEN", str ) )
+    
+    check_list.append( test_parameter( "SQLITE_DATABASE_NAME", str ) )
+    check_list.append( test_parameter( "USE_MYSQL_INSTEAD_OF_SQLITE", bool ) )
+    check_list.append( test_parameter( "MYSQL_ADDRESS", str ) )
+    check_list.append( test_strictly_postive_int_parameter( "MYSQL_PORT" ) )
+    check_list.append( test_parameter( "MYSQL_USERNAME", str ) )
+    check_list.append( test_parameter( "MYSQL_PASSWORD", str ) )
+    check_list.append( test_parameter( "MYSQL_DATABASE_NAME", str ) )
+    
+    check_list.append( test_strictly_postive_int_parameter( "HTTP_SERVER_PORT" ) )
+    
+    check_list.append( test_strictly_postive_int_parameter( "NUMBER_OF_STEP_1_LINK_FINDER_THREADS" ) )
+    check_list.append( test_strictly_postive_int_parameter( "NUMBER_OF_STEP_2_TWEETS_INDEXER_THREADS" ) )
+    check_list.append( test_strictly_postive_int_parameter( "NUMBER_OF_STEP_3_REVERSE_SEARCH_THREADS" ) )
+    check_list.append( test_strictly_postive_int_parameter( "NUMBER_OF_STEP_A_SEARCHAPI_LIST_ACCOUNT_TWEETS_THREADS" ) )
+    check_list.append( test_strictly_postive_int_parameter( "NUMBER_OF_STEP_B_TIMELINEAPI_LIST_ACCOUNT_TWEETS_THREADS" ) )
+    check_list.append( test_strictly_postive_int_parameter( "NUMBER_OF_STEP_C_INDEX_ACCOUNT_TWEETS" ) )
+    
+    check_list.append( test_strictly_postive_int_parameter( "MAX_FILE_DESCRIPTORS" ) )
+    check_list.append( test_parameter( "DEBUG", bool ) )
+    check_list.append( test_parameter( "ENABLE_METRICS", bool ) )
+    check_list.append( test_parameter( "USER_AGENT", str ) )
+    check_list.append( test_strictly_postive_int_parameter( "DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE" ) )
+    check_list.append( test_strictly_postive_int_parameter( "RESET_SEARCHAPI_CURSORS_PERIOD" ) )
+    check_list.append( test_strictly_postive_int_parameter( "MAX_PROCESSING_REQUESTS_PER_IP_ADDRESS" ) )
+    
+    check_list.append( test_parameter( "UNLIMITED_IP_ADDRESSES", list ) )
+    if check_list[-1] : # Eviter de crash si ce n'est pas une liste
+        for i in range( len( param.UNLIMITED_IP_ADDRESSES ) ) :
+            ip_address = param.UNLIMITED_IP_ADDRESSES[i]
+            check_list.append( test_parameter_type( f"UNLIMITED_IP_ADDRESSES[{i}]", ip_address, str ) )
+    
+    check_list.append( test_parameter( "ENABLE_LOGGING", bool ) )
+    
+    if all( check_list ) :
+        print( "Vérification réussie !" )
+    else :
         return False
     
     # ========================================================================
