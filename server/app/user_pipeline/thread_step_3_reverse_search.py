@@ -85,6 +85,14 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
                 else :
                     request.release_proxy()
                     raise error # Doit tomber dans le collecteur d'erreurs
+            except ValueError as error : # URL invalide
+                print( f"[step_3_th{thread_id}] URL invalide : {request.image_urls[image_id]}" )
+                print( error )
+                if len(request.image_urls) > image_id+1 :
+                    image_id += 1 # Reboucler au "while True"
+                    continue
+                request.problem = "ERROR_DURING_REVERSE_SEARCH"
+                break # On n'a pas pu obtenir l'image
             
             try :
                 request_image_pil = binary_image_to_PIL_image( query_image_as_bytes )
@@ -95,7 +103,7 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
             except DecompressionBombError as error :
                 print( f"[step_3_th{thread_id}] L'image d'entrée est trop grande." )
                 print( error )
-                if len(request.image_urls) > image_id :
+                if len(request.image_urls) > image_id+1 :
                     image_id += 1 # Reboucler au "while True"
                     continue
                 request.problem = "QUERY_IMAGE_TOO_BIG"
