@@ -82,10 +82,5 @@ class Reverse_Searcher :
             print( f"[Reverse_Searcher] La recherche s'est faite en {time() - start} secondes." )
             self._add_step_3_times( [ time() - start ], [], [], [] )
         
-        # Suppression des attributs "image_features" pour gagner un peu de
-        # mémoire
-        for image in to_return :
-            image.image_features = []
-        
         # Retourner
         return to_return
