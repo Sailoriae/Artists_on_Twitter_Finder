@@ -1,6 +1,6 @@
 # Module du pipeline de traitement des requêtes de scan (Tweet Finder)
 
-Ce sous-module du module `app` permet de traiter les requêtes d'indexation des Tweets (Ou de mise à jour de l'indexation des Tweets) de comptes Twitter.
+Ce sous-module du module [`app`](../) permet de traiter les requêtes d'indexation des Tweets (Ou de mise à jour de l'indexation des Tweets) de comptes Twitter.
 
 Les requêtes sont représentées par un objet `User_Request`. L'ensemble des requêtes est géré par l'objet `User_Requests_Pipeline`, qui contient les files d'attentes. Les threads de traitement traitent ici les requêtes en paralléle ! Il n'y a donc pas vraiment de pipeline de traitement.
 

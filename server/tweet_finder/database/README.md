@@ -78,6 +78,6 @@ Classe représentant une image dans la base de données. Ces objets sont renvoy�
 * `image_hash` : L'empreinte de l'image,
 * `image_position` : La position de l'image dans le Tweet (1, 2, 3 ou 4).
 
-Ces objets contiennent aussi un attribut `distance` qui est rempli par le moteur CBIR (Voir méthode `search_cbir()` de la classe `CBIR_Engine` dans le module `cbir_engine`).
+Ces objets contiennent aussi un attribut `distance` qui est rempli par le moteur CBIR (Voir méthode `search_cbir()` de la classe `CBIR_Engine` dans le module [`cbir_engine`](../cbir_engine).
 
-Utilisé par la classe `Reverse_Searcher` dans le thread de recherche inversée d'image (Module `user_pipeline`, procédure `thread_step_3_reverse_search`).
+Utilisé par la classe `Reverse_Searcher` dans le thread de recherche inversée d'image (Module [`user_pipeline`](../../app/user_pipeline), procédure `thread_step_3_reverse_search`).

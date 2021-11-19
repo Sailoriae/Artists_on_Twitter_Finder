@@ -8,12 +8,12 @@ Mais comme tout ceci faisait un script beaucoup trop long, il a été séparé e
 
 ## Requêtes
 
-Il y a deux types de requêtes : Les requêtes utilisateur, et les requêtes de scan. Elles sont gérées et traitées respectivement dans les sous-modules `user_pipeline` et `scan_pipeline`.
+Il y a deux types de requêtes : Les requêtes utilisateur, et les requêtes de scan. Elles sont gérées et traitées respectivement dans les sous-modules [`user_pipeline`](user_pipeline) et [`scan_pipeline`](scan_pipeline).
 
 
 ## Liste des procédures des threads
 
-Les threads de traitement sont dans le sous-module `user_pipeline` et `scan_pipeline`. A ces threads s'ajoutent les suivants :
+Les threads de traitement sont dans le sous-module [`user_pipeline`](user_pipeline) et [`scan_pipeline`](scan_pipeline). A ces threads s'ajoutent les suivants :
 
 - `thread_http_server` : Thread de serveur HTTP.
 - `thread_auto_update_accounts` : Thread de mise à jour automatique des comptes dans la base de données.

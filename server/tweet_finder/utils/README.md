@@ -1,6 +1,6 @@
 # Module Outils pour le moteur de CBIR avec BDD
 
-Ce module contient des outils pour la classe `CBIR_Engine_with_Database` :
+Ce module contient des outils pour les classes du Tweet Finder :
 
 * Fonction `url_to_PIL_image` : Retourne une image au bon format pour le moteur CBIR (Objet `PIL.Image`) à partir de l'URL de cette image.
   Utilise les fonctions `url_to_content` et `binary_image_to_cv2_image`.

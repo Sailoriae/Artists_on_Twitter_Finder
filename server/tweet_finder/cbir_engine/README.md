@@ -57,4 +57,4 @@ Avec :
 
 Cette fonction retourne alors une liste contenant les objets de l'itérateurs qui ont étés sélectionnés comme images identiques à l'image de requêtes. Cette liste peut être vide.
 
-C'est la classe `Image_in_DB` du module `database` qui représente une image indexée. De plus, il y a dans ce module `database` un exemple d'itérateur.
+C'est la classe `Image_in_DB` du module [`database`](../database) qui représente une image indexée. De plus, il y a dans ce module `database` un exemple d'itérateur.
