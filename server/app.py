@@ -20,13 +20,14 @@ if __name__ == "__main__" :
     
     import threading
     import re
+    import signal
+    import sys
     
     try :
         import parameters as param
     except ModuleNotFoundError :
         print( "Fichier \"parameters.py\" introuvable !" )
         print( "Veuillez dupliquer \"parameters_sample.py\" vers \"parameters.py\", puis configurer ce-dernier." )
-        import sys
         sys.exit(0)
     
     print( "Vérification des importations...")
@@ -57,7 +58,6 @@ if __name__ == "__main__" :
     except ModuleNotFoundError as error :
         print( f"Il manque une librairie : {error}" )
         print( "Veuillez exécuter : pip install -r requirements.txt" )
-        import sys
         sys.exit(0)
     else :
         print( "Toutes les librairies nécessaires sont présentes !" )
@@ -67,7 +67,6 @@ if __name__ == "__main__" :
     Vérification des paramètres.
     """
     if not check_parameters() :
-        import sys
         sys.exit(0)
     
     """
@@ -233,6 +232,22 @@ if __name__ == "__main__" :
     
     
     """
+    Ecouter les signaux nous demandant de nous arrêter.
+    On le fait après avoir démarré les processus, car un processus fils ou un
+    thread (Comme le serveur Pyro par exemple) ne peut pas fermer le STDIN de
+    son père. Donc ça ne sert à rien qu'ils écoutent ces signaux, car ils ne
+    pourront pas fermer la CLI.
+    """
+    def on_sigterm ( signum, frame ) :
+        print( "Arrêt à la fin des procédures en cours..." )
+        shared_memory.keep_service_alive = False
+        os.close( sys.stdin.fileno() )
+    
+    signal.signal(signal.SIGINT, on_sigterm)
+    signal.signal(signal.SIGTERM, on_sigterm)
+    
+    
+    """
     Entrée en ligne de commande (CLI).
     """
     # Initialisation de notre couche d'abstraction à l'API Twitter
@@ -255,7 +270,11 @@ if __name__ == "__main__" :
         print( "ATTENTION, vous utilisez SQLite. Pour de meilleure performances, il est très vivement conseillé d'utiliser MySQL !" )
     
     while True :
-        command = input()
+        try :
+            command = input()
+        except EOFError :
+            print( "EOF reçu ! Arrêt de la ligne de commande." )
+            break
         args = command.split(" ")
         
         if args[0] == "request" :
