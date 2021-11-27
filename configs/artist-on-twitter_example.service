@@ -8,11 +8,14 @@ Conflicts = shutdown.target reboot.target halt.target
 User = username																								# MODIFIER ICI
 Type = forking
 
-# Nombre de descripteurs de fichiers possibles ("ulimit -n", 1024 par défaut)
-LimitNOFILE = 10000
-LimitNOFILESoft = 10000
-
 ExecStart = screen -dmS twitter /usr/bin/python3 /path/to/Artists_on_Twitter_Finder/server/app.py			# MODIFIER ICI
+
+RemainAfterExit = false
+KillMode = none
+TimeoutStopSec = 1min
+Restart = on-failure
+RestartForceExitStatus = 0
+RestartSec = 10s
 
 [Install]
 WantedBy = multi-user.target
