@@ -248,6 +248,8 @@ class Link_Finder :
             print( f"[Link_Finder] Multiplexeur : {url}" )
         
         # TWITTER
+        # Attention : Cette fonction sort le compte Twitter même si c'est un
+        # URL de Tweet : https://twitter.com/USER/status/ID
         twitter = validate_twitter_account_url( url ) # Ne retourne pas de liste
         if twitter != None :
             return [ twitter ] # La fonction "filter_twitter_accounts_list()" est appelée à la fin du Link Finder
@@ -303,8 +305,8 @@ class Link_Finder :
         if source == "booru_source" and re.match( pixiv_url, url ) != None :
             if not self._already_visited( "pixiv", url ) :
                 self.current_max_depth += 1 # Autoriser une profondeur de plus
-                to_return = self._deviantart.get_twitter_accounts( url,
-                                                                   multiplexer = self._link_mutiplexer )
+                to_return = self._pixiv.get_twitter_accounts( url,
+                                                              multiplexer = self._link_mutiplexer )
                 self.current_max_depth -= 1
                 return to_return
         
