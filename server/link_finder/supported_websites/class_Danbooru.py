@@ -4,6 +4,7 @@
 from typing import List
 import re
 from dateutil import parser
+from urllib.parse import quote
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
 # Ainsi, si on veut utiliser ce script indépendemment (Notemment pour des
@@ -152,7 +153,7 @@ class Danbooru :
             # Problème Danbooru : Le JSON d'une page sur un tag ne donne pas les
             # URL qu'ils ont trouvés. Donc on doit le faire sur une page HTML.
             scanner = Webpage_to_Twitter_Accounts(
-                "https://danbooru.donmai.us/artists/show_or_new?name=" + artist_tag,
+                "https://danbooru.donmai.us/artists/show_or_new?name=" + quote( artist_tag ),
                 )
             
             # Se concentrer que sur la div contenant les données.
