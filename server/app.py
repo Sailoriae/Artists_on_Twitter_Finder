@@ -459,7 +459,7 @@ if __name__ == "__main__" :
                        "Voir le résultat d'une requête : result [URL de l'illustration]\n" +
                        "\n" +
                        "Notes :\n" +
-                       " - Une requête est une procédure complète pour un illustration\n" +
+                       " - Une requête est une procédure complète pour une illustration.\n" +
                        " - Les requêtes sont identifiées par l'URL de l'illustration.\n" +
                        "\n" +
                        "Indexer ou mettre à jour l'indexation des Tweets d'un compte : scan [Nom du compte à scanner]\n" +

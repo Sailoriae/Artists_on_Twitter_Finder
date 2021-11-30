@@ -7,10 +7,10 @@ Lorsqu'il est démarré, il affiche une interface en ligne de commande. Tapez `h
 
 ## Installation
 
-1. Dupliquez le fichier [`parameters_sample.py`](parameters_sample.py) vers `parametres.py`, et configurez-le avec vos clés d'accès aux API. Il vous faut :
+1. Dupliquez le fichier [`parameters_sample.py`](parameters_sample.py) vers `parameters.py`, et configurez-le avec vos clés d'accès aux API. Il vous faut :
    - Un ou plusieurs comptes Twitter qui serviront à indexer les Tweets.
    - Un compte Twitter développeur. Pour se faire, demandez un accès développeur sur le portail suivant : https://developer.twitter.com
-   - Et optionnellement un serveur MySQL (Sinon, le programme utilise SQLite).
+   - Et optionnellement un serveur MySQL (Sinon, le serveur utilise SQLite).
 2. Installez les librairies Python nécessaires : `pip install -r requirements.txt`
 
 
@@ -21,11 +21,14 @@ Lorsqu'il est démarré, il affiche une interface en ligne de commande. Tapez `h
 
 Ceci lance le serveur et vous met en ligne de commande. Si vous souhaitez quitter la fenêtre en laissant le serveur tourner, faites `Crtl + A + D`.
 
+Pour arrêter le serveur, vous pouvez soit éxécuter la commande `stop` dans sa ligne de commande, soit lui envoyer un signal `SIGTERM`.
+Si il utilise une base de données MySQL, vous pouvez aussi le tuer avec `Ctrl + C` ou un signal `SIGKILL`. Ceci n'est pas embêtant pour la cohérence des données.
+
 
 ## Fonctionnalités
 
 * Base de données stockant les comptes et les Tweets.
-* Moteur de calcul de l'empreinte d'une image (Moteur CBIR).
+* Moteur de calcul de l'empreinte d'une image (Moteur CBIR, reposant sur l'algorithme pHash).
 * Parallélisme : 2 pipelines de traitement, divisés en étapes séparés dans des threads de traitement, avec files d'attentes :
   - Traitement des requêtes des utilisateurs, en 3 étapes, exécutées l'une après l'autres. Voir [`app/user_pipeline`](app/user_pipeline).
   - Traitement des requêtes d'indexation / de scan d'un comte Twitter, en 4 étapes paralléles. Voir [`app/scan_pipeline`](app/scan_pipeline).
@@ -42,10 +45,11 @@ Ceci lance le serveur et vous met en ligne de commande. Si vous souhaitez quitte
 * Possibilité de lancer en mode multi-processus (`ENABLE_MULTIPROCESSING`), plus lourd mais plus efficace pour traiter des requêtes (Des utilisateurs et de scans) en paralléle. Note : Dans toute la documentation, on parle toujours de threads, mais **un thread peut devenir un processus en mode multi-processus**.
 * Mémoire partagée entre tous les threads dans l'objet [`Shared_Memory`](shared_memory/class_Shared_Memory.py) du module [`shared_memory`](shared_memory) (Avec la librairie Pyro4 si démarré en mode multi-processus).
 * Limite du nombre de requête en cours de traitement par adresse IP.
-* Thread de délestage automatique des anciennes requêtes terminées.
-* Thread de lancement de mises à jour automatiques des comptes Twitter dans la base de données. Essaye au maximum de répartir les mises à jour dans le temps.
-* Thread de retentative d'indexation de Tweets dont au moins une image a échouée (Et que cette erreur n'est pas identifiée comme insolvable dans le code, voir [`get_tweet_image()`](tweet_finder/utils/get_tweet_image.py)). Ce thread passe ses Tweets à l'étape C.
-* Thread de suppression des curseurs d'indexation avec l'API de recherche, car l'indexation sur le moteur de recherche de Twitter est très fluctuante. Comme le thread de mise à jour, essaye au maximum de répartir les lancement d'indexations dans le temps.
+* Threads de maintenance :
+  - Délestage automatique des anciennes requêtes terminées.
+  - Lancement de mises à jour automatiques des comptes Twitter dans la base de données. Essaye au maximum de répartir les mises à jour dans le temps.
+  - Retentative d'indexation de Tweets dont au moins une image a échouée (Et que cette erreur n'est pas identifiée comme insolvable dans le code, voir [`get_tweet_image()`](tweet_finder/utils/get_tweet_image.py)). Ce thread passe ses Tweets à l'étape C.
+  - Suppression des curseurs d'indexation avec l'API de recherche, car l'indexation sur le moteur de recherche de Twitter est très fluctuante. Comme le thread de mise à jour, essaye au maximum de répartir les lancement d'indexations dans le temps.
 * Collecteur d'erreurs : Tous les threads sont éxécuté dans une instance du collecteur d'erreurs. Stocke l'erreur dans un fichier, met l'éventuelle requête en cours de traitement en situation d'erreur / échec, et redémarre le thread.
 
 
