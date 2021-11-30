@@ -1,6 +1,29 @@
 #!/usr/bin/python3
 # coding: utf-8
 
+"""
+SCRIPT PRINCIPAL DU SERVEUR "ARTISTS ON TWITTER FINDER".
+NE PAS LE LANCER PLUSIEURS FOIS ! En cas de plusieurs lancement, le script
+détectera que le port de son serveur HTTP est indisponible, et donc refusera
+de se lancer.
+
+Ce script est la racine du serveur AOTF. Il réalise les opérations suivantes :
+- Vérification de l'existence du fichier "parameters.py"
+- Importation de tout le serveur, ce qui permet de vérifier que les librairies
+  sont installées
+- Lancement de la fonction de vérification des paramètres, qui permet notamment
+  de vérifier leurs types, et si ils sont utilisables (API Twitter et MySQL)
+- Création de la mémoire partagée, c'est à dire lancement du serveur Pyro si on
+  est en mode multi-processus, ou sinon création de l'objet "Shared_Memory"
+- Lancement des threads ou processus.
+- Exécution de la boucle infinie de la ligne de commande (back-end, et donc
+  attente d'une commande.
+  Si le serveur reçoit la commande "stop", ou reçoit un signal "SIGTERM", il
+  arrête cette boucle infinie, et demande l'arrêt des threads et/ou processus.
+- Attente de l'arrêt des threads et/ou processus.
+- Demande et attente de l'arrêt du serveur Pyro (Si mode multi-processus.
+"""
+
 # Toujours la même erreur :
 # [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1123)
 # Ce fix est dangereux car désactive la vérication des certificats
@@ -14,15 +37,15 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 # Protection pour le multiprocessing
 if __name__ == "__main__" :
-    """
-    Script principal. NE PAS LE LANCER PLUSIEURS FOIS !
-    """
-    
     import threading
     import re
     import signal
     import sys
     
+    
+    """
+    Vérification de l'existence du fichier des paramètres.
+    """
     try :
         import parameters as param
     except ModuleNotFoundError :
@@ -30,6 +53,11 @@ if __name__ == "__main__" :
         print( "Veuillez dupliquer \"parameters_sample.py\" vers \"parameters.py\", puis configurer ce-dernier." )
         sys.exit(0)
     
+    
+    """
+    Importation des modules du serveur AOTF, ce qui permet de vérifier que
+    les librairies Python nécessaires sont installées.
+    """
     print( "Vérification des importations...")
     try :
         from app.check_parameters import check_parameters
@@ -69,6 +97,7 @@ if __name__ == "__main__" :
     if not check_parameters() :
         sys.exit(0)
     
+    
     """
     Augmentation du nombre maximum de descripteurs de fichiers.
     """
@@ -81,6 +110,7 @@ if __name__ == "__main__" :
         # 1024 par défaut, c'est trop peu pour nous !
         resource.setrlimit( resource.RLIMIT_NOFILE, (param.MAX_FILE_DESCRIPTORS, param.MAX_FILE_DESCRIPTORS) )
         print( f"Nombre maximum de descripteurs de fichiers : {param.MAX_FILE_DESCRIPTORS}" )
+    
     
     """
     SI ON EST EN MULTIPROCESSING :
@@ -130,6 +160,7 @@ if __name__ == "__main__" :
             import sys
             sys.exit(0)
     
+    
     """
     SI ON N'EST PAS EN MULTIPROCESSING :
     Créer simplement l'objet de mémoire partagée.
@@ -137,6 +168,7 @@ if __name__ == "__main__" :
     if not param.ENABLE_MULTIPROCESSING :
         shared_memory = Shared_Memory( 0, 0 )
         shared_memory_uri = shared_memory # Pour passer aux threads
+    
     
     """
     Garder des proxies ouverts.
