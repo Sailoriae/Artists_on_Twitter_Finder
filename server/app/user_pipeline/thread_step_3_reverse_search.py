@@ -64,9 +64,9 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
         # On passe la requête à l'étape suivante, c'est à dire notre étape
         shared_memory_user_requests.set_request_to_next_step( request )
         
-        if request.input_url != None :
+        if request.input_url != None : # Recherche normale
             print( f"[step_3_th{thread_id}] Recherche de l'image suivante : {request.input_url}" )
-        else :
+        else : # Recherche directe / dans toute la BDD
             print( f"[step_3_th{thread_id}] Recherche de l'image suivante : {request.image_urls[0]}" )
         
         # Obtenir l'image et la charger en PIL.Image
@@ -78,20 +78,28 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
                 # une bidouille pour GET les image sur Pixiv
                 query_image_as_bytes = url_to_content( request.image_urls[image_id] )
             except urllib.error.HTTPError as error : # On réessaye qu'une seule fois
-                print( error )
+                print( f"[step_3_th{thread_id}] Erreur HTTP : {error}" )
                 if error.code == 502 : # Et uniquement sur certaines erreurs
                     sleep(10)
                     query_image_as_bytes = url_to_content( request.image_urls[image_id] )
                 else :
+                    # Si l'URL ne vient pas du Link Finder, c'est un problème d'entrée utilisateur
+                    if request.input_url == None :
+                        print( f"[step_3_th{thread_id}] Impossible d'obtenir l'image entrée par l'utilisateur !" )
+                        request.problem = "ERROR_DURING_REVERSE_SEARCH"
+                        break # Sortir pour terminer le requête proprement
+                    # Sinon, on plante en indiquant que c'est de la faute du Link Finder
                     request.release_proxy()
-                    raise error # Doit tomber dans le collecteur d'erreurs
+                    message = "Impossible d'obtenir une image trouvée par le Link Finder."
+                    message += "\nCe n'est pas de la faute du thread de recherche inversée (Même si c'est lui qui plante)."
+                    message += "\nLe problème est soit dans le Link Finder, soit chez le site supporté."
+                    raise Exception( message ) from error # Doit tomber dans le collecteur d'erreurs
             except ValueError as error : # URL invalide
-                print( f"[step_3_th{thread_id}] URL invalide : {request.image_urls[image_id]}" )
-                print( error )
+                print( f"[step_3_th{thread_id}] URL entrée par l'utilisateur est invalide : {error}" )
                 if len(request.image_urls) > image_id+1 :
                     image_id += 1 # Reboucler au "while True"
                     continue
-                request.problem = "ERROR_DURING_REVERSE_SEARCH"
+                request.problem = "NOT_AN_URL" # C'est une erreur du Link Finder, mais elle veut dire la même chose
                 break # On n'a pas pu obtenir l'image
             
             try :

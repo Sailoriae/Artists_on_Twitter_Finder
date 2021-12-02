@@ -172,6 +172,8 @@ class User_Requests_Pipeline :
     Si account_name ou account_id ne sont pas indiqués, la recherche se fera
     dans toute la base de données.
     
+    Les requêtes de ce type ont leur attribut "input_url" à "None".
+    
     @param image_url URL de l'image à rechercher. Sert à identifier la requête !
     @param account_name Nom du compte Twitter sur lequel rechercher.
     @param account_id ID du compte Twitter sur lequel rechercher.
@@ -182,7 +184,7 @@ class User_Requests_Pipeline :
         self._requests_sem.acquire()
         
         # Créer et ajouter l'objet User_Request à notre système.
-        request = self._root.register_obj( User_Request( image_url ) )
+        request = self._root.register_obj( User_Request( None ) )
         self._requests[ image_url ] = request
         self._processing_requests_count += 1 # Augmenter le compteur du nombre de requêtes en cours de traitement
         
