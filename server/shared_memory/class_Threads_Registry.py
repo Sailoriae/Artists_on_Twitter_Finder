@@ -89,28 +89,53 @@ class Threads_Registry :
         to_print = ""
         total_memory_size = 0
         pid_memory_size = [] # Liste des PID déjà comptés dans "total_memory_size"
+        
+        # Trier par nom du thread
         sorted_dict = sorted( self._pid_dict.items() )
-        for (key, value) in sorted_dict :
+        
+        # Regrouper les threads par PID
+        pids_threads = {}
+        for (thread, pid) in sorted_dict :
+            if not pid in pids_threads :
+                pids_threads[pid] = []
+            pids_threads[pid].append( thread )
+        
+        # Reconstruire le dictionnaire des threads
+        # Ils seront regroupés par PID et triés par noms
+        sorted_dict = {}
+        for pid in pids_threads :
+            for thread in pids_threads[pid] :
+                sorted_dict[thread] = pid
+        
+        # Construire la chaine à afficher
+        last_pid = None
+        for thread in sorted_dict :
+            pid = sorted_dict[thread]
+            
             # Affichage identique pour tous les threads
-            to_print += f"[PID {value}] " + key
+            if pid == last_pid :
+                to_print += " " * ( len(str(pid))+5 ) + "∟ " + thread
+            else :
+                to_print += f"[PID {pid}] " + thread
+            last_pid = pid
             
             # Affichage du poid en mémoire du thread
             # On vérifie de ne pas compter deux fois le même PID
-            if param.ENABLE_MULTIPROCESSING and not int(value) in pid_memory_size :
-                process_size = psutil.Process( int(value) ).memory_info().rss # en octets
+            if param.ENABLE_MULTIPROCESSING and not int(pid) in pid_memory_size :
+                process_size = psutil.Process( int(pid) ).memory_info().rss # en octets
                 process_size = process_size / 1024 / 1024 # en megaoctets
                 to_print += " ({:.2f} Mo)".format( process_size )
                 total_memory_size += process_size
-                pid_memory_size.append( int(value) )
+                pid_memory_size.append( int(pid) )
             
             try :
-                request = self._requests_dict[key]
+                request = self._requests_dict[thread]
             
             
             except KeyError :
                 # Afficher un thread d'indexation (Etape C)
-                if "thread_step_C_index_account_tweets" in key :
-                    tweet_id, account_id = self._root._scan_requests_obj.get_indexing_ids( key )
+                if "thread_step_C_index_account_tweets" in thread :
+                    tweet_id, account_id = self._root._scan_requests_obj.get_indexing_ids( thread )
                     if tweet_id != None :
                         to_print += f" : Tweet ID {tweet_id}\n"
                     else :
