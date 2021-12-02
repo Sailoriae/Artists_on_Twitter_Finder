@@ -37,8 +37,10 @@ class AOTF_Client :
     """
     def __init__ ( self, 
                    base_api_address : str = "http://localhost:3301/" ) :
-        self._base_api_address = base_api_address
-        self._ready = True # Car on utilise get_request() pour gérer les 429
+        self._base_api_address : str = base_api_address
+        self._ready : bool = True # Car on utilise get_request() pour gérer les 429
+        self._cached_response : dict = None # Mise en cache de la réponse (Si fin de traitement), afin d'éviter une requête de plus
+        self._cached_response_input_url : str = None # URL de requête correspondant à la réponse mise en cache
         
         # Test de contact avec le serveur
         try :
@@ -78,6 +80,8 @@ class AOTF_Client :
         if not self._ready :
             print( "La connexion au serveur n'a pas été initialisée correctement." )
             raise Server_Connection_Not_Initialised
+        if illust_url == self._cached_response_input_url :
+            return self._cached_response
         while True :
             response = requests.get( self._base_api_address + "query?url=" + illust_url )
             if response.status_code == 429 :
@@ -88,6 +92,9 @@ class AOTF_Client :
                     raise Max_Processing_Requests_On_Server
                     break
                 else :
+                    if response["status"] == "END" :
+                        self._cached_response = response
+                        self._cached_response_input_url = illust_url
                     return response
     
     """
