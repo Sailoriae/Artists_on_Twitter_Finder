@@ -66,7 +66,7 @@ Milvus semble être intéressant pour un projet ayant de grosses ressources phys
 
 Les équipes de Milvus ont développé plusieurs cas d'utilisation de leur logiciel : https://github.com/milvus-io/bootcamp/tree/master/EN_solutions
 
-Notemment un moteur de recherche par image, utilisant VGG pour extraire les caractéristiques des images.
+Notamment un moteur de recherche par image, utilisant VGG pour extraire les caractéristiques des images.
 - Github de ce moteur CBIR : https://github.com/zilliz-bootcamp/image_search
 - Article expliquant son fonctionnement : https://medium.com/unstructured-data-service/milvus-application-1-building-a-reverse-image-search-system-based-on-milvus-and-vgg-aed4788dd1ea
 - Autre article, plus détaillé sur la configuration : https://medium.com/unstructured-data-service/the-journey-to-optimizing-billion-scale-image-search-2-2-572a36d5d0d

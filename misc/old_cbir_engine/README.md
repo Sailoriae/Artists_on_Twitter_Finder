@@ -21,7 +21,7 @@ https://www.pyimagesearch.com/2014/12/01/complete-guide-building-image-search-en
 
 ## Utilisation indépendante de ce module
 
-Il est possible d'utiliser ce module indépendemment du reste du projet.
+Il est possible d'utiliser ce module indépendamment du reste du projet.
 
 **Attention : Ce module ne gère pas de base de données !**
 C'est la classe `CBIR_Engine_with_Database` qui fait le lien entre le moteur CBIR et la base de données.

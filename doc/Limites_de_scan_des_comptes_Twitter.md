@@ -52,7 +52,7 @@ En cherchant sur GitHub des scripts Python pour faire ce travail, je n'ai trouv�
 
 ## Moyens retenues pour Artists on Twitter Finder
 
-Deux moyens on étés retenus, et fonctionnent indépendemment sur le serveur :
+Deux moyens on étés retenus, et fonctionnent indépendamment sur le serveur :
 * La mèthode de l'API publique Twitter `GET statuses/user_timeline`,
 * Et les API de recherche de l'UI web. On utilisait avant GetOldTweets3 (Mais l'API qu'il utilisait a été supprimée), et on utilise actuellement SNScrape.
 

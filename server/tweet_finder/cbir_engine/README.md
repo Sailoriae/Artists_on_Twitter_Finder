@@ -11,7 +11,7 @@ L'ancien moteur de recherche par image d'AOTF extrayait des images une liste de 
 
 ## Utilisation indépendante de ce module
 
-Il est possible d'utiliser ce module indépendemment du reste du projet. **Attention : Ce module ne gère pas de base de données !**
+Il est possible d'utiliser ce module indépendamment du reste du projet. **Attention : Ce module ne gère pas de base de données !**
 
 
 ### Importation et initialisation

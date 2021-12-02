@@ -13,7 +13,7 @@ from typing import List
 from datetime import datetime
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
-# Ainsi, comme ce script doit être utilisé indépendemment, il faut que so
+# Ainsi, comme ce script doit être utilisé indépendamment, il faut que so
 # répertoire de travail soit ce même répertoire
 from os.path import abspath as get_abspath
 from os.path import dirname as get_dirname

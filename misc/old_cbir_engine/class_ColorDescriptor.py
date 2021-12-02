@@ -34,7 +34,7 @@ class ColorDescriptor :
     
     """
     Extraction des caractéristiques d'une image
-    L'image est découpée en 5 zones qui sont traitées indépendemments :
+    L'image est découpée en 5 zones qui sont traitées indépendamments :
     - Une ellipse centrale
     - Le quart haut-gauche moins l'ellipse centrale
     - Le quart haut-droit moins l'ellipse centrale

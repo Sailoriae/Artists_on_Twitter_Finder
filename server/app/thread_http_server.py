@@ -4,7 +4,7 @@
 from http.server import ThreadingHTTPServer
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
-# Ainsi, si on veut utiliser ce script indépendemment (Notemment pour des
+# Ainsi, si on veut utiliser ce script indépendamment (Notamment pour des
 # tests), il faut que son répertoire de travail soit ce même répertoire
 if __name__ == "__main__" :
     from os.path import abspath as get_abspath
@@ -41,7 +41,7 @@ def thread_http_server( thread_id : int, shared_memory ) :
     # serveur HTTP
     http_server = ThreadingHTTPServer( ("", param.HTTP_SERVER_PORT ), HTTP_Server )
     
-    # Le timeour doit être définit ici, et non dans la classe HTTP_Server, car
+    # Le timeout doit être définit ici, et non dans la classe HTTP_Server, car
     # handle_request() est définit dans l'arbre de ThreadingHTTPServer, et non
     # dans celui de HTTP_Server -> BaseHTTPRequestHandler
     http_server.timeout = 5 # Fonctionne car handle_request() sort lors du stop
