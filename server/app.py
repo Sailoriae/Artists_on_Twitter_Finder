@@ -84,8 +84,14 @@ if __name__ == "__main__" :
             from shared_memory.class_Shared_Memory import Shared_Memory
         from shared_memory.open_proxy import open_proxy
     except ModuleNotFoundError as error :
-        print( f"Il manque une librairie : {error}" )
-        print( "Veuillez exécuter : pip install -r requirements.txt" )
+        # Si c'est une vraie ModuleNotFoundError, elle contient le nom du module
+        if error.name != None and error.name != "" :
+            print( f"Il manque la librairie suivante : {error.name}" )
+            print( "Veuillez exécuter : pip install -r requirements.txt" )
+        # Sinon, c'est nous qui l'avons créée, et donc elle a un message propre
+        else :
+            print( "Il y a eu un problème lors de la vérification des librairies." )
+            print( error )
         sys.exit(0)
     else :
         print( "Toutes les librairies nécessaires sont présentes !" )
