@@ -66,9 +66,9 @@ def thread_step_A_SearchAPI_list_account_tweets( thread_id : int, shared_memory 
     shared_memory_threads_registry.set_request( f"thread_step_A_SearchAPI_list_account_tweets_th{thread_id}", None )
     
     # Tant que on ne nous dit pas de nous arrêter
-    while shared_memory.keep_service_alive :
+    while shared_memory.keep_threads_alive :
         
-        # Si on ne peut pas acquérir le sémaphore, on retest le keep_service_alive
+        # Si on ne peut pas acquérir le sémaphore, on retest le keep_threads_alive
         if not shared_memory_scan_requests_queues_sem.acquire( timeout = 3 ) :
             continue
         

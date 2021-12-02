@@ -46,7 +46,7 @@ def thread_http_server( thread_id : int, shared_memory ) :
     # dans celui de HTTP_Server -> BaseHTTPRequestHandler
     http_server.timeout = 5 # Fonctionne car handle_request() sort lors du stop
     
-    while shared_memory.keep_service_alive :
+    while shared_memory.keep_threads_alive :
         # Ordre des appels :
         # - handle_request() <== Permet le respect de http_server.timeout, alors que serve_forever() ne le respecte pas
         # - _handle_request_noblock()

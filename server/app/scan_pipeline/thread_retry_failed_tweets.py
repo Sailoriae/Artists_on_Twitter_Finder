@@ -61,7 +61,7 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
     
     # Fonction à passer à "wait_until()"
     # Passer "shared_memory.keep_running" ne fonctionne pas
-    def break_wait() : return not shared_memory.keep_service_alive
+    def break_wait() : return not shared_memory.keep_threads_alive
     
     # Historique des ID de Tweets dont on a lancé le réessai
     # ID du Tweet -> Nombre de réessai
@@ -94,7 +94,7 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
             step_C_index_account_tweets_queue.put( tweet )
     
     # Tant que on ne nous dit pas de nous arrêter
-    while shared_memory.keep_service_alive :
+    while shared_memory.keep_threads_alive :
         # Prendre l'itérateur sur les Tweets à réessayer, triés dans l'ordre du
         # moins récemment réessayé au plus récemment réessayé
         retry_tweets_iterator = bdd.get_retry_tweets()
@@ -179,7 +179,7 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
         
         # Vérifier que l'itération "for" n'est pas était arrêtée pour éteindre
         # le serveur
-        if not shared_memory.keep_service_alive : break
+        if not shared_memory.keep_threads_alive : break
         
         # Si il y a des Tweets dans "hundred_tweets", il faut les traiter
         if len( hundred_tweets ) > 0 :

@@ -57,7 +57,7 @@ class Shared_Memory :
             self._daemon = Pyro4.Daemon( port = pyro_port )
         
         # Variable pour éteindre tout le système.
-        self._keep_service_alive = True
+        self._keep_threads_alive = True
         
         # Variable pour éteindre le serveur Pyro après l'extinction du système
         self._keep_pyro_alive = True
@@ -97,9 +97,9 @@ class Shared_Memory :
     Getters et setters pour Pyro.
     """
     @property
-    def keep_service_alive( self ) : return self._keep_service_alive
-    @keep_service_alive.setter
-    def keep_service_alive( self, value ) : self._keep_service_alive = value
+    def keep_threads_alive( self ) : return self._keep_threads_alive
+    @keep_threads_alive.setter
+    def keep_threads_alive( self, value ) : self._keep_threads_alive = value
     
     @property
     def keep_pyro_alive( self ) : return self._keep_pyro_alive

@@ -45,7 +45,7 @@ def error_collector( thread_procedure, thread_id : int, shared_memory_uri : str 
     
     error_count = 0
     error_on_init_count = 0
-    while shared_memory.keep_service_alive :
+    while shared_memory.keep_threads_alive :
         start_time = time.time()
         
         try :
@@ -121,7 +121,7 @@ def error_collector( thread_procedure, thread_id : int, shared_memory_uri : str 
                     time.sleep( 3 )
                     if time.time() > end_sleep_time :
                         break
-                    if not shared_memory.keep_service_alive :
+                    if not shared_memory.keep_threads_alive :
                         break
             
             error_count += 1

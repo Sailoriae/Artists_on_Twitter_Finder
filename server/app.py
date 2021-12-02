@@ -132,7 +132,7 @@ if __name__ == "__main__" :
         
         # Note : Je ne comprend pas bien pourquoi, mais sous Linux, en mode
         # multi-processus, les processus fils se connectent à leur frère
-        # processus serveur Pyro, mais freezent sur "keep_service_alive", c'est
+        # processus serveur Pyro, mais freezent sur "keep_threads_alive", c'est
         # à dire à l'accès à un attribut. Idem sur ce processus père.
         # Du coup, on crée forcément le serveur Pyro en thread, ce qui n'est
         # pas génant puisque sur le processus pére (Ici, "app.py"), il n'y a
@@ -154,7 +154,7 @@ if __name__ == "__main__" :
             print( "Connexion au serveur de mémoire partagée..." )
             try :
                 shared_memory = open_proxy( shared_memory_uri )
-                shared_memory.keep_service_alive # Test d'accès
+                shared_memory.keep_threads_alive # Test d'accès
             except ( Pyro4.errors.ConnectionClosedError, Pyro4.errors.CommunicationError, ConnectionRefusedError ) :
                 sleep(1)
             else :
@@ -278,7 +278,7 @@ if __name__ == "__main__" :
     """
     def on_sigterm ( signum, frame ) :
         print( "Arrêt à la fin des procédures en cours..." )
-        shared_memory.keep_service_alive = False
+        shared_memory.keep_threads_alive = False
         os.close( sys.stdin.fileno() )
     
     signal.signal(signal.SIGINT, on_sigterm)
@@ -453,7 +453,7 @@ if __name__ == "__main__" :
         elif args[0] == "stop" :
             if len(args) == 1 :
                 print( "Arrêt à la fin des procédures en cours..." )
-                shared_memory.keep_service_alive = False
+                shared_memory.keep_threads_alive = False
                 break
             else :
                 print( "Utilisation : stop")

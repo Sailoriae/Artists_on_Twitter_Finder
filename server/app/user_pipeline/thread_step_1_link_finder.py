@@ -50,7 +50,7 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
     shared_memory_threads_registry.set_request( f"thread_step_1_link_finder_th{thread_id}", None )
     
     # Tant que on ne nous dit pas de nous arrêter
-    while shared_memory.keep_service_alive :
+    while shared_memory.keep_threads_alive :
         
         # On tente de sortir une requête de la file d'attente
         try :

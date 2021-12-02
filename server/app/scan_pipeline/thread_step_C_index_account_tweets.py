@@ -40,7 +40,7 @@ def thread_step_C_index_account_tweets( thread_id : int, shared_memory ) :
     
     # Fonction à passer à la classe "Tweets_Indexer"
     # Passer "shared_memory.keep_running" ne fonctionne pas
-    def keep_running() : return shared_memory.keep_service_alive
+    def keep_running() : return shared_memory.keep_threads_alive
     
     # Initialisation de l'indexeur de Tweets
     tweets_indexer = Tweets_Indexer(

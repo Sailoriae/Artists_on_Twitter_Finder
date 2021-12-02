@@ -67,10 +67,10 @@ def thread_reset_SearchAPI_cursors( thread_id : int, shared_memory ) :
     
     # Fonction à passer à "wait_until()"
     # Passer "shared_memory.keep_running" ne fonctionne pas
-    def break_wait() : return not shared_memory.keep_service_alive
+    def break_wait() : return not shared_memory.keep_threads_alive
     
     # Tant que on ne nous dit pas de nous arrêter
-    while shared_memory.keep_service_alive :
+    while shared_memory.keep_threads_alive :
         # Si il n'y a aucun compte dans la base de données
         if shared_memory.accounts_count < 1 :
             print( f"[reset_cursors_th{thread_id}] La base de données n'a pas de comptes Twitter enregistré !" )
@@ -90,7 +90,7 @@ def thread_reset_SearchAPI_cursors( thread_id : int, shared_memory ) :
         # Pour chaque compte dans la BDD
         for account in oldest_reseted_account_iterator :
             # Vérifier quand même qu'il ne faut pas s'arrêter
-            if not shared_memory.keep_service_alive :
+            if not shared_memory.keep_threads_alive :
                 break
             
             # Vérifier que le compte ait bien terminé sa première indexation
@@ -133,7 +133,7 @@ def thread_reset_SearchAPI_cursors( thread_id : int, shared_memory ) :
                 
                 # Si la boucle d'attente a été cassée, c'est que le serveur
                 # doit s'arrêter, il faut retourner à la boucle
-                # "while shared_memory.keep_service_alive"
+                # "while shared_memory.keep_threads_alive"
                 if not wait_until( end_sleep_time, break_wait ) :
                     break
                 

@@ -50,7 +50,7 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
     bdd = SQLite_or_MySQL()
     
     # Tant que on ne nous dit pas de nous arrêter
-    while shared_memory.keep_service_alive :
+    while shared_memory.keep_threads_alive :
         
         # On tente de sortir une requête de la file d'attente
         try :

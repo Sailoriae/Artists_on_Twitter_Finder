@@ -37,10 +37,10 @@ def thread_remove_finished_requests( thread_id : int, shared_memory ) :
     
     # Fonction à passer à "wait_until()"
     # Passer "shared_memory.keep_running" ne fonctionne pas
-    def break_wait() : return not shared_memory.keep_service_alive
+    def break_wait() : return not shared_memory.keep_threads_alive
     
     # Tant que on ne nous dit pas de nous arrêter
-    while shared_memory.keep_service_alive :
+    while shared_memory.keep_threads_alive :
         # On dort dix minutes = 600 secondes
         end_sleep_time = time() + 600
         if not wait_until( end_sleep_time, break_wait ) :

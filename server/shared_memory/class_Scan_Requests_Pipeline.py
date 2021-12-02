@@ -298,7 +298,7 @@ class Scan_Requests_Pipeline :
         self._step_C_sem.release()
         for thread_name in self._indexing_ids_dict :
             count = 0 # Pour ne pas afficher le message les premières fois
-            # On ne vérifie pas "keep_service_alive" car un thread d'indexation
+            # On ne vérifie pas "keep_threads_alive" car un thread d'indexation
             # n'est pas censé prendre trop de temps sur l'indexation d'un Tweet
             # Sinon, c'est qu'il y a un bug, et ceci permet de le détecter
             while True :
