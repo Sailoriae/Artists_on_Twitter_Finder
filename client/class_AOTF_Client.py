@@ -34,15 +34,21 @@ class AOTF_Client :
     @param base_api_address Addresse de base de l'API du serveur à utiliser,
                             avec un "/" au bout ! Par exemple :
                             https://sub.domain.tld/api/
+    @param ignore_check Sauter l'étape de vérification de la connexion au
+                        serveur AOTF. Peut être mis sur True une fois le
+                        débug du programme terminé.
     """
     def __init__ ( self, 
-                   base_api_address : str = "http://localhost:3301/" ) :
+                   base_api_address : str = "http://localhost:3301/",
+                   ignore_check : bool = False ) :
         self._base_api_address : str = base_api_address
         self._ready : bool = True # Car on utilise get_request() pour gérer les 429
         self._cached_response : dict = None # Mise en cache de la réponse (Si fin de traitement), afin d'éviter une requête de plus
         self._cached_response_input_url : str = None # URL de requête correspondant à la réponse mise en cache
         
         # Test de contact avec le serveur
+        if ignore_check : return
+        
         try :
             response_json = self.get_request( "" )
         except JSONDecodeError :
