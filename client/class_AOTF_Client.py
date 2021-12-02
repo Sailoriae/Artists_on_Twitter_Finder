@@ -81,10 +81,9 @@ class AOTF_Client :
     Obtenir le résultat JSON d'un appel sur l'API.
     @param illust_url URL d'une illustration sur l'un des sites supportés par
                       le serveur.
-    @return Le JSON renvoyé par l'API. Voir la documentation pour plus
-            d'information sur son contenu. Un JSON s'utilise comme un
-            dictionnaire Python. Voir la documentation de l'API HTTP pour
-            plus d'informations sur le contenu de ce JSON.
+    @return Le JSON renvoyé par l'API. Un JSON s'utilise comme un dictionnaire
+            Python. Voir la documentation de l'API HTTP d'AOTF pour plus
+            d'informations sur le contenu de ce JSON.
             Ou None si il y a un problème de connexion.
     """
     def get_request ( self, illust_url : str ) -> dict :
