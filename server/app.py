@@ -324,7 +324,7 @@ if __name__ == "__main__" :
         
         elif args[0] == "status" :
             if len(args) == 2 :
-                request = shared_memory_user_requests.get_request( args[1] )
+                request = shared_memory_user_requests.get_any_request( args[1] )
                 if request != None :
                     print( f"Status : {request.status} {request.get_status_string()}" )
                     if request.problem != None :
@@ -353,7 +353,7 @@ if __name__ == "__main__" :
         
         elif args[0] == "result" :
             if len(args) == 2 :
-                request = shared_memory_user_requests.get_request( args[1] )
+                request = shared_memory_user_requests.get_any_request( args[1] )
                 if request != None :
                     if len( request.twitter_accounts_with_id ) > 0 :
                         s = f"{'s' if len( request.twitter_accounts_with_id ) > 1 else ''}"
@@ -399,13 +399,13 @@ if __name__ == "__main__" :
                             print( f"Compte @{args[2]} inexistant ou indisponible !" )
                         else :
                             print( "Attention ! Si ce compte n'est pas indexé, la recherche ne retournera aucun résultat." )
-                            shared_memory_user_requests.launch_reverse_search_only( args[1], args[2], account_id )
+                            shared_memory_user_requests.launch_direct_request( args[1], args[2], account_id )
                     else :
                         print( "Nom de compte Twitter impossible !" )
                 else :
                     print( "Recherche dans toute la base de données !" )
                     print( "ATTENTION : Pour des raisons de performances, seules les images de Tweets ayant exactement la même empreinte seront retournées. Cela mène à un peu moins de 10% de faux-négatifs !" )
-                    shared_memory_user_requests.launch_reverse_search_only( args[1] )
+                    shared_memory_user_requests.launch_direct_request( args[1] )
             else :
                 print( "Utilisation : search [URL de l'image à chercher] [Nom du compte Twitter (OPTIONNEL)]" )
         

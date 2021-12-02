@@ -56,6 +56,13 @@ class User_Requests_Pipeline :
         # Sémaphore d'accès au dictionnaire précédent.
         self._requests_sem = threading.Semaphore()
         
+        # Même principe que le dictionnaire précédent, mais on sépare les
+        # recherches directes / dans toute la BDD.
+        self._direct_requests = {}
+        
+        # Sémaphore d'accès au dictionnaire précédent.
+        self._direct_requests_sem = threading.Semaphore()
+        
         # File d'attente à l'étape 1 du traitement : Link Finder.
         # Les objets queue.Queue sont prévus pour faire du multi-threading.
         self._step_1_link_finder_queue_obj = Pyro_Queue( convert_uri = True )
@@ -168,7 +175,8 @@ class User_Requests_Pipeline :
         return request
     
     """
-    Lancer une recherche inversée d'image.
+    Lancer une recherche "directe", c'est à dire qu'elle fait seulement l'étape
+    de recherche inversée. L'entrée est donc une URL menant à une image.
     Si account_name ou account_id ne sont pas indiqués, la recherche se fera
     dans toute la base de données.
     
@@ -178,17 +186,23 @@ class User_Requests_Pipeline :
     @param account_name Nom du compte Twitter sur lequel rechercher.
     @param account_id ID du compte Twitter sur lequel rechercher.
     """
-    def launch_reverse_search_only ( self, image_url : str,
-                                           account_name : str = None,
-                                           account_id : int = None ) -> User_Request :
-        self._requests_sem.acquire()
+    def launch_direct_request ( self, image_url : str,
+                                      account_name : str = None,
+                                      account_id : int = None ) -> User_Request :
+        # Vérifier d'abord qu'on n'est pas déjà en train de traiter cette
+        # image d'entrée.
+        self._direct_requests_sem.acquire()
+        for key in self._direct_requests :
+            if key == image_url :
+                self._direct_requests_sem.release()
+                return open_proxy( self._direct_requests[key] )
         
         # Créer et ajouter l'objet User_Request à notre système.
         request = self._root.register_obj( User_Request( None ) )
-        self._requests[ image_url ] = request
+        self._direct_requests[ image_url ] = request
         self._processing_requests_count += 1 # Augmenter le compteur du nombre de requêtes en cours de traitement
         
-        self._requests_sem.release()
+        self._direct_requests_sem.release()
         
         # Modifier cet objet si nécessaire
         request = open_proxy( request )
@@ -205,7 +219,7 @@ class User_Requests_Pipeline :
     """
     Obtenir l'objet User_Request d'une requête.
     
-    @param illust_url L'illustration d'entrée.
+    @param illust_url L'URL de l'illustration d'entrée.
     @return Un objet User_Request,
             Ou None si la requête est inconnue.
     """
@@ -218,6 +232,73 @@ class User_Requests_Pipeline :
         self._requests_sem.release()
         
         return None
+    
+    """
+    Obtenir l'objet User_Request d'une requête directe / dans toute la BDD.
+    
+    @param image_url L'URL de l'image d'entrée.
+    @return Un objet User_Request,
+            Ou None si la requête est inconnue.
+    """
+    def get_direct_request ( self, image_url : str ) -> User_Request :
+        self._direct_requests_sem.acquire()
+        for key in self._direct_requests :
+            if key == image_url :
+                self._direct_requests_sem.release()
+                return open_proxy( self._direct_requests[key] )
+        self._direct_requests_sem.release()
+        
+        return None
+    
+    """
+    Obtenir l'objet User_Request d'une requête, qu'elle soit une requête
+    normale ou une directe / dans toute la BDD.
+    
+    Note : Cette fonction est utilisée uniquement par la CLI. Elle ne doit pas
+    être utilisée pour l'API HTTP,car cela prête à confusion.
+    
+    @param image_url L'URL de l'illustration d'entrée.
+    @return Un objet User_Request,
+            Ou None si la requête est inconnue.
+    """
+    def get_any_request ( self, illust_url : str ) -> User_Request :
+        request = self.get_request( illust_url )
+        direct_request = self.get_direct_request( illust_url )
+        
+        # Vérifier si on peut retourner l'une des deux requêtes, ou aucune.
+        if request != None and direct_request == None : return request
+        if request == None and direct_request != None : return direct_request
+        if request == None and direct_request == None : return None
+        
+        # Maintenant, il va falloir choisir. On sait qu'il est impossible que
+        # ces deux requêtes mènent à un résultat, puisque l'URL d'une page sur
+        # un site supporté n'est pas l'URL d'un fichier image, et inversement.
+        
+        # Eliminer la détection d'une URL invalide pour les requêtes normales.
+        if request.problem in [ "NOT_AN_URL",
+                                "UNSUPPORTED_WEBSITE",
+                                "NOT_AN_ARTWORK_PAGE" ] :
+            return direct_request
+        
+        # Eliminer la détection d'une URL invalide pour les requêtes directes.
+        if direct_request.problem in [ "NOT_AN_URL",
+                                       "ERROR_DURING_REVERSE_SEARCH" ] :
+            return request
+        
+        # Si la requête directe s'est terminée sans erreur, on peut la
+        # retourner comme requête valide.
+        if ( direct_request.get_status_string() == "END" and
+             direct_request.problem in [ None, "" ] ) :
+             return direct_request
+        
+        # Si la requête directe a l'erreur "QUERY_IMAGE_TOO_BIG", c'est que
+        # l'URL est valide pour elle. On peut donc la retourner.
+        if direct_request.problem in [ "QUERY_IMAGE_TOO_BIG" ] :
+             return direct_request
+        
+        # On retourne par défaut la requête normale, car c'est celle qui aura
+        # l'étape de traitement la plus basse.
+        return request
     
     """
     Passer la requête à l'étape suivante.
@@ -267,18 +348,26 @@ class User_Requests_Pipeline :
     Délester les anciennes requêtes.
     """
     def shed_requests ( self ) :
+        # On doit le faire deux fois, pour nos deux dictionnaires de requêtes
+        self._shed_requests( direct_requests = False )
+        self._shed_requests( direct_requests = True )
+    
+    def _shed_requests ( self, direct_requests : bool = False ) :
         # On prend la date actuelle
         now = datetime.datetime.now()
         
         # On bloque l'accès la liste des requêtes
-        self._requests_sem.acquire()
+        if direct_requests : self._direct_requests_sem.acquire()
+        else : self._requests_sem.acquire()
         
         # On filtre le dictionnaire des requêtes utilisateurs
         new_requests_dict = {}
         to_unregister_list = []
         
-        for key in self._requests :
-            request_uri = self._requests[key]
+        if direct_requests : requests_list = self._direct_requests
+        else : requests_list = self._requests
+        for key in requests_list :
+            request_uri = requests_list[key]
             request = open_proxy( request_uri )
             
             # Si la requête est terminée, il faut vérifier qu'on puisse la garder
@@ -292,9 +381,10 @@ class User_Requests_Pipeline :
                         # Si l'URL de requête est invalide ou le site n'est pas
                         # supporté (Erreur de l'utilisateur), on garde la
                         # requête 10 minutes
-                        if request.problem in [ "NOT_AN_URL",
-                                                "NOT_AN_ARTWORK_PAGE",
-                                                "UNSUPPORTED_WEBSITE"] :
+                        if ( request.problem in [ "NOT_AN_URL",
+                                                  "NOT_AN_ARTWORK_PAGE",
+                                                  "UNSUPPORTED_WEBSITE"] or 
+                             direct_requests and request.problem in [ "ERROR_DURING_REVERSE_SEARCH" ] ) :
                             if now - request.finished_date < datetime.timedelta( minutes = 10 ) :
                                 new_requests_dict[ key ] = request_uri
                             
@@ -325,10 +415,12 @@ class User_Requests_Pipeline :
             request.release_proxy()
         
         # On installe la nouvelle liste
-        self._requests = new_requests_dict
+        if direct_requests : self._direct_requests = new_requests_dict
+        else : self._requests = new_requests_dict
         
         # On débloque l'accès à la liste des requêtes
-        self._requests_sem.release()
+        if direct_requests : self._direct_requests_sem.release()
+        else : self._requests_sem.release()
         
         # On désenregistre les requêtes à désenregistrer
         for uri in to_unregister_list :
