@@ -17,7 +17,7 @@ var lang = {
 
 	"NEXT_TRY_IN" : "Nouvel essai dans %s secondes.",
 
-	"STATUS" : "Status du traitement : ",
+	"STATUS" : "Statut du traitement : ",
 
 	"END" : "Fin de traitement.",
 	"IMAGE_REVERSE_SEARCH" : "Recherche inversée de l'illustration.",

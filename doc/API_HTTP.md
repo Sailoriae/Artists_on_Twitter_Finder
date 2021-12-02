@@ -39,7 +39,7 @@ Liste des attributs d'un résultat dans la liste `results` :
 - `image_position` : Chaine contenant la position de l'image dans le tweet et le nombre d'images dans le Tweet, entre 1 et 4.
 - `distance` : Le nombre de bits de différence entre l'empreinte de l'image de requête et celle de l'image trouvée.
 
-Liste des status possibles (Dans l'ordre de traitement) :
+Liste des statuts possibles (Dans l'ordre de traitement) :
 - `WAIT_LINK_FINDER` : En attente de traitement par un thread de Link Finder.
 - `LINK_FINDER` : En cours de traitement par un thread de Link Finder.
 - `WAIT_INDEX_ACCOUNTS_TWEETS` : En attente de traitement par un thread de lancement de l'indexation ou de la mise à jour de l'indexation des Tweets des comptes Twitter de l'artiste.
