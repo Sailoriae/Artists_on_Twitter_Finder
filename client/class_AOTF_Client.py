@@ -25,6 +25,10 @@ class Timeout_Reached ( Exception ) :
         super().__init__( self.message )
 
 
+# Temps entre chaque requêtes, imposé par le serveur AOTF.
+RATE_LIMIT_PERIOD = 1 # En secondes
+
+
 """
 Classe de client à un serveur "Artists on Twitter Finder". Permet d'utiliser
 son API.
@@ -45,6 +49,7 @@ class AOTF_Client :
         self._ready : bool = True # Car on utilise get_request() pour gérer les 429
         self._cached_response : dict = None # Mise en cache de la réponse (Si fin de traitement), afin d'éviter une requête de plus
         self._cached_response_input_url : str = None # URL de requête correspondant à la réponse mise en cache
+        self._last_request_timestamp : float = 0 # Timestamp de la dernière requête (Permet d'éviter les 429)
         
         # Test de contact avec le serveur
         if ignore_check : return
@@ -89,9 +94,13 @@ class AOTF_Client :
         if illust_url == self._cached_response_input_url :
             return self._cached_response
         while True :
+            cooldown_time = RATE_LIMIT_PERIOD - time() + self._last_request_timestamp
+            if cooldown_time > 0 :
+                sleep( cooldown_time )
             response = requests.get( self._base_api_address + "query?url=" + illust_url )
-            if response.status_code == 429 :
-                sleep(1)
+            self._last_request_timestamp = time()
+            if response.status_code == 429 : # Peut arriver si plusieurs éxécutions en parallèle
+                sleep( RATE_LIMIT_PERIOD )
             else :
                 response = response.json()
                 if response["error"] == "YOUR_IP_HAS_MAX_PROCESSING_REQUESTS" :
