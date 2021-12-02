@@ -111,7 +111,7 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
                     
                     end_sleep_time = time() + wait_time
                     
-                    print( f"[auto_update_th{thread_id}] Reprise dans {int(wait_time)} secondes, pour lancer le scan du compte ID {oldest_updated_account['account_id']}." )
+                    print( f"[auto_update_th{thread_id}] Reprise dans {int(wait_time)} secondes, pour lancer la mise à jour du compte ID {oldest_updated_account['account_id']}." )
                     
                     # Si la boucle d'attente a été cassée, c'est que le serveur
                     # doit s'arrêter, il faut retourner à la boucle
@@ -139,7 +139,7 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
             # prendre trop d'avance
             if ( bdd.get_account_SearchAPI_last_scan_local_date( oldest_updated_account["account_id"] ) != oldest_updated_account["last_SearchAPI_indexing_local_date"] and
                  bdd.get_account_TimelineAPI_last_scan_local_date( oldest_updated_account["account_id"] ) != oldest_updated_account["last_TimelineAPI_indexing_local_date"] ) :
-                print( f"[auto_update_th{thread_id}] Le compte ID {oldest_updated_account['account_id']} a eu un scan provoqué par un utilisateur, on peut le sauter." )
+                print( f"[auto_update_th{thread_id}] Le compte ID {oldest_updated_account['account_id']} a eu une mise à jour provoquée par un utilisateur, on peut le sauter." )
                 
                 # On peut sauter ce compte, on le reverra la prochaine fois
                 # qu'on lancera l'itérateur
