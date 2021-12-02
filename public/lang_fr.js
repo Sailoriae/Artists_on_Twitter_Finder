@@ -39,7 +39,7 @@ var lang = {
 	"CANNOT_DISPLAY_TWEET" : "Impossible d'afficher ce Tweet. Peut-être que votre navigateur bloque le widget Twitter ?",
 
 	"CANNOT_DISPLAY_STATS" : "Impossible d'afficher les statistiques.",
-	"SERVER_IS_DOWN" : "Le serveur de traitement ne répond pas, ce service est donc inutilisable. Si vous souhaitez avoir plus d'informations sur cet incident, vous pouvez contacter <a href=\"https://twitter.com/Sailoriae\" target=\"_blank\" rel=\"noopener\">@Sailoriae</a> sur Twitter.", 
+	"SERVER_IS_DOWN" : "Le serveur de traitement ne répond pas, AOTF est donc inutilisable. Si vous souhaitez avoir plus d'informations sur cet incident, vous pouvez contacter <a href=\"https://twitter.com/Sailoriae\" target=\"_blank\" rel=\"noopener\">@Sailoriae</a> sur Twitter.",
 	"STATS_1" : "%s Tweets indexés sur %s comptes Twitter.",
 	"STATS_2_1_ZERO" : "Actuellement aucune requête en cours de traitement,",
 	"STATS_2_1_ONE" : "Actuellement 1 requête en cours de traitement,",

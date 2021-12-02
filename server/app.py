@@ -474,7 +474,7 @@ if __name__ == "__main__" :
                        "Afficher des statistiques de la base de données : stats\n" +
                        f"Afficher les {'processus et threads' if param.ENABLE_MULTIPROCESSING else 'threads'} et ce qu'ils font : threads\n" +
                        "Afficher la taille des files d'attente : queues\n" +
-                       "Arrêter le service : stop\n" +
+                       "Arrêter le serveur : stop\n" +
                        "Afficher l'aide : help" )
             else :
                 print( "Utilisation : help" )
