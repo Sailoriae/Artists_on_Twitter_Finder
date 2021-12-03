@@ -1,4 +1,5 @@
 var tweetsDiv = document.getElementById("tweets");
+var widgetWarningP = document.getElementById("widget-warning");
 
 function canDisplayTweets ( json ) {
 	if ( !canDisplayTwitterAccounts( json ) )
@@ -61,9 +62,7 @@ function displayTweets ( json ) {
 						dnt : "true"
 					})
 				} catch ( ReferenceError ) { // Si la JS de Twitter n'a pas été chargée
-					var p = document.createElement('p');
-					p.textContent = lang[ "CANNOT_DISPLAY_TWEET" ];
-					div2.appendChild(p);
+					widgetWarningP.textContent = lang[ "CANNOT_DISPLAY_TWEETS" ];
 				}
 
 				tweetsDiv.appendChild(div1);

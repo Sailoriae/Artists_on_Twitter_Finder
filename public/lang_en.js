@@ -36,7 +36,7 @@ var lang = {
 
 	"NO_TWEET_FOUND" : "No Tweet found.",
 	"TWEET_FOUND" : "Tweet found\xa0: ",
-	"CANNOT_DISPLAY_TWEET" : "Unable to display this Tweet. Maybe your browser is blocking the Twitter widget ?",
+	"CANNOT_DISPLAY_TWEETS" : "Unable to display the found Tweets. Maybe your browser is blocking the Twitter widget ?",
 
 	"CANNOT_DISPLAY_STATS" : "Unable to display stats.",
 	"SERVER_IS_DOWN" : "The processing server does not respond, AOTF is therefore unusable. If you would like more information about this incident, you can contact <a href=\"https://twitter.com/Sailoriae\" target=\"_blank\" rel=\"noopener\">@Sailoriae</a> on Twitter.",
