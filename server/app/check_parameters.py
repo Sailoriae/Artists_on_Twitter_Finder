@@ -97,11 +97,8 @@ def check_parameters () :
     check_list.append( test_strictly_postive_int_parameter( "NUMBER_OF_STEP_1_LINK_FINDER_THREADS" ) )
     check_list.append( test_strictly_postive_int_parameter( "NUMBER_OF_STEP_2_TWEETS_INDEXER_THREADS" ) )
     check_list.append( test_strictly_postive_int_parameter( "NUMBER_OF_STEP_3_REVERSE_SEARCH_THREADS" ) )
-    check_list.append( test_strictly_postive_int_parameter( "NUMBER_OF_STEP_A_SEARCHAPI_LIST_ACCOUNT_TWEETS_THREADS" ) )
-    check_list.append( test_strictly_postive_int_parameter( "NUMBER_OF_STEP_B_TIMELINEAPI_LIST_ACCOUNT_TWEETS_THREADS" ) )
     check_list.append( test_strictly_postive_int_parameter( "NUMBER_OF_STEP_C_INDEX_ACCOUNT_TWEETS" ) )
     
-    check_list.append( test_strictly_postive_int_parameter( "MAX_FILE_DESCRIPTORS" ) )
     check_list.append( test_parameter( "DEBUG", bool ) )
     check_list.append( test_parameter( "ENABLE_METRICS", bool ) )
     check_list.append( test_parameter( "USER_AGENT", str ) )
@@ -127,12 +124,6 @@ def check_parameters () :
     if len( param.TWITTER_API_KEYS ) < 1 :
         print( "Vous devez donner l'accès à au moins un compte Twitter via la liste \"TWITTER_API_KEYS\"." )
         return False
-    
-    # ========================================================================
-    
-    if ( param.NUMBER_OF_STEP_A_SEARCHAPI_LIST_ACCOUNT_TWEETS_THREADS != len(param.TWITTER_API_KEYS) and
-         param.NUMBER_OF_STEP_B_TIMELINEAPI_LIST_ACCOUNT_TWEETS_THREADS != len(param.TWITTER_API_KEYS) ) :
-        print( "Il doit y avoir autant de threads de listage que de clés d'API dans \"TWITTER_API_KEYS\"." )
     
     # ========================================================================
     

@@ -106,16 +106,28 @@ if __name__ == "__main__" :
     
     """
     Augmentation du nombre maximum de descripteurs de fichiers.
+    1024 par défaut, c'est trop peu pour nous ! Car chaque connexion au serveur
+    de mémoire partagée est un nouveau descripteur de fichier.
     """
+    # Threads de traitement (Etapes 1, 2, 3, A, B et C)
+    MAX_FILE_DESCRIPTORS = 0
+    MAX_FILE_DESCRIPTORS += 300 * param.NUMBER_OF_STEP_1_LINK_FINDER_THREADS
+    MAX_FILE_DESCRIPTORS += 300 * param.NUMBER_OF_STEP_2_TWEETS_INDEXER_THREADS
+    MAX_FILE_DESCRIPTORS += 300 * param.NUMBER_OF_STEP_3_REVERSE_SEARCH_THREADS
+    MAX_FILE_DESCRIPTORS += 300 * len( param.TWITTER_API_KEYS ) # Nombre de threads de listage avec l'API de recherche (Etape A)
+    MAX_FILE_DESCRIPTORS += 300 * len( param.TWITTER_API_KEYS ) # Nombre de threads de listage avec l'API de timeline (Etape B)
+    MAX_FILE_DESCRIPTORS += 300 * param.NUMBER_OF_STEP_C_INDEX_ACCOUNT_TWEETS
+    
+    # Serveur HTTP et autres, même si on a déjà une bonne marge
+    MAX_FILE_DESCRIPTORS += 2000
+    
     try :
         import resource
     except ModuleNotFoundError : # On n'est pas sous un système UNIX
         pass
     else :
-        # Augmenter le nombre de descripteurs de fichiers ouvrables.
-        # 1024 par défaut, c'est trop peu pour nous !
-        resource.setrlimit( resource.RLIMIT_NOFILE, (param.MAX_FILE_DESCRIPTORS, param.MAX_FILE_DESCRIPTORS) )
-        print( f"Nombre maximum de descripteurs de fichiers : {param.MAX_FILE_DESCRIPTORS}" )
+        resource.setrlimit( resource.RLIMIT_NOFILE, (MAX_FILE_DESCRIPTORS, MAX_FILE_DESCRIPTORS) )
+        print( f"Nombre maximum de descripteurs de fichiers : {MAX_FILE_DESCRIPTORS}" )
     
     
     """
@@ -139,7 +151,7 @@ if __name__ == "__main__" :
         # que la CLI.
         thread_pyro = threading.Thread( name = "thread_pyro_th1",
                                         target = thread_pyro_server,
-                                        args = ( pyro_port, param.MAX_FILE_DESCRIPTORS, ) )
+                                        args = ( pyro_port, MAX_FILE_DESCRIPTORS, ) )
         thread_pyro.start()
         
         # On prépare la connexion au serveur.
@@ -226,13 +238,13 @@ if __name__ == "__main__" :
     
     threads_or_process.extend( launch_identical_threads_in_container(
         thread_step_A_SearchAPI_list_account_tweets,
-        param.NUMBER_OF_STEP_A_SEARCHAPI_LIST_ACCOUNT_TWEETS_THREADS,
+        len( param.TWITTER_API_KEYS ), # Il doit y avoir autant de threads de listage que de clés d'API dans TWITTER_API_KEYS
         False, # Ne nécessitent pas des processus séparés
         shared_memory_uri ) )
     
     threads_or_process.extend( launch_identical_threads_in_container(
         thread_step_B_TimelineAPI_list_account_tweets,
-        param.NUMBER_OF_STEP_B_TIMELINEAPI_LIST_ACCOUNT_TWEETS_THREADS,
+        len( param.TWITTER_API_KEYS ), # Il doit y avoir autant de threads de listage que de clés d'API dans TWITTER_API_KEYS
         False, # Ne nécessitent pas des processus séparés
         shared_memory_uri ) )
     

@@ -95,30 +95,18 @@ HTTP_SERVER_PORT = 3301
 
 """
 Paramètrage du nombre de threads.
+
+Note : Le nombre de threads de listages (Etapes A et C) dépendent du nombre de
+tokens de connexion à l'API Twitter que vous passez. Voir la liste
+"TWITTER_API_KEYS".
+Plus exactement, il y a un thread de listage avec l'API de recherche (Etape A)
+par clé "AUTH_TOKEN", et un thread de listage avec l'API de timeline (Etape B)
+par couples de clés "OAUTH_TOKEN" et "OAUTH_TOKEN_SECRET".
 """
 NUMBER_OF_STEP_1_LINK_FINDER_THREADS = 5
 NUMBER_OF_STEP_2_TWEETS_INDEXER_THREADS = 5
 NUMBER_OF_STEP_3_REVERSE_SEARCH_THREADS = 5
-NUMBER_OF_STEP_A_SEARCHAPI_LIST_ACCOUNT_TWEETS_THREADS = len( TWITTER_API_KEYS ) # NE PAS TOUCHER
-NUMBER_OF_STEP_B_TIMELINEAPI_LIST_ACCOUNT_TWEETS_THREADS = len( TWITTER_API_KEYS ) # NE PAS TOUCHER
 NUMBER_OF_STEP_C_INDEX_ACCOUNT_TWEETS = len( TWITTER_API_KEYS ) * 2
-
-"""
-Paramètrage du nombre de descripteurs de fichiers maximum.
-Ce paramètre est aussi utilisable comme nombre maximum de connexions possibles
-au serveur de mémoire partagée.
-"""
-# NE PAS TOUCHER
-MAX_FILE_DESCRIPTORS = 0
-MAX_FILE_DESCRIPTORS += 300 * NUMBER_OF_STEP_1_LINK_FINDER_THREADS
-MAX_FILE_DESCRIPTORS += 300 * NUMBER_OF_STEP_2_TWEETS_INDEXER_THREADS
-MAX_FILE_DESCRIPTORS += 300 * NUMBER_OF_STEP_3_REVERSE_SEARCH_THREADS
-MAX_FILE_DESCRIPTORS += 300 * NUMBER_OF_STEP_A_SEARCHAPI_LIST_ACCOUNT_TWEETS_THREADS
-MAX_FILE_DESCRIPTORS += 300 * NUMBER_OF_STEP_B_TIMELINEAPI_LIST_ACCOUNT_TWEETS_THREADS
-MAX_FILE_DESCRIPTORS += 300 * NUMBER_OF_STEP_C_INDEX_ACCOUNT_TWEETS
-
-# Serveur HTTP et autres, même si on a déjà une bonne marge
-MAX_FILE_DESCRIPTORS += 2000
 
 """
 Faire plus de print().
