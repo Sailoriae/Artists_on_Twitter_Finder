@@ -38,7 +38,8 @@ input#illust-url {
 }
 
 div.twitter-tweet {
-	margin:auto;
+	margin: auto;
+	max-width: 551px !important; /* A retirer si Twitter réparent leur widget */
 }
 
 code {
