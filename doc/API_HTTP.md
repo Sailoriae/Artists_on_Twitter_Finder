@@ -1,6 +1,13 @@
 # Utilisation de l'API
 
-Le serveur est utilisable via son serveur HTTP, depuis la même machine, ou l'extérieur, en faisant un proxy depuis Apache ou Nginx. Ne pas ouvrir le port du serveur !
+Le serveur AOTF est utilisable via son serveur HTTP, depuis la même machine (`http://localhost:3301`, le port est modifiable dans `parameters.py`), ou l'extérieur, en faisant un proxy depuis Apache ou Nginx. Ne pas ouvrir le port du serveur AOTF !
+
+Cette documentation est très similaire à la [documentation de l'API sur l'interface web](../public/documentation.fr.html).
+
+Attention : Le serveur limite chaque adresse IP à 1 requête HTTP par secondes. Si dépassement, le serveur renvoit une erreur HTTP 429.
+
+
+## Endpoint `GET /query`
 
 Les requêtes sont indentifiées par leur URL (C'est à dire l'URL de l'illustration sur un des sites supportés). La méthode pour lancer une procédure ou obtenir le résultat est la même : `GET /query?url=[URL de l'illustration de requête]`
 
@@ -29,9 +36,9 @@ Le serveur répond par un JSON qui contient toujours les mêmes champs :
 }
 ```
 
-La liste `twitter_accounts` contient les comptes Twitter identifiés comme étant ceux de l'artiste de l'illustration de requête.
+La liste `twitter_accounts` contient les comptes Twitter identifiés comme étant ceux de l'artiste de l'illustration de requête. Elle peut être vide.
 
-La liste `results` contient les Tweets avec images trouvés, triée par le nombre de bits de différence avec l'empreinte de l'image de requête, puis si égalité par le nombre d'images dans le Tweet, puis si encore égalité par l'ID du Tweet. Le premier élément de cette liste est donc le Tweet contenant l'image la plus proche.
+La liste `results` contient les Tweets avec images trouvés, triée par le nombre de bits de différence avec l'empreinte de l'image de requête, puis si égalité par le nombre d'images dans le Tweet, puis si encore égalité par l'ID du Tweet. Le premier élément de cette liste est donc le Tweet contenant l'image la plus proche. Cette liste peut être vide.
 
 Liste des attributs d'un résultat dans la liste `results` :
 - `tweet_id` : L'ID du Tweet.
@@ -61,12 +68,32 @@ Liste des erreurs possibles :
 - `ERROR_DURING_REVERSE_SEARCH` : Erreur durant la recherche d'image inversée. Est ce que l'illustration n'a pas un format à la noix ? Par exemple GIF animé ?
 - `QUERY_IMAGE_TOO_BIG` : L'illustration de requête est trop grande pour être traitée.
 - `PROCESSING_ERROR` : Un thread de traitement a planté durant son traitement de cette requête. Il est donc impossible de terminer cette requête !
-- `YOUR_IP_HAS_MAX_PROCESSING_REQUESTS` : L'adresse IP qui a envoyé la requête a atteint son quota maximum de requêtes en cours de traitement. Il faut donc attendre que les autres requêtes envoyées par cette adresse IP finissend leur traitement. 
+- `YOUR_IP_HAS_MAX_PROCESSING_REQUESTS` : L'adresse IP qui a envoyé la requête a atteint son quota maximum de requêtes en cours de traitement. Il faut donc attendre que les autres requêtes envoyées par cette adresse IP finissent leur traitement. 
 
-La liste `results` peut être vide, ou comporter plusieurs résultats. Ils sont alors classés par ordre croissant de distance avec l'illustration de requête.
 
-L'API peut aussi fournir des statistiques sur la base de données : `GET /stats`
+## Endpoint `POST /query`
 
-Attention : Le serveur limite :
-- Le nombre de requêtes en cours de traitement par adresse IP. Si dépassement, le JSON de réponse contient l'erreur : `YOUR_IP_HAS_MAX_PROCESSING_REQUESTS`.
-- Et le nombre de requêtes par secondes. Si dépassement, le serveur renvoit une erreur HTTP 429.
+Fonctionne exactement de la même manière que `GET /api/query` (Voir ci-dessus), mais l'URL de requête est passée dans le contenu de la requête (Type `text/plain` encodé en UTF-8).
+
+L'interface web d'AOTF (Voir les Javascripts du répertoire [`../public`](../public)) utilise cette méthode plutôt que la précédente, afin de permettre aux utilisateurs novices d'entrer n'importe quel URL.
+
+
+## Endpoint `GET /stats`
+
+Recevoir des statistiques sur le serveur.
+
+Retourne un JSON contenant les champs suivants :
+- `indexed_tweets_count` : Nombre de Tweets indexés.
+- `indexed_accounts_count` : Nombre de comptes Twitter indexés.
+- `processing_user_requests_count` : Nombre de requêtes en cours de traitement. Plus cette valeur est élevée, plus votre requête va prendre du temps à être traitée.
+- `processing_scan_requests_count` : Nombre d'indexations ou de mise à jour d'indexation de comptes Twitter en cours. Plus cette valeur est élevée, plus votre requête risque de prendre du temps à être traitée.
+- `pending_tweets_count` : Nombre de Tweets en attente d'indexation. Plus cette valeur est élevée, plus votre requête risque de prendre du temps à être traitée.
+
+
+## Endpoint `GET /config`
+
+Recevoir des informations sur le serveur.
+
+Retourne un JSON contenant les champs suivants :
+- `limit_per_ip_address` : Nombre maximale de requêtes en cours de traitement par adresse IP.
+- `update_accounts_frequency` : Fréquence de la mise à jour automatique des comptes Twitter indexés, en jours. Un compte peut aussi être mis à jour lors d'une requête si l'illustration est trop récente.
