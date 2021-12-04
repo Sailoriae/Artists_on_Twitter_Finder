@@ -116,6 +116,13 @@ def thread_step_A_SearchAPI_list_account_tweets( thread_id : int, shared_memory 
         # Lacher le sémaphore
         shared_memory_scan_requests_queues_sem.release()
         
+        # Vérifier si ce compte n'est pas dans notre liste noire
+        # AVANT de se déclarer au registre des threads
+        if shared_memory_scan_requests.is_blacklisted( int( request.account_id ) ) :
+            print( f"[step_A_th{thread_id}] Le compte Twitter @{request.account_name} est sur notre liste noire ! Ses Tweets ne seront pas listés." )
+            request.release_proxy()
+            continue
+        
         # Dire qu'on est en train de traiter cette requête
         shared_memory_threads_registry.set_request( f"thread_step_A_SearchAPI_list_account_tweets_th{thread_id}", request )
         

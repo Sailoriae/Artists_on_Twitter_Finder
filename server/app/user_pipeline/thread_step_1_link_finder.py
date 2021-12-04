@@ -43,6 +43,7 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
     # Maintenir ouverts certains proxies vers la mémoire partagée
     shared_memory_threads_registry = shared_memory.threads_registry
     shared_memory_user_requests = shared_memory.user_requests
+    shared_memory_scan_requests = shared_memory.scan_requests
     shared_memory_execution_metrics = shared_memory.execution_metrics
     shared_memory_user_requests_step_1_link_finder_queue = shared_memory_user_requests.step_1_link_finder_queue
     
@@ -113,7 +114,16 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
         
         # On vérifie la liste des comptes Twitter
         if can_proceed :
-            request.twitter_accounts_with_id = twitter.get_multiple_accounts_ids( data.twitter_accounts )
+            twitter_accounts_with_id = twitter.get_multiple_accounts_ids( data.twitter_accounts )
+            filtered_twitter_accounts_with_id = []
+            
+            # On vérifie aussi que les comptes validés ne sont pas dans notre
+            # liste noire (Dans ce cas, ils sont considérés comme invalides)
+            for account_name, account_id in twitter_accounts_with_id :
+                if not shared_memory_scan_requests.is_blacklisted( int( account_id ) ) :
+                    filtered_twitter_accounts_with_id.append( ( account_name, account_id ) )
+            
+            request.twitter_accounts_with_id = filtered_twitter_accounts_with_id
         
         # Si jamais aucun compte Twitter valide n'a été trouvé, on ne va pas
         # plus loin avec la requête (On passe donc son status à "Fin de

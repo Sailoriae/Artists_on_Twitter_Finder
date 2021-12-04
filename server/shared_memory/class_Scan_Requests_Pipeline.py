@@ -26,6 +26,7 @@ from shared_memory.remove_account_id_from_queue import remove_account_id_from_qu
 from shared_memory.class_Pyro_Semaphore import Pyro_Semaphore
 from shared_memory.class_Pyro_Queue import Pyro_Queue
 from shared_memory.open_proxy import open_proxy
+from tweet_finder.blacklist import BLACKLIST
 
 
 """
@@ -110,6 +111,10 @@ class Scan_Requests_Pipeline :
         # Compteur du nombre de requêtes en cours de traitement dans le
         # pipeline.
         self._processing_requests_count = 0
+        
+        # Liste des IDs de comptes Twitter qui sont dans la liste noire des
+        # comptes à ne pas indexer.
+        self._blacklist = BLACKLIST
     
     """
     Getters et setters pour Pyro.
@@ -139,6 +144,11 @@ class Scan_Requests_Pipeline :
     def get_size( self ) :
         # Pas besoin de prendre le sémaphore, le GIL Pyhton fait son job
         return len( self._requests )
+    
+    # Savoir si un ID de compte est dans la liste noire ou pas
+    # Permet de ne pas transférer la liste (Lourde en mémoire)
+    def is_blacklisted( self, account_id : int ) -> bool :
+        return int( account_id ) in self._blacklist
     
     """
     Lancer l'indexation ou la mise à jour de l'indexation d'un compte Twitter
