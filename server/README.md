@@ -121,3 +121,5 @@ Si le mode multi-processus est désactivé, tous les processus deviennent des th
   Si il s'est produit une erreur, elle sont journalisées ici.
 
 * Les curseurs d'indexation sont enregistrés une fois l'indexation terminée. D'une manière générale, l'ajout ou la modifications de données dans la base de données est pensée pour qu'un arrêt brutal (Crash ou kill) d'un thread ou du serveur complet n'ait pas d'impact sur la cohérence des données.
+
+* Le serveur AOTF ne supprime aucun enregistrement de sa base de données ! C'est le script de maintenance [`remove_deleted_accounts.py`](../maintenance/remove_deleted_accounts.py) qui permet d'effacer des comptes Twitter, et le script [`cleanup_database.py`](../maintenance/cleanup_database.py) qui permet d'effacer les Tweets sans compte associé.
