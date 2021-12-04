@@ -202,6 +202,11 @@ class TweepyAbstraction :
                                   vérifier que l'ID corresponde au nom.
     @param retry_once Réessayer une fois sur une erreur de connexion.
     @return True ou False.
+            Ou None s'il y a eu un problème, c'est à dire soit :
+            - Le compte n'existe pas,
+            - Le compte est désactivé,
+            - Ou le compte est suspendu
+            Ne détecte pas si le compte est privé.
     """
     # Note : On ne peut pas savoir via cette API si le compte est en privé.
     def blocks_me ( self, account_id : int, append_account_name = False, retry_once = True ) :
@@ -212,6 +217,10 @@ class TweepyAbstraction :
             else :
                 return friendship[0].blocked_by
         except tweepy.errors.HTTPException as error :
+            if 50 in error.api_codes : # User not found
+                return None
+            if 63 in error.api_codes : # User has been suspended
+                return None
             if retry_once and error.api_codes == [] :
                 time.sleep( 10 )
                 return self.blocks_me( account_id, retry_once = False )

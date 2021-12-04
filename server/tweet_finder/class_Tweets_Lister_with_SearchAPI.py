@@ -105,6 +105,9 @@ class Tweets_Lister_with_SearchAPI :
             raise Unfound_Account_on_Lister_with_SearchAPI
         
         blocks_me, real_account_name = self._twitter.blocks_me( account_id, append_account_name = True )
+        if blocks_me == None :
+            print( f"[List_SearchAPI] Compte @{account_name} introuvable !" )
+            raise Unfound_Account_on_Lister_with_SearchAPI
         if blocks_me :
             print( f"[List_SearchAPI] Le compte @{account_name} nous bloque, impossible de le scanner !" )
             raise Blocked_by_User_with_SearchAPI
