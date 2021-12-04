@@ -122,6 +122,8 @@ class Tweets_Lister_with_SearchAPI :
             tweet_dict = analyse_tweet_json( tweet_json )
             if tweet_dict != None :
                 # Re-filtrer au cas où
+                # Très important si jamais account_name ne correspond pas à
+                # account_id (Intérêt en plus du thread de reset des curseurs)
                 if int( tweet_dict["user_id"] ) == int ( account_id ) :
                     # L'ajout dans la file se fait sans vérifier que l'ID du
                     # Tweet y est déjà présent, parce que ça serait trop long

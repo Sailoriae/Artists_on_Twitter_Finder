@@ -33,6 +33,12 @@ Il est donc intéressant de temps en temps de réintialiser le curseur
 d'indexation avec l'API de recherche pour chaque compte.
 Cela ne supprime ou ne réindexe aucun Tweet dans la base ! On en ajoute juste.
 La vitesse dépend donc essentiellement du thread de listage.
+
+Un autre intérêt de ce thread est qu'il permet de réindexer des comptes qui
+auraient changé de nom (@nom) durant son listage. Car le listage des Tweets
+sur l'API de recherche ne peut se faire qu'avec le nom du compte, alors que
+AOTF indexe les Tweets avec les ID de comptes. Ce scénario est cependant très
+peu probable.
 """
 def thread_reset_SearchAPI_cursors( thread_id : int, shared_memory ) :
     # Sécurité, vérifier que le thread est unique
