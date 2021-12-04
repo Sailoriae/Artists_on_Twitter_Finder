@@ -93,6 +93,7 @@ def thread_step_B_TimelineAPI_list_account_tweets( thread_id : int, shared_memor
             # Si tous les comptes qu'on a pour lister sont bloqués, on met la
             # requête en échec
             if len( request.blocks_list ) >= len( param.TWITTER_API_KEYS ) :
+                print( f"[step_B_th{thread_id}] Le compte Twitter @{request.account_name} bloque tous les comptes de listage ! Ses Tweets ne peuvent pas être indexés." )
                 request.has_failed = True
             
             # Sinon, on la remet dans la file
@@ -132,9 +133,11 @@ def thread_step_B_TimelineAPI_list_account_tweets( thread_id : int, shared_memor
                                                         account_id = request.account_id,
                                                         request_uri = request.get_URI() )
         except Unfound_Account_on_Lister_with_TimelineAPI :
+            print( f"[step_B_th{thread_id}] Le compte Twitter @{request.account_name} (ID {request.account_id}) n'existe pas." )
             request.unfound_account = True
         
         except Blocked_by_User_with_TimelineAPI :
+            print( f"[step_B_th{thread_id}] Le compte Twitter @{request.account_name} bloque le compte de listage de ce thread. Un autre thread de listage le réessayera." )
             request.blocks_list += [ thread_id - 1 ] # Ne peut pas faire de append avec Pyro
             if request.is_prioritary :
                 shared_memory_scan_requests_step_B_TimelineAPI_list_account_tweets_prior_queue.put( request )
