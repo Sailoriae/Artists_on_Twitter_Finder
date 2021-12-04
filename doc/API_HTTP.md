@@ -63,7 +63,7 @@ Liste des erreurs possibles :
 - `UNSUPPORTED_WEBSITE` : Le site passé en paramètre n'est pas supporté, ou l'URL est invalide.
 - `NOT_AN_ARTWORK_PAGE` : Le site est supporté, mais l'URL entrée ne mène pas à une illustration.
 - `NO_TWITTER_ACCOUNT_FOUND` : Aucun compte Twitter trouvé pour l'artiste de l'illustration.
-- `NO_VALID_TWITTER_ACCOUNT_FOUND` : Des comptes Twitter ont étés trouvés, mais ils sont invalides.
+- `NO_VALID_TWITTER_ACCOUNT_FOUND` : Des comptes Twitter ont étés trouvés, mais ils sont invalides (Inexistants, privés, suspendus, désactivés ou sur la liste noire d'AOTF).
 - `BLOCKED_BY_TWITTER_ACCOUNT` : Un des comptes Twitter à indexer bloque tous les comptes de scan du serveur. Il est donc impossible d'indexer ce compte.
 - `ERROR_DURING_REVERSE_SEARCH` : Erreur durant la recherche d'image inversée. Est ce que l'illustration n'a pas un format à la noix ? Par exemple GIF animé ?
 - `QUERY_IMAGE_TOO_BIG` : L'illustration de requête est trop grande pour être traitée.
