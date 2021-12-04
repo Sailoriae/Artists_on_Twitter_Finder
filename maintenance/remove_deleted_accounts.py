@@ -5,10 +5,11 @@
 Ce script vérifie tous les ID de comptes enregistrés dans la base de données.
 Si il y en a qui n'existent plus, tous leur Tweets sont supprimés, puis leur
 enregistrement dans la base.
-Attention : Ce script supprime aussi les comptes suspendus.
-Sinon il vaut vérifier l'existence des compte un par uns, et c'est trop long.
-Ce script ne supprime pas les comptes qui ont étés passés en privés.
-Et aucune idée des comptes désactivés.
+
+Attention : Ce script supprime les comptes : Supprimés, suspendus, ou sur la
+liste noire d'AOTF. Ce script ne supprime pas les comptes : Passés en privé.
+Et aucune idée de ce qu'il fait des comptes désactivés.
+
 API utilisée : "GET users/lookup", documentation :
 https://developer.twitter.com/en/docs/twitter-api/v1/accounts-and-users/follow-search-get-users/api-reference/get-users-lookup
 """
@@ -28,6 +29,7 @@ change_wdir( "../server" )
 path.append(get_wdir())
 
 import parameters as param
+from tweet_finder.blacklist import BLACKLIST
 
 
 """
@@ -82,6 +84,7 @@ print( "Listage des ID de comptes Twitter qui existent encore." )
 cursor = 0 # Curseur de parcours de la liste accounts_in_db
 
 accounts_on_twitter = []
+blacklisted = [] # Pour faire un "print()" à la fin
 while True :
     hundred_accounts = accounts_in_db[ cursor : cursor + 100 ]
     if hundred_accounts == [] : # On est arrivés au bout
@@ -90,7 +93,10 @@ while True :
     
     try :
         for account in api.lookup_users( user_id = hundred_accounts ) :
-            accounts_on_twitter.append( account.id )
+            if int( account.id ) in BLACKLIST :
+                blacklisted.append( ( account.screen_name, account.id ) )
+            else :
+                accounts_on_twitter.append( account.id )
     except tweepy.errors.NotFound as error :
         if 17 in error.api_codes : # No user matches for specified terms
             print( "C'est étrange que 100 comptes d'un bloc ne soient plus valides..." )
@@ -100,6 +106,9 @@ while True :
     
     print( "Comptes analysés :", cursor, "/", str(len(accounts_in_db)) + ", valides :", len(accounts_on_twitter) )
     cursor += 100
+
+for account_name, account_id in blacklisted :
+    print( f"Le compte @{account_name} (ID {account_id}) est sur la liste noire d'AOTF. Son indexation sera supprimée !" )
 
 
 """

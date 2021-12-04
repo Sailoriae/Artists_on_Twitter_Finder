@@ -2,7 +2,8 @@
 
 * Script [`remove_deleted_accounts.py`](remove_deleted_accounts.py) :
   Permet de supprimer les comptes de la base de données qui n'existent plus sur Twitter. Supprime aussi leurs Tweets.
-  **Attention :** Ce script supprime les comptes supprimés, suspendus ou passés en privé / protégé.
+  **Attention :** Ce script supprime les comptes supprimés, suspendus ou ajoutés sur la liste noire d'AOTF.
+  Il ne supprime pas les comptes passés en privé. Et aucune idée de ce qu'il fait des comptes désactivés.
 
 * Script [`cleanup_database.py`](cleanup_database.py) :
   Permet de vérifier que les Tweets enregistrés dans la base de données ont bien un compte enregistré correspondant.
