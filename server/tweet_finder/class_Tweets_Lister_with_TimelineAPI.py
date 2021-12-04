@@ -74,6 +74,7 @@ class Tweets_Lister_with_TimelineAPI :
                             dictionnaire retourné par la foncition
                             "analyse_tweet_json()".
     @param account_id ID du compte, vérifié récemment !
+                      Si différence, c'est le compte avec cet ID qui sera listé.
     @param request_uri URI de la requête de scan associée. Permet d'être passée
                        dans l'instruction de fin d'indexation.
     

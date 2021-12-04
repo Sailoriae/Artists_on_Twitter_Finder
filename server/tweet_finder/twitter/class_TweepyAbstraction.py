@@ -196,14 +196,21 @@ class TweepyAbstraction :
     Regarder si un compte bloque le compte connecté à l'API.
     
     @param account_id L'ID du compte.
+    @param append_twitter_account Permet de retourner en même temps le nom du
+                                  compte Twitter. Ceci est une bidouille pour
+                                  le listage avec l'API de recherche, afin de
+                                  vérifier que l'ID corresponde au nom.
     @param retry_once Réessayer une fois sur une erreur de connexion.
     @return True ou False.
     """
     # Note : On ne peut pas savoir via cette API si le compte est en privé.
-    def blocks_me ( self, account_id : int, retry_once = True ) :
+    def blocks_me ( self, account_id : int, append_account_name = False, retry_once = True ) :
         try :
             friendship = self._api.get_friendship( target_id = account_id )
-            return friendship[0].blocked_by
+            if append_account_name :
+                return friendship[0].blocked_by, friendship[1].screen_name
+            else :
+                return friendship[0].blocked_by
         except tweepy.errors.HTTPException as error :
             if retry_once and error.api_codes == [] :
                 time.sleep( 10 )

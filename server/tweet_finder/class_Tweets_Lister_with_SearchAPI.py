@@ -73,6 +73,7 @@ class Tweets_Lister_with_SearchAPI :
                             dictionnaire retourné par la foncition
                             "analyse_tweet_json()".
     @param account_id ID du compte, vérifié récemment !
+                      Si différence, c'est le compte avec cet ID qui sera listé.
     @param request_uri URI de la requête de scan associée. Permet d'être passée
                        dans l'instruction de fin d'indexation.
     
@@ -103,9 +104,14 @@ class Tweets_Lister_with_SearchAPI :
             print( f"[List_SearchAPI] Compte @{account_name} introuvable !" )
             raise Unfound_Account_on_Lister_with_SearchAPI
         
-        if self._twitter.blocks_me( account_id ) :
+        blocks_me, real_account_name = self._twitter.blocks_me( account_id, append_account_name = True )
+        if blocks_me :
             print( f"[List_SearchAPI] Le compte @{account_name} nous bloque, impossible de le scanner !" )
             raise Blocked_by_User_with_SearchAPI
+        
+        if real_account_name != account_name :
+            print( f"[List_SearchAPI] Le compte ID {account_id} se nomme @{real_account_name} et non @{account_name}." )
+            account_name = real_account_name
         
         if self._DEBUG :
             print( f"[List_SearchAPI] Listage des Tweets de @{account_name}." )
