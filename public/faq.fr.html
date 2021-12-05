@@ -53,22 +53,21 @@
 
 		<h2>Comment les comptes Twitter des artistes sont recherchés ?</h2>
 
-		<p>La recherche de comptes Twitter est faite par le "Link Finder". Comme son nom l'indique, il recherche des liens. Il va donc rechercher sur la page web de l'illustration, ainsi que sur le profile de l'artiste, si il/elle a indiqué un lien vers son compte Twitter.</p>
+		<p>La recherche de comptes Twitter consiste à analyser des pages webs à la recherche de liens (URL). Le serveur AOTF en cherche sur la page web de l'illustration, ainsi que sur le profile de l'artiste. Si un lien mène à un compte Twitter, il sera considéré comme appartenant à l'artiste. De plus, si un lien mène à un profile sur un autre site supporté, il sera lui aussi considéré comme appartenant à l'artiste, et la recherche de comptes Twitter s'y fera récursivement.</p>
 		<p>Si plusieurs comptes Twitter sont trouvés, ils seront tous considérés comme celui de l'artiste.</p>
 
 		<p>Détails de la recherche de comptes Twitter pour chaque site supporté :</p>
 		<ul>
 			<li>DeviantArt&nbsp;: Dans la description de l'illustration et dans la biographie de l'artiste sur son profile.</li>
 			<li>Pixiv&nbsp;: Dans les liens indiqués par l'artiste sur son profile.</li>
-			<li>Boorus (Danbooru, Derpibooru, Furbooru)&nbsp;: Dans les informations sur l'artiste, ainsi que sur la source de l'illustration, si elle vient d'un site supporté. Attention&nbsp;: Si la source est un Tweet, le compte Twitter associé n'est pas considéré comme le compte Twitter de l'artiste.</li>
+			<li>Boorus (Danbooru, Derpibooru, Furbooru)&nbsp;: Dans les informations sur l'artiste, et récussivement sur la source de l'illustration, si elle vient d'un site supporté. Attention&nbsp;: Si la source est un Tweet, le compte Twitter associé n'est pas considéré comme le compte Twitter de l'artiste (Sauf pour les sources sur Danbooru).</li>
 		</ul>
 
 		<p>Notes :</p>
 		<ul>
 			<li>La recherche de comptes Twitter se fait indépendamment pour chaque illustration. Aucune association n'est stockée.</li>
 			<li>Si les comptes Twitter trouvés sont inexistants ou supprimés, suspendus, désactivés, ou privés, ils seront considéré comme invalides, car aucune indexation ni aucune recherche ne peut être faite. De plus, AOTF possède une liste noire de comptes qui sont répertoriés pour contenir beaucoup de Tweets avec médias, sans être des comptes d'artistes. Si un compte trouvé est sur cette liste, il sera aussi considéré comme invalide.</li>
-			<li>Sur les Boorus, si un liens vers le compte DeviantArt ou Pixiv de l'artiste est trouvé, il sera aussi analysé.</li>
-			<li>Si un lien Linktree est trouvé, cette page Linktree sera aussi analysée.</li>
+			<li>Si un lien mène à un profil sur l'un des sites suivants, ce profil sera lui aussi analysé à la recherche de comptes Twitter&nbsp;: Linktree et Patreon.</li>
 		</ul>
 
 		<h2>Je suis un artiste, j'ai un compte Twitter, mais il n'est pas trouvé. Pourquoi ?</h2>

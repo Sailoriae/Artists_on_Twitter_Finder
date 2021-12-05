@@ -53,22 +53,21 @@
 
 		<h2>How are artists' Twitter accounts searched ?</h2>
 
-		<p>The search for Twitter accounts is done by the "Link Finder". As the name suggests, it searches for links. It will therefore search on the illustration's webpage, as well as on the artist's profile, if he/she has indicated a link to his Twitter account.</p>
+		<p>The search for Twitter accounts consists in analyzing web pages looking for links (URL). The AOTF server looks for links on the illustration's webpage, as well as on the artist's profile. If a link leads to a Twitter account, it will be considered as belonging to the artist. Moreover, if a link leads to a profile on another supported site, it will also be considered as belonging to the artist, and the search for Twitter accounts will be recursive.</p>
 		<p>If multiple Twitter accounts are found, they will all be considered as the artist's.</p>
 
 		<p>Details on Twitter accounts search for each supported website :</p>
 		<ul>
 			<li>DeviantArt&nbsp;: In the description of the illustration and in the artist's biography on his/her profile.</li>
 			<li>Pixiv&nbsp;: In the links indicated by the artist on his profile.</li>
-			<li>Boorus (Danbooru, Derpibooru, Furbooru)&nbsp;: In the informations about the artist, as well as the source of the illustration, if it comes from a supported website. Warning&nbsp;: If the source is a Tweet, the associated Twitter account is not considered the artist's Twitter account.</li>
+			<li>Boorus (Danbooru, Derpibooru, Furbooru)&nbsp;: In the informations about the artist, as well as the source of the illustration, if it comes from a supported website. Warning&nbsp;: If the source is a Tweet, the associated Twitter account is not considered as the artist's Twitter account (Except for sources on Danbooru).</li>
 		</ul>
 
 		<p>Notes :</p>
 		<ul>
 			<li>The search for Twitter accounts is done independently for each illustration. No association is stored.</li>
 			<li>If the Twitter accounts found are non-existent or deleted, suspended, deactivated, or private, they will be considered as invalids, because no indexing or search can be made. In addition, AOTF has a blacklist of accounts that are listed for containing a lot of Tweets with media, without being artist accounts. If an account found is on this list, it will also be considered as invalid.</li>
-			<li>On Boorus, if a link to the artist's DeviantArt or Pixiv account is found, it will also be analyzed.</li>
-			<li>If a Linktree link is found, this Linktree page will also be analyzed.</li>
+			<li>If a link leads to a profile on one of the following websites, this profile will also be scanned for Twitter accounts&nbsp;: Linktree and Patreon.</li>
 		</ul>
 
 		<h2>I am an artist, I have a Twitter account, but it is not found. Why ?</h2>

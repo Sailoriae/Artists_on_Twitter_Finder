@@ -47,8 +47,8 @@ Liste des attributs d'un résultat dans la liste `results` :
 - `distance` : Le nombre de bits de différence entre l'empreinte de l'image de requête et celle de l'image trouvée.
 
 Liste des statuts possibles (Dans l'ordre de traitement) :
-- `WAIT_LINK_FINDER` : En attente de traitement par un thread de Link Finder.
-- `LINK_FINDER` : En cours de traitement par un thread de Link Finder.
+- `WAIT_LINK_FINDER` : En attente de traitement par un thread de recherche des comptes Twitter de l'artiste.
+- `LINK_FINDER` : En cours de traitement par un thread de recherche des comptes Twitter de l'artiste.
 - `WAIT_INDEX_ACCOUNTS_TWEETS` : En attente de traitement par un thread de lancement de l'indexation ou de la mise à jour de l'indexation des Tweets des comptes Twitter de l'artiste.
 - `INDEX_ACCOUNTS_TWEETS` : En cours de traitement par les threads d'indexation des Tweets des comptes Twitter de l'artiste.
   - Si le champs `has_first_time_scan` est à `false`, c'est seulement pour une mise à jour des comptes, car l'illustration est trop récente.
