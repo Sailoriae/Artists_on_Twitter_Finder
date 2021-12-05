@@ -315,6 +315,11 @@ if __name__ == "__main__" :
         print( "Il peut y avoir des problèmes d'affichage des messages et de processus fantômes, notamment sous Windows." )
         # En fait c'est parce qu'il faudrait flush stdout de temps en temps dans les sous-processus
         # Pour les processus fantômes, c'est quand on tue le processus père (Ou qu'il plante)
+        
+        # Ajout : Si on éxécute AOTF avec CMD sous Windows ou Bash sous Linux, les messages s'affichent très bien
+        # En revanche, MINGW64 empêche l'affichage des messages depuis les threads (Buffer ne se vide pas ?)
+        # Liste de solutions possibles : https://stackoverflow.com/a/35467658
+        # Note : Désactiver complètement le buffer (python -u) est une mauvaise idée, car les messages peuvent s'entremêler
     
     if not param.USE_MYSQL_INSTEAD_OF_SQLITE :
         print( "ATTENTION, vous utilisez SQLite. Pour de meilleure performances, il est très vivement conseillé d'utiliser MySQL !" )
