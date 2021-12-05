@@ -40,6 +40,7 @@ if os.path.isfile( "../backups/AOTF_" + datetime.today().strftime("%Y-%m-%d") + 
 
 print( "Sauvegarde de la base de données d'Artists on Twitter Finder..." )
 os.system( "mkdir -p ../backups" )
-os.system( f"MYSQL_PWD=\"{param.MYSQL_PASSWORD}\" mysqldump -h {param.MYSQL_ADDRESS} -P {param.MYSQL_PORT} -u {param.MYSQL_USERNAME} --hex-blob --single-transaction --no-tablespaces Artists_on_Twitter_Finder accounts tweets reindex_tweets > ../backups/AOTF_$(date '+%Y-%m-%d').sql" )
+os.environ["MYSQL_PWD"] = param.MYSQL_PASSWORD # Ne pas exposer le MDP dans la commande du processus
+os.system( f"mysqldump -h {param.MYSQL_ADDRESS} -P {param.MYSQL_PORT} -u {param.MYSQL_USERNAME} --hex-blob --single-transaction --no-tablespaces Artists_on_Twitter_Finder accounts tweets reindex_tweets > ../backups/AOTF_$(date '+%Y-%m-%d').sql" )
 os.system( "find ../backups -name \"*.sql\" -mtime +42 -exec rm {} \;" )
 print( "Sauvegarde terminée !" )
