@@ -8,20 +8,18 @@ Afin d'être le plus optimisé possible, ce traitement est fait par un serveur, 
 
 Afin de recevoir des requêtes et d'y répondre, le serveur possède une API HTTP. La réponse contient l'étape du traitement de la requête, et le résultat si le traitement est terminé. La documentation de cette API est disponible dans [`doc/API_HTTP.md`](doc/API_HTTP.md).
 
+L'API HTTP peut être utilisée via une interface web, présente dans le répertoire [`public`](public). Afin qu'elle soit fonctionnelle, il faut qu'elle soit rendue accessible par un serveur HTTP, comme par exemple Apache. Ce dernier doit aussi faire un proxy vers l'API HTTP du serveur AOTF. Un exemple de configuration Apache est présent dans le répertoire [`configs`](configs).
+
 
 ## Exemple d'utilisation
 
-Voici un fanart de la nouvelle She-Ra, posté sur DeviantArt par DarkerEve :
-https://www.deviantart.com/darkereve/art/She-Ra-The-Siege-833260345
-
-En donnant cette URL au serveur, celui-ci va :
+Voici [un fanart de la nouvelle She-Ra](https://www.deviantart.com/darkereve/art/She-Ra-The-Siege-833260345), dessiné et publié sur DeviantArt par DarkerEve. En donnant cette URL au serveur AOTF, celui-ci va :
 - Chercher si l'artiste a un ou plusieurs comptes Twitter, dans notre cas, il en a un : @DarkerEve,
 - Indexer les Tweets avec un ou plusieurs images dans sa base de données,
 - Chercher l'image dans l'indexation des Tweets,
 - Retourner le ou les Tweets contenant l'illustration de la requête.
 
-Dans notre exemple, le serveur a trouvé le Tweet suivant :
-https://twitter.com/DarkerEve/status/1237323900410789899
+Dans notre exemple, le serveur a trouvé le Tweet [ID 1237323900410789899](https://twitter.com/DarkerEve/status/1237323900410789899).
 
 Grace à l'API HTTP, envoyer une requête au serveur et recevoir sa réponse peut être fait de manière automatique. Ainsi, "Artists on Twitter Finder" peut être très intéressant pour des robots postant des illustrations sur Twitter, afin de pouvoir Retweeter l'artiste au lieu de reposter son illustration.
 
@@ -59,7 +57,7 @@ Puis, si vous souhaitez activer l'interface web publique, consultez le fichier [
 ## Note de fin
 
 Si vous souhaitez faire l'opération inverse, c'est à dire à partir d'un Tweet trouver l'image source, voici :
-* SauceNAO : Un moteur de recherche inversée d'images spécialisé dans les animes, supporte Pixiv et pleins d'autres sites : https://saucenao.com/
-* Twitter-SauceNAO : Un robot qui permet à partir d'un Tweet de retrouver sa source via SauceNAO : https://github.com/FujiMakoto/twitter-saucenao
+* [SauceNAO](https://saucenao.com/) : Un moteur de recherche inversée d'images spécialisé dans les animes, supporte Pixiv et pleins d'autres sites.
+* [Twitter-SauceNAO](https://github.com/FujiMakoto/twitter-saucenao) : Un robot qui permet à partir d'un Tweet de retrouver sa source via SauceNAO.
 
 SauceNAO est l'inverse de "Artists on Twitter Finder", car il indexe les images sur les sites sources. Ici, on indexe les images sur Twitter 
