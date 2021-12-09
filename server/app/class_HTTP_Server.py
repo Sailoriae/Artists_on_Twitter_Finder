@@ -96,11 +96,24 @@ def http_server_container ( shared_memory_uri_arg ) :
             # toutes les autres possibilités, puis un "else" final pour le 404
             
             # =================================================================
+            # HTTP 429
+            # =================================================================
+            # Vérifier que l'utilisateur ne fait pas trop de requêtes
+            # En premier, c'est plus logique
+            if not self.http_limitator.can_request( client_ip ) :
+                http_code = 429
+                self.send_response(http_code)
+                self.send_header("Content-type", "text/plain; charset=utf-8")
+                self.end_headers()
+                
+                self.wfile.write( "429 Too Many Requests\n".encode("utf-8") )
+            
+            # =================================================================
             # HTTP 414
             # =================================================================
             # Vérifier la longueur de l'URL de requête, pour éviter que des
             # petits malins viennent nous innonder notre mémoire vive
-            if len( self.path ) > MAX_URI_LENGTH :
+            elif len( self.path ) > MAX_URI_LENGTH :
                 http_code = 414
                 self.send_response(http_code)
                 self.send_header("Content-type", "text/plain; charset=utf-8")
@@ -120,18 +133,6 @@ def http_server_container ( shared_memory_uri_arg ) :
                 self.end_headers()
                 
                 self.wfile.write( "413 Payload Too Large\n".encode("utf-8") )
-            
-            # =================================================================
-            # HTTP 429
-            # =================================================================
-            # Vérifier que l'utilisateur ne fait pas trop de requêtes
-            elif not self.http_limitator.can_request( client_ip ) :
-                http_code = 429
-                self.send_response(http_code)
-                self.send_header("Content-type", "text/plain; charset=utf-8")
-                self.end_headers()
-                
-                self.wfile.write( "429 Too Many Requests\n".encode("utf-8") )
             
             # =================================================================
             # HTTP 200
