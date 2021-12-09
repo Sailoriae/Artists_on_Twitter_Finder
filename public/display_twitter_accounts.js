@@ -6,6 +6,7 @@ function canDisplayTwitterAccounts ( json ) {
 		return false;
 	}
 	if ( ( json.error === "NO_URL_FIELD" ) ||
+		 ( json.error === "URL_TOO_LONG" ) ||
 		 ( json.error === "NOT_AN_URL" ) ||
 		 ( json.error === "NOT_AN_ARTWORK_PAGE" ) ||
 		 ( json.error === "UNSUPPORTED_WEBSITE" ) ||

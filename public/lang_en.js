@@ -13,7 +13,7 @@ var lang = {
 	"QUERY_IMAGE_TOO_BIG" : "The query illustration is too large to process.",
 	"PROCESSING_ERROR" : "Error on the server side, unable to finish processing the request.",
 	"YOUR_IP_HAS_MAX_PROCESSING_REQUESTS" : "Your IP address has reached its maximum quota of requests being processed.",
-	"REQUEST_URI_TOO_LONG" : "The URL entered is too long.",
+	"URL_TOO_LONG" : "The URL entered is too long.",
 
 	"NEXT_TRY_IN" : "Retry in %s seconds.",
 
