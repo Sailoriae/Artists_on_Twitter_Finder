@@ -136,6 +136,20 @@ def http_server_container ( shared_memory_uri_arg ) :
             # =================================================================
             # HTTP 200
             # =================================================================
+            # Racine de l'API, affiche juste un petit message
+            # GET /
+            elif endpoint == "/" :
+                http_code = 200
+                self.send_response(http_code)
+                self.send_header("Content-type", "text/plain")
+                self.end_headers()
+                
+                to_send = "Artists of Twitter Finder\n"
+                to_send += "Vous êtes sur l'API d'AOTF. Merci de consulter sa documentation afin de l'utiliser.\n"
+                to_send += "You are on the AOTF API. Please check its documentation to use it.\n"
+                
+                self.wfile.write( to_send.encode("utf-8") )
+            
             # Si on veut lancer une requête ou obtenir son résultat
             # GET /query
             # GET /query?url=[URL de l'illustration de requête]
