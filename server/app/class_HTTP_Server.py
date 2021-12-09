@@ -24,6 +24,14 @@ import parameters as param
 from shared_memory.open_proxy import open_proxy
 
 
+# Taille maximale de l'URI de la requête (Sinon, HTTP 414)
+# Cela contient aussi les paramètres
+MAX_URI_LENGTH = 300 # caractères
+
+# Taille maximale du contenu d'une requête POST (Sinon, HTTP 413)
+MAX_CONTENT_LENGTH = 500 # octets
+
+
 """
 Serveur HTTP, permettant d'utiliser AOTF.
 
@@ -75,6 +83,11 @@ def http_server_container ( shared_memory_uri_arg ) :
             if client_ip == None :
                 client_ip = self.client_address[0]
             
+            # Obtenir la taille du contenu (Dans le cas d'une requête POST)
+            if method == "POST" :
+                # Le param "Content-Length" est insensible à la casse
+                content_length = int(self.headers.get("Content-Length", 0))
+            
             # A partie de maintenant, on fait un "if" puis que des "elif" pour
             # toutes les autres possibilités, puis un "else" final pour le 404
             
@@ -83,13 +96,26 @@ def http_server_container ( shared_memory_uri_arg ) :
             # =================================================================
             # Vérifier la longueur de l'URL de requête, pour éviter que des
             # petits malins viennent nous innonder notre mémoire vive
-            if len( self.path ) > 200 :
+            if len( self.path ) > MAX_URI_LENGTH :
                 http_code = 414
                 self.send_response(http_code)
                 self.send_header("Content-type", "text/plain")
                 self.end_headers()
                 
                 self.wfile.write( "414 Request-URI Too Long\n".encode("utf-8") )
+            
+            # =================================================================
+            # HTTP 413
+            # =================================================================
+            # Vérifier la taille du contenu de la requête, pour éviter que des
+            # petits malins viennent nous innonder notre mémoire vive
+            elif method == "POST" and content_length > MAX_CONTENT_LENGTH :
+                http_code = 413
+                self.send_response(http_code)
+                self.send_header("Content-type", "text/plain")
+                self.end_headers()
+                
+                self.wfile.write( "413 Payload Too Large\n".encode("utf-8") )
             
             # =================================================================
             # HTTP 429
@@ -120,7 +146,6 @@ def http_server_container ( shared_memory_uri_arg ) :
                 
                 illust_url = None
                 if method == "POST" :
-                    content_length = int(self.headers.get("Content-Length", 0)) # Longueur 0 par défaut, param "Content-Length" est insensible à la casse
                     if content_length != 0 :
                         illust_url = self.rfile.read(content_length).decode('utf-8')
                 else :
