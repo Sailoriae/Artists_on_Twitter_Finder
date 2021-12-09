@@ -103,7 +103,7 @@ def http_server_container ( shared_memory_uri_arg ) :
             if len( self.path ) > MAX_URI_LENGTH :
                 http_code = 414
                 self.send_response(http_code)
-                self.send_header("Content-type", "text/plain")
+                self.send_header("Content-type", "text/plain; charset=utf-8")
                 self.end_headers()
                 
                 self.wfile.write( "414 Request-URI Too Long\n".encode("utf-8") )
@@ -116,7 +116,7 @@ def http_server_container ( shared_memory_uri_arg ) :
             elif method == "POST" and content_length > MAX_CONTENT_LENGTH :
                 http_code = 413
                 self.send_response(http_code)
-                self.send_header("Content-type", "text/plain")
+                self.send_header("Content-type", "text/plain; charset=utf-8")
                 self.end_headers()
                 
                 self.wfile.write( "413 Payload Too Large\n".encode("utf-8") )
@@ -128,7 +128,7 @@ def http_server_container ( shared_memory_uri_arg ) :
             elif not self.http_limitator.can_request( client_ip ) :
                 http_code = 429
                 self.send_response(http_code)
-                self.send_header("Content-type", "text/plain")
+                self.send_header("Content-type", "text/plain; charset=utf-8")
                 self.end_headers()
                 
                 self.wfile.write( "429 Too Many Requests\n".encode("utf-8") )
@@ -141,7 +141,7 @@ def http_server_container ( shared_memory_uri_arg ) :
             elif endpoint == "/" :
                 http_code = 200
                 self.send_response(http_code)
-                self.send_header("Content-type", "text/plain")
+                self.send_header("Content-type", "text/plain; charset=utf-8")
                 self.end_headers()
                 
                 to_send = "Artists of Twitter Finder\n"
@@ -156,7 +156,7 @@ def http_server_container ( shared_memory_uri_arg ) :
             elif endpoint == "/query" :
                 http_code = 200
                 self.send_response(http_code)
-                self.send_header("Content-type", "application/json")
+                self.send_header("Content-type", "application/json; charset=utf-8")
                 self.send_header("Access-Control-Allow-Origin", "*")
                 self.end_headers()
                 
@@ -206,7 +206,7 @@ def http_server_container ( shared_memory_uri_arg ) :
             elif endpoint == "/stats" :
                 http_code = 200
                 self.send_response(http_code)
-                self.send_header("Content-type", "application/json")
+                self.send_header("Content-type", "application/json; charset=utf-8")
                 self.send_header("Access-Control-Allow-Origin", "*")
                 self.end_headers()
                 
@@ -226,7 +226,7 @@ def http_server_container ( shared_memory_uri_arg ) :
             elif endpoint == "/config" :
                 http_code = 200
                 self.send_response(http_code)
-                self.send_header("Content-type", "application/json")
+                self.send_header("Content-type", "application/json; charset=utf-8")
                 self.send_header("Access-Control-Allow-Origin", "*")
                 self.end_headers()
                 
@@ -248,7 +248,7 @@ def http_server_container ( shared_memory_uri_arg ) :
             else :
                 http_code = 404
                 self.send_response(http_code)
-                self.send_header("Content-type", "text/plain")
+                self.send_header("Content-type", "text/plain; charset=utf-8")
                 self.end_headers()
                 
                 self.wfile.write( "404 Not Found\n".encode("utf-8") )
