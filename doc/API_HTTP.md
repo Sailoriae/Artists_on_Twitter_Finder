@@ -4,7 +4,10 @@ Le serveur AOTF est utilisable via son serveur HTTP, depuis la même machine (`h
 
 Cette documentation est très similaire à la [documentation de l'API sur l'interface web](../public/documentation.fr.html).
 
-Attention : Le serveur limite chaque adresse IP à 1 requête HTTP par secondes. Si dépassement, le serveur renvoit une erreur HTTP 429.
+Attention :
+- Le serveur limite chaque adresse IP à 1 requête HTTP par secondes. Si dépassement, il renvoie une erreur HTTP 429.
+- Le serveur limite la taille de l'URL de requête. Si dépassement, il renvoie une erreur HTTP 414.
+- Le serveur limite la taille du contenu des requêtes `POST`. Si dépassement, il renvoie une erreur HTTP 413.
 
 
 ## Endpoint `GET /query`
@@ -58,8 +61,8 @@ Liste des statuts possibles (Dans l'ordre de traitement) :
 - `END` : Fin de traitement.
 
 Liste des erreurs possibles :
-- `NO_URL_FIELD` : Il n'y a pas de paramètre / argument `url` dans l'URL de requête.
-- `NOT_AN_URL` : L'entrée du paramètre / argument `url` n'est pas une URL.
+- `NO_URL_FIELD` : Si la méthode HTTP est `GET`, il n'y a pas de paramètre / argument `url` dans l'URL de requête. Si la méthode HTTP est `POST`, il n'y a pas de contenu dans la requête.
+- `NOT_AN_URL` : La chaine entrée comme URL d'une illustration n'est pas un URL valide.
 - `UNSUPPORTED_WEBSITE` : Le site passé en paramètre n'est pas supporté, ou l'URL est invalide.
 - `NOT_AN_ARTWORK_PAGE` : Le site est supporté, mais l'URL entrée ne mène pas à une illustration.
 - `NO_TWITTER_ACCOUNT_FOUND` : Aucun compte Twitter trouvé pour l'artiste de l'illustration.

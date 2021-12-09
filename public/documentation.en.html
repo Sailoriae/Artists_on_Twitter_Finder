@@ -42,6 +42,8 @@
 
 		<p>The API limits you to 1 HTTP request per second. Otherwise, you will receive an HTTP 429 error.</p>
 
+		<p>In addition, the API limits the size of HTTP request URLs, as well as the content of <code>POST</code> requests. In case of overflow, you will receive an HTTP 414 or HTTP 413 error, respectively.</p>
+
 
 		<h2><code>POST /api/query</code> endpoint (Recommended)</h2>
 
@@ -118,8 +120,8 @@
 
 		<p>List of possible errors&nbsp;:</p>
 		<ul>
-			<li><code>NO_URL_FIELD</code><br>There is no <code>url</code> parameter / argument in the HTTP request URL.</li>
-			<li><code>NOT_AN_URL</code><br>The input to the <code>url</code> parameter / argument is not a URL.</li>
+			<li><code>NO_URL_FIELD</code><br>If the HTTP method is <code>GET</code>, there is no <code>url</code> parameter / argument in the request URL. If the HTTP method is <code>POST</code>, there is no content in the request.</li>
+			<li><code>NOT_AN_URL</code><br>The string inputted as URL of an illustration is not a valid URL.</li>
 			<li><code>UNSUPPORTED_WEBSITE</code><br>The site of the inputted URL is not supported, or the URL is invalid.</li>
 			<li><code>NOT_AN_ARTWORK_PAGE</code><br>The site is supported, but the input URL does not lead to an illustration.</li>
 			<li><code>NO_TWITTER_ACCOUNT_FOUND</code><br>No Twitter account found for the illustration artist.</li>
