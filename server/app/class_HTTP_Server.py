@@ -218,7 +218,10 @@ def http_server_container ( shared_memory_uri_arg ) :
                 
                 response_dict = {
                     "limit_per_ip_address" : param.MAX_PROCESSING_REQUESTS_PER_IP_ADDRESS,
-                    "update_accounts_frequency" : param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE
+                    "update_accounts_frequency" : param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE,
+                    "max_uri_length" : MAX_URI_LENGTH,
+                    "max_content_length" : MAX_CONTENT_LENGTH,
+                    "max_illust_url_size" : MAX_ILLUST_URL_SIZE
                 }
                 
                 json_text = json.dumps( response_dict )

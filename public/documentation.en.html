@@ -157,6 +157,9 @@
 		<ul>
 			<li><code>limit_per_ip_address</code><br>Maximum number of requests being processed per IP address.</li>
 			<li><code>update_accounts_frequency</code><br>How often indexed Twitter accounts are automatically updated, in days. An account can also be updated during a request if the illustration is too recent.</li>
+			<li><code>max_uri_length</code><br>Maximum length of the request URL before an HTTP 414 error.</li>
+			<li><code>max_content_length</code><br>Maximum size in bytes of the content of a `POST` request before HTTP error 413.</li>
+			<li><code>max_illust_url_size</code><br>Maximum length of an illustration's URL for the <code>/api/query</code> endpoint input.</li>
 		</ul>
 	</main>
 

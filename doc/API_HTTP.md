@@ -101,3 +101,6 @@ Recevoir des informations sur le serveur.
 Retourne un JSON contenant les champs suivants :
 - `limit_per_ip_address` : Nombre maximale de requêtes en cours de traitement par adresse IP.
 - `update_accounts_frequency` : Fréquence de la mise à jour automatique des comptes Twitter indexés, en jours. Un compte peut aussi être mis à jour lors d'une requête si l'illustration est trop récente.
+- `max_uri_length` : Longueur maximale de l'URL de requête avant une erreur HTTP 414.
+- `max_content_length` : Taille maximale en octets du contenu d'une requête `POST` avant erreur HTTP 413.
+- `max_illust_url_size` : Longueur maximale de l'URL d'une illustration pour l'entrée de l'endpoint `/query`.
