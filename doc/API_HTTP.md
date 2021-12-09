@@ -62,6 +62,7 @@ Liste des statuts possibles (Dans l'ordre de traitement) :
 
 Liste des erreurs possibles :
 - `NO_URL_FIELD` : Si la méthode HTTP est `GET`, il n'y a pas de paramètre / argument `url` dans l'URL de requête. Si la méthode HTTP est `POST`, il n'y a pas de contenu dans la requête.
+- `URL_TOO_LONG` : La chaine entrée comme URL d'une illustration est trop longue.
 - `NOT_AN_URL` : La chaine entrée comme URL d'une illustration n'est pas un URL valide.
 - `UNSUPPORTED_WEBSITE` : Le site passé en paramètre n'est pas supporté, ou l'URL est invalide.
 - `NOT_AN_ARTWORK_PAGE` : Le site est supporté, mais l'URL entrée ne mène pas à une illustration.

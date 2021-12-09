@@ -26,10 +26,14 @@ from shared_memory.open_proxy import open_proxy
 
 # Taille maximale de l'URI de la requête (Sinon, HTTP 414)
 # Cela contient aussi les paramètres
-MAX_URI_LENGTH = 300 # caractères
+MAX_URI_LENGTH = 512 # caractères
 
 # Taille maximale du contenu d'une requête POST (Sinon, HTTP 413)
-MAX_CONTENT_LENGTH = 500 # octets
+MAX_CONTENT_LENGTH = 1024 # octets
+
+# Taille maximale de l'URL d'un illustration (Sinon, "URL_TOO_LONG")
+# On sépare pour permettre une potentielle autre utilisation du POST
+MAX_ILLUST_URL_SIZE = 256 # caractères
 
 
 """
@@ -158,6 +162,10 @@ def http_server_container ( shared_memory_uri_arg ) :
                 if illust_url == None :
                     response_dict["status"] = "END"
                     response_dict["error"] = "NO_URL_FIELD"
+                
+                elif len( illust_url ) > MAX_ILLUST_URL_SIZE :
+                    response_dict["status"] = "END"
+                    response_dict["error"] = "URL_TOO_LONG"
                 
                 else :
                     # Lance une nouvelle requête, ou donne la requête déjà existante
