@@ -57,6 +57,7 @@ BLACKLIST = [ # === GROUPES DE BOTS ===
               1040873635110690816, # @StarbotGlimmer
               1303671355406073856, # @dailyapplejack
               630915843, # @CalpainEqD
+              1010139676714283008, # @Ponkbot1
 
               # === BOTS HENTAI ===
               1125035851581415426, # @alewdfemboy
@@ -104,6 +105,7 @@ BLACKLIST = [ # === GROUPES DE BOTS ===
               807095, # @nytimes
               759251, # @CNN
               428333, # @cnnbrk
+              2097571, # @cnni
               742143, # @BBCWorld
               2467791, # @washingtonpost
               3108351, # @WSJ (Wall Street Journal)
@@ -111,8 +113,37 @@ BLACKLIST = [ # === GROUPES DE BOTS ===
               1652541, # @Reuters
               5988062, # @TheEconomist
               18949452, # @FT (Financial Times)
+              28785486, # @ABC
+              1367531, # @FoxNews
+              2836421, # @MSNBC
+              14173315, # @NBCNews
+              15754281, # @USATODAY
+              15012486, # @CBSNews
+              5988062, # @TheEconomist
+              87818409, # @guardian
 
-              # === JOURNAUX NON-ANGLOPHONES ===
+              # === JOURNAUX FRANCOPHONES ===
+              68440549, # @libe
+              338985020, # @afpfr
+              34867057, # @franceinter
+              13353862, # @LEXPRESS
+              8460572, # @LePoint
+              38395124, # @franceinfo
+              24744541, # @lemondefr
+              38142665, # @le_Parisien
+              92564226, # @LesEchos
+              34570323, # @Europe1
+              133663801, # @BFMTV
+              18396319, # @CNEWS 💩
+              8350912, # @Le_Figaro
+              21313364, # @lobs
+              2649991, # @20Minutes
+              34294667, # @RTLFrance
+              8460572, # @LePoint
+              103821088, # @TF1
+              1994321, # @FRANCE24
+
+              # === JOURNAUX (AUTRES) ===
               15007299, # @ElNacionalWeb
               108192135, # @EP_Mundo
               165796189, # @geonews_urdu
