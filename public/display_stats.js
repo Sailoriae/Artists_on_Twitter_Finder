@@ -58,7 +58,7 @@ function displayStats() {
 		}
 	});
 
-	request.open("GET", "./api/stats"); // self.send_header("Access-Control-Allow-Origin", "*")
+	request.open("GET", baseURL + "/stats"); // self.send_header("Access-Control-Allow-Origin", "*")
 	request.send();
 }
 

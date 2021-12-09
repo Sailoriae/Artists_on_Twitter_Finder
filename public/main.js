@@ -44,7 +44,7 @@ function mainFunction ( new_loop = true ) {
 		}
 	});
 
-	request.open("POST", "./api/query"); // self.send_header("Access-Control-Allow-Origin", "*")
+	request.open("POST", baseURL + "/query"); // self.send_header("Access-Control-Allow-Origin", "*")
 	request.setRequestHeader("Content-type", "text/plain");
 	request.send( illustURL );
 }

@@ -20,6 +20,6 @@ function displayConfig() {
 		}
 	});
 
-	request.open("GET", "./api/config"); // self.send_header("Access-Control-Allow-Origin", "*")
+	request.open("GET", baseURL + "/config"); // self.send_header("Access-Control-Allow-Origin", "*")
 	request.send();
 }
