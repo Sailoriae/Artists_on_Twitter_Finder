@@ -64,4 +64,7 @@ BLACKLIST = [ # === GROUPES DE BOTS ===
 
               # === REPOSTS MANUELS ===
               1049263783573643264, # @_Miku_Lover
+
+              # === ENTREPRISES ===
+              116397707, # @ototoy_info
              ]

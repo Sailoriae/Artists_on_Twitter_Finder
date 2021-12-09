@@ -15,3 +15,14 @@
   La raison de ce script est qu'il va chercher tout seul les paramètres dans le fichier "parameters.py".
   Il peut ainsi être utilisé facilement en tant que tâche dans une table Cron.
   Les Dumps sont enregistrés dans le répertoire [`../backups`](../backups).
+
+
+## Requêtes SQL utiles
+
+Obtenir la liste des comptes ayant le plus de Tweets indexés. Cela peut être utile pour chercher des gros comptes qui ne sont pas des artistes, et ainsi mettre à jour la liste noire (Voir [`blacklist.py`](../server/tweet_finder/blacklist.py)).
+```
+SELECT account_id, COUNT(*) as indexed_tweets_count
+FROM tweets
+GROUP BY account_id
+ORDER BY indexed_tweets_count DESC
+```
