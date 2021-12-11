@@ -25,6 +25,7 @@ change_wdir( ".." )
 path.append(get_wdir())
 
 from link_finder.class_Link_Finder import Link_Finder
+from link_finder.supported_websites.utils.filter_twitter_accounts_list import filter_twitter_accounts_list
 
 
 """
@@ -60,7 +61,7 @@ def test ( url : str,
     else :
         print( "Test images sources : ECHEC !" )
         print( f"On aurait dû avoir : {should_get_image_url}" )
-        print( f"On a eu : {data.image_urls[0]}" )
+        print( f"On a eu : {data.image_urls[0] if data.image_urls != None else 'None'}" )
         test_image_url = False
     
     if data.twitter_accounts == should_get_twitter_accounts :
@@ -82,6 +83,32 @@ def test ( url : str,
         test_datetime = False
     
     return test_image_url and test_twitter_accounts and test_datetime
+
+
+def test_multiplexer ( url : str,
+                       should_get_twitter_accounts : List[str],
+                       multiplexer_source : str = "" ) :
+    print( "" )
+    print( f"Test : {url}" )
+    
+    twitter_accounts = engine._link_mutiplexer( url, source = multiplexer_source )
+    
+    if twitter_accounts == None :
+        print( "Site non-supporté.")
+        return False
+    
+    twitter_accounts = filter_twitter_accounts_list( twitter_accounts )
+    
+    if twitter_accounts == should_get_twitter_accounts :
+        print( "Test comptes Twitter : OK !" )
+        test_twitter_accounts = True
+    else :
+        print( "Test comptes Twitter : ECHEC !" )
+        print( f"On aurait dû avoir : {should_get_twitter_accounts}" )
+        print( f"On a eu : {twitter_accounts}" )
+        test_twitter_accounts = False
+    
+    return test_twitter_accounts
 
 
 check_list = []
@@ -200,6 +227,22 @@ test( "https://furbooru.org/images/18",
       "https://furrycdn.org/img/view/2020/4/24/18.png",
       ['twiren_arts'],
       datetime.fromisoformat( "2020-04-24 22:50:11+00:00" ) ) )
+
+
+print( "" )
+print( "TEST DE PATREON :" )
+
+check_list.append(
+test_multiplexer( "https://www.patreon.com/NeoArtCorE",
+                  ['neoartcore'] ) )
+
+
+print( "" )
+print( "TEST DE LINKTREE :" )
+
+check_list.append(
+test_multiplexer( "https://linktr.ee/reubenwu",
+                  ['reuben_wu'] ) )
 
 
 print( "" )
