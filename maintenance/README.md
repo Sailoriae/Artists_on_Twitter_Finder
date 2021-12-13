@@ -19,9 +19,23 @@
 
 ## Requêtes SQL utiles
 
-Obtenir la liste des comptes ayant le plus de Tweets indexés. Cela peut être utile pour chercher des gros comptes qui ne sont pas des artistes, et ainsi mettre à jour la liste noire (Voir [`blacklist.py`](../server/tweet_finder/blacklist.py)).
+Obtenir la liste des comptes ayant le plus de Tweets indexés.
 ```
 SELECT account_id, COUNT(*) as indexed_tweets_count
+FROM tweets
+GROUP BY account_id
+ORDER BY indexed_tweets_count DESC
+```
+
+Afficher un profil Twitter à partir de son ID (En remplaçant `123456` par l'ID, un nombre entier).
+```
+https://twitter.com/intent/user?user_id=123456
+https://twitter.com/i/user/123456
+```
+
+Explorer les comptes ayant le plus de Tweets indexés. Cela peut être utile pour chercher des gros comptes qui ne sont pas des artistes, et ainsi mettre à jour la liste noire (Voir [`blacklist.py`](../server/tweet_finder/blacklist.py)).
+```
+SELECT CONCAT("https://twitter.com/i/user/", account_id) as account_url, COUNT(*) as indexed_tweets_count
 FROM tweets
 GROUP BY account_id
 ORDER BY indexed_tweets_count DESC
