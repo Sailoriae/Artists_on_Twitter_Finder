@@ -26,7 +26,7 @@ import tweepy
 
 auth = tweepy.OAuthHandler(api_key, api_secret)
 auth.set_access_token(oauth_token, oauth_token_secret)
-api = tweepy.API( auth, wait_on_rate_limit = True, wait_on_rate_limit_notify  = True  )
+api = tweepy.API( auth, wait_on_rate_limit = True )
 
 while True :
     for tweet in tweepy.Cursor( api.user_timeline, screen_name = "jack" ).items() :

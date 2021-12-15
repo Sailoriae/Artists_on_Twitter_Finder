@@ -4,7 +4,7 @@ Ceci est l'ancien moteur de recherche par image d'AOTF, qui utilise la méthode 
 
 Il a été utilisé depuis le début d'AOTF (Premier commit le 1er juillet 2020), jusqu'à son remplacement le 26 septembre 2021.
 
-Le gros problème de ce moteur est que l'hitogramme colorométique prenanait beaucoup de place, souvent vide, notamment pour les images avec "peu de données" (Très claires).
+Le gros problème de ce moteur est que l'histogramme colorométique prenait beaucoup de place, souvent vide, notamment pour les images avec "peu de données" (Très claires). De plus; la recherche par image menait à beaucou de faux positifs. C'est pour cela qu'un thread numéro 4 a existé dans le pipeline des requêtes utilisateurs, permettant de vérifier avec un algorithme de comparaison directe des images, ce qui ajoutait une étape de plus très lourde.
 
 Il a été remplacé par le moteur actuel, qui utilise la méthode des empreintes d'images ("image hash").
 
@@ -25,6 +25,7 @@ Il est possible d'utiliser ce module indépendamment du reste du projet.
 
 **Attention : Ce module ne gère pas de base de données !**
 C'est la classe `CBIR_Engine_with_Database` qui fait le lien entre le moteur CBIR et la base de données.
+*Note : Cette classe n'existe plus aujourd'hui, elle a été séparée en plusieurs classes dans le module `tweet_finder`.*
 
 ### Importation et initialisation
 
