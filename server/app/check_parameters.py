@@ -17,6 +17,7 @@ if __name__ == "__main__" :
 import parameters as param
 from tweet_finder.twitter.class_SNScrapeAbstraction import SNScrapeAbstraction
 from tweet_finder.twitter.class_TweepyAbstraction import TweepyAbstraction
+from tweet_finder.database.class_SQLite_or_MySQL import SQLite_or_MySQL
 
 
 """
@@ -218,17 +219,12 @@ def check_parameters () :
     
     # ========================================================================
     
+    accounts_count = 0 # Sert pour le test suivant
+    
     if param.USE_MYSQL_INSTEAD_OF_SQLITE :
         print( "Vérification de la connexion à la BDD MySQL..." )
         try :
-            import mysql
-            mysql.connector.connect(
-                    host = param.MYSQL_ADDRESS,
-                    port = param.MYSQL_PORT,
-                    user = param.MYSQL_USERNAME,
-                    password = param.MYSQL_PASSWORD,
-                    database = param.MYSQL_DATABASE_NAME
-                )
+            bdd = SQLite_or_MySQL()
         except Exception as error:
             print( "Impossible de se connecter à la base de donées MySQL !" )
             print( error )
@@ -238,6 +234,28 @@ def check_parameters () :
             return False
         else :
             print( "Connexion à la BDD MySQL réussie !" )
+            tweets_count, accounts_count = bdd.get_stats()
+    
+    else :
+        bdd = SQLite_or_MySQL()
+        tweets_count, accounts_count = bdd.get_stats()
+    
+    # ========================================================================
+    
+    # API "GET users/show"
+    # Estimation du nombre de requêtes qu'on va faire par fenêtres de 15 mins
+    # Une fenêtre correspond à la période des rate-limits sur l'API Twitter
+    # On est limité à 900 requêtes toutes les 15 minutes
+    # Nombre de fenêtres dans une journée (24h) : 24*60 / 15 = 96
+    # Nombre de requêtes par jours sur l'API :    900 * 96 = 86400
+    estimation = accounts_count / param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE
+    estimation += accounts_count / param.RESET_SEARCHAPI_CURSORS_PERIOD
+    if estimation > 86400 :
+        print( f"Votre base de données a trop de comptes pour mettre à jour ses comptes tous les {param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE} jours et reset les curseurs d'indexation tous les {param.RESET_SEARCHAPI_CURSORS_PERIOD} jours." )
+        print( "Merci d'augmenter la valeur des clés suivantes : DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE, RESET_SEARCHAPI_CURSORS_PERIOD" )
+        return False
+    
+    # ========================================================================
     
     print( "Tous les tests ont réussi ! Démarrage du serveur..." )
     
