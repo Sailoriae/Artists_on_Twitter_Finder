@@ -44,6 +44,16 @@ if __name__ == "__main__" :
     
     
     """
+    Par mesure de sécurité, on empêche l'éxécution en tant que "root".
+    """
+    if hasattr( os, "geteuid" ) : # Sinon, c'est qu'on est sous Windows
+        if os.geteuid() == 0 : # UID de "root" = 0
+            print( "Ce script ne peut pas être éxécuté en tant que super-utilisateur." )
+            print( "Ceci est un principe de sécurité." )
+            sys.exit(0)
+    
+    
+    """
     Vérification de l'existence du fichier des paramètres.
     """
     try :
