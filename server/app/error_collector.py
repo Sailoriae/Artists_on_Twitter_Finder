@@ -87,6 +87,12 @@ def error_collector( thread_procedure, thread_id : int, shared_memory_uri : str 
             else :
                 pyro_traceback = None
             
+            # Si on est un thread de Link Finder, on avertit que ce problème
+            # peut être cause par un bug sur un site supporté
+            if thread_procedure.__name__ == "thread_step_1_link_finder" :
+                error_name += "Attention : Cette erreur peut être causée par un problème temporaire sur un des sites supportés.\n"
+                error_name += "Par conséquent, si elle n'est pas reproductible, il ne vaut mieux pas modifier le code d'AOTF.\n"
+            
             # Enregistrer dans un fichier
             if error_count < 100 : # Ne pas créer trop de logs, s'il y a autant d'erreurs, c'est que c'est la même
                 file = open( f"{thread_procedure.__name__}_th{thread_id}_errors.log", "a" )
