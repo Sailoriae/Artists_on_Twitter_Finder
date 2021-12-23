@@ -8,5 +8,5 @@ beautifulsoup4
 Pyro4
 snscrape>=0.4.0
 python-dateutil
-pillow
+pillow>=8.3.2
 psutil
