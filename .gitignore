@@ -11,12 +11,6 @@ __pycache__/
 # Fichiers log
 *.log
 
-# Fichier d'installation des dépendances
-/server/src/
-
-# Au cas où SNScrape soit déplacée
-/server/snscrape/
-
 # Configuration du serveur modifiée
 /server/parameters.py
 
