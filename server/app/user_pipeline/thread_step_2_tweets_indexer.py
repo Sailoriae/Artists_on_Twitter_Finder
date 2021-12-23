@@ -24,6 +24,13 @@ from tweet_finder.database.class_SQLite_or_MySQL import SQLite_or_MySQL
 from shared_memory.open_proxy import open_proxy
 
 
+# Marge laissée à l'artiste pour publier sur Twitter. Si l'illustration est
+# trop récente par rapport à la dernière mise à jour d'un compte Twitter
+# trouvé (En prenant en compte cette marge), l'index de ce compte sera mis à
+# jour (Et une requête de scan sera alors lancée).
+ARTIST_TWEET_ILLUST_MARGIN = 7 #jours
+
+
 """
 ETAPE 2 du traitement d'une requête.
 Thread de lancement de l'indexation ou de la mise à jour de l'indexation des
@@ -126,11 +133,12 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
                     if request.datetime.tzinfo == None :
                         request.datetime = request.datetime.replace( tzinfo = UTC )
                     
-                    # Si cette mise à jour moins 3 jours est plus
+                    # N = ARTIST_TWEET_ILLUST_MARGIN
+                    # Si cette mise à jour moins N jours est plus
                     # vielle que la date de l'illustration, il faut MàJ
-                    # (On laisse 3 jours de marge à l'artiste pour
+                    # (On laisse N jours de marge à l'artiste pour
                     # publier sur Twitter)
-                    if min_date - datetime.timedelta( days = 3 ) < request.datetime :
+                    if min_date - datetime.timedelta( days = ARTIST_TWEET_ILLUST_MARGIN ) < request.datetime :
                         print( f"[step_2_th{thread_id}] @{account_name} est déjà dans la BDD, mais il faut le MàJ car l'illustration de requête est trop récente !" )
                         
                         scan_request = shared_memory_scan_requests.launch_request( account_id,
