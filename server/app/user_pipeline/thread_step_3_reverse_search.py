@@ -72,16 +72,19 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
         # Obtenir l'image et la charger en PIL.Image
         request_image_pil = None
         image_id = 0
+        retry_once = True
         while True : # Pour tenter toutes les résolution d'images trouvées par le Link Finder
             try :
                 # ATTENTION : Bien utiliser url_to_content(), car elle contient
                 # une bidouille pour GET les image sur Pixiv
                 query_image_as_bytes = url_to_content( request.image_urls[image_id] )
-            except urllib.error.HTTPError as error : # On réessaye qu'une seule fois
+            except urllib.error.HTTPError as error :
                 print( f"[step_3_th{thread_id}] Erreur HTTP : {error}" )
-                if error.code == 502 : # Et uniquement sur certaines erreurs
+                # On réessaye qu'une seule fois, et uniquement sur certaines erreurs
+                if retry_once and error.code == 502 :
+                    retry_once = False
                     sleep(10)
-                    query_image_as_bytes = url_to_content( request.image_urls[image_id] )
+                    continue
                 else :
                     # Si l'URL ne vient pas du Link Finder, c'est un problème d'entrée utilisateur
                     if request.input_url == None :
