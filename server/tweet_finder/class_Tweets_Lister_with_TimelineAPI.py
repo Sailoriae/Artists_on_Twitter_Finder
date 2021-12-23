@@ -35,13 +35,19 @@ class Tweets_Lister_with_TimelineAPI :
     """
     Constructeur.
     
+    @param tweets_queue_put Fonction pour placer un Tweet dans la file
+                            d'attente de sortie. Un Tweet est représenté par le
+                            dictionnaire retourné par la fonction
+                            "analyse_tweet_json()".
     @param add_step_B_time Fonction de la mémoire, objet
                            "Metrics_Container".
     """
     def __init__( self, api_key, api_secret, oauth_token, oauth_token_secret,
+                        tweets_queue_put,
                         DEBUG : bool = False, ENABLE_METRICS : bool = False,
                         add_step_B_time = None, # Fonction de la mémoire partagée
                   ) -> None :
+        self._tweets_queue_put = tweets_queue_put
         self._DEBUG = DEBUG
         self._ENABLE_METRICS = ENABLE_METRICS
         self._add_step_B_time = add_step_B_time
@@ -51,6 +57,41 @@ class Tweets_Lister_with_TimelineAPI :
                                            api_secret,
                                            oauth_token,
                                            oauth_token_secret )
+    
+    """
+    Indiquer qu'on a fini le listage en donnant une instruction
+    d'enregistrement de curseur dans la base de données. Cette instruction sera
+    traitée par un thread d'indexation, ce qui permet de vérifier que tous les
+    Tweets trouvés ont bien étés enregistrés.
+    Ce curseur est l'ID du Tweet trouvé le plus récent, ou celui enregistré
+    dans la base de données si aucun Tweet n'a été trouvé.
+    
+    @param account_name Le nom de compte, uniquement pour faire des print().
+    @param account_id ID du compte, vérifié récemment ! Le curseur est associé
+                      à l'ID dans la base de données.
+    @param request_uri URI de la requête de scan associée. Permet de terminer
+                       proprement une requête de scan dans le serveur AOTF.
+    @param cursor Curseur à enregistrer, qui est l'ID du Tweet le plus récent,
+                  ou "None" pour mettre à "NULL" si aucun Tweet n'a jamais été
+                  trouvé.
+    @param unchange_cursor Permet d'outrepasser le paramètre précédent et
+                           laisser le curseur tel quel. L'instruction servira
+                           donc uniquement à terminer la requête de scan.
+    
+    La BDD peut retourner None si elle ne connait pas le compte (Donc aucun
+    Tweet n'est enregistré pour ce compte), c'est pas grave. L'intruction
+    mènera à la création de ce compte dans la base de données.
+    """
+    
+    def _send_save_cursor_instruction( self, account_name, account_id, request_uri,
+                                             cursor = None, unchange_cursor = False ) :
+        if unchange_cursor :
+            cursor = self._bdd.get_account_TimelineAPI_last_tweet_id( account_id )
+        
+        self._tweets_queue_put( {"save_TimelineAPI_cursor" : cursor,
+                                 "account_id" : account_id,
+                                 "account_name" : account_name, # Pour faire des print()
+                                 "request_uri" : request_uri} )
     
     """
     Lister les Tweets du compte Twitter @account_name.
@@ -68,11 +109,7 @@ class Tweets_Lister_with_TimelineAPI :
     Cette méthode utlise l'API de timeline, limitée aux 3200 premiers Tweets du
     compte, retweets compris !
     
-    param account_name Le nom de compte, uniquement pour faire des print().
-    param tweets_queue_put Fonction pour placer un Tweet dans la file
-                            d'attente de sortie. Un Tweet est représenté par le
-                            dictionnaire retourné par la foncition
-                            "analyse_tweet_json()".
+    @param account_name Le nom de compte, uniquement pour faire des print().
     @param account_id ID du compte, vérifié récemment !
                       Si différence, c'est le compte avec cet ID qui sera listé.
     @param request_uri URI de la requête de scan associée. Permet d'être passée
@@ -97,7 +134,7 @@ class Tweets_Lister_with_TimelineAPI :
     Peut émettre des "Blocked_by_User_with_TimelineAPI" si le compte nous
     bloque.
     """
-    def list_TimelineAPI_tweets ( self, account_name, tweets_queue_put,
+    def list_TimelineAPI_tweets ( self, account_name,
                                         account_id = None,
                                         request_uri = None ) -> None :
         if account_id == None :
@@ -138,7 +175,7 @@ class Tweets_Lister_with_TimelineAPI :
                     # (La file peut être très très grande), et que l'indexeur
                     # vérifie que le Tweet ne soit pas déjà dans la BDD avant
                     # de l'analyser et de l'indexeur (Voir "Tweet_Indexer")
-                    tweets_queue_put( tweet_dict )
+                    self._tweets_queue_put( tweet_dict )
             count += 1
         
         if self._DEBUG or self._ENABLE_METRICS :
@@ -154,15 +191,15 @@ class Tweets_Lister_with_TimelineAPI :
         # La BDD peut retourner None si elle ne connait pas le compte (Donc aucun
         # Tweet n'est enregistré pour ce compte), c'est pas grave.
         if last_tweet_id == None :
-            tweets_queue_put( {"save_TimelineAPI_cursor" : self._bdd.get_account_TimelineAPI_last_tweet_id( account_id ),
-                               "account_id" : account_id,
-                               "account_name" : account_name, # Pour faire des print()
-                               "request_uri" : request_uri} )
+            self._send_save_cursor_instruction( account_name, # Pour faire des print()
+                                                account_id,
+                                                request_uri,
+                                                unchange_cursor = True )
         else :
-            tweets_queue_put( {"save_TimelineAPI_cursor" : last_tweet_id,
-                               "account_id" : account_id,
-                               "account_name" : account_name, # Pour faire des print()
-                               "request_uri" : request_uri} )
+            self._send_save_cursor_instruction( account_name, # Pour faire des print()
+                                                account_id,
+                                                request_uri,
+                                                cursor = last_tweet_id )
 
 
 """
@@ -171,13 +208,10 @@ Test du bon fonctionnement de cette classe
 if __name__ == '__main__' :
     import parameters as param
     
-    class Test :
-        def put( self, tweet ) : print( tweet )
-    test = Test()
-    
     engine = Tweets_Lister_with_TimelineAPI( param.API_KEY,
                                              param.API_SECRET,
                                              param.TWITTER_API_KEYS[0]["OAUTH_TOKEN"],
                                              param.TWITTER_API_KEYS[0]["OAUTH_TOKEN_SECRET"],
+                                             print,
                                              DEBUG = True )
-    engine.list_TimelineAPI_tweets( "rikatantan2nd", test )
+    engine.list_TimelineAPI_tweets( "rikatantan2nd" )

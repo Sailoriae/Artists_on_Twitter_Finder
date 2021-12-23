@@ -43,23 +43,23 @@ def thread_step_B_TimelineAPI_list_account_tweets( thread_id : int, shared_memor
     shared_memory_scan_requests_step_B_TimelineAPI_list_account_tweets_queue = shared_memory_scan_requests.step_B_TimelineAPI_list_account_tweets_queue
     shared_memory_scan_requests_step_C_index_account_tweets_queue = shared_memory_scan_requests.step_C_index_account_tweets_queue
     
-    # Initialisation du listeur de Tweets
-    timelineAPI_lister = Tweets_Lister_with_TimelineAPI( param.API_KEY,
-                                                         param.API_SECRET,
-                                                         param.TWITTER_API_KEYS[ thread_id - 1 ]["OAUTH_TOKEN"],
-                                                         param.TWITTER_API_KEYS[ thread_id - 1 ]["OAUTH_TOKEN_SECRET"],
-                                                         DEBUG = param.DEBUG,
-                                                         ENABLE_METRICS = param.ENABLE_METRICS,
-                                                         add_step_B_time = shared_memory_execution_metrics.add_step_B_time )
-    
-    # Fonction à passer à la méthode
-    # "Tweets_Lister_with_TimelineAPI.list_TimelineAPI_tweets()"
+    # Fonction à passer à l'objet "Tweets_Lister_with_TimelineAPI"
     # Permet de mettre les Tweets trouvés dans la file d'attente des Tweets à
     # indexer (Il n'y a pas de vérification de doublon car cela prendrait trop
     # de temps, alors que l'indexation vérifie déjà que le Tweet ne soit pas
     # indexé dans la BDD)
     def tweets_queue_put( tweet_dict : dict ) -> None :
         shared_memory_scan_requests_step_C_index_account_tweets_queue.put( tweet_dict )
+    
+    # Initialisation du listeur de Tweets
+    timelineAPI_lister = Tweets_Lister_with_TimelineAPI( param.API_KEY,
+                                                         param.API_SECRET,
+                                                         param.TWITTER_API_KEYS[ thread_id - 1 ]["OAUTH_TOKEN"],
+                                                         param.TWITTER_API_KEYS[ thread_id - 1 ]["OAUTH_TOKEN_SECRET"],
+                                                         tweets_queue_put,
+                                                         DEBUG = param.DEBUG,
+                                                         ENABLE_METRICS = param.ENABLE_METRICS,
+                                                         add_step_B_time = shared_memory_execution_metrics.add_step_B_time )
     # Dire qu'on ne fait rien
     shared_memory_threads_registry.set_request( f"thread_step_B_TimelineAPI_list_account_tweets_th{thread_id}", None )
     
@@ -129,7 +129,6 @@ def thread_step_B_TimelineAPI_list_account_tweets( thread_id : int, shared_memor
         print( f"[step_B_th{thread_id}] Listage des Tweets du compte Twitter @{request.account_name} avec l'API de timeline." )
         try :
             timelineAPI_lister.list_TimelineAPI_tweets( request.account_name,
-                                                        tweets_queue_put,
                                                         account_id = request.account_id,
                                                         request_uri = request.get_URI() )
         except Unfound_Account_on_Lister_with_TimelineAPI :
@@ -143,6 +142,18 @@ def thread_step_B_TimelineAPI_list_account_tweets( thread_id : int, shared_memor
                 shared_memory_scan_requests_step_B_TimelineAPI_list_account_tweets_prior_queue.put( request )
             else :
                 shared_memory_scan_requests_step_B_TimelineAPI_list_account_tweets_queue.put( request )
+        
+        # En cas de plantage lors du listage, il faut envoyer une instruction
+        # d'enregistrement du curseur afin que la requête de scan soit terminée
+        # proprement lors que tous les Tweets qui ont pu être listés seront
+        # enregistrés
+        except Exception as error:
+            request.has_failed = True # A faire avant
+            timelineAPI_lister._send_save_cursor_instruction( request.account_name,
+                                                              request.account_id,
+                                                              request.get_URI(),
+                                                              unchange_cursor = True )
+            raise error # Passer au collecteur d'erreurs
         
         # Dire qu'on n'est plus en train de traiter cette requête
         shared_memory_threads_registry.set_request( f"thread_step_B_TimelineAPI_list_account_tweets_th{thread_id}", None )

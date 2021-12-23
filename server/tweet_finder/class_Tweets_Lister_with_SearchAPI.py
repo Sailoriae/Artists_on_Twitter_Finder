@@ -36,13 +36,19 @@ class Tweets_Lister_with_SearchAPI :
     """
     Constructeur.
     
+    @param tweets_queue_put Fonction pour placer un Tweet dans la file
+                            d'attente de sortie. Un Tweet est représenté par le
+                            dictionnaire retourné par la fonction
+                            "analyse_tweet_json()".
     @param add_step_A_time Fonction de la mémoire, objet
                            "Metrics_Container".
     """
     def __init__( self, api_key, api_secret, oauth_token, oauth_token_secret, auth_token,
+                        tweets_queue_put,
                         DEBUG : bool = False, ENABLE_METRICS : bool = False,
                         add_step_A_time = None, # Fonction de la mémoire partagée 
                  ) -> None :
+        self._tweets_queue_put = tweets_queue_put
         self._DEBUG = DEBUG
         self._ENABLE_METRICS = ENABLE_METRICS
         self._add_step_A_time = add_step_A_time
@@ -53,6 +59,41 @@ class Tweets_Lister_with_SearchAPI :
                                            api_secret,
                                            oauth_token,
                                            oauth_token_secret )
+    
+    """
+    Indiquer qu'on a fini le listage en donnant une instruction
+    d'enregistrement de curseur dans la base de données. Cette instruction sera
+    traitée par un thread d'indexation, ce qui permet de vérifier que tous les
+    Tweets trouvés ont bien étés enregistrés.
+    Ce curseur est la date du Tweet trouvé le plus récent, ou celui enregistré
+    dans la base de données si aucun Tweet n'a été trouvé.
+    
+    @param account_name Le nom de compte, uniquement pour faire des print().
+    @param account_id ID du compte, vérifié récemment ! Le curseur est associé
+                      à l'ID dans la base de données.
+    @param request_uri URI de la requête de scan associée. Permet de terminer
+                       proprement une requête de scan dans le serveur AOTF.
+    @param cursor Curseur à enregistrer, qui est la date du Tweet le plus
+                  récent, ou "None" pour mettre à "NULL" si aucun Tweet n'a
+                  jamais été trouvé.
+    @param unchange_cursor Permet d'outrepasser le paramètre précédent et
+                           laisser le curseur tel quel. L'instruction servira
+                           donc uniquement à terminer la requête de scan.
+    
+    La BDD peut retourner None si elle ne connait pas le compte (Donc aucun
+    Tweet n'est enregistré pour ce compte), c'est pas grave. L'intruction
+    mènera à la création de ce compte dans la base de données.
+    """
+    
+    def _send_save_cursor_instruction( self, account_name, account_id, request_uri,
+                                             cursor = None, unchange_cursor = False ) :
+        if unchange_cursor :
+            cursor = self._bdd.get_account_SearchAPI_last_tweet_date( account_id )
+        
+        self._tweets_queue_put( {"save_SearchAPI_cursor" : cursor,
+                                 "account_id" : account_id,
+                                 "account_name" : account_name, # Pour faire des print()
+                                 "request_uri" : request_uri} )
     
     """
     Lister les Tweets du compte Twitter @account_name.
@@ -68,10 +109,6 @@ class Tweets_Lister_with_SearchAPI :
     mémoire vive.
     
     @param account_name Le nom de compte, uniquement pour faire des print().
-    @param tweets_queue_put Fonction pour placer un Tweet dans la file
-                            d'attente de sortie. Un Tweet est représenté par le
-                            dictionnaire retourné par la foncition
-                            "analyse_tweet_json()".
     @param account_id ID du compte, vérifié récemment !
                       Si différence, c'est le compte avec cet ID qui sera listé.
     @param request_uri URI de la requête de scan associée. Permet d'être passée
@@ -95,7 +132,7 @@ class Tweets_Lister_with_SearchAPI :
     le compte est introuvable.
     Peut émettre des "Blocked_by_User_with_SearchAPI" si le compte nous bloque.
     """
-    def list_searchAPI_tweets ( self, account_name, tweets_queue_put,
+    def list_searchAPI_tweets ( self, account_name,
                                       account_id = None,
                                       request_uri = None ) -> None :
         if account_id == None :
@@ -139,7 +176,7 @@ class Tweets_Lister_with_SearchAPI :
                     # (La file peut être très très grande), et que l'indexeur
                     # vérifie que le Tweet ne soit pas déjà dans la BDD avant
                     # de l'analyser et de l'indexeur (Voir "Tweet_Indexer")
-                    tweets_queue_put( tweet_dict )
+                    self._tweets_queue_put( tweet_dict )
         
         # Note : Plus besoin de faire de bidouille avec "filter:safe"
         # On met le "@" à cause de @KIYOSATO_0928 qui renvoyait des erreurs 400
@@ -165,15 +202,15 @@ class Tweets_Lister_with_SearchAPI :
         # La BDD peut retourner None si elle ne connait pas le compte (Donc aucun
         # Tweet n'est enregistré pour ce compte), c'est pas grave.
         if count > 0 :
-            tweets_queue_put( {"save_SearchAPI_cursor" : first_tweet_date.strftime('%Y-%m-%d'),
-                               "account_id" : account_id,
-                               "account_name" : account_name, # Pour faire des print()
-                               "request_uri" : request_uri} )
+            self._send_save_cursor_instruction( account_name, # Pour faire des print()
+                                                account_id,
+                                                request_uri,
+                                                cursor = first_tweet_date.strftime('%Y-%m-%d') )
         else :
-            tweets_queue_put( {"save_SearchAPI_cursor" : self._bdd.get_account_SearchAPI_last_tweet_date( account_id ),
-                               "account_id" : account_id,
-                               "account_name" : account_name, # Pour faire des print()
-                               "request_uri" : request_uri} )
+            self._send_save_cursor_instruction( account_name, # Pour faire des print()
+                                                account_id,
+                                                request_uri,
+                                                unchange_cursor = True )
 
 
 """
@@ -182,14 +219,11 @@ Test du bon fonctionnement de cette classe
 if __name__ == '__main__' :
     import parameters as param
     
-    class Test :
-        def put( self, tweet ) : print( tweet )
-    test = Test()
-    
     engine = Tweets_Lister_with_SearchAPI( param.API_KEY,
                                            param.API_SECRET,
                                            param.TWITTER_API_KEYS[0]["OAUTH_TOKEN"],
                                            param.TWITTER_API_KEYS[0]["OAUTH_TOKEN_SECRET"],
                                            param.TWITTER_API_KEYS[0]["AUTH_TOKEN"],
+                                           print,
                                            DEBUG = True )
-    engine.list_searchAPI_tweets( "rikatantan2nd", test )
+    engine.list_searchAPI_tweets( "rikatantan2nd" )
