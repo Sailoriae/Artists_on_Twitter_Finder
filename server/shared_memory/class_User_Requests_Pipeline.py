@@ -326,9 +326,8 @@ class User_Requests_Pipeline :
             
             # Descendre le compteur de requêtes en cours de traitement dans le
             # pipeline
-            self._requests_sem.acquire()
+            # Pas besoin de prendre le sémaphore, le GIL fait son travail
             self._processing_requests_count -= 1
-            self._requests_sem.release()
             
             if request.ip_address != None :
                 self._limit_per_ip_addresses_obj.remove_ip_address( request.ip_address )
