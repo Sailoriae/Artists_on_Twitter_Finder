@@ -21,7 +21,7 @@ if __name__ == "__main__" :
 
 import parameters as param
 from tweet_finder.class_Reverse_Searcher import Reverse_Searcher
-from tweet_finder.utils.url_to_content import url_to_content
+from tweet_finder.utils.url_to_content import url_to_content, File_Too_Big
 from tweet_finder.utils.url_to_PIL_image import binary_image_to_PIL_image
 
 
@@ -78,6 +78,13 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
                 # ATTENTION : Bien utiliser url_to_content(), car elle contient
                 # une bidouille pour GET les image sur Pixiv
                 query_image_as_bytes = url_to_content( request.image_urls[image_id] )
+            except File_Too_Big :
+                print( f"[step_3_th{thread_id}] L'image d'entrée est trop grande." )
+                if len(request.image_urls) > image_id+1 :
+                    image_id += 1 # Reboucler au "while True"
+                    continue
+                request.problem = "QUERY_IMAGE_TOO_BIG"
+                break # Impossible d'obtenir l'image
             except urllib.error.HTTPError as error :
                 print( f"[step_3_th{thread_id}] Erreur HTTP : {error}" )
                 # On réessaye qu'une seule fois, et uniquement sur certaines erreurs

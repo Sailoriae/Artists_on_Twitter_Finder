@@ -2,7 +2,6 @@
 # coding: utf-8
 
 import urllib
-import urllib.request
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
 # Ainsi, si on veut utiliser ce script indépendamment (Notamment pour des
@@ -20,11 +19,27 @@ if __name__ == "__main__" :
 import parameters as param
 
 
+# Taille maximale que AOTF peut télécharger
+# Permet d'éviter de faire saturer la mémoire vive
+MAX_SIZE = 20 * 1024 * 1024 # octets = 20 Mo
+
+# Exception si jamais la taille maximale est dépassée
+class File_Too_Big ( Exception ) :
+    pass
+
+
 """
 Obtenir le contenu disponible à une URL.
 Attention : Cette fonction retourne le contenu binaire !
+
+@param url URL où se situe le contenu à obtenir.
+@param max_size Taille maximale (En octets) du contenu. Si cette taille est
+                dépassée, le contenu ne sera pas téléchargé, et une erreur
+                "File_Too_Big" sera émise.
+
+@return Contenu binaire.
 """
-def url_to_content ( url : str ) -> bytes :
+def url_to_content ( url : str, max_size : int = MAX_SIZE ) -> bytes :
     # Construire la requête
     request = urllib.request.Request( url )
     
@@ -34,7 +49,15 @@ def url_to_content ( url : str ) -> bytes :
     if url[:20] == "https://i.pximg.net/" :
         request.add_header("Referer", "https://www.pixiv.net/")
     
+    # Ajouter notre "User-Agent" à la requête
     request.add_header("User-Agent", param.USER_AGENT)
     
+    # Créer la requête (Ceci va faire une requête HTTP "HEAD")
+    response = urllib.request.urlopen( request, timeout = 60 )
+    
+    # Vérifier la taille du contenu (Obtenu grâce au "HEAD")
+    if response.length > max_size :
+        raise File_Too_Big
+    
     # Télécharger et retourner le contenu
-    return urllib.request.urlopen( request, timeout = 60 ).read()
+    return response.read()
