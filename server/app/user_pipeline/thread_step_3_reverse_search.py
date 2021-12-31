@@ -138,6 +138,8 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
                                                    account_id = twitter_account[1] )
                 if result != None :
                     request.found_tweets += result
+                else :
+                    print( f"[step_3_th{thread_id}] Le compte Twitter @{twitter_account[0]} est privé, désactivé ou inexistant !" )
             
             # Si il n'y a pas de compte Twitter dans la requête
             if request.twitter_accounts_with_id == []:

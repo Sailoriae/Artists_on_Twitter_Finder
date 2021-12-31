@@ -420,13 +420,8 @@ if __name__ == "__main__" :
                     # Vérification que le nom d'utilisateur Twitter est possible
                     if re.compile(r"^@?(\w){1,15}$").match(args[2]) :
                         print( f"Recherche sur le compte @{args[2]}." )
-                        account_id = twitter.get_account_id( args[2] )
-                        
-                        if account_id == None :
-                            print( f"Compte @{args[2]} inexistant ou indisponible !" )
-                        else :
-                            print( "Attention ! Si ce compte n'est pas indexé, la recherche ne retournera aucun résultat." )
-                            shared_memory_user_requests.launch_direct_request( args[1], args[2], account_id )
+                        print( "Attention : Si ce compte n'est pas indexé ou s'il n'existe pas, la recherche ne retournera aucun résultat." )
+                        shared_memory_user_requests.launch_direct_request( args[1], args[2] )
                     else :
                         print( "Nom de compte Twitter impossible !" )
                 else :

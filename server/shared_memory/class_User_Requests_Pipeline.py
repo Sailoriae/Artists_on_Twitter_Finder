@@ -183,12 +183,11 @@ class User_Requests_Pipeline :
     Les requêtes de ce type ont leur attribut "is_direct" à "True".
     
     @param image_url URL de l'image à rechercher. Sert à identifier la requête !
-    @param account_name Nom du compte Twitter sur lequel rechercher.
-    @param account_id ID du compte Twitter sur lequel rechercher.
+    @param account_name Nom du compte Twitter sur lequel rechercher. Son ID
+                        sera recherché par la recherche par image (Etape 3).
     """
     def launch_direct_request ( self, image_url : str,
-                                      account_name : str = None,
-                                      account_id : int = None ) -> User_Request :
+                                      account_name : str = None ) -> User_Request :
         # Vérifier d'abord qu'on n'est pas déjà en train de traiter cette
         # image d'entrée.
         self._direct_requests_sem.acquire()
@@ -206,8 +205,8 @@ class User_Requests_Pipeline :
         
         # Modifier cet objet pour qu'il soit une requête directe
         request = open_proxy( request )
-        if account_name != None and account_id != None :
-            request.twitter_accounts_with_id += [ (account_name,account_id) ]
+        if account_name != None :
+            request.twitter_accounts_with_id += [ (account_name, None) ]
         request.status = 3
         self.set_request_to_next_step( request )
         
