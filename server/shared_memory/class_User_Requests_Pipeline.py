@@ -125,6 +125,8 @@ class User_Requests_Pipeline :
     Crée une nouvelle requête si cette illustration n'est pas déjà en cours de
     traitement.
     
+    Cette fonction permet aussi d'obtenir une requête si elle est déjà lancée.
+    
     Les requêtes sont délestées par le thread "remove_finished_requests" 24h
     après la fin de son traitement.
     
@@ -137,6 +139,9 @@ class User_Requests_Pipeline :
             Ou None si l'addresse IP passée en paramètre a atteint son nombre
             maximum de requêtes en cours de traitement. La requête n'a donc pas
             été lancée.
+    
+    Cette fonction permet ainsi d'obtenir une requête si il en existe déjà une
+    pour l'entrée "image_url".
     """
     def launch_request ( self, illust_url : str,
                                ip_address : str = None ) -> User_Request :
@@ -185,6 +190,12 @@ class User_Requests_Pipeline :
     @param image_url URL de l'image à rechercher. Sert à identifier la requête !
     @param account_name Nom du compte Twitter sur lequel rechercher. Son ID
                         sera recherché par la recherche par image (Etape 3).
+    
+    @return L'objet User_Request créé.
+            Ou l'objet User_Request déjà existant.
+    
+    Cette fonction permet ainsi d'obtenir une requête si il en existe déjà une
+    pour l'entrée "image_url".
     """
     def launch_direct_request ( self, image_url : str,
                                       account_name : str = None ) -> User_Request :
@@ -211,90 +222,6 @@ class User_Requests_Pipeline :
         self.set_request_to_next_step( request )
         
         # Retourner l'objet User_Request.
-        return request
-    
-    """
-    Obtenir l'objet User_Request d'une requête.
-    
-    @param illust_url L'URL de l'illustration d'entrée.
-    @return Un objet User_Request,
-            Ou None si la requête est inconnue.
-    """
-    def get_request ( self, illust_url : str ) -> User_Request :
-        self._requests_sem.acquire()
-        for key in self._requests :
-            if key == illust_url :
-                self._requests_sem.release()
-                return open_proxy( self._requests[key] )
-        self._requests_sem.release()
-        
-        return None
-    
-    """
-    Obtenir l'objet User_Request d'une requête directe / dans toute la BDD.
-    
-    @param image_url L'URL de l'image d'entrée.
-    @return Un objet User_Request,
-            Ou None si la requête est inconnue.
-    """
-    def get_direct_request ( self, image_url : str ) -> User_Request :
-        self._direct_requests_sem.acquire()
-        for key in self._direct_requests :
-            if key == image_url :
-                self._direct_requests_sem.release()
-                return open_proxy( self._direct_requests[key] )
-        self._direct_requests_sem.release()
-        
-        return None
-    
-    """
-    Obtenir l'objet User_Request d'une requête, qu'elle soit une requête
-    normale ou une directe / dans toute la BDD.
-    
-    Note : Cette fonction est utilisée uniquement par la CLI. Elle ne doit pas
-    être utilisée pour l'API HTTP,car cela prête à confusion.
-    
-    @param image_url L'URL de l'illustration d'entrée.
-    @return Un objet User_Request,
-            Ou None si la requête est inconnue.
-    """
-    def get_any_request ( self, illust_url : str ) -> User_Request :
-        request = self.get_request( illust_url )
-        direct_request = self.get_direct_request( illust_url )
-        
-        # Vérifier si on peut retourner l'une des deux requêtes, ou aucune.
-        if request != None and direct_request == None : return request
-        if request == None and direct_request != None : return direct_request
-        if request == None and direct_request == None : return None
-        
-        # Maintenant, il va falloir choisir. On sait qu'il est impossible que
-        # ces deux requêtes mènent à un résultat, puisque l'URL d'une page sur
-        # un site supporté n'est pas l'URL d'un fichier image, et inversement.
-        
-        # Eliminer la détection d'une URL invalide pour les requêtes normales.
-        if request.problem in [ "NOT_AN_URL",
-                                "UNSUPPORTED_WEBSITE",
-                                "NOT_AN_ARTWORK_PAGE" ] :
-            return direct_request
-        
-        # Eliminer la détection d'une URL invalide pour les requêtes directes.
-        if direct_request.problem in [ "NOT_AN_URL",
-                                       "ERROR_DURING_REVERSE_SEARCH" ] :
-            return request
-        
-        # Si la requête directe s'est terminée sans erreur, on peut la
-        # retourner comme requête valide.
-        if ( direct_request.get_status_string() == "END" and
-             direct_request.problem in [ None, "" ] ) :
-             return direct_request
-        
-        # Si la requête directe a l'erreur "QUERY_IMAGE_TOO_BIG", c'est que
-        # l'URL est valide pour elle. On peut donc la retourner.
-        if direct_request.problem in [ "QUERY_IMAGE_TOO_BIG" ] :
-             return direct_request
-        
-        # On retourne par défaut la requête normale, car c'est celle qui aura
-        # l'étape de traitement la plus basse.
         return request
     
     """
