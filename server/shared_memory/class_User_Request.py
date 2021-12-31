@@ -26,11 +26,18 @@ class User_Request :
     """
     @param input_url L'URL de l'illustration de requête.
     @param ip_address L'adresse IP qui a lancé la requête.
+    @param is_direct Mettre à True si cette requête sera placée directement
+                     à l'étape de recherche (Etape 3) sans passer par le Link
+                     Finder. L'URL doit donc mener directemet à un fichier
+                     image, et non à une page d'illustration sur un site
+                     supporté.
     """
     def __init__ ( self, input_url : str,
-                         ip_address : str = None ) :
+                         ip_address : str = None,
+                         is_direct : bool = False ) :
         self._input_url = input_url
         self._ip_address = ip_address
+        self._is_direct = is_direct
         
         # Si jamais il y a eu un problème et qu'on ne peut pas traiter la
         # requête, on le met ici sous forme d'une string
@@ -39,6 +46,8 @@ class User_Request :
         # Résultat du Link Finder (Etape 1)
         # Image source de l'illustration
         self._image_urls = None
+        if is_direct : # Requête directe (L'URL d'entrée mène à une image)
+            self._image_urls = [ input_url ]
         
         # Résultat du Link Finder (Etape 1)
         # Liste de tuples (str, int), avec le nom du compte Twitter, et son ID
@@ -98,6 +107,9 @@ class User_Request :
     
     @property
     def ip_address( self ) : return self._ip_address
+    
+    @property
+    def is_direct( self ) : return self._is_direct
     
     @property
     def problem( self ) : return self._problem

@@ -64,10 +64,7 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
         # On passe la requête à l'étape suivante, c'est à dire notre étape
         shared_memory_user_requests.set_request_to_next_step( request )
         
-        if request.input_url != None : # Recherche normale
-            print( f"[step_3_th{thread_id}] Recherche de l'image suivante : {request.input_url}" )
-        else : # Recherche directe / dans toute la BDD
-            print( f"[step_3_th{thread_id}] Recherche de l'image suivante : {request.image_urls[0]}" )
+        print( f"[step_3_th{thread_id}] Recherche de l'image suivante : {request.input_url}" )
         
         # Obtenir l'image et la charger en PIL.Image
         request_image_pil = None
@@ -94,7 +91,7 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
                     continue
                 else :
                     # Si l'URL ne vient pas du Link Finder, c'est un problème d'entrée utilisateur
-                    if request.input_url == None :
+                    if request.is_direct :
                         print( f"[step_3_th{thread_id}] Impossible d'obtenir l'image entrée par l'utilisateur !" )
                         request.problem = "ERROR_DURING_REVERSE_SEARCH"
                         break # Sortir pour terminer le requête proprement
