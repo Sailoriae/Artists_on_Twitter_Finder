@@ -63,6 +63,18 @@ if __name__ == "__main__" :
     
     
     """
+    En cas de Ctrl+C ou de SIGTERM lors de la phase d'initilisation.
+    On remplacera cette gestion après l'initialisation (Voir plus bas).
+    """
+    def on_sigterm ( signum, frame ) :
+        print( "Démarrage annulé." )
+        sys.exit(0)
+    
+    signal.signal(signal.SIGINT, on_sigterm)
+    signal.signal(signal.SIGTERM, on_sigterm)
+    
+    
+    """
     Vérification de l'existence du fichier des paramètres.
     """
     try :
