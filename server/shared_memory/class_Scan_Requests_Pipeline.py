@@ -375,7 +375,7 @@ class Scan_Requests_Pipeline :
         
         for key in self._requests :
             request_uri = self._requests[key]
-            request = open_proxy( request_uri )
+            request = self._root.get_obj( request_uri )
             
             # Si la requête est terminée, il faut vérifier qu'on puisse la garder
             if request.finished_date != None :
@@ -391,8 +391,6 @@ class Scan_Requests_Pipeline :
             # Sinon, son traitement n'est pas fini, on la garde forcément
             else :
                 new_requests_dict[ key ] = request_uri
-            
-            request.release_proxy()
         
         # On installe la nouvelle liste
         self._requests = new_requests_dict

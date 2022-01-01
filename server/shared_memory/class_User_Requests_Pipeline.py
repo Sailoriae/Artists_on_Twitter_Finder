@@ -291,7 +291,7 @@ class User_Requests_Pipeline :
         else : requests_list = self._requests
         for key in requests_list :
             request_uri = requests_list[key]
-            request = open_proxy( request_uri )
+            request = self._root.get_obj( request_uri )
             
             # Si la requête est terminée, il faut vérifier qu'on puisse la garder
             if request.finished_date != None :
@@ -333,9 +333,6 @@ class User_Requests_Pipeline :
             # Sinon, son traitement n'est pas fini, on la garde forcément
             else :
                 new_requests_dict[ key ] = request_uri
-            
-            # Forcer la fermeture du proxy
-            request.release_proxy()
         
         # On installe la nouvelle liste
         if direct_requests : self._direct_requests = new_requests_dict

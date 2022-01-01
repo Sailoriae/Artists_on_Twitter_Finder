@@ -161,9 +161,36 @@ class Shared_Memory :
             return obj
     
     """
-    Dé-enregistrer un objet.
+    Extraire l'ID de l'objet d'une URI Pyro.
+    @param L'URI vers un objet, sous la forme d'une string.
+    @return L'ID de cet objet, sous la forme d'une string.
+    """
+    def _uri_to_id ( self, uri ) :
+        return Pyro4.URI( uri ).object
+    
+    """
+    Obtenir un objet Python à partir de son URI.
+    Attention : Ce n'est pas un Proxy, donc cet objet n'est utilisable qu'en
+    interne de la mémoire partagée (Il ne peut donc pas être retourné).
+    @param L'URI vers cet objet, sous la forme d'une string.
+    @return L'objet Python associé à cet URI.
+    """
+    def get_obj ( self, uri ) :
+        if param.ENABLE_MULTIPROCESSING :
+            object_id = self._uri_to_id( uri )
+            if not object_id in self._daemon.objectsById :
+                raise AssertionError( "Object non enregistré, impossible de l'obtenir !" )
+            return self._daemon.objectsById.get( object_id )
+        else :
+            return uri
+    
+    """
+    Désenregistrer un objet.
     @param L'URI vers cet objet.
     """
     def unregister_obj ( self, uri ) :
         if param.ENABLE_MULTIPROCESSING :
-            self._daemon.unregister( uri )
+            object_id = self._uri_to_id( uri )
+            if not object_id in self._daemon.objectsById :
+                raise AssertionError( "Object non enregistré, impossible de le désenregistrer !" )
+            self._daemon.unregister( object_id )
