@@ -314,12 +314,14 @@ if __name__ == "__main__" :
     
     """
     Ecouter les signaux nous demandant de nous arrêter.
-    On le fait après avoir démarré les processus, car un processus fils ou un
-    thread (Comme le serveur Pyro par exemple) ne peut pas fermer le STDIN de
-    son père. Donc ça ne sert à rien qu'ils écoutent ces signaux, car ils ne
-    pourront pas fermer la CLI.
+    On le fait après avoir démarré les processus fils, car ils créent eux aussi
+    leurs fonctions d'écoute, qui envoient des "SIGTERM" à leur père, c'est à
+    dire ici. Voir le fichier "threads_launchers.py".
     """
+    on_sigterm_once = threading.Semaphore()
     def on_sigterm ( signum, frame ) :
+        if not on_sigterm_once.acquire( blocking = False ) :
+            return # Déjà entendu
         print( "Arrêt à la fin des procédures en cours..." )
         shared_memory.keep_threads_alive = False
         wait_and_stop()

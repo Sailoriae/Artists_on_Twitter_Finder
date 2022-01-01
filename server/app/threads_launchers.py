@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 # coding: utf-8
 
+import os
+import signal
 import threading
 import multiprocessing
 
@@ -21,6 +23,32 @@ import parameters as param
 from app.error_collector import error_collector
 
 
+# PID racine, c'est à dire de "app.py". Cette variable est conservée telle
+# quelle lors du "fork".
+PID = os.getpid()
+
+
+"""
+Fonction racine à un processus fils du serveur AOTF.
+Lorsqu'on crée un nouveau processus, il faut qu'il puisse gérer les SIGTERM, et
+en envoyer vers "app.py" afin d'arrêter le serveur AOTF.
+
+@param procedure Procédure à exécuter.
+@param *arguments Arguments à passer à cette procédure.
+"""
+def subprocess ( procedure, *arguments ) :
+    def on_sigterm ( signum, frame ) :
+        try :
+            os.kill(PID, signal.SIGTERM)
+        except OSError : # Le père est déjà mort
+            sys.exit(0)
+    
+    signal.signal(signal.SIGINT, on_sigterm)
+    signal.signal(signal.SIGTERM, on_sigterm)
+    
+    procedure( *arguments )
+
+
 """
 Lancer un thread ou un processus sans conteneur.
 
@@ -36,13 +64,16 @@ Lancer un thread ou un processus sans conteneur.
 """
 def launch_thread( thread_procedure, thread_id : int, as_process : bool, shared_memory_uri : str ) :
     if as_process and param.ENABLE_MULTIPROCESSING :
-        Thread_or_Process = multiprocessing.Process
+        thread_or_process = multiprocessing.Process(
+            name = f"{thread_procedure.__name__}_th{thread_id}",
+            target = subprocess,
+            args = ( error_collector, thread_procedure, thread_id, shared_memory_uri ) )
     else :
-        Thread_or_Process = threading.Thread
+        thread_or_process = threading.Thread(
+            name = f"{thread_procedure.__name__}_th{thread_id}",
+            target = error_collector,
+            args = ( thread_procedure, thread_id, shared_memory_uri ) )
     
-    thread_or_process = Thread_or_Process( name = f"{thread_procedure.__name__}_th{thread_id}",
-                                           target = error_collector,
-                                           args = ( thread_procedure, thread_id, shared_memory_uri, ) )
     thread_or_process.start()
     return thread_or_process
 
@@ -72,9 +103,10 @@ Sinon, cette fonction retourne la liste des threads ou procédures créés.
 def launch_identical_threads_in_container( thread_procedure, number_of_threads, as_process, shared_memory_uri ) :
     # On crée un conteneur uniquement si ses enfants sont des threads
     if param.ENABLE_MULTIPROCESSING and not as_process :
-        process = multiprocessing.Process( name = f"{thread_procedure.__name__}_th_container",
-                                           target = _threads_container_for_identical_threads,
-                                           args = ( thread_procedure, number_of_threads, as_process, shared_memory_uri ) )
+        process = multiprocessing.Process(
+            name = f"{thread_procedure.__name__}_th_container",
+            target = subprocess,
+            args = ( _threads_container_for_identical_threads, thread_procedure, number_of_threads, as_process, shared_memory_uri ) )
         process.start()
         return [ process ]
     else :
@@ -117,9 +149,10 @@ Sinon, cette fonction retourne la liste des threads ou procédures créés.
 def launch_unique_threads_in_container( thread_procedures, as_process, container_name, shared_memory_uri ) :
     # On crée un conteneur uniquement si ses enfants sont des threads
     if param.ENABLE_MULTIPROCESSING and not as_process :
-        process = multiprocessing.Process( name = f"{container_name}_th_container",
-                                           target = _threads_container_for_unique_threads,
-                                           args = ( thread_procedures, as_process, shared_memory_uri ) )
+        process = multiprocessing.Process(
+            name = f"{container_name}_th_container",
+            target = subprocess,
+            args = ( _threads_container_for_unique_threads, thread_procedures, as_process, shared_memory_uri ) )
         process.start()
         return [ process ]
     else :
