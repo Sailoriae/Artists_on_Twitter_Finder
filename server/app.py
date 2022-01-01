@@ -42,6 +42,9 @@ if __name__ == "__main__" :
     import signal
     import sys
     
+    # Il suffit juste d'importer ce module pour avoir un historique des entrées
+    # dans "input()", ce qui permet d'avoir un historique de la CLI.
+    import readline
     
     """
     Par mesure de sécurité, on empêche l'éxécution en tant que "root".
@@ -292,6 +295,24 @@ if __name__ == "__main__" :
     
     
     """
+    Fonction d'arrêt du serveur AOTF.
+    Peut être utilisée lors de la fin de la CLI (Commande "stop"), ou lors d'un
+    SIGTERM (Ce qui empêche la sortie du "input()", problème avec le module
+    Python "readline" qui ne fait rien en cas d'EOF).
+    
+    Cette fonction attend que les threads se terminent, puis arrête la mémoire
+    partagée (Pyro) si on est en multiprocessus.
+    """
+    def wait_and_stop () :
+        for thread in threads_or_process :
+            thread.join()
+        if param.ENABLE_MULTIPROCESSING :
+            shared_memory.keep_pyro_alive = False
+            thread_pyro.join()
+        sys.exit(0)
+    
+    
+    """
     Ecouter les signaux nous demandant de nous arrêter.
     On le fait après avoir démarré les processus, car un processus fils ou un
     thread (Comme le serveur Pyro par exemple) ne peut pas fermer le STDIN de
@@ -301,7 +322,7 @@ if __name__ == "__main__" :
     def on_sigterm ( signum, frame ) :
         print( "Arrêt à la fin des procédures en cours..." )
         shared_memory.keep_threads_alive = False
-        os.close( sys.stdin.fileno() )
+        wait_and_stop()
     
     signal.signal(signal.SIGINT, on_sigterm)
     signal.signal(signal.SIGTERM, on_sigterm)
@@ -512,10 +533,4 @@ if __name__ == "__main__" :
     """
     Arrêt du système.
     """
-    # Attendre que les threads aient fini
-    for thread in threads_or_process :
-        thread.join()
-    
-    if param.ENABLE_MULTIPROCESSING :
-        shared_memory.keep_pyro_alive = False
-        thread_pyro.join()
+    wait_and_stop()
