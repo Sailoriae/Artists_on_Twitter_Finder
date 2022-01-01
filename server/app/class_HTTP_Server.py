@@ -43,6 +43,8 @@ Note : NE PAS CREER UNE API PERMETTANT DE FAIRE UNE RECHERCHE DANS TOUTE LA
 BASE DE DONNEES ! En effet, malgré la vitesse améliorée par la méthode de la
 recherche exacte, elle est toujours trop lente pour les très grosses BDD, et
 donc peut être utilisé à des fins de DDOS.
+De plus, cela serait une grosse faille de sécurité. Voir ce que sont les
+"Server side request forgery" (SSRF).
 """
 # Fonction contenant la classe, permettant de passer le paramètre shared_memory
 def http_server_container ( shared_memory_uri_arg ) :
