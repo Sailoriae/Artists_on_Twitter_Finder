@@ -44,7 +44,13 @@ if __name__ == "__main__" :
     
     # Il suffit juste d'importer ce module pour avoir un historique des entrées
     # dans "input()", ce qui permet d'avoir un historique de la CLI.
-    import readline
+    # Note : Ce module n'est pas disponible sous Windows ou MacOS, il faut
+    # installer la libairie PyReadline.
+    try :
+        import readline # readline ou pyreadline
+    except ModuleNotFoundError :
+        print( "Il est recommandé d'installer la librairie PyReadline afin d'avoir un historique des commandes éxécutées dans la CLI du serveur AOTF, rendant ainsi son utilisation plus pratique." )
+        print( "Pour se faire, éxécutez la commande suivante :\npip install pyreadline")
     
     """
     Par mesure de sécurité, on empêche l'éxécution en tant que "root".
@@ -303,13 +309,19 @@ if __name__ == "__main__" :
     Cette fonction attend que les threads se terminent, puis arrête la mémoire
     partagée (Pyro) si on est en multiprocessus.
     """
+    wait_and_stop_once = threading.Semaphore()
     def wait_and_stop () :
+        if not wait_and_stop_once.acquire( blocking = False ) :
+            return # Déjà en cours
         for thread in threads_or_process :
             thread.join()
         if param.ENABLE_MULTIPROCESSING :
             shared_memory.keep_pyro_alive = False
             thread_pyro.join()
-        sys.exit(0)
+        try :
+            sys.exit(0)
+        except SystemExit :
+            os._exit(0) # Forcer
     
     
     """
