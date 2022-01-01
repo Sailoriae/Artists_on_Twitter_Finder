@@ -325,6 +325,8 @@ if __name__ == "__main__" :
     def wait_and_stop () :
         if not wait_and_stop_once.acquire( blocking = False ) :
             return # Déjà en cours
+        print( "Arrêt à la fin des procédures en cours..." )
+        shared_memory.keep_threads_alive = False
         for thread in threads_or_process :
             thread.join()
         if param.ENABLE_MULTIPROCESSING :
@@ -342,12 +344,7 @@ if __name__ == "__main__" :
     leurs fonctions d'écoute, qui envoient des "SIGTERM" à leur père, c'est à
     dire ici. Voir le fichier "threads_launchers.py".
     """
-    on_sigterm_once = threading.Semaphore()
     def on_sigterm ( signum, frame ) :
-        if not on_sigterm_once.acquire( blocking = False ) :
-            return # Déjà entendu
-        print( "Arrêt à la fin des procédures en cours..." )
-        shared_memory.keep_threads_alive = False
         wait_and_stop()
     
     signal.signal(signal.SIGINT, on_sigterm)
@@ -525,9 +522,7 @@ if __name__ == "__main__" :
         
         elif args[0] == "stop" :
             if len(args) == 1 :
-                print( "Arrêt à la fin des procédures en cours..." )
-                shared_memory.keep_threads_alive = False
-                break
+                break # Appel de "wait_and_stop()" après la boucle de la CLI
             else :
                 print( "Utilisation : stop")
         
