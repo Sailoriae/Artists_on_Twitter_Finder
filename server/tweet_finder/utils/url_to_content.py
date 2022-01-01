@@ -56,7 +56,7 @@ def url_to_content ( url : str, max_size : int = MAX_SIZE ) -> bytes :
     response = urllib.request.urlopen( request, timeout = 60 )
     
     # Vérifier la taille du contenu (Obtenu grâce au "HEAD")
-    if response.length > max_size :
+    if response.length == None or response.length > max_size :
         raise File_Too_Big
     
     # Télécharger et retourner le contenu
