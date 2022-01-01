@@ -82,10 +82,11 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
                     continue
                 request.problem = "QUERY_IMAGE_TOO_BIG"
                 break # Impossible d'obtenir l'image
-            except urllib.error.HTTPError as error :
+            except ( urllib.error.HTTPError,
+                     urllib.error.URLError ) as error :
                 print( f"[step_3_th{thread_id}] Erreur HTTP : {error}" )
                 # On réessaye qu'une seule fois, et uniquement sur certaines erreurs
-                if retry_once and error.code == 502 :
+                if retry_once and hasattr( error, "code" ) and error.code == 502 :
                     retry_once = False
                     sleep(10)
                     continue
