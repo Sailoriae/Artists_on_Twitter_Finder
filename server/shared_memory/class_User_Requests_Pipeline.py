@@ -195,7 +195,7 @@ class User_Requests_Pipeline :
             Ou l'objet User_Request déjà existant.
     
     Cette fonction permet ainsi d'obtenir une requête si il en existe déjà une
-    pour l'entrée "image_url".
+    pour l'entrée "image_url" et le compte "account_name".
     """
     def launch_direct_request ( self, image_url : str,
                                       account_name : str = None ) -> User_Request :
@@ -204,8 +204,16 @@ class User_Requests_Pipeline :
         self._direct_requests_sem.acquire()
         for key in self._direct_requests :
             if key == image_url :
-                self._direct_requests_sem.release()
-                return open_proxy( self._direct_requests[key] )
+                # On vérifie que cette requête directe recherche sur le même
+                # compte Twitter que celle qu'on veut créer.
+                request = self._root.get_obj( self._direct_requests[key] )
+                same_request = True
+                for req_account_name, req_account_id in request.twitter_accounts_with_id :
+                    if req_account_name != account_name :
+                        same_request = False
+                if same_request :
+                    self._direct_requests_sem.release()
+                    return open_proxy( self._direct_requests[key] )
         
         # Créer et ajouter l'objet User_Request à notre système.
         request = self._root.register_obj( User_Request( image_url, is_direct = True ) )
