@@ -48,3 +48,12 @@ Puis activez ce service, et démarrez-le :
 ```
 sudo systemctl enable /path/to/Artists_on_Twitter_Finder/configs/artist-on-twitter.service
 ```
+
+## Alternative au service
+
+Si vous ne souhaitez pas créer un service, vous pouvez simplement ajouter le AOTF au démarrage via la table Cron de l'utilisateur que vous souhaitez utiliser.
+Pour se faire, éditez la table de cet utilisateur (`sudo crontab -e -u utilisateur`) et ajoutez-y la ligne suivante :
+```
+@reboot screen -dmS twitter python3 /path/to/Artists_on_Twitter_Finder/server/app.py
+```
+L'arrêt du serveur se fera proprement lors du shutdown car le serveur AOTF gère les `SIGTERM`.
