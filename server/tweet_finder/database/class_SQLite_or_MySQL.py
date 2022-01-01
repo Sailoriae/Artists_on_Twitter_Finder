@@ -165,6 +165,8 @@ class SQLite_or_MySQL :
     Destructeur
     """
     def __del__( self ) :
+        if not hasattr( self, "_conn" ) :
+            return
         if not param.USE_MYSQL_INSTEAD_OF_SQLITE :
             try :
                 self._conn.close()
