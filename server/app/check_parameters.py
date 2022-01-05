@@ -198,6 +198,9 @@ def check_parameters () :
         else :
             print( "Connexion à l'API de recherche de SNScrape réussie !")
     
+    # Ca serait intéressant de tester avec un Tweet qui apparait dans une
+    # recherche avec un compte Twitter, et pas dans une recherche en tant
+    # que invité. Sauf que j'en ai pas (encore) trouvé.
     print( "Verification de l'accès aux images avec SNScrape..." )
     ok = False
     for tweet_json in tweets_jsons :

@@ -100,6 +100,8 @@ class SNScrapeAbstraction :
         scraper.set_output_function( output_function )
         
         # Lancer la recherche / Obtenir les Tweets
+        # Sont dans l'ordre chronologique, car SNScrape met le paramètre
+        # "tweet_search_mode" à "live" (Onglet "Récent" sur l'UI web)
         count = 0
         first_tweet_date = None # Le premier Tweet est forcément le plus récent
         for tweet in scraper.get_items() :
