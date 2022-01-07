@@ -110,6 +110,8 @@ NUMBER_OF_STEP_C_INDEX_ACCOUNT_TWEETS = len( TWITTER_API_KEYS ) * 2
 
 """
 Faire plus de print().
+Active aussi des écritures dans le fichier "debug.log". Cela permet d'avoir des
+informations de débug qu'on ne peut pas voir dans le terminal.
 """
 DEBUG = False
 
