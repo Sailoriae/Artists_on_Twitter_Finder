@@ -2,6 +2,7 @@
 # coding: utf-8
 
 import os
+import sys
 import signal
 import threading
 import multiprocessing
@@ -32,6 +33,8 @@ PID = os.getpid()
 Fonction racine à un processus fils du serveur AOTF.
 Lorsqu'on crée un nouveau processus, il faut qu'il puisse gérer les SIGTERM, et
 en envoyer vers "app.py" afin d'arrêter le serveur AOTF.
+Il faut aussi qu'il puisse gérer les SIGHUP lorsque STDOUT n'existe plus, mais
+ne l'envoie pas vers "app.py".
 
 @param procedure Procédure à exécuter.
 @param *arguments Arguments à passer à cette procédure.
@@ -45,6 +48,12 @@ def subprocess ( procedure, *arguments ) :
     
     signal.signal(signal.SIGINT, on_sigterm)
     signal.signal(signal.SIGTERM, on_sigterm)
+    
+    def on_sighup ( signum, frame ) :
+        sys.stdout = open( os.devnull, "w" )
+    
+    try : signal.signal(signal.SIGHUP, on_sighup)
+    except AttributeError : pass # Windows
     
     procedure( *arguments )
 

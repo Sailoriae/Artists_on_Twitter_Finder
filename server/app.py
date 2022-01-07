@@ -325,7 +325,10 @@ if __name__ == "__main__" :
     def wait_and_stop () :
         if not wait_and_stop_once.acquire( blocking = False ) :
             return # Déjà en cours
-        print( "Arrêt à la fin des procédures en cours..." )
+        
+        try : print( "Arrêt à la fin des procédures en cours..." )
+        except OSError : pass # Par mesure de sécurité
+        
         shared_memory.keep_threads_alive = False
         for thread in threads_or_process :
             thread.join()
@@ -349,6 +352,22 @@ if __name__ == "__main__" :
     
     signal.signal(signal.SIGINT, on_sigterm)
     signal.signal(signal.SIGTERM, on_sigterm)
+    
+    # Lorsque une "screen" reçoit un SIGTERM, elle envoie à son fils un signal
+    # SIGHUP. Cela inclue aussi que STDOUT et STDIN sont fermés. Il faut donc
+    # avertir nos processus fils pour qu'ils restaurent leur STDOUT, puis on
+    # restaure le notre, afin de ne pas crasher sur un print().
+    def on_sighup ( signum, frame ) :
+        if param.ENABLE_MULTIPROCESSING :
+            # Il n'y a que des objets "Process" dans la liste "threads".
+            for process in threads_or_process :
+                os.kill(process.pid, signal.SIGHUP)
+        sys.stdout = open( os.devnull, "w" )
+        
+        wait_and_stop() # Arrêter le serveur
+    
+    try : signal.signal(signal.SIGHUP, on_sighup)
+    except AttributeError : pass # Windows
     
     
     """
@@ -381,9 +400,12 @@ if __name__ == "__main__" :
     while True :
         try :
             command = input()
+            
+        # Sert aussi lors d'un SIGHUP, car fermeture de STDIN.
         except EOFError :
             print( "EOF reçu ! Arrêt de la ligne de commande." )
             break
+        
         args = command.split(" ")
         
         if args[0] == "query" :
