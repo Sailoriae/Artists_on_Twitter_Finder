@@ -44,7 +44,8 @@ def custom_print ( *args, **kwargs ) :
     try :
         # Ligne de test pour vérifier que cette fonction soit bien appelée.
 #        builtin_print( "[TEST]", *args, **kwargs )
-        builtin_print( *args, **kwargs )
+        # On force le vidage du buffer de sortie à chaque appel.
+        builtin_print( *args, **kwargs, flush = True )
     # On gère le cas où STDOUT est fermé. Cela arrive notamment lorsqu'on
     # reçoit un signal SIGHUP (Voir la gestion de ce signal plus bas).
     except OSError as error :
