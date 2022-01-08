@@ -35,6 +35,23 @@ Ce script est la racine du serveur AOTF. Il réalise les opérations suivantes :
 import os
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
+# On écrase la fonction "print()" par défaut de Python. On peut vérifier
+# facilement que ceci s'appliquer récursivement à tous les modules importés, et
+# dans tous les threads et processus fils.
+import builtins
+builtin_print = print
+def custom_print ( *args, **kwargs ) :
+    try :
+        # Ligne de test pour vérifier que cette fonction soit bien appelée.
+#        builtin_print( "[TEST]", *args, **kwargs )
+        builtin_print( *args, **kwargs )
+    # On gère le cas où STDOUT est fermé. Cela arrive notamment lorsqu'on
+    # reçoit un signal SIGHUP (Voir la gestion de ce signal plus bas).
+    except OSError as error :
+        if error.errno == 5 : pass # I/O error
+        else : raise error
+builtins.print = custom_print
+
 # Protection pour le multiprocessing
 if __name__ == "__main__" :
     import threading
