@@ -55,6 +55,7 @@ Si il utilise une base de données MySQL, vous pouvez aussi le tuer avec `Ctrl +
   - Retentative d'indexation de Tweets dont au moins une image a échouée (Et que cette erreur n'est pas identifiée comme insolvable dans le code, voir [`get_tweet_image()`](tweet_finder/utils/get_tweet_image.py)). Ce thread passe ses Tweets à l'étape C.
   - Suppression des curseurs d'indexation avec l'API de recherche, car l'indexation sur le moteur de recherche de Twitter est très fluctuante. Comme le thread de mise à jour, essaye au maximum de répartir les lancement d'indexations dans le temps.
 * Collecteur d'erreurs : Tous les threads sont éxécuté dans une instance du collecteur d'erreurs. Stocke l'erreur dans un fichier, met l'éventuelle requête en cours de traitement en situation d'erreur / échec, et redémarre le thread.
+* Support des signaux `SIGTERM`, `SIGINT` et `SIGHUP`, avec arrêt propre lorsque l'un d'entre eux est reçu.
 
 
 ## Architecture du code
@@ -110,6 +111,13 @@ En mode multi-processus, le serveur AOTF éxécute des processus et des threads.
 Si le mode multi-processus est désactivé, tous les processus deviennent des threads (Sauf `app.py`), et les processus de groupes de threads disparaissent.
 
 
+## Philosophie
+
+* **Cohérence des données de la BDD à tout moment :** L'ajout ou la modifications de données dans la base de données est pensée pour qu'un arrêt brutal (Plantage ou kill) d'un thread de traitement ou du serveur complet n'ait pas d'impact sur la cohérence des données. Ceci est notamment le cas pour les curseurs d'indexation, qui sont enregistrés une fois que tous les Tweets ont bien étés enregistrés sans qu'un thread ait planté. Cela permet aussi faire un Dump MySQL à n'importe quel moment, sans avoir à arrêter le serveur.
+
+* **Cross-platform :** Le code est pensé pour être cross-platform. Il peut être exécuté facilement sur n'importe que système muni de l'interpréteur CPython, et ne nécessite aucune dépendance externe, mis à part optionnellement un serveur MySQL.
+
+
 ## Notes
 
 * Les requêtes sur le serveur sont identifiées par l'URL de l'illustration de requête.
@@ -119,13 +127,7 @@ Si le mode multi-processus est désactivé, tous les processus deviennent des th
   - Ceci est une URL d'illustration, elle peut être traitée par le serveur : https://danbooru.donmai.us/posts/3991989
   - Ceci est une URL menant directement à l'image, elle sera rejetée par serveur : https://danbooru.donmai.us/data/__hatsune_miku_vocaloid_drawn_by_bibboss39__cac99a60fa84a778d5b048daec05e7b1.jpg
 
-* La date de dernière mise à jour d'un compte Twitter est mise dans la base de données à la fin des indexations (Grâce à une intruction d'enregistrement passée dans la file d'attente de l'indexeur). Si l'un des threads de traitement plante, la requête est mise en erreur, et aucune date n'est enregistrée. Ainsi, l'intégralité des Tweets qu'il est possible de récupérer ont étés analysés et ceux avec une ou plusieurs image sont dans la base de données.
-
 * Si l'image d'un Tweet a été perdue par Twitter, ou qu'il s'est produit une erreur, elle est de toutes manières enregistrée dans la base de données, et son empreinte est mise à `NULL` (Mais son nom est quand même enregistré).
   Si il s'est produit une erreur, elle sont journalisées ici.
 
-* Les curseurs d'indexation sont enregistrés une fois l'indexation terminée. D'une manière générale, l'ajout ou la modifications de données dans la base de données est pensée pour qu'un arrêt brutal (Crash ou kill) d'un thread ou du serveur complet n'ait pas d'impact sur la cohérence des données.
-
 * Le serveur AOTF ne supprime aucun enregistrement de sa base de données ! C'est le script de maintenance [`remove_deleted_accounts.py`](../maintenance/remove_deleted_accounts.py) qui permet d'effacer des comptes Twitter, et le script [`cleanup_database.py`](../maintenance/cleanup_database.py) qui permet d'effacer les Tweets sans compte associé.
-
-* Après le démarrage du serveur, vous devriez voir s'afficher trois messages, venant respectivement des threads `auto_update_th1`, `retry_failed_tweets_th1` et `reset_cursors_th1`. Si ce n'est pas le cas, c'est que le terminal que vous utilisez ne vide pas le buffer de la sortie standard (`STDOUT`) lors d'une nouvelle ligne (`\n`). AOTF n'implémente de vidage forcé (Avec par exemple `print("Exemple", flush=True)`), et désactiver ce buffer (`python -u`) mène à des lignes entremêlées. Théoriquement, ce problème ne devrait pas se poser avec Bash sous Linux ou CMD sous Windows.
