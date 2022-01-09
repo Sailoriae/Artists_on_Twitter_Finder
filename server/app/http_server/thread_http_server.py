@@ -13,10 +13,10 @@ if __name__ == "__main__" :
     from os import getcwd as get_wdir
     from sys import path
     change_wdir(get_dirname(get_abspath(__file__)))
-    change_wdir( ".." )
+    change_wdir( "../.." )
     path.append(get_wdir())
 
-from app.class_HTTP_Server import http_server_container
+from app.http_server.class_HTTP_Server import http_server_container
 import parameters as param
 
 

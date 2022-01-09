@@ -65,6 +65,8 @@ Script [`app.py`](app.py) : Script central, crée et gère les threads de traite
 * Module [`app`](app) : Dépendances du script [`app.py`](app.py). Contient les procédures de ses threads, et ses classes. Voir le [`README.md`](app/README.md) de ce module pour plus de détails.
   - Module [`user_pipeline`](app/user_pipeline) : Pipeline de traitement des requêtes utilisateurs, en 3 étapes : Link Finder, lancement si nécessaire et suivi du scan du ou des comptes Twitter dans l'autre pipeline, et recherche inversée de l'image de requête.
   - Module [`scan_pipeline`](app/scan_pipeline) : Pipeline de traitement des requêtes de scan d'un compte Twitter, en 3 étapes paralléles.
+  - Module [`http_server`](app/http_server) : Serveur HTTP intégré, qui contient uniquement l'API.
+  - Module [`maintenance`](app/maintenance) : Threads de maintenance, dont celui de mise à jour automatique.
 
 * Module [`shared_memory`](shared_memory) : Mémoire partagée dans un serveur, permet le multi-processing et de faire potentiellement un système distribué.
   Peut être utilisée comme un serveur PYRO (Indispensable au multi-processus), ou sinon comme un simple objet Python.

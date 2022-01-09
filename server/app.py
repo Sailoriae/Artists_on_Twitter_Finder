@@ -113,10 +113,10 @@ if __name__ == "__main__" :
         
         from app.threads_launchers import launch_thread, launch_identical_threads_in_container, launch_unique_threads_in_container
         
-        from app.thread_auto_update_accounts import thread_auto_update_accounts
-        from app.thread_reset_SearchAPI_cursors import thread_reset_SearchAPI_cursors
-        from app.thread_remove_finished_requests import thread_remove_finished_requests
-        from app.thread_http_server import thread_http_server
+        from app.maintenance.thread_auto_update_accounts import thread_auto_update_accounts
+        from app.maintenance.thread_reset_SearchAPI_cursors import thread_reset_SearchAPI_cursors
+        from app.maintenance.thread_remove_finished_requests import thread_remove_finished_requests
+        from app.http_server.thread_http_server import thread_http_server
         
         from app.user_pipeline.thread_step_1_link_finder import thread_step_1_link_finder
         from app.user_pipeline.thread_step_2_tweets_indexer import thread_step_2_tweets_indexer

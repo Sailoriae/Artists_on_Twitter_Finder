@@ -15,7 +15,7 @@ if __name__ == "__main__" :
     from os import getcwd as get_wdir
     from sys import path
     change_wdir(get_dirname(get_abspath(__file__)))
-    change_wdir( ".." )
+    change_wdir( "../.." )
     path.append(get_wdir())
 
 from app.user_pipeline.generate_json import get_user_request_json_model
