@@ -14,7 +14,7 @@
   Au passage, il supprime les anciennes sauvegardes qui ont plus de 6 semaines.
   La raison de ce script est qu'il va chercher tout seul les paramètres dans le fichier "parameters.py".
   Il peut ainsi être utilisé facilement en tant que tâche dans une table Cron.
-  Les Dumps sont enregistrés dans le répertoire [`../backups`](../backups).
+  Les Dumps sont enregistrés dans le répertoire [`backups`](../backups).
 
 
 ## Requêtes SQL utiles

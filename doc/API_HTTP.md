@@ -79,7 +79,7 @@ Liste des erreurs possibles :
 
 Fonctionne exactement de la même manière que `GET /api/query` (Voir ci-dessus), mais l'URL de requête est passée dans le contenu de la requête (Type `text/plain` encodé en UTF-8).
 
-L'interface web d'AOTF (Voir les Javascripts du répertoire [`../public`](../public)) utilise cette méthode plutôt que la précédente, afin de permettre aux utilisateurs novices d'entrer n'importe quel URL.
+L'interface web d'AOTF (Voir les Javascripts du répertoire [`public`](../public)) utilise cette méthode plutôt que la précédente, afin de permettre aux utilisateurs novices d'entrer n'importe quel URL.
 
 
 ## Endpoint `GET /stats`

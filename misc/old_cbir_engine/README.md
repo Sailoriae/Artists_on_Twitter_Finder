@@ -1,4 +1,4 @@
-# Module Moteur CBIR
+# Module de l'ancien moteur CBIR
 
 Ceci est l'ancien moteur de recherche par image d'AOTF, qui utilise la méthode des histogrammes colorimétriques pour extraire le vecteur des caractéristiques d'une image.
 

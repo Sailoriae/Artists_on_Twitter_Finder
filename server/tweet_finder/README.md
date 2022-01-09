@@ -1,4 +1,4 @@
-# Module Tweet Finder
+# Tweet Finder
 
 Le Tweet Finder est l'une des deux grandes parties du serveur "Artists on Twitter Finder", avec le Link Finder.
 

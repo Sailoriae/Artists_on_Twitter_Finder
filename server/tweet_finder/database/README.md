@@ -1,4 +1,4 @@
-# Module de la base de données pour le Tweet Finder
+# Base de données pour le Tweet Finder
 
 ## Tables de la base de données
 

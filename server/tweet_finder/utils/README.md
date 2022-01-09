@@ -1,4 +1,4 @@
-# Module Outils pour le moteur de CBIR avec BDD
+# Outils pour le Tweet Finder
 
 Ce module contient des outils pour les classes du Tweet Finder :
 

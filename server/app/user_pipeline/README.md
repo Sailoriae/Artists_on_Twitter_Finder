@@ -1,8 +1,8 @@
-# Module du pipeline de traitement des requêtes des utilisateurs
+# Pipeline de traitement des requêtes des utilisateurs
 
-Ce sous-module du module [`app`](../) permet de traiter les requêtes des utilisateurs.
-
-Les requêtes sont représentées par un objet `Scan_Request`. L'ensemble des requêtes est géré par l'objet `Scan_Requests_Pipeline`, qui contient les files d'attentes.
+Permet de traiter les requêtes des utilisateurs.
+Les requêtes sont représentées par un objet `User_Request`. L'ensemble des requêtes est géré par l'objet `User_Requests_Pipeline`, qui contient les files d'attentes.
+Ces deux objets sont présentes dans le répertoire [`shared_memory`](../../shared_memory).
 
 
 ## Liste des procédures des threads
@@ -19,4 +19,4 @@ Ce sous-module contient les 3 threads de traitement des requêtes des utilisateu
 A tout moment, on peut connaitre le status d'une requête via la CLI dans le processus principal, ou via l'API, gérée par le thread `http_server_thread_main`.
 Lorsque la procédure est terminée, on peut aussi voir son résultat.
 
-Voir [`doc/API_HTTP.md`](../../../doc/API_HTTP.md) pour plus d'informations.
+Lire le fichier [`API_HTTP.md`](../../../doc/API_HTTP.md) pour plus d'informations.

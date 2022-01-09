@@ -1,4 +1,4 @@
-# Module de couche d'abstraction à l'utilisation des API de Twitter
+# Couche d'abstraction à l'utilisation des API de Twitter
 
 ## Couche d'abstraction à la librairie Tweepy
 

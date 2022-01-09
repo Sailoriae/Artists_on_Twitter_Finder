@@ -1,13 +1,15 @@
-# Module des threads du serveur (Dépendances du script `app.py`)
+# Threads du serveur
 
 Le script `app.py` (Présent dans le répertoire parent à celui-ci), est le script central du serveur AOTF.
 Il initialise la mémoire partagée, démarre les threads (Ou processus si le paramètre `ENABLE_MULTIPROCESSING` est à `True`), et éxécute la ligne de commande.
-Les procédures des threads sont présentes dans ce module, ainsi que les fonctions utilisées pour les démarrer.
+Les procédures des threads sont présentes dans ce répertoire, ainsi que les fonctions utilisées pour les démarrer.
+
+Les objets de la mémoire partagée sont présents dans le répertoire [`shared_memory`](../shared_memory).
 
 
 ## Rappel sur les requêtes traitées
 
-Il y a deux types de requêtes : Les requêtes utilisateur, et les requêtes de scan. Elles sont gérées et traitées respectivement par les threads de traitement des sous-modules [`user_pipeline`](user_pipeline) et [`scan_pipeline`](scan_pipeline). Les classes des requêtes sont présentes dans le module [`../shared_memory`](../shared_memory).
+Il y a deux types de requêtes : Les requêtes utilisateur, et les requêtes de scan. Elles sont gérées et traitées respectivement par les threads de traitement des répertoires [`user_pipeline`](user_pipeline) et [`scan_pipeline`](scan_pipeline). Les classes des requêtes sont présentes dans le répertoire [`shared_memory`](../shared_memory).
 
 
 ## Liste des procédures des threads

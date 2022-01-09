@@ -25,7 +25,7 @@ get_request ( illust_url : str ) -> dict
 Prend en entrée le paramètre suivant :
 - `illust_url` : URL de l'illustration à traiter. Elle doit mener à une page d'une illustration sur un site supporté par le serveur AOTF.
 
-Retourne le JSON (Fonctionne comme un dictionnaire Python) renvoyé par le serveur pour l'illustration dont l'URL est passée en paramètre. Pour connaitre exactement le contenu de ce dictionnaire, voir la documentation de l'API pour l'endpoint `GET /query` dans le fichier [`../doc/API_HTTP.md`](../doc/API_HTTP.md).
+Retourne le JSON (Fonctionne comme un dictionnaire Python) renvoyé par le serveur pour l'illustration dont l'URL est passée en paramètre. Pour connaitre exactement le contenu de ce dictionnaire, lisez la documentation de l'API pour l'endpoint `GET /query` dans le fichier [`../doc/API_HTTP.md`](../doc/API_HTTP.md).
 
 ### Méthode `get_twitter_accounts()`
 

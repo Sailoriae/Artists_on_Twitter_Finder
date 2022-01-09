@@ -1,4 +1,4 @@
-# Module Moteur CBIR
+# Module du moteur CBIR
 
 L'objet `CBIR_Engine` est un moteur de recherche par image, qui utilise l'algorithme **pHash** pour indexer et comparer les images. pHash est un algorithme d'empreinte d'image ("image hashin"), qui permet d'extraire une liste de bits à partir de n'importe quelle image. Le recherche se fait alors pas compaison bits à bits entre l'empreinte de l'image de requête, et les empreintes des images stockées dans la base de données.
 

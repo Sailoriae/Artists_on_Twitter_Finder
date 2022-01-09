@@ -6,7 +6,7 @@ Contrairement aux moteurs de recherche par image généralistes, comme Google Im
 
 Afin d'être le plus optimisé possible, ce traitement est fait par un serveur, présent dans le répertoire [`server`](server). Ainsi, il peut indexer des comptes et leurs Tweets dans une base de données afin d'être le plus rapide possible lorsqu'il y aura une nouvelle requête pour un compte Twitter connu par le système.
 
-Afin de recevoir des requêtes et d'y répondre, le serveur possède une API HTTP. La réponse contient l'étape du traitement de la requête, et le résultat si le traitement est terminé. La documentation de cette API est disponible dans [`doc/API_HTTP.md`](doc/API_HTTP.md).
+Afin de recevoir des requêtes et d'y répondre, le serveur possède une API HTTP. La réponse contient l'étape du traitement de la requête, et le résultat si le traitement est terminé. La documentation de cette API est disponible dans le fichier [`API_HTTP.md`](doc/API_HTTP.md).
 
 L'API HTTP peut être utilisée via une interface web, présente dans le répertoire [`public`](public). Afin qu'elle soit fonctionnelle, il faut qu'elle soit rendue accessible par un serveur HTTP, comme par exemple Apache. Ce dernier doit aussi faire un proxy vers l'API HTTP du serveur AOTF. Un exemple de configuration Apache est présent dans le répertoire [`configs`](configs).
 
