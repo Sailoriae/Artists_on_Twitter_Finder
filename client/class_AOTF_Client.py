@@ -84,7 +84,6 @@ class AOTF_Client :
     @return Le JSON renvoyé par l'API. Un JSON s'utilise comme un dictionnaire
             Python. Voir la documentation de l'API HTTP d'AOTF pour plus
             d'informations sur le contenu de ce JSON.
-            Ou None si il y a un problème de connexion.
     """
     def get_request ( self, illust_url : str ) -> dict :
         if not self._ready :
@@ -123,14 +122,12 @@ class AOTF_Client :
             - "account_name" : Nom du compte Twitter,
             - "account_id" : L'ID du compte Twitter.
             OU une liste vide si l'artiste n'a pas de compte Twitter.
-            OU None s'il y a eu un problème.
+            OU None s'il y a eu un problème sur le serveur AOTF.
     """
     def get_twitter_accounts ( self, illust_url : str, timeout : int = 300 ) :
         start = time()
         while True :
             response = self.get_request( illust_url )
-            if response == None :
-                return None
             if response["error"] != None :
                 print( "Erreur : " + response["error"] )
                 # Si des comptes Twitter ont étés trouvés, on laisse la
@@ -158,14 +155,12 @@ class AOTF_Client :
             - "distance" : La distance calculée entre l'image de requête et cette image.
             OU une liste vide si l'artiste n'a pas de compte Twitter ou
             l'artiste n'a pas de compte Twitter.
-            OU None s'il y a eu un problème.
+            OU None s'il y a eu un problème sur le serveur AOTF.
     """
     def get_tweets ( self, illust_url : str, timeout : int = 3600 ) :
         start = time()
         while True :
             response = self.get_request( illust_url )
-            if response == None :
-                return None
             if response["error"] != None :
                 print( "Erreur : " + response["error"] )
                 return None

@@ -12,8 +12,6 @@ Fonction permettant de populer la base de données autour d'un tag sur Danbooru.
 """
 def scan_danbooru_tag ( TAG_TO_SCAN ) :
     server = AOTF_Client()
-    if not server.ready :
-        return
     
     # Liste des artistes déjà envoyé, ça ne sert à rien de faire une autre
     # requête au serveur pour cet artiste, puisqu'on veut juste populer sa

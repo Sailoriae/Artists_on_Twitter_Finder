@@ -17,8 +17,6 @@ aucun filtre n'est appliqué !
 """
 def scan_derpibooru_search ( SEARCH_TO_SCAN, LIMIT = None ) :
     server = AOTF_Client()
-    if not server.ready :
-        return
     
     # Liste des artistes déjà envoyé, ça ne sert à rien de faire une autre
     # requête au serveur pour cet artiste, puisqu'on veut juste populer sa

@@ -17,8 +17,6 @@ Pour la recherche, les résultats sont triés par "Popular all times".
 """
 def scan_deviantart_home_or_search ( NUMBER_OF_ILLUST_TO_SEND = 150, SEARCH = None ) :
     server = AOTF_Client()
-    if not server.ready :
-        return
     
     page_number = 0
     deviations_count = 0
