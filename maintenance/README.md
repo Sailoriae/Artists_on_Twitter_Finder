@@ -20,7 +20,7 @@
 ## Requêtes SQL utiles
 
 Obtenir la liste des comptes ayant le plus de Tweets indexés.
-```
+```sql
 SELECT account_id, COUNT(*) as indexed_tweets_count
 FROM tweets
 GROUP BY account_id
@@ -34,7 +34,7 @@ https://twitter.com/i/user/123456
 ```
 
 Explorer les comptes ayant le plus de Tweets indexés. Cela peut être utile pour chercher des gros comptes qui ne sont pas des artistes, et ainsi mettre à jour la liste noire (Voir [`blacklist.py`](../server/tweet_finder/blacklist.py)).
-```
+```sql
 SELECT CONCAT("https://twitter.com/i/user/", account_id) as account_url, COUNT(*) as indexed_tweets_count
 FROM tweets
 GROUP BY account_id

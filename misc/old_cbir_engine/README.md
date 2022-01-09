@@ -30,7 +30,7 @@ C'est la classe `CBIR_Engine_with_Database` qui fait le lien entre le moteur CBI
 ### Importation et initialisation
 
 Il faut d'abord importer l'objet `CBIR_Engine` de ce module, puis l'initialiser :
-```
+```python
 from cbir_engine import CBIR_Engine
 
 engine = CBIR_Engine()
@@ -45,7 +45,7 @@ Le module `utils` contient la fonction `url_to_cv2_image` permettant d'importer 
 ### Indexation (Extraction de caractéristiques)
 
 Pour obtenir la liste des caractéristiques ("feature vector") d'une image :
-```
+```python
 engine.index_cbir( image )
 ```
 Avec `image` l'image à indexer, sous la forme d'un objet `numpy.ndarray`.
@@ -55,7 +55,7 @@ Cette fonction retourne alors une liste de réels.
 ### Recherche d'image inversée
 
 Pour chercher une image à partir d'une autre :
-```
+```python
 engine.index_cbir( image, images_iterator )
 ```
 Avec :

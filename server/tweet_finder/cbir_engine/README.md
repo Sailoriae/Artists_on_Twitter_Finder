@@ -17,7 +17,7 @@ Il est possible d'utiliser ce module indépendamment du reste du projet. **Atten
 ### Importation et initialisation
 
 Il faut d'abord importer l'objet `CBIR_Engine` de ce module, puis l'initialiser :
-```
+```python
 from cbir_engine import CBIR_Engine
 
 engine = CBIR_Engine()
@@ -34,7 +34,7 @@ Le module `utils` contient la fonction `url_to_PIL_image` permettant d'importer 
 
 Pour obtenir l'empreinte d'une image :
 
-```
+```python
 engine.index_cbir( image )
 ```
 
@@ -45,7 +45,7 @@ Avec `image` l'image à indexer, sous la forme d'un objet `PIL.Image`.
 
 Pour chercher une image à partir d'une autre :
 
-```
+```python
 engine.index_cbir( image, images_iterator )
 ```
 

@@ -24,7 +24,7 @@ Cette procédure est appelée en procédure de création d'un thread par `app.py
 Le script `thread_pyro_server.py` peut être éxécuté indépendamment... Mais ça ne sert à rien, sauf à débugger.
 
 En revanche, il peut être intéressant d'accéder à la mémoire partagée afin de débugger le serveur AOTF. Pour se faire, éxécutez le code suivant dans une console Python (IPython par exemple) :
-```
+```python
 import Pyro4
 Pyro4.config.SERIALIZER = "pickle"
 
