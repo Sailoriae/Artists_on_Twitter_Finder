@@ -189,8 +189,6 @@ class Tweets_Indexer :
         if not "tweet_id" in tweet :
             return False
         
-        if self._DEBUG :
-            print( f"[Tweets_Indexer] Indexation Tweet ID {tweet['tweet_id']} du compte ID {tweet['user_id']}." )
         if self._DEBUG or self._ENABLE_METRICS :
             start = time()
         
@@ -208,15 +206,18 @@ class Tweets_Indexer :
         # - Le thread de reset des curseurs de listage avec SearchAPI.
         if self._bdd.is_tweet_indexed( tweet["tweet_id"] ) and not "force_index" in tweet :
             if self._DEBUG :
-                print( "[Tweets_Indexer] Tweet déjà indexé !" )
+                print( f"[Tweets_Indexer] Tweet ID {tweet['tweet_id']} du compte ID {tweet['user_id']} est déjà indexé !" )
             return False
         
         length = len( tweet["images"] )
         
         if length == 0 :
             if self._DEBUG :
-                print( "[Tweets_Indexer] Tweet sans image, on le passe !" )
+                print( f"[Tweets_Indexer] Tweet ID {tweet['tweet_id']} du compte ID {tweet['user_id']} est sans image !" )
             return False
+        
+        if self._DEBUG :
+            print( f"[Tweets_Indexer] Indexation Tweet ID {tweet['tweet_id']} du compte ID {tweet['user_id']}." )
         
         image_1_url = None
         image_2_url = None
