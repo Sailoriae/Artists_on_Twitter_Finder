@@ -2,6 +2,7 @@
 # coding: utf-8
 
 import traceback
+from datetime import datetime
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
 # Ainsi, si on veut utiliser ce script indépendamment (Notamment pour des
@@ -35,12 +36,20 @@ def thread_pyro_server( pyro_port = 3300, pool_size = 100000 ) :
         print( "[pyro_server_th1] Serveur de mémoire partagée Pyro arrêté !" )
     
     except Exception :
+        error_name = "Erreur dans le serveur de mémoire partagée Pyro !\n"
+        error_name +=  f"S'est produite le {datetime.now().strftime('%Y-%m-%d à %H:%M:%S')}.\n"
+        error_name +=  "Si vous voyez ceci, c'est que c'est vraiment la merde.\n"
+        
         file = open( "thread_pyro_server_errors.log", "a" )
-        file.write( "Erreur dans le serveur de mémoire partagée Pyro !\n" )
-        file.write( "Si vous voyez ceci, c'est que c'est vraiment la merde.\n" )
+        file.write( "ICI LE COLLECTEUR D'ERREURS DE LA MEMOIRE PARTAGEE !\n" )
+        file.write( "Je suis dans le fichier suivant : shared_memory/thread_pyro_server.py\n" )
+        file.write( error_name )
         traceback.print_exc( file = file )
         file.write( "\n\n\n" )
         file.close()
+        
+        print( error_name )
+        traceback.print_exc()
 
 
 if __name__ == "__main__" :
