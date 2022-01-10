@@ -1,6 +1,8 @@
-# Serveur de mémoire partagée
+# Mémoire partagée
 
-La mémoire partagée consiste en un objet racine, `Shared_Memory`, et ses sous-objets. Si le serveur est démarré en mode multi-processus (`ENABLE_MULTIPROCESSING` est à `True`), la mémoire partagée est un serveur tournant avec la librairie Python `Pyro4`. Sinon, l'objet racine peut être simplement partagé entre les threads.
+Lors de l'éxécution du serveur AOTF, les threads (Ou processus en mode mode multi-processus) ont besoin de partager des données, par exemple les files d'attentes avant une étape dans l'un des deux pipelines de traitement ([`user_pipeline`](../threads/user_pipeline) et [`scan_pipeline`](../threads/scan_pipeline)). La mémoire partagée permet de stocker et restituer ces données.
+
+Celle-ci consiste en un objet racine, `Shared_Memory`, et recursivement des sous-objets stockés dans les attributs. Si le serveur est démarré en mode multi-processus (`ENABLE_MULTIPROCESSING` est à `True`), la mémoire partagée est un serveur tournant avec la librairie Python `Pyro4`. Sinon, l'objet racine peut être simplement partagé entre les threads.
 
 Documentation de la librairie Pyro4 : https://pyro4.readthedocs.io/en/stable/index.html
 
@@ -77,12 +79,12 @@ Voir chaque classe pour plus de documentation.
 
 ## Notes
 
-Les objets `Pyro4.Proxy` ferment leur connexion lorsqu'ils arrivent dans le garbage collector. Source : https://github.com/irmen/Pyro4/blob/79de6434259ff82d202090cbd0901673d4b8344b/src/Pyro4/core.py#L264
+Les objets `Pyro4.Proxy` ferment leur connexion lorsqu'ils arrivent dans le garbage collector. [Source](https://github.com/irmen/Pyro4/blob/79de6434259ff82d202090cbd0901673d4b8344b/src/Pyro4/core.py#L264).
 
-Si les paramètres `ENABLE_MULTIPROCESSING` est à `False`, c'est à dire que le serveur ne crée pas de processus fils, le serveur Pyro n'est pas lancé, et la mémoire partagée fonctionne comme un simple objet Python, partagé entre les Threads.
+Comme expliqué précédemment, si les paramètres `ENABLE_MULTIPROCESSING` est à `False`, c'est à dire que le serveur ne crée pas de processus fils, le serveur Pyro n'est pas lancé, et la mémoire partagée fonctionne comme un simple objet Python, partagé entre les Threads.
 
 Ainsi, il faut toujours utiliser la fonction `open_proxy()` !
 Celle-ci renvoie un `Pyro4.Proxy` si le serveur est démarré en mode multi-processus, ou directement l'objet sinon.
-Dans ces deux cas, elle ajoute au proxy ou à l'objet deux méthodes, pour ne pas avoir à utiliser les méthodes et attributs `_pyro*` :
+Dans ces deux cas, elle ajoute au proxy ou à l'objet deux méthodes, pour ne pas avoir à utiliser les méthodes et attributs privés `_pyro*` :
 * `get_URI()` : Retourne l'URI du proxy, ou simplement l'objet.
 * `release_proxy()` : Ferme le proxy, ou ne fait rien.
