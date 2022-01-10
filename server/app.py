@@ -56,19 +56,9 @@ builtins.print = custom_print
 # Protection pour le multiprocessing
 if __name__ == "__main__" :
     import threading
-    import re
     import signal
     import sys
     
-    # Il suffit juste d'importer ce module pour avoir un historique des entrées
-    # dans "input()", ce qui permet d'avoir un historique de la CLI.
-    # Note : Ce module n'est pas disponible sous Windows ou MacOS, il faut
-    # installer la libairie PyReadline.
-    try :
-        import readline # readline ou pyreadline
-    except ModuleNotFoundError :
-        print( "Il est recommandé d'installer la librairie PyReadline afin d'avoir un historique des commandes éxécutées dans la CLI du serveur AOTF, rendant ainsi son utilisation plus pratique." )
-        print( "Pour se faire, éxécutez la commande suivante :\npip install pyreadline")
     
     """
     Par mesure de sécurité, on empêche l'éxécution en tant que "root".
@@ -110,6 +100,7 @@ if __name__ == "__main__" :
     print( "Vérification des importations...")
     try :
         from app.check_parameters import check_parameters
+        from app.class_Command_Line_Interface import Command_Line_Interface
         
         from threads.launch_threads import launch_threads
         
@@ -240,18 +231,12 @@ if __name__ == "__main__" :
     
     
     """
-    Garder des proxies ouverts.
+    On s'enregistre comme thread / processus.
     """
-    shared_memory_user_requests = shared_memory.user_requests
-    shared_memory_scan_requests = shared_memory.scan_requests
-    shared_memory_execution_metrics = shared_memory.execution_metrics
-    shared_memory_threads_registry = shared_memory.threads_registry
-    
-    # On s'enregistre comme thread / processus
     # ATTENTION : Pyro crée aussi pleins de threads (Mais pas des
     # processus comme nous en mode Multiprocessing) qui ne sont pas
     # enregistrés dans notre mémoire partagée.
-    shared_memory_threads_registry.register_thread( "app.py", os.getpid() )
+    shared_memory.threads_registry.register_thread( "app.py", os.getpid() )
     
     
     """
@@ -348,208 +333,13 @@ if __name__ == "__main__" :
     
     """
     Entrée en ligne de commande (CLI).
+    Retourne uniquement si la commande "stop" est éxécutée.
     """
-    # Initialisation de notre couche d'abstraction à l'API Twitter
-    from tweet_finder.twitter.class_TweepyAbstraction import TweepyAbstraction
-    twitter = TweepyAbstraction( param.API_KEY,
-                                param.API_SECRET,
-                                param.OAUTH_TOKEN,
-                                param.OAUTH_TOKEN_SECRET )
-    
-    print( "Vous êtes en ligne de commande.")
-    print( "Tapez `help` pour afficher l'aide.")
-    
-    if param.ENABLE_MULTIPROCESSING :
-        print( "ATTENTION, serveur démarré en multiprocessing !" )
-        print( "Il peut y avoir des problèmes d'affichage des messages et de processus fantômes, notamment sous Windows." )
-        # En fait c'est parce qu'il faudrait flush stdout de temps en temps dans les sous-processus
-        # Pour les processus fantômes, c'est quand on tue le processus père (Ou qu'il plante)
-        
-        # Ajout : Si on éxécute AOTF avec CMD sous Windows ou Bash sous Linux, les messages s'affichent très bien
-        # En revanche, MINGW64 empêche l'affichage des messages depuis les threads (Buffer ne se vide pas ?)
-        # Liste de solutions possibles : https://stackoverflow.com/a/35467658
-        # Note : Désactiver complètement le buffer (python -u) est une mauvaise idée, car les messages peuvent s'entremêler
-    
-    if not param.USE_MYSQL_INSTEAD_OF_SQLITE :
-        print( "ATTENTION, vous utilisez SQLite. Pour de meilleure performances, il est très vivement conseillé d'utiliser MySQL !" )
-    
-    while True :
-        try :
-            command = input()
-            
-        # Sert aussi lors d'un SIGHUP, car fermeture de STDIN.
-        except EOFError :
-            print( "EOF reçu ! Arrêt de la ligne de commande." )
-            break
-        
-        args = command.split(" ")
-        
-        if args[0] == "query" :
-            if len(args) == 2 :
-                request = shared_memory_user_requests.launch_request( args[1] )
-                
-                print( f"Status : {request.status} {request.get_status_string()}" )
-                if request.problem != None :
-                    print( f"Problème : {request.problem}" )
-                
-                if request.scan_requests == None :
-                    if request.status < 3 : # Si n'est pas encore passée au moins une fois dans l'étape 2
-                        print( "Cette requête n'a pas (encore ?) de requête de scan associée." )
-                    else :
-                        print( "Cette requête n'a pas de requête de scan associée." )
-                elif request.scan_requests == [] :
-                    print( "Cette requête n'a plus de requête de scan associée." )
-                else :
-                    for scan_request_uri in request.scan_requests :
-                        scan_request = open_proxy( scan_request_uri )
-                        print( f" - Scan @{scan_request.account_name} (ID {scan_request.account_id}), prioritaire : {'OUI' if scan_request.is_prioritary else 'NON'}" )
-                        print( f"    - A démarré le listage SearchAPI : {'OUI' if scan_request.started_SearchAPI_listing else 'NON'}, TimelineAPI : {'OUI' if scan_request.started_TimelineAPI_listing else 'NON'}" )
-                        print( f"    - A terminé l'indexation SearchAPI : {'OUI' if scan_request.finished_SearchAPI_indexing else 'NON'}, TimelineAPI : {'OUI' if scan_request.finished_TimelineAPI_indexing else 'NON'}" )
-                
-                if request.finished_date != None :
-                    print( f"Fin du traitement : {request.finished_date}" )
-                
-                if request.status > 1 : # Si a dépassé le Link Finder (Etape 1)
-                    if len( request.twitter_accounts_with_id ) > 0 :
-                        s = f"{'s' if len( request.twitter_accounts_with_id ) > 1 else ''}"
-                        print( f"Compte{s} Twitter trouvé{s} : {', '.join( [ f'@{account[0]} (ID {account[1]})' for account in request.twitter_accounts_with_id ] )}" )
-                    else :
-                        print( "Aucun compte Twitter trouvé !" )
-                
-                if request.status == 6 : # Si a dépassé la recherche inverée (Etape 3)
-                    if len( request.found_tweets ) > 0 :
-                        s = f"{'s' if len( request.found_tweets ) > 1 else ''}"
-                        print( f"Tweet{s} trouvé{s} : {', '.join( [ f'ID {tweet.tweet_id} (Distance {tweet.distance})' for tweet in request.found_tweets ] )}" )
-                    else :
-                        print( "Aucun Tweet trouvé !" )
-            else :
-                print( "Utilisation : query [URL de l'illustration]" )
-        
-        elif args[0] == "scan" :
-            if len(args) == 2 :
-                # Vérification que le nom d'utilisateur Twitter est possible
-                if re.compile(r"^@?(\w){1,15}$").match(args[1]) :
-                    account_name = args[1]
-                    print( f"Demande de scan / d'indexation du compte @{account_name}." )
-                    account_id = twitter.get_account_id( account_name )
-                    
-                    if account_id == None :
-                        print( f"Compte @{args[1]} inexistant ou indisponible !" )
-                    else :
-                        shared_memory_scan_requests.launch_request( account_id, account_name )
-                else :
-                    print( "Nom de compte Twitter impossible !" )
-            else :
-                print( "Utilisation : scan [Nom du compte à scanner]" )
-        
-        elif args[0] == "search" :
-            if len(args) in [ 2, 3 ] :
-                request = None
-                
-                if len(args) == 3 :
-                    # Vérification que le nom d'utilisateur Twitter est possible
-                    if re.compile(r"^@?(\w){1,15}$").match(args[2]) :
-                        print( f"Recherche sur le compte @{args[2]}." )
-                        print( "Attention : Si ce compte n'existe pas ou n'est pas indexé, la recherche ne retournera aucun résultat." )
-                        request = shared_memory_user_requests.launch_direct_request( args[1], args[2] )
-                    else :
-                        print( "Nom de compte Twitter impossible !" )
-                else :
-                    print( "Recherche dans toute la base de données !" )
-                    print( "ATTENTION : Pour des raisons de performances, seules les images de Tweets ayant exactement la même empreinte seront retournées. Cela mène à un peu moins de 10% de faux-négatifs !" )
-                    request = shared_memory_user_requests.launch_direct_request( args[1] )
-                
-                # Affichage très similaire à celui de la commande "query"
-                if request != None :
-                    print( f"Status : {request.status} {request.get_status_string()}" )
-                    if request.problem != None :
-                        print( f"Problème : {request.problem}" )
-                    
-                    if request.finished_date != None :
-                        print( f"Fin du traitement : {request.finished_date}" )
-                    
-                    if request.status == 6 : # Si a dépassé la recherche inverée (Etape 3)
-                        if len( request.found_tweets ) > 0 :
-                            s = f"{'s' if len( request.found_tweets ) > 1 else ''}"
-                            print( f"Tweet{s} trouvé{s} : {', '.join( [ f'ID {tweet.tweet_id} (Distance {tweet.distance})' for tweet in request.found_tweets ] )}" )
-                        else :
-                            print( "Aucun Tweet trouvé !" )
-            else :
-                print( "Utilisation : search [URL de l'image à chercher] [Nom du compte Twitter (OPTIONNEL)]" )
-        
-        elif args[0] == "threads" :
-            if len(args) == 1 :
-                print( shared_memory_threads_registry.get_status() )
-            else :
-                print( "Utilisation : threads")
-        
-        elif args[0] == "queues" :
-            if len(args) == 1 :
-                to_print = f"Taille step_1_link_finder_queue : {shared_memory_user_requests.step_1_link_finder_queue.qsize()} requêtes\n"
-                to_print += f"Taille step_2_tweets_indexer_queue : {shared_memory_user_requests.step_2_tweets_indexer_queue.qsize()} requêtes\n"
-                to_print += f"Taille step_3_reverse_search_queue : {shared_memory_user_requests.step_3_reverse_search_queue.qsize()} requêtes\n"
-                to_print += f"Taille step_A_SearchAPI_list_account_tweets_prior_queue : {shared_memory_scan_requests.step_A_SearchAPI_list_account_tweets_prior_queue.qsize()} requêtes\n"
-                to_print += f"Taille step_A_SearchAPI_list_account_tweets_queue : {shared_memory_scan_requests.step_A_SearchAPI_list_account_tweets_queue.qsize()} requêtes\n"
-                to_print += f"Taille step_B_TimelineAPI_list_account_tweets_prior_queue : {shared_memory_scan_requests.step_B_TimelineAPI_list_account_tweets_prior_queue.qsize()} requêtes\n"
-                to_print += f"Taille step_B_TimelineAPI_list_account_tweets_queue : {shared_memory_scan_requests.step_B_TimelineAPI_list_account_tweets_queue.qsize()} requêtes\n"
-                to_print += f"Taille step_C_index_account_tweets_queue : {shared_memory_scan_requests.step_C_index_account_tweets_queue.qsize()} Tweets\n"
-                to_print += f"Nombre de requêtes utilisateur en cours de traitement : {shared_memory_user_requests.processing_requests_count} requêtes\n"
-                to_print += f"Nombre de requêtes de scan en cours de traitement : {shared_memory_scan_requests.processing_requests_count} requêtes"
-                print( to_print )
-            else :
-                print( "Utilisation : queues")
-        
-        elif args[0] == "stats" :
-            if len(args) == 1 :
-                to_print = f"Nombre de tweets indexés : {shared_memory.tweets_count}\n"
-                to_print += f"Nombre de comptes Twitter indexés : {shared_memory.accounts_count}\n"
-                to_print += f"Nombre de requêtes dans le pipeline utilisateur : {shared_memory_user_requests.get_size()}\n"
-                to_print += f"Nombre de requêtes dans le pipeline de scan : {shared_memory_scan_requests.get_size()}"
-                print( to_print )
-            else :
-                print( "Utilisation : stats")
-        
-        elif args[0] == "metrics" :
-            if len(args) == 1 :
-                if not param.ENABLE_METRICS :
-                    print( "Le paramètre \"ENABLE_METRICS\" est à \"False\" !" )
-                else :
-                    print( shared_memory_execution_metrics.get_metrics() )
-            else :
-                print( "Utilisation : metrics")
-        
-        elif args[0] == "stop" :
-            if len(args) == 1 :
-                break # Appel de "wait_and_stop()" après la boucle de la CLI
-            else :
-                print( "Utilisation : stop")
-        
-        elif args[0] == "help" :
-            if len(args) == 1 :
-                print( "Lancer une requête et voir son état : query [URL de l'illustration]\n" +
-                       "Relancez cette commande pour voir l'avancement de la requête.\n" +
-                       "\n" +
-                       "Notes :\n" +
-                       " - Une requête est une procédure complète pour une illustration.\n" +
-                       " - Les requêtes sont identifiées par l'URL de l'illustration.\n" +
-                       "\n" +
-                       "Indexer ou mettre à jour l'indexation des Tweets d'un compte : scan [Nom du compte à scanner]\n" +
-                       "Rechercher une image dans la base de données : search [URL de l'image] [Nom du compte Twitter (OPTIONNEL)]\n" +
-                       "Relancez cette commande pour voir l'avancement de la requête.\n" +
-                       "\n" +
-                       "Afficher des statistiques de la base de données : stats\n" +
-                       f"Afficher les {'processus et threads' if param.ENABLE_MULTIPROCESSING else 'threads'} et ce qu'ils font : threads\n" +
-                       "Afficher la taille des files d'attente : queues\n" +
-                       "Arrêter le serveur : stop\n" +
-                       "Afficher l'aide : help" )
-            else :
-                print( "Utilisation : help" )
-        
-        else :
-            print( "Commande inconnue !" )
+    cli = Command_Line_Interface( shared_memory )
+    cli.do_cli_loop()
     
     
     """
-    Arrêt du système.
+    Arrêt du système (Si commande "stop").
     """
     wait_and_stop()
