@@ -37,12 +37,22 @@ from threads.maintenance.thread_remove_finished_requests import thread_remove_fi
 """
 Fonction permettant de lancer les threads du serveur AOTF.
 
+Ce ne sont pas les procédures qui sont exécutées directement, mais le
+collecteur d'erreurs qui exécute la procédure. Voir les fonctions du fichier
+"threads_launchers.py". Ce sont elles qui lancent réellement les threads et les
+processus fils.
+
+IMPORTANT : Si on est en multi-processus, aucun thread ne doit être créé
+directement en tant que fils de "app.py", car il y a déjà le serveur Pyro.
+Les procédures qui peuvent rester des threads afin d'économiser de la RAM
+doivent être éxécutés dans un processus conteneur.
+
 @param shared_memory_uri URI de la mémoire partagée, ou objet de la mémoire
                          partagée si on n'est pas en mode multi-processus.
 @return Liste des threads et/ou processus créés.
 """
 def launch_threads ( shared_memory_uri ) :
-    threads_or_process = [] # Liste contenant tous les threads ou processus
+    threads_or_process = [] # Liste contenant tous les threads XOR processus fils
     
     threads_or_process.extend( launch_identical_threads_in_container(
         thread_step_1_link_finder,

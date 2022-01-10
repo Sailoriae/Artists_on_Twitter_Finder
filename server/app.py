@@ -8,21 +8,22 @@ détectera que le port de son serveur HTTP est indisponible, et donc refusera
 de se lancer.
 
 Ce script est la racine du serveur AOTF. Il réalise les opérations suivantes :
-- Vérification de l'existence du fichier "parameters.py"
+- Vérification de l'existence du fichier "parameters.py".
 - Importation de tout le serveur, ce qui permet de vérifier que les librairies
-  sont installées
+  sont installées.
 - Lancement de la fonction de vérification des paramètres, qui permet notamment
   de vérifier leurs types, et si ils sont utilisables (API Twitter et MySQL)
 - Création de la mémoire partagée, c'est à dire lancement du serveur Pyro si on
-  est en mode multi-processus, ou sinon création de l'objet "Shared_Memory"
-- Lancement des threads ou processus.
-- Exécution de la boucle infinie de la ligne de commande (back-end, et donc
+  est en mode multi-processus, ou sinon création de l'objet "Shared_Memory".
+- Lancement des threads et processus si on est en multi-processus.
+- Exécution de la boucle infinie de la ligne de commande (back-end), et donc
   attente d'une commande.
   Si le serveur reçoit la commande "stop", ou reçoit un signal "SIGTERM", il
   arrête cette boucle infinie, et demande l'arrêt des threads et/ou processus.
-- Attente de l'arrêt des threads et/ou processus.
-- Demande et attente de l'arrêt du serveur Pyro (Si mode multi-processus.
+- Attente de l'arrêt des threads et processus.
+- Demande et attente de l'arrêt du serveur Pyro (Si mode multi-processus).
 """
+
 
 # Toujours la même erreur :
 # [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1123)
@@ -34,6 +35,7 @@ Ce script est la racine du serveur AOTF. Il réalise les opérations suivantes :
 # Toutes les importations se font depuis cet emplacement
 import os
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
 
 # On écrase la fonction "print()" par défaut de Python. On peut vérifier
 # facilement que ceci s'appliquer récursivement à tous les modules importés, et
@@ -53,11 +55,16 @@ def custom_print ( *args, **kwargs ) :
         else : raise error
 builtins.print = custom_print
 
+
 # Protection pour le multiprocessing
 if __name__ == "__main__" :
+    """
+    Importations de librairies standards de Python.
+    """
     import threading
     import signal
     import sys
+    
     
     
     """
@@ -104,22 +111,28 @@ if __name__ == "__main__" :
         
         from shared_memory.launch_shared_memory import launch_shared_memory
         from threads.launch_threads import launch_threads
+    
     except ModuleNotFoundError as error :
-        # Si c'est une vraie ModuleNotFoundError, elle contient le nom du module
+        # Si c'est une vraie ModuleNotFoundError, elle contient le nom du module.
         if error.name != None and error.name != "" :
             print( f"Il manque la librairie suivante : {error.name}" )
             print( "Veuillez exécuter : pip install -r requirements.txt" )
-        # Sinon, c'est nous qui l'avons créée, et donc elle a un message propre
+        
+        # Sinon, c'est nous qui l'avons créée, et donc elle a un message propre.
+        # Voir par exemple le fichier "class_TweepyAbstraction.py" qui vérifie
+        # la version de la librairie Tweepy.
         else :
             print( "Il y a eu un problème lors de la vérification des librairies." )
             print( error )
         sys.exit(0)
+    
     else :
         print( "Toutes les librairies nécessaires sont présentes !" )
     
     
     """
     Vérification des paramètres.
+    Voir le fichier "check_parameters.py".
     """
     if not check_parameters() :
         sys.exit(0)
@@ -169,6 +182,7 @@ if __name__ == "__main__" :
     """
     Lancement de la mémoire partagée.
     En mode multi-processus, ceci lance le thread du serveur Pyro.
+    Voir le fichier "launch_shared_memory.py".
     """
     shared_memory, thread_pyro = launch_shared_memory( MAX_FILE_DESCRIPTORS )
     
@@ -185,22 +199,14 @@ if __name__ == "__main__" :
     
     
     """
-    Démarrage des threads ou processus.
-    Ce ne sont pas les procédures qui sont exécutées directement, mais le
-    collecteur d'erreurs qui exécute la procédure.
-    
-    IMPORTANT : Si on est en Multiprocessing, aucun thread ne doit être créé
-    directement en tant que fils de "app.py", car il y a déjà le serveur Pyro.
-    Les procédures qui peuvent rester des threads afin d'économiser de la RAM
-    doivent être éxécutés dans un processus conteneur.
-    
-    Voir le fichier "threads_launchers.py"...
+    Démarrage des threads et/ou processus.
+    Voir le fichier "launch_threads.py".
     """
     print( f"Démarrage des {'processus et threads' if param.ENABLE_MULTIPROCESSING else 'threads'}." )
     if param.DEBUG :
         write_debug( f"[app.py] Démarrage des {'processus et threads' if param.ENABLE_MULTIPROCESSING else 'threads'}." )
     
-    # Liste contenant tous les threads ou processus
+    # Liste contenant tous les threads XOR processus fils.
     threads_or_process = launch_threads( shared_memory.get_URI() )
     
     
@@ -211,7 +217,7 @@ if __name__ == "__main__" :
     Python "readline" qui ne fait rien en cas d'EOF).
     
     Cette fonction attend que les threads se terminent, puis arrête la mémoire
-    partagée (Pyro) si on est en multiprocessus.
+    partagée (Pyro) si on est en multi-processus.
     """
     wait_and_stop_once = threading.Semaphore()
     def wait_and_stop () :
@@ -235,10 +241,8 @@ if __name__ == "__main__" :
             write_debug( "[app.py] Arrêt terminé." )
             close_debug()
         
-        try :
-            sys.exit(0)
-        except SystemExit :
-            os._exit(0) # Forcer
+        try : sys.exit(0)
+        except SystemExit : os._exit(0) # Forcer
     
     
     """
@@ -265,7 +269,7 @@ if __name__ == "__main__" :
             write_debug( f"[app.py] Signal {signal.Signals(signum).name} reçu." )
         
         if param.ENABLE_MULTIPROCESSING :
-            # Il n'y a que des objets "Process" dans la liste "threads".
+            # En mutli-processus  n'y a que des objets "Process".
             for process in threads_or_process :
                 os.kill(process.pid, signal.SIGHUP)
         sys.stdout = open( os.devnull, "w" )
@@ -277,14 +281,11 @@ if __name__ == "__main__" :
     
     
     """
-    Entrée en ligne de commande (CLI).
-    Retourne uniquement si la commande "stop" est éxécutée.
+    Exécuter le back-end, c'est à dire l'entrée en ligne de commande (CLI).
     """
     cli = Command_Line_Interface( shared_memory )
     cli.do_cli_loop()
     
-    
-    """
-    Arrêt du système (Si commande "stop").
-    """
+    # Si on est sorti de la boucle de la CLI, c'est que la commande "stop" a
+    # été éxécutée. On peut donc lancer la procédure d'arrêt de serveur AOTF.
     wait_and_stop()
