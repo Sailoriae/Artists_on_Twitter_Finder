@@ -102,13 +102,8 @@ if __name__ == "__main__" :
         from app.check_parameters import check_parameters
         from app.class_Command_Line_Interface import Command_Line_Interface
         
+        from shared_memory.launch_shared_memory import launch_shared_memory
         from threads.launch_threads import launch_threads
-        
-        if param.ENABLE_MULTIPROCESSING :
-            from shared_memory.thread_pyro_server import thread_pyro_server
-        else :
-            from shared_memory.class_Shared_Memory import Shared_Memory
-        from shared_memory.open_proxy import open_proxy
     except ModuleNotFoundError as error :
         # Si c'est une vraie ModuleNotFoundError, elle contient le nom du module
         if error.name != None and error.name != "" :
@@ -172,70 +167,20 @@ if __name__ == "__main__" :
     
     
     """
-    SI ON EST EN MULTIPROCESSING :
-    Lancement du serveur de mémoire partagée, et accès pour ce processus (Le
-    collecteur d'erreurs crée les accès pour les threads).
+    Lancement de la mémoire partagée.
+    En mode multi-processus, ceci lance le thread du serveur Pyro.
     """
-    if param.ENABLE_MULTIPROCESSING :
-        from random import randint
-        
-        # On démarre le serveur sur un port aléatoire, j'en ai marre des processus
-        # fantomes qui massacrent tous mes tests !
-        pyro_port = randint( 49152, 65535 )
-        
-        # Note : Je ne comprend pas bien pourquoi, mais sous Linux, en mode
-        # multi-processus, les processus fils se connectent à leur frère
-        # processus serveur Pyro, mais freezent sur "keep_threads_alive", c'est
-        # à dire à l'accès à un attribut. Idem sur ce processus père.
-        # Du coup, on crée forcément le serveur Pyro en thread, ce qui n'est
-        # pas génant puisque sur le processus pére (Ici, "app.py"), il n'y a
-        # que la CLI.
-        thread_pyro = threading.Thread( name = "thread_pyro_th1",
-                                        target = thread_pyro_server,
-                                        args = ( pyro_port, MAX_FILE_DESCRIPTORS, ) )
-        thread_pyro.start()
-        
-        # On prépare la connexion au serveur.
-        import Pyro4
-        Pyro4.config.SERIALIZER = "pickle"
-        shared_memory_uri = "PYRO:shared_memory@localhost:" + str(pyro_port)
-        
-        # On test pendant 30 secondes que la connection s'établisse.
-        from time import sleep
-        shared_memory = None
-        for i in range( 30 ) :
-            print( "Connexion au serveur de mémoire partagée..." )
-            try :
-                shared_memory = open_proxy( shared_memory_uri )
-                shared_memory.keep_threads_alive # Test d'accès
-            except ( Pyro4.errors.ConnectionClosedError, Pyro4.errors.CommunicationError, ConnectionRefusedError ) :
-                sleep(1)
-            else :
-                print( "Connexion au serveur de mémoire partagée réussie !" )
-                break
-        
-        if shared_memory == None :
-            print( "Connexion au serveur de mémoire partagée impossible !" )
-            if param.DEBUG :
-                close_debug()
-            sys.exit(0)
+    shared_memory, thread_pyro = launch_shared_memory( MAX_FILE_DESCRIPTORS )
     
+    # Si échec du lancement du serveur de mémoire partagée.
+    if shared_memory == None :
+        if param.DEBUG : close_debug()
+        sys.exit(0)
     
-    """
-    SI ON N'EST PAS EN MULTIPROCESSING :
-    Créer simplement l'objet de mémoire partagée.
-    """
-    if not param.ENABLE_MULTIPROCESSING :
-        shared_memory = Shared_Memory( 0, 0 )
-        shared_memory_uri = shared_memory # Pour passer aux threads
-    
-    
-    """
-    On s'enregistre comme thread / processus.
-    """
-    # ATTENTION : Pyro crée aussi pleins de threads (Mais pas des
-    # processus comme nous en mode Multiprocessing) qui ne sont pas
-    # enregistrés dans notre mémoire partagée.
+    # On s'enregistre comme thread / processus.
+    # Note : Pyro crée aussi pleins de threads (Mais pas des processus comme
+    # nous en mode multi-processus) qui ne sont pas enregistrés dans notre
+    # registre des threads. Et ce n'est pas grave.
     shared_memory.threads_registry.register_thread( "app.py", os.getpid() )
     
     
@@ -256,7 +201,7 @@ if __name__ == "__main__" :
         write_debug( f"[app.py] Démarrage des {'processus et threads' if param.ENABLE_MULTIPROCESSING else 'threads'}." )
     
     # Liste contenant tous les threads ou processus
-    threads_or_process = launch_threads( shared_memory_uri )
+    threads_or_process = launch_threads( shared_memory.get_URI() )
     
     
     """

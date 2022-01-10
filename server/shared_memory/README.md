@@ -18,10 +18,16 @@ Ainsi, j'ai exploré deux solutions de serveur de mémoire partagée :
 - La librarie `Pyro4`. Peut supporter des classes, et exécuter coté-serveur le code de leurs attributs, mais pas pour les sous-objets ! Cependant, une parade a été trouvée pour pallier ce problème, et faire une mémoire partagée efficace, voir ci-dessous.
 
 
-## Procédure de lancement du serveur Pyro : `thread_pyro_server`
+## Initialisation de la mémoire partagée
 
-Cette procédure est appelée en procédure de création d'un thread par `app.py`. Elle ne peut pas être un sous-processus de la racine, car cela empêche les accès aux données depuis d'autres threads.
-Le script `thread_pyro_server.py` peut être éxécuté indépendamment... Mais ça ne sert à rien, sauf à débugger.
+Le script `app.py` appelle la fonction `launch_shared_memory()`. Celle-ci lance la mémoire partagée avec le serveur Pyro si on est en mode multi-processus. Sinon, elle initialise simplement l'objet racine `Shared_Memory`. Cela permet que le serveur soit plus léger si il n'a pas de processus fils
+
+
+## Procédure du thread du serveur Pyro
+
+La procédure racine du thread du serveur Pyro est `thread_pyro_server`. Elle ne peut pas être un sous-processus de `app.py`, car cela empêche les accès aux données depuis d'autres threads.
+
+Note : Le script `thread_pyro_server.py` peut aussi être éxécuté indépendamment... Mais ça ne sert à rien, sauf à débugger.
 
 En revanche, il peut être intéressant d'accéder à la mémoire partagée afin de débugger le serveur AOTF. Pour se faire, éxécutez le code suivant dans une console Python (IPython par exemple) :
 ```python
