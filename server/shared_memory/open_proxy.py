@@ -37,11 +37,11 @@ else:
 
 
 """
-Si le multiprocessing est activé, ouvre un Proxy vers l'objet Pyro distant.
+Si le multi-processus est activé, ouvre un Proxy vers l'objet Pyro distant.
 @param uri URI de l'objet Pyro distant.
 @return Proxy vers cet objet distant.
 
-Si le multiprocessing est désactivé, retourne simplement l'objet.
+Si le multi-processus est désactivé, retourne simplement l'objet.
 @param obj Objet à retourner.
 @return Le même objet, non modifié.
 

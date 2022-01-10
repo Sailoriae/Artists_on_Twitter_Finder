@@ -71,7 +71,7 @@ Script [`app.py`](app.py) : Script central, crée et gère les threads de traite
   - Module [`maintenance`](threads/maintenance) : Threads de maintenance, dont celui de mise à jour automatique.
   - Fonction [`launch_threads()`](threads/launch_threads.py) : Fonction racine appelée par `app.py`.
 
-* Module [`shared_memory`](shared_memory) : Mémoire partagée dans un serveur, permet le multi-processing et de faire potentiellement un système distribué.
+* Module [`shared_memory`](shared_memory) : Mémoire partagée dans un serveur, permet le multi-processus et de faire potentiellement un système distribué.
   Peut être utilisée comme un serveur PYRO (Indispensable au multi-processus), ou sinon comme un simple objet Python.
 
 * Module [`tweet_finder`](tweet_finder), contenant plusieurs classes : Moteur de recherche d'image par le contenu pour des comptes Twitter et des Tweets. Gère le stockage et la recherche d'image inversée.

@@ -57,7 +57,7 @@ def launch_threads ( shared_memory_uri ) :
     threads_or_process.extend( launch_identical_threads_in_container(
         thread_step_1_link_finder,
         param.NUMBER_OF_STEP_1_LINK_FINDER_THREADS,
-        False, # Ne nécessitent pas des processus séparés (Seront placés dans un processus conteneur sui on est en Multiprocessing)
+        False, # Ne nécessitent pas des processus séparés (Seront placés dans un processus conteneur si on est en mode multi-processus)
         shared_memory_uri ) )
     
     threads_or_process.extend( launch_identical_threads_in_container(

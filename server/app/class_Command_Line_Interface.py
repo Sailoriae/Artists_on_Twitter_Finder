@@ -65,7 +65,7 @@ class Command_Line_Interface :
         print( "Tapez `help` pour afficher l'aide.")
         
         if param.ENABLE_MULTIPROCESSING :
-            print( "ATTENTION, serveur démarré en multiprocessing !" )
+            print( "ATTENTION, serveur démarré en mode multi-processus !" )
             print( "Faites attention à éteindre proprement le serveur, ou vous risquez d'avoir des processus fantômes." )
         
         if not param.USE_MYSQL_INSTEAD_OF_SQLITE :

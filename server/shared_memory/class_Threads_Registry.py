@@ -25,9 +25,9 @@ import parameters as param
 """
 Objet pour que les thread enregistrent la requête qu'ils sont en train de
 traiter.
-ATTENTION : Un thread est un processus en mode Multiprocessing !
+ATTENTION : Un thread est un processus en mode multi-processus !
 ATTENTION : Pyro crée aussi pleins de threads (Mais pas des processus comme
-nous en mode Multiprocessing) qui ne sont pas enregistrés ici !
+nous en mode multi-processus) qui ne sont pas enregistrés ici !
 """
 @Pyro4.expose
 class Threads_Registry :

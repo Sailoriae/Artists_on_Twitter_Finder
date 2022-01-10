@@ -136,7 +136,7 @@ class Shared_Memory :
     """
     def launch_pyro_server ( self ) :
         if not param.ENABLE_MULTIPROCESSING :
-            raise AssertionError( "Multiprocessing désactivé, le serveur Pyro ne peut pas être démarré !" )
+            raise AssertionError( "Mode multi-processus désactivé, le serveur Pyro ne peut pas être démarré !" )
         uri = self._daemon.register( self, "shared_memory" )
         print( f"[Shared_Memory] URI de la mémoire partagée : {uri}" )
         self._daemon.requestLoop( loopCondition = self.keep_running )

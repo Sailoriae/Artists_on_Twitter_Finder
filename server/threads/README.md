@@ -26,7 +26,7 @@ La fonction `error_collector()` est le collecteur d'erreurs. C'est la procédure
 
 Les fonctions dans le script `threads_launchers.py` permettent de lancer des threads dans le collecteur d'erreurs :
 - `launch_thread()` : Lancer un thread ou un processus sans conteneur.
-- `launch_identical_threads_in_container()` : Lancer plusieurs threads ou processus identiques, c'est à dire qu'ils utilisent la même procédure. Si ce sont des threads et que `ENABLE_MULTIPROCESSING` est activé, ils seront placés dans processus conteneur. Cela permet de rendre leur GIL indépendant, sans prendre autant de mémoire vive si tous ces threads étaient des processus.
+- `launch_identical_threads_in_container()` : Lancer plusieurs threads ou processus identiques, c'est à dire qu'ils utilisent la même procédure. Si ce sont des threads et que le mode multi-processus est activé (`ENABLE_MULTIPROCESSING` à `True`), ils seront placés dans processus conteneur. Cela permet de rendre leur GIL indépendant, sans prendre autant de mémoire vive si tous ces threads étaient des processus.
 - `threads_container_for_unique_threads()` : Idem, mais pour des threads ou processus uniques.
 
 Tous les threads ou processus fils du script `app.py` sont exécutés par une de ces trois fonctions. La seule exception est le thread du serveur de mémoire partagée Pyro, qui n'est pas exécuté dans le collecteur d'erreurs. Voir le répertoire [`shared_memory`](../shared_memory).
