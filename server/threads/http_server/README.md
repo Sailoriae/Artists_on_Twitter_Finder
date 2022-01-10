@@ -4,3 +4,5 @@
 - `thread_http_server` : Thread de serveur HTTP. Lance le serveur HTTP en mode multi-threads. Chaque requête HTTP mène à la création d'un thread pour y répondre.
 
 La documentation de l'utilisation l'API HTTP est disponible dans le fichier [`API_HTTP.md`](../../../doc/API_HTTP.md).
+
+Les fonctions dans `generate_json.py` permettent de générer le JSON renvoyé par l'endpoint `/query` de l'API à partir d'un objet `User_Request`.
