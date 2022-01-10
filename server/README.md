@@ -62,14 +62,13 @@ S’il utilise une base de données MySQL, vous pouvez aussi le tuer avec `Ctrl 
 
 Script [`app.py`](app.py) : Script central, crée et gère les threads de traitement, la ligne de commande, les files d'attentes des requêtes, et le serveur HTTP.
 
-* Module [`app`](app) : Dépendances directes du script [`app.py`](app.py). Contient des éléments qu'il utilise directement, dont par exemple l'entrée en ligne de commande.
+* Module [`app`](app) : Dépendances directes du script [`app.py`](app.py). Contient des éléments qu'il utilise directement, dont par exemple le gestionnaire des threads (Classe `Threads_Manager`) ou l'entrée en ligne de commande (Classe `Command_Line_Interface`).
 
 * Module [`threads`](threads) : Procédures des threads du serveur AOTF, ainsi que les fonctions pour les démarrer. Voir le [`README.md`](threads/README.md) de ce module pour plus de détails.
   - Module [`user_pipeline`](threads/user_pipeline) : Pipeline de traitement des requêtes utilisateurs, en 3 étapes : Link Finder, lancement si nécessaire et suivi du scan du ou des comptes Twitter dans l'autre pipeline, et recherche inversée de l'image de requête.
   - Module [`scan_pipeline`](threads/scan_pipeline) : Pipeline de traitement des requêtes de scan d'un compte Twitter, en 3 étapes paralléles.
   - Module [`http_server`](threads/http_server) : Serveur HTTP intégré, qui contient uniquement l'API.
   - Module [`maintenance`](threads/maintenance) : Threads de maintenance, dont celui de mise à jour automatique.
-  - Fonction [`launch_threads()`](threads/launch_threads.py) : Fonction racine appelée par `app.py`.
 
 * Module [`shared_memory`](shared_memory) : Mémoire partagée dans un serveur, permet le multi-processus et de faire potentiellement un système distribué.
   Peut être utilisée comme un serveur Pyro (Indispensable au multi-processus), ou sinon comme un simple objet Python.

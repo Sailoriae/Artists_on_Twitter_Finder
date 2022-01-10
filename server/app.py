@@ -13,6 +13,7 @@ Ce script est la racine du serveur AOTF. Il réalise les opérations suivantes :
   sont installées.
 - Lancement de la fonction de vérification des paramètres, qui permet notamment
   de vérifier leurs types, et si ils sont utilisables (API Twitter et MySQL)
+- Instantiation du gestionnaire de threads
 - Création de la mémoire partagée, c'est à dire lancement du serveur Pyro si on
   est en mode multi-processus, ou sinon création de l'objet "Shared_Memory".
 - Lancement des threads et processus si on est en multi-processus.
@@ -58,39 +59,17 @@ builtins.print = custom_print
 
 # Protection pour le multiprocessing
 if __name__ == "__main__" :
-    """
-    Importations de librairies standards de Python.
-    """
-    import threading
-    import signal
+    # Importations de librairies standards de Python.
     import sys
     
-    
-    """
-    Par mesure de sécurité, on empêche l'exécution en tant que "root".
-    """
+    # Par mesure de sécurité, on empêche l'exécution en tant que "root".
     if hasattr( os, "geteuid" ) : # Sinon, c'est qu'on est sous Windows
         if os.geteuid() == 0 : # UID de "root" = 0
             print( "Ce script ne peut pas être exécuté en tant que super-utilisateur." )
             print( "Ceci est un principe de sécurité." )
             sys.exit(0)
     
-    
-    """
-    En cas de Ctrl+C ou de SIGTERM lors de la phase d'initilisation.
-    On remplacera cette gestion après l'initialisation (Voir plus bas).
-    """
-    def on_sigterm ( signum, frame ) :
-        print( "Démarrage annulé." )
-        sys.exit(0)
-    
-    signal.signal(signal.SIGINT, on_sigterm)
-    signal.signal(signal.SIGTERM, on_sigterm)
-    
-    
-    """
-    Vérification de l'existence du fichier des paramètres.
-    """
+    # Vérification de l'existence du fichier des paramètres.
     try :
         import parameters as param
     except ModuleNotFoundError :
@@ -99,18 +78,13 @@ if __name__ == "__main__" :
         sys.exit(0)
     
     
-    """
-    Importation des modules du serveur AOTF, ce qui permet de vérifier que
-    les librairies Python nécessaires sont installées.
-    """
+    # Importation des modules du serveur AOTF, ce qui permet de vérifier que
+    # les librairies Python nécessaires sont installées.
     print( "Vérification des importations...")
     try :
         from app.check_parameters import check_parameters
         from app.class_Command_Line_Interface import Command_Line_Interface
-        from app.class_Debug_File import Debug_File
-        
-        from shared_memory.launch_shared_memory import launch_shared_memory
-        from threads.launch_threads import launch_threads
+        from app.class_Threads_Manager import Threads_Manager
     
     except ModuleNotFoundError as error :
         # Si c'est une vraie ModuleNotFoundError, elle contient le nom du module.
@@ -130,58 +104,19 @@ if __name__ == "__main__" :
         print( "Toutes les librairies nécessaires sont présentes !" )
     
     
-    """
-    Vérification des paramètres.
-    Voir le fichier "check_parameters.py".
-    """
-    if not check_parameters() :
-        sys.exit(0)
+    # Initialiser le gestionnaire des threads.
+    # Avant de vérifier les paramètres, afin qu'il gère les signaux.
+    threads_manager = Threads_Manager()
     
+    # Vérification des paramètres.
+    # Voir le fichier "check_parameters.py".
+    if not check_parameters() : sys.exit(0)
     
-    """
-    Augmentation du nombre maximum de descripteurs de fichiers.
-    1024 par défaut, c'est trop peu pour nous ! Car chaque connexion au serveur
-    de mémoire partagée est un nouveau descripteur de fichier.
-    """
-    # Threads de traitement (Etapes 1, 2, 3, A, B et C)
-    MAX_FILE_DESCRIPTORS = 0
-    MAX_FILE_DESCRIPTORS += 300 * param.NUMBER_OF_STEP_1_LINK_FINDER_THREADS
-    MAX_FILE_DESCRIPTORS += 300 * param.NUMBER_OF_STEP_2_TWEETS_INDEXER_THREADS
-    MAX_FILE_DESCRIPTORS += 300 * param.NUMBER_OF_STEP_3_REVERSE_SEARCH_THREADS
-    MAX_FILE_DESCRIPTORS += 300 * len( param.TWITTER_API_KEYS ) # Nombre de threads de listage avec l'API de recherche (Etape A)
-    MAX_FILE_DESCRIPTORS += 300 * len( param.TWITTER_API_KEYS ) # Nombre de threads de listage avec l'API de timeline (Etape B)
-    MAX_FILE_DESCRIPTORS += 300 * param.NUMBER_OF_STEP_C_INDEX_ACCOUNT_TWEETS
+    # Lancer le serveur de mémoire partagée et les threads.
+    # Voir le fichier "class_Threads_Manager.py".
+    threads_manager.launch_threads()
+    shared_memory = threads_manager._shared_memory
     
-    # Serveur HTTP et autres, même si on a déjà une bonne marge
-    MAX_FILE_DESCRIPTORS += 2000
-    
-    try :
-        import resource
-    except ModuleNotFoundError : # On n'est pas sous un système UNIX
-        pass
-    else :
-        resource.setrlimit( resource.RLIMIT_NOFILE, (MAX_FILE_DESCRIPTORS, MAX_FILE_DESCRIPTORS) )
-        print( f"Nombre maximum de descripteurs de fichiers : {MAX_FILE_DESCRIPTORS}" )
-    
-    
-    """
-    Ouverture du fichier de débug. Penser à le fermer !
-    """
-    debug = Debug_File()
-    debug.write( "[app.py] Fichier de débug ouvert." )
-    
-    
-    """
-    Lancement de la mémoire partagée.
-    En mode multi-processus, ceci lance le thread du serveur Pyro.
-    Voir le fichier "launch_shared_memory.py".
-    """
-    shared_memory, thread_pyro = launch_shared_memory( MAX_FILE_DESCRIPTORS )
-    
-    # Si échec du lancement du serveur de mémoire partagée.
-    if shared_memory == None :
-        debug.close()
-        sys.exit(0)
     
     # On s'enregistre comme thread / processus.
     # Note : Pyro crée aussi pleins de threads (Mais pas des processus comme
@@ -189,90 +124,10 @@ if __name__ == "__main__" :
     # registre des threads. Et ce n'est pas grave.
     shared_memory.threads_registry.register_thread( "app.py", os.getpid() )
     
-    
-    """
-    Démarrage des threads et/ou processus.
-    Voir le fichier "launch_threads.py".
-    """
-    print( f"Démarrage des {'processus et threads' if param.ENABLE_MULTIPROCESSING else 'threads'}." )
-    debug.write( f"[app.py] Démarrage des {'processus et threads' if param.ENABLE_MULTIPROCESSING else 'threads'}." )
-    
-    # Liste contenant tous les threads XOR processus fils.
-    threads_or_process = launch_threads( shared_memory.get_URI() )
-    
-    
-    """
-    Fonction d'arrêt du serveur AOTF.
-    Peut être utilisée lors de la fin de la CLI (Commande "stop"), ou lors d'un
-    SIGTERM (Ce qui empêche la sortie du "input()", problème avec le module
-    Python "readline" qui ne fait rien en cas d'EOF).
-    
-    Cette fonction attend que les threads se terminent, puis arrête la mémoire
-    partagée (Pyro) si on est en multi-processus.
-    """
-    wait_and_stop_once = threading.Semaphore()
-    def wait_and_stop () :
-        if not wait_and_stop_once.acquire( blocking = False ) :
-            return # Déjà en cours
-        
-        debug.write( "[app.py] Arrêt initié." )
-        
-        try : print( "Arrêt à la fin des procédures en cours..." )
-        except OSError : pass # Par mesure de sécurité
-        
-        shared_memory.keep_threads_alive = False
-        for thread in threads_or_process :
-            thread.join()
-        if param.ENABLE_MULTIPROCESSING :
-            shared_memory.keep_pyro_alive = False
-            thread_pyro.join()
-        
-        debug.write( "[app.py] Arrêt terminé." )
-        debug.close()
-        
-        try : sys.exit(0)
-        except SystemExit : os._exit(0) # Forcer
-    
-    
-    """
-    Ecouter les signaux nous demandant de nous arrêter.
-    On le fait après avoir démarré les processus fils, car ils créent eux aussi
-    leurs fonctions d'écoute, qui envoient des "SIGTERM" à leur père, c'est à
-    dire ici. Voir le fichier "threads_launchers.py".
-    """
-    def on_sigterm ( signum, frame ) :
-        debug.write( f"[app.py] Signal {signal.Signals(signum).name} reçu." )
-        
-        wait_and_stop()
-    
-    signal.signal(signal.SIGINT, on_sigterm)
-    signal.signal(signal.SIGTERM, on_sigterm)
-    
-    # Lorsque une "screen" reçoit un SIGTERM, elle envoie à son fils un signal
-    # SIGHUP. Cela inclue aussi que STDOUT et STDIN sont fermés. Il faut donc
-    # avertir nos processus fils pour qu'ils restaurent leur STDOUT, puis on
-    # restaure le notre, afin de ne pas crasher sur un print().
-    def on_sighup ( signum, frame ) :
-        debug.write( f"[app.py] Signal {signal.Signals(signum).name} reçu." )
-        
-        if param.ENABLE_MULTIPROCESSING :
-            # En mutli-processus  n'y a que des objets "Process".
-            for process in threads_or_process :
-                os.kill(process.pid, signal.SIGHUP)
-        sys.stdout = open( os.devnull, "w" )
-        
-        wait_and_stop() # Arrêter le serveur
-    
-    try : signal.signal(signal.SIGHUP, on_sighup)
-    except AttributeError : pass # Windows
-    
-    
-    """
-    Exécuter le back-end, c'est à dire l'entrée en ligne de commande (CLI).
-    """
+    # Exécuter le back-end, c'est à dire l'entrée en ligne de commande (CLI).
     cli = Command_Line_Interface( shared_memory )
     cli.do_cli_loop()
     
     # Si on est sorti de la boucle de la CLI, c'est que la commande "stop" a
     # été exécutée. On peut donc lancer la procédure d'arrêt de serveur AOTF.
-    wait_and_stop()
+    threads_manager.stop_threads()

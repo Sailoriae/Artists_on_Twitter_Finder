@@ -1,9 +1,9 @@
 # Procédures des threads du serveur AOTF
 
-Le script `app.py` (Présent dans le répertoire parent à celui-ci), est le script central du serveur AOTF, et donc la racine de l'arbre des threads et sous processus (Si on est en mode multi-processus, c'est à dire que le paramètre `ENABLE_MULTIPROCESSING` est à `True`).
+Le script `app.py` (Présent dans le répertoire parent à celui-ci), est le script central du serveur AOTF, et donc la racine de l'arbre des threads et sous processus (Si on est en mode multi-processus, c'est à dire que le paramètre `ENABLE_MULTIPROCESSING` est à `True`). Il gère ses threads ou sous-processus, ainsi que celui de la mémoire partagée; via la classe `Threads_Manager` (Répertoire [`app`](../app)).
 
 Les procédures des threads sont présentes dans ce répertoire, ainsi que les fonctions utilisées pour les démarrer.
-Les objets de la mémoire partagée sont présents dans le répertoire [`shared_memory`](../shared_memory).
+Les objets de la mémoire partagée et sa procédure de thread sont présents dans le répertoire [`shared_memory`](../shared_memory).
 
 
 ## Rappel sur les requêtes traitées
@@ -30,6 +30,6 @@ Les fonctions dans le script `threads_launchers.py` permettent de lancer des thr
 
 Tous les threads ou processus fils du script `app.py` sont exécutés par une de ces trois fonctions. La seule exception est le thread du serveur de mémoire partagée Pyro, qui n'est pas exécuté dans le collecteur d'erreurs. Voir le répertoire [`shared_memory`](../shared_memory).
 
-Enfin, la fonction `launch_threads()` permet de lancer tous les threads du serveur AOTF (En utilisant les fonctions du script `threads_launchers.py`). C'est elle qui est exécutée par `app.py`, et elle lui retourne la liste des threads et/ou processus créés.
+Ces fonctions sont utilisée dans le gestionnaire de threads, qui est la classe `Threads_Manager` (Répertoire [`app`](../app)). Celle-ci rassemble sans sa méthode `launch_threads()` tous les éléments de ce répertoire `threads`.
 
 Note : Tout comme `app.py`, les processus fils peuvent gérer les signaux `SIGTERM`, `SIGINT` et `SIGHUP`.
