@@ -21,7 +21,7 @@ if __name__ == "__main__" :
     path.append(get_wdir())
 
 import parameters as param
-from app.error_collector import error_collector
+from threads.error_collector import error_collector
 
 
 # PID racine, c'est à dire de "app.py". Cette variable est conservée telle

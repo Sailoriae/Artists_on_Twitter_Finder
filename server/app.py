@@ -111,21 +111,22 @@ if __name__ == "__main__" :
     try :
         from app.check_parameters import check_parameters
         
-        from app.threads_launchers import launch_thread, launch_identical_threads_in_container, launch_unique_threads_in_container
+        from threads.threads_launchers import launch_thread, launch_identical_threads_in_container, launch_unique_threads_in_container
         
-        from app.maintenance.thread_auto_update_accounts import thread_auto_update_accounts
-        from app.maintenance.thread_reset_SearchAPI_cursors import thread_reset_SearchAPI_cursors
-        from app.maintenance.thread_remove_finished_requests import thread_remove_finished_requests
-        from app.http_server.thread_http_server import thread_http_server
+        from threads.maintenance.thread_auto_update_accounts import thread_auto_update_accounts
+        from threads.maintenance.thread_reset_SearchAPI_cursors import thread_reset_SearchAPI_cursors
+        from threads.maintenance.thread_remove_finished_requests import thread_remove_finished_requests
         
-        from app.user_pipeline.thread_step_1_link_finder import thread_step_1_link_finder
-        from app.user_pipeline.thread_step_2_tweets_indexer import thread_step_2_tweets_indexer
-        from app.user_pipeline.thread_step_3_reverse_search import thread_step_3_reverse_search
+        from threads.http_server.thread_http_server import thread_http_server
         
-        from app.scan_pipeline.thread_step_A_SearchAPI_list_account_tweets import thread_step_A_SearchAPI_list_account_tweets
-        from app.scan_pipeline.thread_step_B_TimelineAPI_list_account_tweets import thread_step_B_TimelineAPI_list_account_tweets
-        from app.scan_pipeline.thread_step_C_index_account_tweets import thread_step_C_index_account_tweets
-        from app.scan_pipeline.thread_retry_failed_tweets import thread_retry_failed_tweets
+        from threads.user_pipeline.thread_step_1_link_finder import thread_step_1_link_finder
+        from threads.user_pipeline.thread_step_2_tweets_indexer import thread_step_2_tweets_indexer
+        from threads.user_pipeline.thread_step_3_reverse_search import thread_step_3_reverse_search
+        
+        from threads.scan_pipeline.thread_step_A_SearchAPI_list_account_tweets import thread_step_A_SearchAPI_list_account_tweets
+        from threads.scan_pipeline.thread_step_B_TimelineAPI_list_account_tweets import thread_step_B_TimelineAPI_list_account_tweets
+        from threads.scan_pipeline.thread_step_C_index_account_tweets import thread_step_C_index_account_tweets
+        from threads.scan_pipeline.thread_retry_failed_tweets import thread_retry_failed_tweets
         
         if param.ENABLE_MULTIPROCESSING :
             from shared_memory.thread_pyro_server import thread_pyro_server

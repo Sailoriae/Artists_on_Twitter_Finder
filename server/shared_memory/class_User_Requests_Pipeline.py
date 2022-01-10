@@ -25,7 +25,7 @@ from shared_memory.class_Pyro_Semaphore import Pyro_Semaphore
 from shared_memory.class_Pyro_Queue import Pyro_Queue
 from shared_memory.open_proxy import open_proxy
 import parameters as param
-from app.user_pipeline.generate_json import generate_user_request_json
+from threads.user_pipeline.generate_json import generate_user_request_json
 
 
 """

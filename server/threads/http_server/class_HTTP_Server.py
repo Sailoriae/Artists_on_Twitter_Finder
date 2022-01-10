@@ -18,8 +18,8 @@ if __name__ == "__main__" :
     change_wdir( "../.." )
     path.append(get_wdir())
 
-from app.user_pipeline.generate_json import get_user_request_json_model
-from app.user_pipeline.generate_json import generate_user_request_json
+from threads.user_pipeline.generate_json import get_user_request_json_model
+from threads.user_pipeline.generate_json import generate_user_request_json
 import parameters as param
 from shared_memory.open_proxy import open_proxy
 

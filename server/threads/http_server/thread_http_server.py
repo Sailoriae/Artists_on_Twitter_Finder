@@ -16,7 +16,7 @@ if __name__ == "__main__" :
     change_wdir( "../.." )
     path.append(get_wdir())
 
-from app.http_server.class_HTTP_Server import http_server_container
+from threads.http_server.class_HTTP_Server import http_server_container
 import parameters as param
 
 
