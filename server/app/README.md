@@ -9,3 +9,4 @@ Les objets de la mémoire partagée sont présents dans le répertoire [`shared_
 Diverses éléments utilisés par ce script sont ici présents :
 - `check_parameters()` : Fonction permettant de vérifier les données dans `parameters.py`. Exécutée au démarrage du serveur AOTF.
 - `Command_Line_Interface` : Classe de la ligne de commande. Une fois instanciée, sa boucle infinie peut être éxécutée via sa méthode `do_cli_loop()`.
+- `Debug_File` : Classe du fichier de débug. Ne fait rien si le paramètre `DEBUG` est sur `False`.

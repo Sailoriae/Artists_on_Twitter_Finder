@@ -108,6 +108,7 @@ if __name__ == "__main__" :
     try :
         from app.check_parameters import check_parameters
         from app.class_Command_Line_Interface import Command_Line_Interface
+        from app.class_Debug_File import Debug_File
         
         from shared_memory.launch_shared_memory import launch_shared_memory
         from threads.launch_threads import launch_threads
@@ -166,17 +167,9 @@ if __name__ == "__main__" :
     
     """
     Ouverture du fichier de débug. Penser à le fermer !
-    Celui-ci est avec un buffer de ligne (Vidé à chaque "\n").
     """
-    if param.DEBUG :
-        debug_file = open( "debug.log", "a", buffering = 1 )
-        def write_debug ( line ) :
-            try : debug_file.write( line + "\n" )
-            except Exception : pass # Mesure de sécurité
-        def close_debug () :
-            try : debug_file.close()
-            except Exception : pass # Mesure de sécurité
-        write_debug( "[app.py] Fichier de débug ouvert." )
+    debug = Debug_File()
+    debug.write( "[app.py] Fichier de débug ouvert." )
     
     
     """
@@ -188,7 +181,7 @@ if __name__ == "__main__" :
     
     # Si échec du lancement du serveur de mémoire partagée.
     if shared_memory == None :
-        if param.DEBUG : close_debug()
+        debug.close()
         sys.exit(0)
     
     # On s'enregistre comme thread / processus.
@@ -203,8 +196,7 @@ if __name__ == "__main__" :
     Voir le fichier "launch_threads.py".
     """
     print( f"Démarrage des {'processus et threads' if param.ENABLE_MULTIPROCESSING else 'threads'}." )
-    if param.DEBUG :
-        write_debug( f"[app.py] Démarrage des {'processus et threads' if param.ENABLE_MULTIPROCESSING else 'threads'}." )
+    debug.write( f"[app.py] Démarrage des {'processus et threads' if param.ENABLE_MULTIPROCESSING else 'threads'}." )
     
     # Liste contenant tous les threads XOR processus fils.
     threads_or_process = launch_threads( shared_memory.get_URI() )
@@ -224,8 +216,7 @@ if __name__ == "__main__" :
         if not wait_and_stop_once.acquire( blocking = False ) :
             return # Déjà en cours
         
-        if param.DEBUG :
-            write_debug( "[app.py] Arrêt initié." )
+        debug.write( "[app.py] Arrêt initié." )
         
         try : print( "Arrêt à la fin des procédures en cours..." )
         except OSError : pass # Par mesure de sécurité
@@ -237,9 +228,8 @@ if __name__ == "__main__" :
             shared_memory.keep_pyro_alive = False
             thread_pyro.join()
         
-        if param.DEBUG :
-            write_debug( "[app.py] Arrêt terminé." )
-            close_debug()
+        debug.write( "[app.py] Arrêt terminé." )
+        debug.close()
         
         try : sys.exit(0)
         except SystemExit : os._exit(0) # Forcer
@@ -252,8 +242,7 @@ if __name__ == "__main__" :
     dire ici. Voir le fichier "threads_launchers.py".
     """
     def on_sigterm ( signum, frame ) :
-        if param.DEBUG :
-            write_debug( f"[app.py] Signal {signal.Signals(signum).name} reçu." )
+        debug.write( f"[app.py] Signal {signal.Signals(signum).name} reçu." )
         
         wait_and_stop()
     
@@ -265,8 +254,7 @@ if __name__ == "__main__" :
     # avertir nos processus fils pour qu'ils restaurent leur STDOUT, puis on
     # restaure le notre, afin de ne pas crasher sur un print().
     def on_sighup ( signum, frame ) :
-        if param.DEBUG :
-            write_debug( f"[app.py] Signal {signal.Signals(signum).name} reçu." )
+        debug.write( f"[app.py] Signal {signal.Signals(signum).name} reçu." )
         
         if param.ENABLE_MULTIPROCESSING :
             # En mutli-processus  n'y a que des objets "Process".
