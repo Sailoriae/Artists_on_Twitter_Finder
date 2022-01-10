@@ -4,10 +4,12 @@
   Permet de supprimer les comptes de la base de données qui n'existent plus sur Twitter. Supprime aussi leurs Tweets.
   **Attention :** Ce script supprime les comptes supprimés, suspendus ou ajoutés sur la liste noire d'AOTF.
   Il ne supprime pas les comptes passés en privé. Et aucune idée de ce qu'il fait des comptes désactivés.
+  Il est recommandé que le serveur AOTF soit éteint pour exécuter ce script.
 
 * Script [`cleanup_database.py`](cleanup_database.py) :
   Permet de vérifier que les Tweets enregistrés dans la base de données ont bien un compte enregistré correspondant.
   Puis supprime les Tweets sans compte enregistré (Et ainsi les empreintes des images de ces Tweets).
+  Le serveur AOTF doit être éteint pour exécuter ce script.
 
 * Script [`mysqldump_backup.py`](mysqldump_backup.py) :
   Ce script permet de sauvegarder la base de données en faisant un Dump MySQL.
@@ -15,6 +17,8 @@
   La raison de ce script est qu'il va chercher tout seul les paramètres dans le fichier "parameters.py".
   Il peut ainsi être utilisé facilement en tant que tâche dans une table Cron.
   Les Dumps sont enregistrés dans le répertoire [`backups`](../backups).
+  Le serveur AOTF n'a pas besoin d'être éteint pour exécuter ce script.
+  Ceci est dû au fait que le serveur garantisse la cohérence des données à tout moment, et que la table `accounts` (Contenant les curseurs) soit dumpée avant les tables `tweets` et `reindex_tweets`.
 
 
 ## Requêtes SQL utiles
