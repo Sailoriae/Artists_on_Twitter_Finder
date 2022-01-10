@@ -34,8 +34,8 @@ Si il utilise une base de données MySQL, vous pouvez aussi le tuer avec `Ctrl +
 * Base de données stockant les comptes et les Tweets.
 * Moteur de calcul de l'empreinte d'une image (Moteur CBIR, reposant sur l'algorithme pHash).
 * Parallélisme : 2 pipelines de traitement, divisés en étapes séparés dans des threads de traitement, avec files d'attentes :
-  - Traitement des requêtes des utilisateurs, en 3 étapes, exécutées l'une après l'autres. Voir [`app/user_pipeline`](app/user_pipeline).
-  - Traitement des requêtes d'indexation / de scan d'un comte Twitter, en 4 étapes paralléles. Voir [`app/scan_pipeline`](app/scan_pipeline).
+  - Traitement des requêtes des utilisateurs, en 3 étapes, exécutées l'une après l'autres. Voir [`threads/user_pipeline`](threads/user_pipeline).
+  - Traitement des requêtes d'indexation / de scan d'un comte Twitter, en 4 étapes paralléles. Voir [`threads/scan_pipeline`](threads/scan_pipeline).
 * Traitement des requêtes des utilisateurs en 3 étapes :
   - **Etape 1 :** Link Finder : Recherche des comptes Twitter de l'artiste, et recherche du fichier de l'illustration. Classe principale : [`Link_Finder`](link_finder/class_Link_Finder.py), dans le module [`link_finder`](link_finder).
   - **Etape 2 :** Tweets Indexer : Lancement de l'indexation / du scan des comptes Twitter trouvés dans l'autre pipeline, et surveillance de l'avancement de ce traitement.
@@ -62,11 +62,14 @@ Si il utilise une base de données MySQL, vous pouvez aussi le tuer avec `Ctrl +
 
 Script [`app.py`](app.py) : Script central, crée et gère les threads de traitement, la ligne de commande, les files d'attentes des requêtes, et le serveur HTTP.
 
-* Module [`app`](app) : Dépendances du script [`app.py`](app.py). Contient les procédures de ses threads, et ses classes. Voir le [`README.md`](app/README.md) de ce module pour plus de détails.
-  - Module [`user_pipeline`](app/user_pipeline) : Pipeline de traitement des requêtes utilisateurs, en 3 étapes : Link Finder, lancement si nécessaire et suivi du scan du ou des comptes Twitter dans l'autre pipeline, et recherche inversée de l'image de requête.
-  - Module [`scan_pipeline`](app/scan_pipeline) : Pipeline de traitement des requêtes de scan d'un compte Twitter, en 3 étapes paralléles.
-  - Module [`http_server`](app/http_server) : Serveur HTTP intégré, qui contient uniquement l'API.
-  - Module [`maintenance`](app/maintenance) : Threads de maintenance, dont celui de mise à jour automatique.
+* Module [`app`](app) : Dépendances directes du script [`app.py`](app.py). Contient des éléments qu'il utilise directement, dont par exemple l'entrée en ligne de commande.
+
+* Module [`threads`](threads) : Procédures des threads du serveur AOTF, ainsi que les fonctions pour les démarrer. Voir le [`README.md`](threads/README.md) de ce module pour plus de détails.
+  - Module [`user_pipeline`](threads/user_pipeline) : Pipeline de traitement des requêtes utilisateurs, en 3 étapes : Link Finder, lancement si nécessaire et suivi du scan du ou des comptes Twitter dans l'autre pipeline, et recherche inversée de l'image de requête.
+  - Module [`scan_pipeline`](threads/scan_pipeline) : Pipeline de traitement des requêtes de scan d'un compte Twitter, en 3 étapes paralléles.
+  - Module [`http_server`](threads/http_server) : Serveur HTTP intégré, qui contient uniquement l'API.
+  - Module [`maintenance`](threads/maintenance) : Threads de maintenance, dont celui de mise à jour automatique.
+  - Fonction [`launch_threads()`](threads/launch_threads.py) : Fonction racine appelée par `app.py`.
 
 * Module [`shared_memory`](shared_memory) : Mémoire partagée dans un serveur, permet le multi-processing et de faire potentiellement un système distribué.
   Peut être utilisée comme un serveur PYRO (Indispensable au multi-processus), ou sinon comme un simple objet Python.
