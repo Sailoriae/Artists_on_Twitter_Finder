@@ -21,7 +21,7 @@ import parameters as param
 from tweet_finder.analyse_tweet_json import analyse_tweet_json
 from tweet_finder.database.class_SQLite_or_MySQL import SQLite_or_MySQL
 from tweet_finder.twitter.class_TweepyAbstraction import TweepyAbstraction
-from threads.wait_until import wait_until
+from threads.maintenance.wait_until import wait_until
 
 
 """

@@ -32,8 +32,3 @@ Les fonctions dans le script `threads_launchers.py` permettent de lancer les thr
 Tous les threads ou processus fils du script `app.py` sont exécutés par une de ces trois fonctions. La seule exception est le thread du serveur Pyro, qui n'est pas exécuté dans le collecteur d'erreurs.
 
 Tout comme `app.py`, les processus fils peuvent gérer les signaux `SIGTERM`, `SIGINT` et `SIGHUP`.
-
-
-## Autre fonction
-
-- `wait_until()` : Fonction utilisée par les threads de maintenance. Elle permet d'attendre jusqu'à un instant précis. Utilisée par les threads de maintenance.

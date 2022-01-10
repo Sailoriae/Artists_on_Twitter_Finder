@@ -5,3 +5,5 @@
 - `thread_reset_SearchAPI_cursors` : Thread de suppression des curseurs d'indexation avec l'API de recherche, car l'indexation sur le moteur de recherche de Twitter est très fluctuante.
 
 - `thread_retry_failed_tweets` : Considéré comme un thread de maintenance, mais il est placé dans le répertoire [`scan_pipeline`](../scan_pipeline).
+
+La fonction `wait_until()` est utilisée par les threads de maintenance. Elle permet d'attendre jusqu'à un instant précis.

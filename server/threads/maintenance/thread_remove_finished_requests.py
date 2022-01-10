@@ -16,7 +16,7 @@ if __name__ == "__main__" :
     change_wdir( "../.." )
     path.append(get_wdir())
 
-from threads.wait_until import wait_until
+from threads.maintenance.wait_until import wait_until
 
 
 """
