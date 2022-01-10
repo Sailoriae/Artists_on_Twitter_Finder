@@ -1,4 +1,4 @@
-# Artists on Twitter Finder : Index de la Documentation
+# Index de la documentation d'AOTF
 
 Veuillez d'abord lire la description générale de AOTF, c'est à dire le fichier [`../README.md`](../README.md).
 

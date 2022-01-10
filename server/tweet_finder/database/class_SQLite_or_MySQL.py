@@ -57,11 +57,12 @@ def to_int( value : bytes ) -> int :
 
 
 """
-Couche d'abstraction à la base de données SQLite.
+Couche d'abstraction à une base de données SQLite ou MySQL.
 """
 class SQLite_or_MySQL :
     """
-    Constructeur
+    Constructeur : Connexion à la base de données et création de tables si
+    elles n'existaient pas.
     """
     def __init__( self ) :
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
@@ -162,7 +163,7 @@ class SQLite_or_MySQL :
         self._conn.commit()
     
     """
-    Destructeur
+    Destructeur : Déconnexion propre de la base de données.
     """
     def __del__( self ) :
         if not hasattr( self, "_conn" ) :
@@ -422,7 +423,7 @@ class SQLite_or_MySQL :
                 
                 # On est obligé de vérifier que le hash correspond, car notre
                 # requête SQL ne différencie pas les 4 images de Tweets (Ce qui
-                # est plus rapide à éxécuter pour le serveur SQL)
+                # est plus rapide à exécuter pour le serveur SQL)
                 image_hash = to_int( tweet_line[3+i*2] )
                 if image_hash != request_image_hash :
                     continue

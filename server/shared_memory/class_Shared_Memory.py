@@ -80,7 +80,7 @@ class Shared_Memory :
         self._http_limitator_obj = HTTP_Requests_Limitator()
         self._http_limitator = self.register_obj( self._http_limitator_obj )
         
-        # Conteneur des mesures de temps d'éxécution.
+        # Conteneur des mesures de temps d'exécution.
         self._execution_metrics_obj = Metrics_Container()
         self._execution_metrics = self.register_obj( self._execution_metrics_obj )
         

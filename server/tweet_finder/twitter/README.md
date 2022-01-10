@@ -2,9 +2,9 @@
 
 ## Couche d'abstraction à la librairie Tweepy
 
-Tweepy est la librairie utilisée pour accèder à l'API publique de Twitter.
+Tweepy est la librairie utilisée pour accéder à l'API publique de Twitter.
 
-L'objet `TweepyAbstraction` est une couche d'abstraction adaptée à l'utilisation du serveur de l'API publique de Twitter. Elle permet aussi de gèrer les limites de taux ("rate limits") de cette API.
+L'objet `TweepyAbstraction` est une couche d'abstraction adaptée à l'utilisation du serveur de l'API publique de Twitter. Elle permet aussi de gérer les limites de taux ("rate limits") de cette API.
 
 Fonctions disponibles :
 
@@ -26,13 +26,14 @@ Fonctions disponibles :
 * `blocks_me( account_id )` :
   Retourne `True` si l'utilisateur dont l'ID passé en paramètre bloque l'utilisateur courant (Clés passées en paramètre à l'objet), `False` sinon.
 
+
 ## Couche d'abstraction à la librairie SNScrape
 
-SNSCrape est la librairie utilisée pour accèder à l'API de recherche de Twitter, celle qui ne nous limite pas à 7 jours et ne nous demande pas de payer. Pour faire simple : Celle qui est utilisable pour un projet qui ne rapporte rien et a besoin d'avoir plus de 3 200 Tweets par comptes.
+SNSCrape est la librairie utilisée pour accéder à l'API de recherche de Twitter, celle qui ne nous limite pas à 7 jours et ne nous demande pas de payer. Pour faire simple : Celle qui est utilisable pour un projet qui ne rapporte rien et a besoin d'avoir plus de 3 200 Tweets par comptes.
 
 L'objet `SNScrapeAbstraction` est une couche d'abstraction adaptée à l'utilisation du serveur de cette API. Elle permet aussi dé gérer les erreurs HTTP 429, c'est à dire les limites de taux.
 
 Fonctions disponibles :
 
 * `search( self, query : str, output_function = print )` :
-  Execute la recherche `query`, et donne les JSON des Tweets à la fonction `output_function`. Tous les Tweets de cette recherche sont retournés !
+  Exécute la recherche `query`, et donne les JSON des Tweets à la fonction `output_function()`. Tous les Tweets de cette recherche sont retournés !

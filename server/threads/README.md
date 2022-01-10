@@ -1,7 +1,6 @@
-# Threads du serveur AOTF
+# Procédures des threads du serveur AOTF
 
-Le script `app.py` (Présent dans le répertoire parent à celui-ci), est le script central du serveur AOTF.
-Il initialise la mémoire partagée, démarre les threads (Ou processus si le paramètre `ENABLE_MULTIPROCESSING` est à `True`), et éxécute la ligne de commande.
+Le script `app.py` (Présent dans le répertoire parent à celui-ci), est le script central du serveur AOTF, et donc la racine de l'arbre des threads et sous processus (Si on est en mode multi-processus, c'est à dire que le paramètre `ENABLE_MULTIPROCESSING` est à `True`).
 
 Les procédures des threads sont présentes dans ce répertoire, ainsi que les fonctions utilisées pour les démarrer.
 Les objets de la mémoire partagée sont présents dans le répertoire [`shared_memory`](../shared_memory).
@@ -22,7 +21,7 @@ Il y a deux types de requêtes : Les requêtes utilisateur, et les requêtes de 
 
 ## Procédures de démarrage des threads
 
-La fonction `error_collector()` est le collecteur d'erreurs. C'est la procédure conteneuse de chaque thread du serveur. Comme son nom l'indique, elle permet de collecter les erreurs, de les enregistrer dans des fichiers, et de redémarrer le thread. Elle met aussi la requête en échec si le thread était en train de traiter une requête (Utilisateur ou scan).
+La fonction `error_collector()` est le collecteur d'erreurs. C'est la procédure conteneur de chaque thread du serveur. Comme son nom l'indique, elle permet de collecter les erreurs, de les enregistrer dans des fichiers, et de redémarrer le thread. Elle met aussi la requête en échec si le thread était en train de traiter une requête (Utilisateur ou scan).
 
 Les fonctions dans le script `threads_launchers.py` permettent de lancer des threads dans le collecteur d'erreurs :
 - `launch_thread()` : Lancer un thread ou un processus sans conteneur.
@@ -31,6 +30,6 @@ Les fonctions dans le script `threads_launchers.py` permettent de lancer des thr
 
 Tous les threads ou processus fils du script `app.py` sont exécutés par une de ces trois fonctions. La seule exception est le thread du serveur de mémoire partagée Pyro, qui n'est pas exécuté dans le collecteur d'erreurs. Voir le répertoire [`shared_memory`](../shared_memory).
 
-Enfin, la fonction `launch_threads()` permet de lancer tous les threads du serveur AOTF (En utilisant les fonctions du script `threads_launchers.py`). C'est elle qui est éxécutée par `app.py`, et elle lui retourne la liste des threads et/ou processus créés.
+Enfin, la fonction `launch_threads()` permet de lancer tous les threads du serveur AOTF (En utilisant les fonctions du script `threads_launchers.py`). C'est elle qui est exécutée par `app.py`, et elle lui retourne la liste des threads et/ou processus créés.
 
 Note : Tout comme `app.py`, les processus fils peuvent gérer les signaux `SIGTERM`, `SIGINT` et `SIGHUP`.

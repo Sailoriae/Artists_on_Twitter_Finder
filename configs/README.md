@@ -1,29 +1,30 @@
-# Artists on Twitter Finder : Configurations
+# Configurations externes pour le serveur AOTF
 
-## `apache2_example.conf` : Hôte virtuel Apache2
+## Hôte virtuel Apache2
 
-Ce fichier est à modifier ! Remplacez :
-* `/path/to/Artists_on_Twitter_Finder/public` par le chemin vers le répetoire `public` de "Artists on Twitter Finder",
+Le fichier `apache2_example.conf` est un exemple de fichier de configuration pour créer un hôte virtuel dans le serveur HTTP Apache2.
+
+Si vous souhaitez l'utilisez, dupliquez-le vers `apache2.conf` pour y modifier les valeurs suivantes :
+* `/path/to/Artists_on_Twitter_Finder/public` par le chemin vers le répertoire `public` de "Artists on Twitter Finder",
 * Et `sub.domain.tld` par le nom de domaine utilisé.
 
-Activer cet hôte virtuel Apache2 :
+Puis activez cet hôte virtuel Apache2 :
 ```
 sudo ln -s /path/to/Artists_on_Twitter_Finder/configs/apache.conf /etc/apache2/sites-enabled/sub.domain.tld.conf
 ```
 
-Activer les modules Apache2 nécessaires :
+Activez les modules Apache2 nécessaires :
 ```
 sudo a2enmod proxy
 sudo a2enmod proxy_http
 ```
 
-Et relancer le serveur Apache2 :
+Et relancez le serveur Apache2 :
 ```
 sudo service apache2 restart
 ```
 
-### Optionnel : HTTPS
-
+Vous pouvez aussi optionnellement activer HTTPS en obtenant un certificat auprès de Let's Encrypt :
 ```
 sudo a2dismod ssl
 sudo service apache2 restart
@@ -32,10 +33,12 @@ sudo a2enmod ssl
 sudo service apache2 restart
 ```
 
-## `artist-on-twitter_example.service` : Service
+## Service Systemd
 
-Ce fichier est à modifier ! Remplacez :
-* `/path/to/Artists_on_Twitter_Finder/server` par le chemin vers le répetoire `server` de "Artists on Twitter Finder",
+Le fichier `artist-on-twitter_example.service` est un exemple de fichier de configuration pour créer un service via Systemd.
+
+Si vous souhaitez l'utilisez, dupliquez-le vers `artist-on-twitter.service` pour y modifier les valeurs suivantes :
+* `/path/to/Artists_on_Twitter_Finder/server` par le chemin vers le répertoire `server` de "Artists on Twitter Finder",
 * Et `username` par le nom d'utilisateur qui aura le processus.
 
 Par mesure de sécurité, on crée un lien physique vers le fichier de configuration du service, et on en donne la propriété à `root:root`.
@@ -56,4 +59,5 @@ Pour se faire, éditez la table de cet utilisateur (`sudo crontab -e -u utilisat
 ```
 @reboot screen -dmS twitter python3 /path/to/Artists_on_Twitter_Finder/server/app.py
 ```
-L'arrêt du serveur se fera proprement lors du shutdown car le serveur AOTF gère les `SIGTERM`.
+
+L'arrêt du serveur se fera proprement lors du shutdown car le serveur AOTF gère les signaux `SIGTERM` et `SIGHUP`. Vous pouvez vérifier la bonne extinction du serveur via le fichier `debug.log`, ce qui nécessite l'activation du paramètre `DEBUG` dans votre fichier `parameters.py`. Si le message `Arrêt terminé.` y a été écrit, c'est que le serveur AOTF s'est bien arrêté proprement.

@@ -22,7 +22,7 @@ Notes :
 * Seules les Tweets avec au moins une image sont stockés.
 * Un Tweet ne peut pas contenir plus de 4 images.
 * Si une image est corrompue / perdue par Twitter, son nom est quand même stocké (Mais son empreinte est à `NULL`).
-* Les identifiants et les empreintes peuvent être à `NULL` si il n'y a pas d'image en plus.
+* Les identifiants et les empreintes peuvent être à `NULL` s’il n'y a pas d'image en plus.
 
 ### Table `accounts`
 
@@ -50,7 +50,7 @@ Contient les attributs suivants :
 * `image_3_url TEXT` : URL de la troisième image (`NULL` sinon),
 * `image_4_url TEXT` : URL de la quatrième image (`NULL` sinon),
 * `last_retry_date DATETIME` : Date locale de la dernière tentative d'indexation,
-* `retries_count TINYINT UNSIGNED DEFAULT` : Compteur de tentatives de réindexation (0 par défaut).
+* `retries_count TINYINT UNSIGNED DEFAULT` : Compteur de tentatives de ré-indexation (0 par défaut).
 
 ### Avertissement : Réfléchir avant de vouloir stocker autre chose
 
@@ -62,13 +62,14 @@ Il faut comprendre que ces associations sont du cache, et non des données "stat
 * Les données des comptes Twitter analysées (Table `accounts`) : Leurs curseurs d'indexation, leurs dates de dernière mise à jour, et leurs dates de dernière utilisation, et leurs compteurs d'utilisations,
 * Et les données pour les Tweets qui ont besoin d'être réindexés (Table `reindex_tweets`).
 
-En effet, ce sont des données qui ont besoin de persistence lors d'un redémarrage du serveur AOTF. Elles s'opposent aux associations qui n'ont pas besoin de persistence, et encore moins d'être inclues dans une stratégie de sauvegarde.
+En effet, ce sont des données qui ont besoin de persistance lors d'un redémarrage du serveur AOTF. Elles s'opposent aux associations qui n'ont pas besoin de persistance, et encore moins d'être inclues dans une stratégie de sauvegarde.
+
 
 ## Objets dans ce module
 
 ### Classe `SQLite_or_MySQL`
 
-Classe d'accès et de gestion de la base de données. Supporte SQLite ou MySQL. Utilise `parameters.py` pour choisir. Contient une multitude de mèthodes qu'on utilise dans "Artists on Twitter Finder".
+Classe d'accès et de gestion de la base de données. Supporte SQLite ou MySQL. Utilise `parameters.py` pour choisir. Contient une multitude de méthodes qu'on utilise dans "Artists on Twitter Finder".
 
 ### Classe `Image_in_DB`
 

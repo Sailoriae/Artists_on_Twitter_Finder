@@ -14,7 +14,7 @@ Cependant, il peut être intéressant d'explorer des pistes pour voir s'il n'y a
 ___
 
 
-Note : Ce qui est écrit n'est pas forcément éxact, j'apprends !
+Note : Ce qui est écrit n'est pas forcément exact, j'apprends !
 
 
 ## Problème de la recherche par force brute
@@ -39,9 +39,9 @@ LIRE est une librairie écrite en Java permettant d'extraire les caractéristiqu
 
 Github de cette librairie : https://github.com/dermotte/lire
 
-Cependant, le problème de cette librairie est qu'elle ne contient pas le rangement de données (C'es à dire comment on organise la base de données, et donc comment on recherche).
+Cependant, le problème de cette librairie est qu'elle ne contient pas le rangement de données (C'est à dire comment on organise la base de données, et donc comment on recherche).
 
-Or, pour accélérer notre moteur CBIR, il faut faire le plus d'opérations possibles dans la base de données (C'est à dire au plus proche des données), afin de pré-filtrer les images indexées pour sortir le moins de données possibles.
+Or, pour accélérer notre moteur CBIR, il faut faire le plus d'opérations possibles dans la base de données (C'est à dire au plus proche des données), afin de préfiltrer les images indexées pour sortir le moins de données possibles.
 
 Il existe cependant un projet regroupant LIRE et le SGDB Solr : https://github.com/dermotte/liresolr
 
@@ -51,12 +51,12 @@ LIRE intégré dans Solr semble être une solution intéressante, car le moteur 
 
 Son défaut est qu'il est complexe à mettre en oeuvre.
 
-Note : Trace.Moe utilise l'algorithme de hashing ColorLayout (Implémenté dans LIRE, vient de MPEG-7). Au passage, les algo de hashing pourraient être une solution intéressante... A étudier !
+Note : Trace.Moe utilise l'algorithme de hashing ColorLayout (Implémenté dans LIRE, vient de MPEG-7). Au passage, les algos de hashing pourraient être une solution intéressante... A étudier !
 
 
 ## Utiliser Milvus
 
-Milvus est un SGDB spécialisé dans les vecteurs, donc exactement les données que l'on stocke. L'opération de recherche (C'est à dire chercher des vecteurs similaires au vecteur de requête) se fait directement dans le SGDB, ce qui garantie de bonnes performances.
+Milvus est un SGDB spécialisé dans les vecteurs, donc exactement les données que l'on stocke. L'opération de recherche (C'est à dire chercher des vecteurs similaires au vecteur de requête) se fait directement dans le SGDB, ce qui garantit de bonnes performances.
 
 Github de ce SGDB : https://github.com/milvus-io/milvus
 
@@ -80,7 +80,7 @@ Avec l'indexation prenant le moins de RAM, pour 10 000 000 de vecteurs à 240 va
 - Comparer les ressources recommandées en fonction de la méthode d'indexation : https://www.milvus.io/tools/sizing
 - "recall rate" = "la proportion des items pertinents proposés parmi l'ensemble des items pertinents", source : https://fr.wikipedia.org/wiki/Pr%C3%A9cision_et_rappel
 
-On pourrait soit utiliser Milvus, soit créer notre système de graphe de voisinage (Et donc un nouveau algorithme de recherche).
+On pourrait soit utiliser Milvus, soit créer notre système de graphe de voisinage (Et donc un nouvel algorithme de recherche).
 Cependant, on a testé notre propre système, mais il est super lent ! Voir [`class_Graph_Search.py`](../misc/class_Graph_Search.py) pour notre implémentation.
 
 Installation de Milvus sans Docker : https://github.com/milvus-io/milvus/blob/master/INSTALL.md
@@ -92,7 +92,7 @@ Installation de Milvus sans Docker : https://github.com/milvus-io/milvus/blob/ma
 
 Autre article intéressant sur la construction d'un moteur de recherche par image : https://www.oreilly.com/library/view/practical-deep-learning/9781492034858/ch04.html
 
-Notamment le paragraphe "Length of Feature Vectors" qui compare certains modèles de Keras. VGG16 est celui qui sort les vecteurs de plus petite taille (512 valeurs, contre 2048 pour ResNet-50). Cependant, l'article propose de "compresser" ces 2048 valeurs en 100 (Voir le paragraphe "Reducing Feature-Length with PCA"). Cependant, cette méthode n'est pas adapté à notre utilisation, car elle nécessite l'ensemble des vecteurs pour pouvoir les réduires sur les valeurs qui les différencient.
+Notamment le paragraphe "Length of Feature Vectors" qui compare certains modèles de Keras. VGG16 est celui qui sort les vecteurs de plus petite taille (512 valeurs, contre 2048 pour ResNet-50). Cependant, l'article propose de "compresser" ces 2048 valeurs en 100 (Voir le paragraphe "Reducing Feature-Length with PCA"). Cependant, cette méthode n'est pas adaptée à notre utilisation, car elle nécessite l'ensemble des vecteurs pour pouvoir les réduires sur les valeurs qui les différencient.
 
 Il compare aussi des librairies ANN = Approximate Nearest Neighbors (Annoy, NGT, FAISS...). Attention : Ce sont des librairies, pas des serveurs comme Milvus.
 
@@ -114,4 +114,4 @@ Documentation : http://www.pytables.org/index.html
 Attention cependant au parallélisme : *Unlike most RDBMs, PyTables is not intended to serve concurrent accesses to a database. It has no protections whatsoever against corruption for different (or even the same) programs accessing the same database. Opening several handles to the same database in read-only mode is safe, though.*
 
 Question que je me suis posée : Est-ce que ça ne serait pas mieux d'utiliser une librairie ANN, comme Annoy ou NMSLIB par exemple (Recommandés dans l'article ci-dessus comme des libraires simples à utiliser). Parce que ces librairies reposent aussi sur HDF5, mais elles ont en plus le moteur intégré.
-Réponse : Le problèmes de ces libs, c'est que c'est compliqué d'ajouter de nouveaux vecteurs une fois le graphe de voisinage construit.
+Réponse : Le problèmes de ces librairies, c'est que c'est compliqué d'ajouter de nouveaux vecteurs une fois le graphe de voisinage construit.

@@ -21,7 +21,7 @@ from shared_memory.class_Shared_Memory import Shared_Memory
 
 
 """
-Permet de lancer la mémoire partagée en tant que serveur PYRO.
+Permet de lancer la mémoire partagée en tant que serveur Pyro.
 A utiliser uniquement si le serveur est lancé en mode multi-processus. Sinon,
 utiliser directement l'objet Shared_Memory (A instancier qu'une seule fois).
 Voir la classe Shared_Memory pour la doc des paramètres.

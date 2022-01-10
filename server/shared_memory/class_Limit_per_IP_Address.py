@@ -35,11 +35,11 @@ class Limit_per_IP_Address :
         self._dict_of_ip_addresses_sem = threading.Semaphore()
     
     """
-    Faire +1 au nombre de requête en cours de traitement pour une addresse IP.
+    Faire +1 au nombre de requête en cours de traitement pour une adresse IP.
     
     @param ip_address L'adresse IP concernée.
     @return True si on a pu faire +1.
-            False si l'addresse IP a atteint son nombre maximum de requêtes en
+            False si l'adresse IP a atteint son nombre maximum de requêtes en
             cours de traitement.
     """
     def add_ip_address ( self, ip_address : str ) -> bool :
@@ -64,7 +64,7 @@ class Limit_per_IP_Address :
                 return False
     
     """
-    Faire -1 au nombre de requêtes en cours de traitement pour une addresse IP.
+    Faire -1 au nombre de requêtes en cours de traitement pour une adresse IP.
     
     @param ip_address L'adresse IP à concernée.
     """

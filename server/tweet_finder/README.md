@@ -1,6 +1,6 @@
 # Tweet Finder
 
-Le Tweet Finder est l'une des deux grandes parties du serveur "Artists on Twitter Finder", avec le Link Finder.
+Le Tweet Finder est l'une des deux grandes parties du serveur "Artists on Twitter Finder", avec le [Link Finder](../link_finder).
 
 Les classes `Tweets_Lister_with_SearchAPI` et `Tweets_Lister_with_TimelineAPI` listent les Tweets de comptes Twitter à partir du dernier scan (Ou tous les Tweet si le compte n'a pas été encore scanné) :
 * `Tweets_Lister_with_SearchAPI` utilise la librairie SNScraper pour l'API Twitter utilisée par l'UI web https://twitter.com/search,
@@ -15,7 +15,7 @@ L'étape de listage communique ses Tweets trouvés à l'étape d'indexation via 
 Cet objet est stocké dans le pipeline de traitement des requêtes de scan (Objet `Scan_Requests_Pipeline`) de la mémoire partagée.
 Les Tweets sont insérés dans cette file sous la forme de dictionnaires, créés par la fonction `analyse_tweet_json()` à partie des JSON des Tweets renvoyés par les API de Twitter.
 
-Les étapes de listage peuvent aussi communiquer avec les Tweets des instructions d'enregistrement des curseur. Ces instructions peuvent aussi permettre de mettre fin à la requête de scan d'un compte Twitter (Comment la classe `Tweets_Indexer` les utilise). Il est **très** important que les curseurs soient enregistrés à la fin de l'indexation de tous les Tweets trouvés par l'étape de listage. Cela permet d'avoir une base de données cohérente en cas d'extinction du serveur.
+Les étapes de listage peuvent aussi communiquer avec les Tweets des instructions d'enregistrement des curseurs. Ces instructions peuvent aussi permettre de mettre fin à la requête de scan d'un compte Twitter (Comment la classe `Tweets_Indexer` les utilise). Il est **très** important que les curseurs soient enregistrés à la fin de l'indexation de tous les Tweets trouvés par l'étape de listage. Cela permet d'avoir une base de données cohérente en cas d'extinction du serveur.
 
 La classe `Reverse_Searcher` permet de rechercher un Tweet à partir d'une image, et éventuellement du compte Twitter sur lequel chercher :
 1. Calcul de l'empreinte de l'image de recherche, module [`cbir_engine`](cbir_engine),
@@ -23,7 +23,7 @@ La classe `Reverse_Searcher` permet de rechercher un Tweet à partir d'une image
 3. Calcul la distance entre l'image de requête et chaque image de l'itérateur, module [`cbir_engine`](cbir_engine),
 4. Retourne le ou les Tweets correspondant.
 
-Cette classe permet aussi de faire une recherche exacte, c'est à dire que les images retournées ont exactement la même empreinte que l'image de requête. Cela permet d'être plus rapide, mais mène à un peu moins de 10% de faux-négatifs (C'est à dire des images identiques qui auraient dûes être retournées). Cette statistique a été trouvée via l'analyse des résultats par la recherche classique (Voir le script `../../misc/analyze_results.py`).
+Cette classe permet aussi de faire une recherche exacte, c'est à dire que les images retournées ont exactement la même empreinte que l'image de requête. Cela permet d'être plus rapide, mais mène à un peu moins de 10% de faux-négatifs (C'est à dire des images identiques qui auraient dues être retournées). Cette statistique a été trouvée via l'analyse des résultats par la recherche classique (Voir le script `../../misc/analyze_results.py`).
 
 
 ## Sous-modules

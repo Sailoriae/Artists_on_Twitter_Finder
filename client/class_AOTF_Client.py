@@ -97,7 +97,7 @@ class AOTF_Client :
                 sleep( cooldown_time )
             response = requests.get( self._base_api_address + "query?url=" + illust_url )
             self._last_request_timestamp = time()
-            if response.status_code == 429 : # Peut arriver si plusieurs éxécutions en parallèle
+            if response.status_code == 429 : # Peut arriver si plusieurs exécutions en parallèle
                 sleep( RATE_LIMIT_PERIOD )
             else :
                 response = response.json()

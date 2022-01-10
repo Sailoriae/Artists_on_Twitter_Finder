@@ -33,7 +33,7 @@ while True :
     if answer == "y" :
         break
     elif answer == "n" :
-        print( "Veuillez d'abord éteindre le serveur avant d'éxécuter ce script !" )
+        print( "Veuillez d'abord éteindre le serveur avant d'exécuter ce script !" )
         sys.exit(0)
 
 

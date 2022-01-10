@@ -1,4 +1,4 @@
-# Artists on Twitter Finder : Scripts de maintenance
+# Scripts de maintenance de la BDD du serveur AOTF
 
 * Script [`remove_deleted_accounts.py`](remove_deleted_accounts.py) :
   Permet de supprimer les comptes de la base de données qui n'existent plus sur Twitter. Supprime aussi leurs Tweets.

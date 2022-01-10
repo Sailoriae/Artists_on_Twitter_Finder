@@ -5,14 +5,14 @@
 Activer le mode multi-processus.
 
 Si ce paramètre activé, de nombreux sous-processus seront créés, ainsi qu'un
-serveur de mémoire partagée reposant sur la librairie PYRO sera créé. Le
+serveur de mémoire partagée reposant sur la librairie Pyro sera créé. Le
 serveur sera donc plus lourd, mais le traitement des requêtes sera bien plus
 efficace.
 
 Si ce paramètre est désactivé, seulement des threads seront créés, et la
 mémoire partagée sera simplement un objet Python. Le serveur sera donc plus
 léger, mais le traitement des requêtes sera plus lent, car les threads Python
-ne fonctionnent pas en paralléle (Voir la doc sur le GIL). 
+ne fonctionnent pas en parallèle (Voir la doc sur le GIL).
 
 ATTENTION ! SQLite bloque la BDD lors d'une écriture ! Ne pas activer ce
 paramètre si vous utilisez SQLite !
@@ -22,7 +22,7 @@ ENABLE_MULTIPROCESSING = True
 """
 Paramètres pour l'accès à l'API Twitter.
 https://developer.twitter.com/en/apps
-Il est très recommandé de paramètrer l'app Twitter pour qu'elle un un accès en
+Il est très recommandé de paramétrer l'app Twitter pour qu'elle un accès en
 lecture seule.
 
 Pour obtenir OAUTH_TOKEN et OAUTH_TOKEN_SECRET, vous pouvez utiliser le script
@@ -88,13 +88,13 @@ MYSQL_DATABASE_NAME = ""
 
 """
 Port du serveur HTTP.
-NE PAS OUVRIR AU PUBLIQUE ! Utiliser un vrai serveur web comme Apache 2 ou
-Nginx comme proxy.
+NE PAS OUVRIR AU PUBLIC ! Utiliser un vrai serveur web comme Apache 2 ou Nginx
+pour faire un proxy vers le serveur AOTF.
 """
 HTTP_SERVER_PORT = 3301
 
 """
-Paramètrage du nombre de threads.
+Paramétrage du nombre de threads.
 
 Note : Le nombre de threads de listages (Etapes A et C) dépendent du nombre de
 tokens de connexion à l'API Twitter que vous passez. Voir la liste
@@ -116,7 +116,7 @@ informations de débug qu'on ne peut pas voir dans le terminal.
 DEBUG = False
 
 """
-Activer la mesure des temps d'éxécutions des procédures longues.
+Activer la mesure des temps d'exécutions des procédures longues.
 Les moyennes sont alors accessibles via la commande "metrics".
 """
 ENABLE_METRICS = True
@@ -144,10 +144,10 @@ compte avant ce nombre de jours ne se soit écoulé.
 DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE = 30 # jours
 
 """
-Période en jours pour réset les curseurs d'indexation avec l'API de recherche.
+Période en jours pour reset les curseurs d'indexation avec l'API de recherche.
 En effet : Le moteur de recherche de Twitter fluctue, et est assez mal
 documenté. Certains Tweets peuvent être désindexés ou réindexés.
-Il est donc intéressant de temps en temps de réintialiser le curseur
+Il est donc intéressant de temps en temps de réinitialiser le curseur
 d'indexation avec l'API de recherche pour chaque compte.
 Cela ne supprime ou ne réindexe aucun Tweet dans la base ! On en ajoute juste.
 La vitesse dépend donc essentiellement du thread de listage.
@@ -159,12 +159,12 @@ temps.
 RESET_SEARCHAPI_CURSORS_PERIOD = 365 # jours
 
 """
-Limitation du nombre de requêtes (Via l'API HTTP) par addresse IP.
+Limitation du nombre de requêtes (Via l'API HTTP) par adresse IP.
 """
 MAX_PROCESSING_REQUESTS_PER_IP_ADDRESS = 10
 
 """
-Liste des addresses IP non-soumises à la limitation.
+Liste des adresses IP non-soumises à la limitation.
 """
 UNLIMITED_IP_ADDRESSES = [ "127.0.0.1" ]
 
@@ -173,7 +173,7 @@ Activer la journalisation des résultats.
 Les résultats sont alors écrits dans le fichier "results.log". Chaque résultat
 est au format JSON, un JSON par ligne car une ligne par résultat.
 Le JSON est identique à celui renvoyé par l'API.
-Attention ! Les résultats sont journalisés uniquement si il n'y a pas eu de
+Attention ! Les résultats sont journalisés uniquement s’il n'y a pas eu de
 problème ou d'erreur.
 """
 ENABLE_LOGGING = False

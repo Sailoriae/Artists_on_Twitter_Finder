@@ -1,12 +1,12 @@
 # Module du moteur CBIR
 
-L'objet `CBIR_Engine` est un moteur de recherche par image, qui utilise l'algorithme **pHash** pour indexer et comparer les images. pHash est un algorithme d'empreinte d'image ("image hashin"), qui permet d'extraire une liste de bits à partir de n'importe quelle image. Le recherche se fait alors pas compaison bits à bits entre l'empreinte de l'image de requête, et les empreintes des images stockées dans la base de données.
+L'objet `CBIR_Engine` est un moteur de recherche par image, qui utilise l'algorithme **pHash** pour indexer et comparer les images. pHash est un algorithme d'empreinte d'image ("image hashing"), qui permet d'extraire une liste de bits à partir de n'importe quelle image. La recherche se fait alors par comparaison bits à bits entre l'empreinte de l'image de requête, et les empreintes des images stockées dans la base de données.
 
-On a choisi pHash car il est celui qui a le moins de collisions, et donc le moins de faux-positifs ou faux-négatifs. De plus, par rapport à dHash, il supporte beaucoup mieux la compression des images par Twitter. Son inconvénient par rapport à dHash est qu'il est légérement plus lent.
+On a choisi pHash car il est celui qui a le moins de collisions, et donc le moins de faux-positifs ou faux-négatifs. De plus, par rapport à dHash, il supporte beaucoup mieux la compression des images par Twitter. Son inconvénient par rapport à dHash est qu'il est légèrement plus lent.
 
 Source : http://www.hackerfactor.com/blog/?/archives/529-Kind-of-Like-That.html
 
-L'ancien moteur de recherche par image d'AOTF extrayait des images une liste de caractéristiques, ou "features list", de longueur fixe, qui s'assimile à un vecteur dans un espace vectoriel. La recherche se faisait alors par recherche du plus proche vecteur. Ce moteur est présent dans `/misc/cbir_engine`.
+L'ancien moteur de recherche par image d'AOTF extrayait des images une liste de caractéristiques, ou "features list", de longueur fixe, qui s'assimile à un vecteur dans un espace vectoriel. La recherche se faisait alors par recherche du plus proche vecteur. Ce moteur est présent dans le répertoire [`old_cbir_engine`](../../../misc/old_cbir_engine).
 
 
 ## Utilisation indépendante de ce module
@@ -27,7 +27,7 @@ engine = CBIR_Engine()
 
 Ce module analyse des images représentés par des objets `PIL.Image`.
 
-Le module `utils` contient la fonction `url_to_PIL_image` permettant d'importer n'importe quelle image depuis le web et de la convertir dans ce format.
+Le module `utils` contient la fonction `url_to_PIL_image()` permettant d'importer n'importe quelle image depuis le web et de la convertir dans ce format.
 
 
 ### Indexation (Calcul des empreintes)
@@ -57,4 +57,5 @@ Avec :
 
 Cette fonction retourne alors une liste contenant les objets de l'itérateurs qui ont étés sélectionnés comme images identiques à l'image de requêtes. Cette liste peut être vide.
 
-C'est la classe `Image_in_DB` du module [`database`](../database) qui représente une image indexée. De plus, il y a dans ce module `database` un exemple d'itérateur.
+C'est la classe `Image_in_DB` du module [`database`](../database) qui représente une image indexée.
+L'itérateur est la méthode `get_images_in_db_iterator()` de la classe `SQLite_or_MySQL`.

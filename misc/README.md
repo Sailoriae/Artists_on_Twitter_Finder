@@ -1,4 +1,4 @@
-# Artists on Twitter Finder : Divers
+# Scripts divers et archives
 
 ## Scripts qui sont utiles
 
@@ -29,7 +29,7 @@
 Ces fonctionnalités n'ont pas étées ajoutées au serveur Artists on Twitter Finder.
 
 * Script [`action_dispatcher.py`](action_dispatcher.py) :
-  Fonction permettant d'étaler des actions dans le temps. Pose pleins de problèmes, voir dedans pour des détails.
+  Fonction permettant d'étaler des actions dans le temps. Elle pose cependant pleins de problèmes, voir dedans pour des détails.
 
 * Scripts [`class_Graph_Search.py`](class_Graph_Search.py) et [`build_vectors_graph.py`](build_vectors_graph.py) :
-  Permet d'ajouter au serveur la possibilité de faire de la recherche de vecteurs similaires via un arbre. On parle de vecteurs et pas d'empreintes, car ils ont étés créés pour l'ancien moteur de recherche par image. Les vecteurs (C'est à dire les images de Tweets) sont organisées sous la forme d'un arbre, et la recherche le parcours afin de trouver des vecteurs similaires au vecteur de requête. N'a pas été ajouté au serveur car est super lent ! Pour faire ce genre de recherche, il faut rapprocher les données et les algorithmes. Milvus fait ça, lire [`Pistes_explorées_pour_la_recherche.md`](../doc/Pistes_explorées_pour_la_recherche.md) pour plus de détails.
+  Permet d'ajouter au serveur la possibilité de faire de la recherche de vecteurs similaires via un arbre. On parle de vecteurs et pas d'empreintes, car ils ont étés créés pour l'ancien moteur de recherche par image. Les vecteurs (C'est à dire les images de Tweets) sont organisés sous la forme d'un arbre, et la recherche le parcours afin de trouver des vecteurs similaires au vecteur de requête. N'a pas été ajouté au serveur car est super lent ! Pour faire ce genre de recherche, il faut rapprocher les données et les algorithmes. Milvus fait ça, lire [`Pistes_explorées_pour_la_recherche.md`](../doc/Pistes_explorées_pour_la_recherche.md) pour plus de détails.

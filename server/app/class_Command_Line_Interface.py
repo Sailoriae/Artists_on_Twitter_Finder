@@ -56,9 +56,9 @@ class Command_Line_Interface :
     """
     Boucle infinie de l'entrée en ligne de commande.
     Elle peut être arrêtée de trois manières différentes :
-    - Soit en éxécutant la commande "stop".
+    - Soit en exécutant la commande "stop".
     - Soit en envoyant un EOF dans STDIN.
-    - Soit en éxéccutant "sys.exit()".
+    - Soit en exéccutant "sys.exit()".
     """
     def do_cli_loop ( self ) :
         print( "Vous êtes en ligne de commande.")
@@ -240,7 +240,7 @@ class Command_Line_Interface :
     
     """
     Commande "threads" : Permet d'afficher les threads et/ou processus en cours
-    d'éxécution, ainsi que ce qu'ils sont en trainde faire.
+    d'exécution, ainsi que ce qu'ils sont en trainde faire.
     """
     def _do_threads ( self ) :
         print( self._shared_memory_threads_registry.get_status() )
@@ -274,7 +274,7 @@ class Command_Line_Interface :
         print( to_print )
     
     """
-    Commande "metrics" : Permet d'afficher les moyennes des temps d'éxécutions
+    Commande "metrics" : Permet d'afficher les moyennes des temps d'exécutions
     mesurés à différents endroits du serveur.
     """
     def _do_metrics ( self ) :

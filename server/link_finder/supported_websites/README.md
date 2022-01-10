@@ -1,6 +1,6 @@
 # Sites supportés par le Link Finder
 
-Ce module contient une classe par site supporté. Ces classes permettent de chercher sur ces sites les liens vers les image sources, ainsi que le ou les comptes Twitter des artistes.
+Ce module contient une classe par site supporté. Ces classes permettent de chercher sur ces sites les liens vers les images sources, ainsi que le ou les comptes Twitter des artistes.
 
 Chaque classe doit contenir les deux fonctions suivantes :
 
@@ -10,7 +10,7 @@ Chaque classe doit contenir les deux fonctions suivantes :
 
 * `get_twitter_accounts( self, illust_url ) -> List[str]` :
   Prend en entrée l'URL de l'illustration postée sur le site, et retourne la liste des comptes Twitter de l'artiste (Sans le "@") qui ont étés trouvés, ou `None` si l'URL passée en entrée est invalide.
-  Doit utiliser la fonction `validate_twitter_account_url` pour reconnaitre une URL de compte Twitter et en sortir le nom de ce compte.
+  Doit utiliser la fonction `validate_twitter_account_url()` pour reconnaitre une URL de compte Twitter et en sortir le nom de ce compte.
   - Peut aussi prendre un paramètre optionnel `multiplexer` dans lequel la classe `Link_Finder` donne sa méthode `link_mutiplexer()` (Multiplexeur de liens). Appeler ensuite cette méthode pour toutes les URL pouvant mener à des profils de l'artiste sur d'autres sites. Voir sa documentation pour plus d'informations.
   - Peut aussi prendre un paramètre optionnel utilisé par le multiplexeur de liens pour forcer le scan de la page d'un artiste. **Attention :** Si ce paramètre et `multiplexer` sont spécifiables, cette méthode **ne doit surtout pas aller scanner la page de l'artiste d'elle-même**. Elle doit passer par le multiplexeur de liens. Cela permet d'empêcher de scanner deux fois la page de l'artiste.
 

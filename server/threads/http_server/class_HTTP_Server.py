@@ -190,7 +190,7 @@ def http_server_container ( shared_memory_uri_arg ) :
                                                                  ip_address = client_ip )
                     
                     # Si request == None, c'est qu'on ne peut pas lancer une
-                    # nouvelle requête car l'addresse IP a trop de requêtes en
+                    # nouvelle requête car l'adresse IP a trop de requêtes en
                     # cours de traitement, donc on renvoit l'erreur
                     # YOUR_IP_HAS_MAX_PROCESSING_REQUESTS
                     if request == None :

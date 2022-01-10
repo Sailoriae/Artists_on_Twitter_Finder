@@ -92,7 +92,7 @@ class Scan_Requests_Pipeline :
         # trop de temps à sortir les Tweets. De plus, cela casserait l'ordre
         # des instructions d'enregistrement de curseurs. Car cette liste peut
         # aussi contenir des instruction d'enregistrement de curseurs
-        # d'indexation, qui sont éxécutées par les threads de l'étapt C.
+        # d'indexation, qui sont exécutées par les threads de l'étapt C.
         self._step_C_index_account_tweet_queue_obj = Pyro_Queue( convert_uri = False )
         self._step_C_index_account_tweets_queue = self._root.register_obj( self._step_C_index_account_tweet_queue_obj )
         

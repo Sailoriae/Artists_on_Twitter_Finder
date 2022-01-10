@@ -30,14 +30,14 @@ Lorsqu'on parle d'un "site supporté" par le serveur, on parle de l'un des sites
 
 * DeviantArt : https://www.deviantart.com/
 * Pixiv : https://www.pixiv.net/en/
-* Danbooru : https://danbooru.donmai.us/ (Attention, peut contenir du NSFW directement sur la page d'acceuil)
+* Danbooru : https://danbooru.donmai.us/ (Attention, peut contenir du NSFW directement sur la page d'accueil)
 * Derpibooru : https://derpibooru.org/
 * Furbooru : https://furbooru.org/
 
 
 ## Répertoires
 
-* [`server`](server) : Serveur "Artists on Twitter Finder". Pour chaque requête, trouve les comptes Twitter des artistes, indexe leurs Tweets, et recherche l'illustration de requête. Il contient une API sous la forme d'un serveur HTTP pour recevoir des requêtes et renvoyer leurs status et leurs résultats en JSON.
+* [`server`](server) : Serveur "Artists on Twitter Finder". Pour chaque requête, trouve les comptes Twitter des artistes, indexe leurs Tweets, et recherche l'illustration de requête. Il contient une API sous la forme d'un serveur HTTP pour recevoir des requêtes et renvoyer leurs statuts et leurs résultats au format JSON.
 * [`configs`](configs) : Fichier de configuration Apache2, pour faire un proxy depuis l'extérieur vers le serveur HTTP du serveur.
 * [`maintenance`](maintenance) : Scripts de maintenance de la base de données du serveur.
 * [`client`](client) : Client à l'API du serveur, et scripts exemples.
@@ -60,4 +60,4 @@ Si vous souhaitez faire l'opération inverse, c'est à dire à partir d'un Tweet
 * [SauceNAO](https://saucenao.com/) : Un moteur de recherche inversée d'images spécialisé dans les animes, supporte Pixiv et pleins d'autres sites.
 * [Twitter-SauceNAO](https://github.com/FujiMakoto/twitter-saucenao) : Un robot qui permet à partir d'un Tweet de retrouver sa source via SauceNAO.
 
-SauceNAO est l'inverse de "Artists on Twitter Finder", car il indexe les images sur les sites sources. Ici, on indexe les images sur Twitter 
+SauceNAO est l'inverse de "Artists on Twitter Finder", car il indexe les images sur les sites sources. Ici, on indexe les images sur Twitter

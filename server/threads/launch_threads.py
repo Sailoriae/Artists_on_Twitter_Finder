@@ -45,7 +45,7 @@ processus fils.
 IMPORTANT : Si on est en multi-processus, aucun thread ne doit être créé
 directement en tant que fils de "app.py", car il y a déjà le serveur Pyro.
 Les procédures qui peuvent rester des threads afin d'économiser de la RAM
-doivent être éxécutés dans un processus conteneur.
+doivent être exécutés dans un processus conteneur.
 
 @param shared_memory_uri URI de la mémoire partagée, ou objet de la mémoire
                          partagée si on n'est pas en mode multi-processus.

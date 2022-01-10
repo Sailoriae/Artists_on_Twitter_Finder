@@ -29,7 +29,7 @@ En vérité, les procédures des threads ne sont pas exécutées directement, ma
 le sont par ce collecteur d'erreur.
 
 ATTENTION : La ligne de commande (Dans "app.py") et le thread du serveur de
-mémoire partagée Pyro ne doivent pas être éxécutés dans ce collecteur
+mémoire partagée Pyro ne doivent pas être exécutés dans ce collecteur
 d'erreurs. Seules les procédures de threads présentes dans le module "app"
 peuvent l'être.
 

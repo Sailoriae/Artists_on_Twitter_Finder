@@ -27,7 +27,7 @@ import parameters as param
 
 
 if sys.platform not in [ "linux", "linux2" ] :
-    print( "Ce script ne peut être éxécuté que sur un système Linux." )
+    print( "Ce script ne peut être exécuté que sur un système Linux." )
     sys.exit(0)
 
 if not param.USE_MYSQL_INSTEAD_OF_SQLITE :
@@ -35,7 +35,7 @@ if not param.USE_MYSQL_INSTEAD_OF_SQLITE :
     sys.exit(0)
 
 if os.path.isfile( "../backups/AOTF_" + datetime.today().strftime("%Y-%m-%d") + ".sql" ) :
-    print( "Une sauvegarde de la base de données a déjà été éxécutée aujourd'hui." )
+    print( "Une sauvegarde de la base de données a déjà été exécutée aujourd'hui." )
     sys.exit(0)
 
 print( "Sauvegarde de la base de données d'Artists on Twitter Finder..." )

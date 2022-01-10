@@ -144,7 +144,7 @@ Si ils sont lancés en tant que threads ("as_process" est à "False") et que
 processus conteneur. Cette fonction retourne alors ce processus
 Sinon, cette fonction retourne la liste des threads ou procédures créés.
 
-@param thread_procedures Liste des procédures à éxécuter.
+@param thread_procedures Liste des procédures à exécuter.
 @param as_process False pour les lancer en tant que threads,
                   True pour les lancer en tant que processus, aucun processus
                   conteneur ne sera lancé.

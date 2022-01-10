@@ -20,7 +20,7 @@ from tweet_finder.utils.url_to_PIL_image import url_to_PIL_image
 
 """
 Ce script va faire calculer au moteur CBIR l'emprreinte de deux images, puis va
-lancer la comparaison comme le ferait AOTF en éxécution.
+lancer la comparaison comme le ferait AOTF en exécution.
 @param url1 URL de la première image.
 @param url2 URL de la seconde image.
 """

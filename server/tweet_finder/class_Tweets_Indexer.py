@@ -56,7 +56,7 @@ Si le dict du Tweet contient le champs "force_index", son éventuel
 enregistrement dans la base de données sera écrasé.
 Sinon, si le Tweet était déjà présent, il sera ignoré.
 
-Note : Il n'y a aucun moyen pour empêcher deux threads indexeur (Donc éxécutant
+Note : Il n'y a aucun moyen pour empêcher deux threads indexeur (Donc exécutant
 en parallèle la fonction "index_tweets()") de traiter le même Tweet en même temps.
 La probabilité que cela arrive est très faible, et implémenter des mesures contre
 ferait perdre plus de temps qu'autre chose.
@@ -94,7 +94,7 @@ class Tweets_Indexer :
         if DEBUG or ENABLE_METRICS :
             self._times = [] # Liste des temps pour indexer un Tweet
             self._download_image_times = [] # Liste des temps pour télécharger les images d'un Tweet
-            self._calculate_features_times = [] # Liste des temps pour d'éxécution du moteur CBIR pour une images d'un Tweet
+            self._calculate_features_times = [] # Liste des temps pour d'exécution du moteur CBIR pour une images d'un Tweet
             self._insert_into_times = [] # Liste des temps pour faire le INSERT INTO
     
     """
@@ -396,7 +396,7 @@ class Tweets_Indexer :
         return False
     
     """
-    Afficher et enregistrer les mesures des temps d'éxécution (Si on a accès
+    Afficher et enregistrer les mesures des temps d'exécution (Si on a accès
     à la mémoire partagée).
     """
     def _display_and_save_metrics ( self ) -> None :
@@ -454,7 +454,7 @@ class Tweets_Indexer :
                 # D'abord pour notre thread, en cas de crash
                 current_tweet.append( tweet )
             
-            # Enregistrer les mesures des temps d'éxécution tous les 100
+            # Enregistrer les mesures des temps d'exécution tous les 100
             # Tweets (Ces temps sont calculés par la méthode "_index_tweet()").
             if len(self._times) >= 100 :
                 self._display_and_save_metrics()

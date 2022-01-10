@@ -66,13 +66,12 @@ if __name__ == "__main__" :
     import sys
     
     
-    
     """
-    Par mesure de sécurité, on empêche l'éxécution en tant que "root".
+    Par mesure de sécurité, on empêche l'exécution en tant que "root".
     """
     if hasattr( os, "geteuid" ) : # Sinon, c'est qu'on est sous Windows
         if os.geteuid() == 0 : # UID de "root" = 0
-            print( "Ce script ne peut pas être éxécuté en tant que super-utilisateur." )
+            print( "Ce script ne peut pas être exécuté en tant que super-utilisateur." )
             print( "Ceci est un principe de sécurité." )
             sys.exit(0)
     
@@ -275,5 +274,5 @@ if __name__ == "__main__" :
     cli.do_cli_loop()
     
     # Si on est sorti de la boucle de la CLI, c'est que la commande "stop" a
-    # été éxécutée. On peut donc lancer la procédure d'arrêt de serveur AOTF.
+    # été exécutée. On peut donc lancer la procédure d'arrêt de serveur AOTF.
     wait_and_stop()

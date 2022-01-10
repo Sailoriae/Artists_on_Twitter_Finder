@@ -136,7 +136,7 @@ class User_Requests_Pipeline :
     
     @return L'objet User_Request créé.
             Ou l'objet User_Request déjà existant.
-            Ou None si l'addresse IP passée en paramètre a atteint son nombre
+            Ou None si l'adresse IP passée en paramètre a atteint son nombre
             maximum de requêtes en cours de traitement. La requête n'a donc pas
             été lancée.
     

@@ -69,7 +69,7 @@ def action_dispatcher( get_count, period, do_action, keep_alive, break_wait = No
         # afin de faire une dernière attente très précise.
         almost_end_sleep_time = end_sleep_time - 3
         
-        # Boucle d'attente jusqu'à la prochaine éxécution de l'action.
+        # Boucle d'attente jusqu'à la prochaine exécution de l'action.
         while True :
             # Vérification qu'on peut continuer.
             if not keep_alive() :
@@ -90,10 +90,10 @@ def action_dispatcher( get_count, period, do_action, keep_alive, break_wait = No
             final_sleep = end_sleep_time - time()
             if final_sleep > 0 :
                 sleep( final_sleep )
-            break # Fin de l'attente jusqu'à la prochaine éxécution de l'action.
+            break # Fin de l'attente jusqu'à la prochaine exécution de l'action.
         
         # On met à jour la variable "start" avant de faire l'action. Ainsi, le
-        # temps d'éxécution de l'action sera enlevé de la prochaine attente.
+        # temps d'exécution de l'action sera enlevé de la prochaine attente.
         start = time()
         
         # Réaliser l'action, c'est à dire appeler la fonction passée en param.

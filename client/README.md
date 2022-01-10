@@ -1,10 +1,9 @@
-# Artists on Twitter Finder : Client
+# Classe `AOTF_Client`
 
-## Classe `AOTF_Client`
+Cette classe gère la connexion à l'API HTTP du serveur AOTF.
 
-Cette classe gère la connexion à l'API du serveur AOTF.
 
-### Constructeur
+## Constructeur
 
 ```python
 __init__ ( base_api_address : str = "http://localhost:3301/", ignore_check : bool = False ) -> None
@@ -14,9 +13,10 @@ Prend en entrée les paramètres suivants :
 - `base_api_address` : Adresse de la racine de l'API du serveur AOTF. Elle peut être par exemple `http://localhost:3301/`, ou `https://sub.domain.tld/api/`.
 - `ignore_check` : Sauter la vérification de la connexion au serveur. Peut être utile en production.
 
-Reut émettre une exception `Error_During_Server_Connection_Init` en cas d'échec de la connexion au serveur (Uniquement si `ignore_check = False`).
+Peut émettre une exception `Error_During_Server_Connection_Init` en cas d'échec de la connexion au serveur (Uniquement si le paramètre `ignore_check` est à `False`).
 
-### Méthode `get_request()`
+
+## Méthode `get_request()`
 
 ```python
 get_request ( illust_url : str ) -> dict
@@ -27,7 +27,8 @@ Prend en entrée le paramètre suivant :
 
 Retourne le JSON (Fonctionne comme un dictionnaire Python) renvoyé par le serveur pour l'illustration dont l'URL est passée en paramètre. Pour connaitre exactement le contenu de ce dictionnaire, lisez la documentation de l'API pour l'endpoint `GET /query` dans le fichier [`../doc/API_HTTP.md`](../doc/API_HTTP.md).
 
-### Méthode `get_twitter_accounts()`
+
+## Méthode `get_twitter_accounts()`
 
 ```python
 get_twitter_accounts ( get_twitter_accounts : str, timeout = 300 ) -> dict
@@ -43,7 +44,8 @@ Retourne la liste des comptes Twitter trouvés pour l'artiste de l'illustration 
 
 Peut retourner une liste vide si aucun compte Twitter n'a été trouvé. Ou `None` s’il y a eu un problème sur le serveur AOTF. Pour plus de précision, il faut obtenir le JSON renvoyé par la méthode `get_request()`.
 
-### Méthode `get_tweets()`
+
+## Méthode `get_tweets()`
 
 ```python
 get_tweets ( get_tweets : str, timeout = 3600 ) -> dict
@@ -61,7 +63,8 @@ Retourne la liste des Tweets de l'artiste contenant l'illustration dont l'URL es
 
 Elle peut retourner une liste vide si aucun compte Twitter n'a été trouvé. Ou `None` si il y a eu un problème sur le serveur AOTF.
 
-### Exceptions
+
+## Exceptions
 
 Ces trois méthodes peuvent émettre les exceptions suivantes :
 
