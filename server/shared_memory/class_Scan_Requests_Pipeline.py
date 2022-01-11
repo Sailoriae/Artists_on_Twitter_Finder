@@ -94,7 +94,7 @@ class Scan_Requests_Pipeline :
         # aussi contenir des instruction d'enregistrement de curseurs
         # d'indexation, qui sont exécutées par les threads de l'étapt C.
         self._step_C_index_account_tweet_queue_obj = Pyro_Queue( convert_uri = False )
-        self._step_C_index_account_tweets_queue = self._root.register_obj( self._step_C_index_account_tweet_queue_obj )
+        self._step_C_index_tweets_queue = self._root.register_obj( self._step_C_index_account_tweet_queue_obj )
         
         # Dictionnaire des Tweets en cours d'indexation.
         # Les threads de l'étape C déclarent dedans l'ID du Tweet qu'ils sont
@@ -135,7 +135,7 @@ class Scan_Requests_Pipeline :
     def queues_sem( self ) : return open_proxy( self._queues_sem )
     
     @property
-    def step_C_index_account_tweets_queue( self ) : return open_proxy( self._step_C_index_account_tweets_queue )
+    def step_C_index_tweets_queue( self ) : return open_proxy( self._step_C_index_tweets_queue )
     
     @property
     def processing_requests_count( self ) : return self._processing_requests_count

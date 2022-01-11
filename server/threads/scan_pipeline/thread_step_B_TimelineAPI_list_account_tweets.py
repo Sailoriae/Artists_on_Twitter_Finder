@@ -41,7 +41,7 @@ def thread_step_B_TimelineAPI_list_account_tweets( thread_id : int, shared_memor
     shared_memory_scan_requests_queues_sem = shared_memory_scan_requests.queues_sem
     shared_memory_scan_requests_step_B_TimelineAPI_list_account_tweets_prior_queue = shared_memory_scan_requests.step_B_TimelineAPI_list_account_tweets_prior_queue
     shared_memory_scan_requests_step_B_TimelineAPI_list_account_tweets_queue = shared_memory_scan_requests.step_B_TimelineAPI_list_account_tweets_queue
-    shared_memory_scan_requests_step_C_index_account_tweets_queue = shared_memory_scan_requests.step_C_index_account_tweets_queue
+    shared_memory_scan_requests_step_C_index_tweets_queue = shared_memory_scan_requests.step_C_index_tweets_queue
     
     # Fonction à passer à l'objet "Tweets_Lister_with_TimelineAPI"
     # Permet de mettre les Tweets trouvés dans la file d'attente des Tweets à
@@ -49,7 +49,7 @@ def thread_step_B_TimelineAPI_list_account_tweets( thread_id : int, shared_memor
     # de temps, alors que l'indexation vérifie déjà que le Tweet ne soit pas
     # indexé dans la BDD)
     def tweets_queue_put( tweet_dict : dict ) -> None :
-        shared_memory_scan_requests_step_C_index_account_tweets_queue.put( tweet_dict )
+        shared_memory_scan_requests_step_C_index_tweets_queue.put( tweet_dict )
     
     # Initialisation du listeur de Tweets
     timelineAPI_lister = Tweets_Lister_with_TimelineAPI( param.API_KEY,

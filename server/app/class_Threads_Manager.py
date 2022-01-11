@@ -33,7 +33,7 @@ from threads.user_pipeline.thread_step_3_reverse_search import thread_step_3_rev
 
 from threads.scan_pipeline.thread_step_A_SearchAPI_list_account_tweets import thread_step_A_SearchAPI_list_account_tweets
 from threads.scan_pipeline.thread_step_B_TimelineAPI_list_account_tweets import thread_step_B_TimelineAPI_list_account_tweets
-from threads.scan_pipeline.thread_step_C_index_account_tweets import thread_step_C_index_account_tweets
+from threads.scan_pipeline.thread_step_C_index_tweets import thread_step_C_index_tweets
 from threads.scan_pipeline.thread_retry_failed_tweets import thread_retry_failed_tweets
 
 from threads.http_server.thread_http_server import thread_http_server
@@ -184,8 +184,8 @@ class Threads_Manager :
         # Threads étape C : Indexation des Tweets trouvés
         self._threads_xor_process.extend(
             launch_identical_threads_in_container(
-                thread_step_C_index_account_tweets,
-                param.NUMBER_OF_STEP_C_INDEX_ACCOUNT_TWEETS,
+                thread_step_C_index_tweets,
+                param.NUMBER_OF_STEP_C_INDEX_TWEETS,
                 True, # Nécessitent des processus séparés (Analyse d'images)
                 self._shared_memory.get_URI() ) )
         

@@ -66,7 +66,7 @@ Arbre des objets :
     - Attribut `requests_sem` (Privé) : URI vers objet `Pyro_Semaphore` : Verrouillage de la liste précédente. Permet de vérifier qu'une requête n'est pas lancée deux fois.
     - Attributs `*_list_account_*_queue` : URIs vers objets `Pyro_Queue` : 4 files d'attente des threads de listage (Etapes A et B, avec une version prioritaire et non-prioritaire pour chaque file). Contiennent des URI de la liste `requests`.
     - Attribut `queues_sem` : URI vers objet `Pyro_Semaphore` : Verrouillage des 4 files précédentes. Permet de passer une requête non-prioritaire en prioritaire.
-    - Attribut `step_C_index_account_tweets_queue` : URIs vers objet `Pyro_Queue` : File d'attente du thread de d'indexation (Etape C). Contient des Tweets représentés par des dictionnaires.
+    - Attribut `step_C_index_tweets_queue` : URIs vers objet `Pyro_Queue` : File d'attente du thread de d'indexation (Etape C). Contient des Tweets représentés par des dictionnaires.
     - Attribut `indexing_ids_dict` (Privé) : Dictionnaire : Contient les Tweets en cours d'indexation dans chaque thread d'indexation (Etape C).
     - Attribut `step_C_sem` : URI vers objet `Pyro_Semaphore` : Verrouillage du dictionnaire précédent. Permet de terminer les requêtes de scan sans oublier un Tweet encore en cours d'indexation.
 

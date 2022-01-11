@@ -98,7 +98,7 @@ def check_parameters () :
     check_list.append( test_strictly_postive_int_parameter( "NUMBER_OF_STEP_1_LINK_FINDER_THREADS" ) )
     check_list.append( test_strictly_postive_int_parameter( "NUMBER_OF_STEP_2_TWEETS_INDEXER_THREADS" ) )
     check_list.append( test_strictly_postive_int_parameter( "NUMBER_OF_STEP_3_REVERSE_SEARCH_THREADS" ) )
-    check_list.append( test_strictly_postive_int_parameter( "NUMBER_OF_STEP_C_INDEX_ACCOUNT_TWEETS" ) )
+    check_list.append( test_strictly_postive_int_parameter( "NUMBER_OF_STEP_C_INDEX_TWEETS" ) )
     
     check_list.append( test_parameter( "DEBUG", bool ) )
     check_list.append( test_parameter( "ENABLE_METRICS", bool ) )

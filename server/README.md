@@ -104,7 +104,7 @@ En mode multi-processus, le serveur AOTF exécute des processus et des threads. 
     - Plusieurs threads `thread_step_A_SearchAPI_list_account_tweets` (Nombre défini dans `parameters.py`) : Etape A, listage avec l'API de recherche.
   - Processus de group de threads :
     - Plusieurs threads `thread_step_B_TimelineAPI_list_account_tweets` (Nombre défini dans `parameters.py`) : Etape B, listage avec l'API de timeline.
-  - Plusieurs processus `thread_step_C_index_account_tweets` (Nombre défini dans `parameters.py`) : Etape C, indexation des Tweets trouvés.
+  - Plusieurs processus `thread_step_C_index_tweets` (Nombre défini dans `parameters.py`) : Etape C, indexation des Tweets trouvés.
   - Processus `thread_http_server` : Serveur HTTP, API du serveur.
   - Processus de groupe de threads :
     - Thread `thread_auto_update_accounts` : Mise à jour automatique.

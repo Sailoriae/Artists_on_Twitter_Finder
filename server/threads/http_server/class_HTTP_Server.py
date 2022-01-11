@@ -58,7 +58,7 @@ def http_server_container ( shared_memory_uri_arg ) :
         http_limitator = shared_memory.http_limitator
         user_requests = shared_memory.user_requests
         scan_requests = shared_memory.scan_requests
-        step_C_index_account_tweets_queue = scan_requests.step_C_index_account_tweets_queue
+        step_C_index_tweets_queue = scan_requests.step_C_index_tweets_queue
         
         # Envoyer un header "Server" personnalisé
         server_version = "Artists on Twitter Finder"
@@ -218,7 +218,7 @@ def http_server_container ( shared_memory_uri_arg ) :
                     "indexed_accounts_count" : self.shared_memory.accounts_count,
                     "processing_user_requests_count" : self.user_requests.processing_requests_count,
                     "processing_scan_requests_count" : self.scan_requests.processing_requests_count,
-                    "pending_tweets_count" : self.step_C_index_account_tweets_queue.qsize()
+                    "pending_tweets_count" : self.step_C_index_tweets_queue.qsize()
                 }
                 
                 json_text = json.dumps( response_dict )

@@ -134,7 +134,7 @@ class Threads_Registry :
             
             except KeyError :
                 # Afficher un thread d'indexation (Etape C)
-                if "thread_step_C_index_account_tweets" in thread :
+                if "thread_step_C_index_tweets" in thread :
                     tweet_id, account_id = self._root._scan_requests_obj.get_indexing_ids( thread )
                     if tweet_id != None :
                         to_print += f" : Tweet ID {tweet_id}\n"

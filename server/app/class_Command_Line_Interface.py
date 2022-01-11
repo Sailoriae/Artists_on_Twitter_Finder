@@ -257,7 +257,7 @@ class Command_Line_Interface :
         to_print += f"Taille step_A_SearchAPI_list_account_tweets_queue : {self._shared_memory_scan_requests.step_A_SearchAPI_list_account_tweets_queue.qsize()} requêtes\n"
         to_print += f"Taille step_B_TimelineAPI_list_account_tweets_prior_queue : {self._shared_memory_scan_requests.step_B_TimelineAPI_list_account_tweets_prior_queue.qsize()} requêtes\n"
         to_print += f"Taille step_B_TimelineAPI_list_account_tweets_queue : {self._shared_memory_scan_requests.step_B_TimelineAPI_list_account_tweets_queue.qsize()} requêtes\n"
-        to_print += f"Taille step_C_index_account_tweets_queue : {self._shared_memory_scan_requests.step_C_index_account_tweets_queue.qsize()} Tweets\n"
+        to_print += f"Taille step_C_index_tweets_queue : {self._shared_memory_scan_requests.step_C_index_tweets_queue.qsize()} Tweets\n"
         to_print += f"Nombre de requêtes utilisateur en cours de traitement : {self._shared_memory_user_requests.processing_requests_count} requêtes\n"
         to_print += f"Nombre de requêtes de scan en cours de traitement : {self._shared_memory_scan_requests.processing_requests_count} requêtes"
         print( to_print )

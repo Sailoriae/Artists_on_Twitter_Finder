@@ -32,7 +32,7 @@ def define_max_file_descriptors () :
     max_fd += 300 * param.NUMBER_OF_STEP_3_REVERSE_SEARCH_THREADS
     max_fd += 300 * len( param.TWITTER_API_KEYS ) # Nombre de threads de listage avec l'API de recherche (Etape A)
     max_fd += 300 * len( param.TWITTER_API_KEYS ) # Nombre de threads de listage avec l'API de timeline (Etape B)
-    max_fd += 300 * param.NUMBER_OF_STEP_C_INDEX_ACCOUNT_TWEETS
+    max_fd += 300 * param.NUMBER_OF_STEP_C_INDEX_TWEETS
     
     # Serveur HTTP et autres, même si on a déjà une bonne marge
     max_fd += 2000

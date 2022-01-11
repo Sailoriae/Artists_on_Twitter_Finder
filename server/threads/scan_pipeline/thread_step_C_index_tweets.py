@@ -25,15 +25,15 @@ from tweet_finder.database.class_SQLite_or_MySQL import SQLite_or_MySQL
 ETAPE C du traitement de l'indexation ou de la mise à jour de l'indexation d'un
 compte Twitter.
 Thread d'indexation de n'importe quel Tweet trouvé par les méthodes de listage,
-ou par les Tweets du thread de retentative d'indexation.
+ou les Tweets du thread de retentative d'indexation.
 Traite la file d'attente suivante (Dans la mémoire partagée) :
-shared_memory.scan_requests.step_C_SearchAPI_index_account_tweets_queue
+shared_memory.scan_requests.step_C_index_tweets_queue
 
 Il y a dans ce thread plusieurs sécurité pour éviter au maximum de perdre un
 Tweet listé. Cela peut sembler redondant, mais c'est nécessaire, car on est un
 thread assez critique.
 """
-def thread_step_C_index_account_tweets( thread_id : int, shared_memory ) :
+def thread_step_C_index_tweets( thread_id : int, shared_memory ) :
     # Maintenir ouverts certains proxies vers la mémoire partagée
     shared_memory_execution_metrics = shared_memory.execution_metrics
     shared_memory_scan_requests = shared_memory.scan_requests
@@ -66,7 +66,7 @@ def thread_step_C_index_account_tweets( thread_id : int, shared_memory ) :
         if first_get_tweet_to_index :
             first_get_tweet_to_index = False
             try :
-                return shared_memory_scan_requests.get_tweet_to_index( f"thread_step_C_index_account_tweets_th{thread_id}", first_time = True )
+                return shared_memory_scan_requests.get_tweet_to_index( f"thread_step_C_index_tweets_th{thread_id}", first_time = True )
             
             # Si ce thread a déjà démarré une fois, il faut mettre le Tweet
             # qu'on risque d'écraser dans la table des Tweets à réessayer
@@ -77,14 +77,14 @@ def thread_step_C_index_account_tweets( thread_id : int, shared_memory ) :
             # thread avec le même nom.
             except AssertionError :
                 print( f"[step_C_th{thread_id}] Redémarrage après un crash détecté. Sauvegarde du Tweet qui était en cours d'indexation." )
-                tweet_id, _ = shared_memory_scan_requests.get_indexing_ids( f"thread_step_C_index_account_tweets_th{thread_id}" )
+                tweet_id, _ = shared_memory_scan_requests.get_indexing_ids( f"thread_step_C_index_tweets_th{thread_id}" )
                 SQLite_or_MySQL().add_retry_tweet_id( tweet_id )
                 
                 # Si on arrive ici sans crasher, c'est qu'on peut obtenir le
                 # Tweet en écrasant le précédent.
-                return shared_memory_scan_requests.get_tweet_to_index( f"thread_step_C_index_account_tweets_th{thread_id}" )
+                return shared_memory_scan_requests.get_tweet_to_index( f"thread_step_C_index_tweets_th{thread_id}" )
         
-        return shared_memory_scan_requests.get_tweet_to_index( f"thread_step_C_index_account_tweets_th{thread_id}" )
+        return shared_memory_scan_requests.get_tweet_to_index( f"thread_step_C_index_tweets_th{thread_id}" )
     
     # Liste permettant d'enregistrer dans la BDD les Tweets sur lesquels
     # l'indexeur a éventuellement crashé
@@ -136,9 +136,9 @@ def thread_step_C_index_account_tweets( thread_id : int, shared_memory ) :
                         )
                         tweet_is_safe = True
                     except Exception :
-                        file = open( "thread_step_C_index_account_tweets_errors.log", "a" )
+                        file = open( "thread_step_C_index_tweets_errors.log", "a" )
                         file.write( "ICI UN COLLECTEUR D'ERREURS DU THREAD C !\n" )
-                        file.write( "Je suis dans le fichier suivant : app/scan_pipeline/thread_step_C_index_account_tweets.py\n" )
+                        file.write( "Je suis dans le fichier suivant : app/scan_pipeline/thread_step_C_index_tweets.py\n" )
                         file.write( f"Erreur avec le Tweet ID {tweet['tweet_id']} !\n" )
                         file.write( "Il y a eu un problème lors de la tentative d'enregistrer le Tweet dans la table des Tweets à réessayer d'indexer.\n")
                         file.write( "Il est recommandé d'insérer manuellement l'ID du Tweet dans la table \"retry_tweets\" !\n" )
@@ -156,9 +156,9 @@ def thread_step_C_index_account_tweets( thread_id : int, shared_memory ) :
                                 request.has_failed = True
                                 scan_request_on_error = True
                     except Exception :
-                        file = open( "thread_step_C_index_account_tweets_errors.log", "a" )
+                        file = open( "thread_step_C_index_tweets_errors.log", "a" )
                         file.write( "ICI UN COLLECTEUR D'ERREURS DU THREAD C !\n" )
-                        file.write( "Je suis dans le fichier suivant : app/scan_pipeline/thread_step_C_index_account_tweets.py\n" )
+                        file.write( "Je suis dans le fichier suivant : app/scan_pipeline/thread_step_C_index_tweets.py\n" )
                         file.write( f"Erreur avec le Tweet ID {tweet['tweet_id']} !\n" )
                         file.write( "Il y a eu un problème lors de la tentative de mettre la requête de scan associée en échec.\n")
                         file.write( "Il est recommandé d'insérer manuellement l'ID du Tweet dans la table \"retry_tweets\" !\n" )
@@ -180,7 +180,7 @@ def thread_step_C_index_account_tweets( thread_id : int, shared_memory ) :
             message += "\nVous pouvez aussi plus simplement mettre à \"NULL\" les curseurs d'indexation pour l'ID du compte Twitter."
         else :
             message += "\nAucun Tweet en cours d'indexation."
-        message += "\nCes informations sont données au collecteur d'erreurs général par fonction \"thread_step_C_index_account_tweets\"."
+        message += "\nCes informations sont données au collecteur d'erreurs général par fonction \"thread_step_C_index_tweets\"."
         raise Exception( message ) from error
     
     print( f"[step_C_th{thread_id}] Arrêté !" )

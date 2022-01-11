@@ -57,7 +57,7 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
     rate_limit_period = datetime.timedelta( minutes = 15 )
     
     # Maintenir ouverts certains proxies vers la mémoire partagée
-    step_C_index_account_tweets_queue = shared_memory.scan_requests.step_C_index_account_tweets_queue
+    step_C_index_tweets_queue = shared_memory.scan_requests.step_C_index_tweets_queue
     
     # Fonction à passer à "wait_until()"
     # Passer "shared_memory.keep_running" ne fonctionne pas
@@ -91,7 +91,7 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
             print( f"[retry_failed_tweets_th{thread_id}] Demande de réindexation du Tweet ID {tweet['tweet_id']} envoyée !" )
             tweet["was_failed_tweet"] = True
             tweet["force_index"] = True
-            step_C_index_account_tweets_queue.put( tweet )
+            step_C_index_tweets_queue.put( tweet )
     
     # Tant que on ne nous dit pas de nous arrêter
     while shared_memory.keep_threads_alive :
@@ -175,7 +175,7 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
                 print( f"[retry_failed_tweets_th{thread_id}] Demande de réindexation du Tweet ID {tweet['tweet_id']} envoyée !" )
                 tweet["was_failed_tweet"] = True
                 tweet["force_index"] = True
-                step_C_index_account_tweets_queue.put( tweet )
+                step_C_index_tweets_queue.put( tweet )
         
         # Vérifier que l'itération "for" n'est pas était arrêtée pour éteindre
         # le serveur
