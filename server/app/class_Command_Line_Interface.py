@@ -2,6 +2,8 @@
 # coding: utf-8
 
 import re
+import traceback
+from datetime import datetime
 
 # Il suffit juste d'importer ce module pour avoir un historique des entrées
 # dans "input()", ce qui permet d'avoir un historique de la CLI.
@@ -54,11 +56,8 @@ class Command_Line_Interface :
                                           param.OAUTH_TOKEN_SECRET )
     
     """
-    Boucle infinie de l'entrée en ligne de commande.
-    Elle peut être arrêtée de trois manières différentes :
-    - Soit en exécutant la commande "stop".
-    - Soit en envoyant un EOF dans STDIN.
-    - Soit en exéccutant "sys.exit()".
+    Collecteur d'erreurs à l'entrée en ligne de commande. Si "app.py" plante,
+    ça devient compliqué d'arrêter le serveur.
     """
     def do_cli_loop ( self ) :
         print( "Vous êtes en ligne de commande.")
@@ -71,6 +70,34 @@ class Command_Line_Interface :
         if not param.USE_MYSQL_INSTEAD_OF_SQLITE :
             print( "ATTENTION, vous utilisez SQLite. Pour de meilleure performances, il est très vivement conseillé d'utiliser MySQL !" )
         
+        while True :
+            try :
+                self._do_cli_loop()
+            except Exception :
+                error_name = "Erreur dans l'entrée en ligne de commande !\n"
+                error_name +=  f"S'est produite le {datetime.now().strftime('%Y-%m-%d à %H:%M:%S')}.\n"
+                
+                file = open( "method_Command_Line_Interface.do_cli_loop_errors.log", "a" )
+                file.write( "ICI LE COLLECTEUR D'ERREURS DE LA LIGNE DE COMMANDE !\n" )
+                file.write( "Je suis dans le fichier suivant : app/class_Command_Line_Interface.py\n" )
+                file.write( error_name )
+                traceback.print_exc( file = file )
+                file.write( "\n\n\n" )
+                file.close()
+                
+                print( error_name )
+                traceback.print_exc()
+            else :
+                break
+    
+    """
+    Boucle infinie de l'entrée en ligne de commande.
+    Elle peut être arrêtée de trois manières différentes :
+    - Soit en exécutant la commande "stop".
+    - Soit en envoyant un EOF dans STDIN.
+    - Soit en exéccutant "sys.exit()".
+    """
+    def _do_cli_loop ( self ) :
         while True :
             try :
                 command = input()
