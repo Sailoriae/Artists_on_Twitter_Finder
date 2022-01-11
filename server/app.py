@@ -57,7 +57,12 @@ def custom_print ( *args, **kwargs ) :
 builtins.print = custom_print
 
 
-# Protection pour le multiprocessing
+# Protection pour le multi-processus
+# Le code précédent a été exécuté si les processus fils sont démarrés avec la
+# méthode "spawn" (Par défaut sous Windows), mais pas s'ils le sont avec la
+# méthode "fork" (Par défaut sous Unix)
+# Doc : https://docs.python.org/3/library/multiprocessing.html
+# Dans les deux cas, nos instructions ci-dessus sont prises en compte
 if __name__ == "__main__" :
     # Importations de librairies standards de Python.
     import sys
