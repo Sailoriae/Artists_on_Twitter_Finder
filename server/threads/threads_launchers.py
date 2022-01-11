@@ -24,11 +24,6 @@ import parameters as param
 from threads.error_collector import error_collector
 
 
-# PID racine, c'est à dire de "app.py". Cette variable est conservée telle
-# quelle lors du "fork".
-PID = os.getpid()
-
-
 """
 Fonction racine à un processus fils du serveur AOTF.
 Lorsqu'on crée un nouveau processus, il faut qu'il puisse gérer les SIGTERM, et
@@ -36,13 +31,14 @@ en envoyer vers "app.py" afin d'arrêter le serveur AOTF.
 Il faut aussi qu'il puisse gérer les SIGHUP lorsque STDOUT n'existe plus, mais
 ne l'envoie pas vers "app.py".
 
+@param parent_pid PID du processus père.
 @param procedure Procédure à exécuter.
 @param *arguments Arguments à passer à cette procédure.
 """
-def subprocess ( procedure, *arguments ) :
+def subprocess ( parent_pid, procedure, *arguments ) :
     def on_sigterm ( signum, frame ) :
         try :
-            os.kill(PID, signal.SIGTERM)
+            os.kill(parent_pid, signal.SIGTERM)
         except OSError : # Le père est déjà mort
             sys.exit(0)
     
@@ -76,7 +72,7 @@ def launch_thread( thread_procedure, thread_id : int, as_process : bool, shared_
         thread_or_process = multiprocessing.Process(
             name = f"{thread_procedure.__name__}_th{thread_id}",
             target = subprocess,
-            args = ( error_collector, thread_procedure, thread_id, shared_memory_uri ) )
+            args = ( os.getpid(), error_collector, thread_procedure, thread_id, shared_memory_uri ) )
     else :
         thread_or_process = threading.Thread(
             name = f"{thread_procedure.__name__}_th{thread_id}",
@@ -115,7 +111,7 @@ def launch_identical_threads_in_container( thread_procedure, number_of_threads, 
         process = multiprocessing.Process(
             name = f"{thread_procedure.__name__}_th_container",
             target = subprocess,
-            args = ( _threads_container_for_identical_threads, thread_procedure, number_of_threads, as_process, shared_memory_uri ) )
+            args = ( os.getpid(), _threads_container_for_identical_threads, thread_procedure, number_of_threads, as_process, shared_memory_uri ) )
         process.start()
         return [ process ]
     else :
@@ -161,7 +157,7 @@ def launch_unique_threads_in_container( thread_procedures, as_process, container
         process = multiprocessing.Process(
             name = f"{container_name}_th_container",
             target = subprocess,
-            args = ( _threads_container_for_unique_threads, thread_procedures, as_process, shared_memory_uri ) )
+            args = ( os.getpid(), _threads_container_for_unique_threads, thread_procedures, as_process, shared_memory_uri ) )
         process.start()
         return [ process ]
     else :
