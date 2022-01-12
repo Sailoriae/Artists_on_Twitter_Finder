@@ -54,7 +54,7 @@ class Threads_Manager :
     """
     def __init__ ( self ) :
         # PID de "app.py". Permet d'éviter que les processus fils éxécutent la
-        # même fonction d'écoute des signaux.
+        # même fonction d'écoute des signaux (Si "fork" sous Unix).
         self._pid = os.getpid()
         
         # Ecouter les signaux nous demandant d'arrêter le serveur

@@ -7,7 +7,7 @@ from time import time, sleep
 """
 Attendre précisemment jusqu'à un certain instant.
 
-@param end_sleep_time Date de fin, instant où s'arrêter, en temps UNIX.
+@param end_sleep_time Date de fin, instant où s'arrêter, en temps Unix.
 @param break_wait Fonction renvoyant True si il faut arrêter l'attente.
 
 @return True si on est arrivé au bout de l'attente, False sinon.
