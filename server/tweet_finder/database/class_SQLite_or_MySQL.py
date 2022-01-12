@@ -180,10 +180,29 @@ class SQLite_or_MySQL :
     Obtenir un curseur.
     @param buffered Pour MySQL, obtenir un curseur dont toutes les données sont
                     sorties de la base de données en mises en cache.
+    @param commit Accepter les modifications faites par d'autres acteurs sur la
+                  BDD MySQL. Dans le cas du serveur AOTF, il faut toujours
+                  mettre sur True si on va utiliser le curseur pour faire un
+                  SELECT. Pas besoin pour un INSERT INTO ou un UPDATE.
     """
-    def _get_cursor( self, buffered = False ) :
+    def _get_cursor( self, buffered = False, commit = False ) :
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
             try :
+                # Il faut faire un COMMIT avant de faire un SELECT afin
+                # d'accepter les modifications faites par d'autres acteurs sur
+                # la base de données MySQL
+                # Sans ça, la base de données sera vue dans le même état que
+                # lors du premier SELECT
+                # Source 1 : https://bugs.mysql.com/bug.php?id=102053
+                # Source 2 : https://stackoverflow.com/a/64864679
+                # Voir documentation sur l'isolation "REPEATABLE READ"
+                if commit : self._conn.commit()
+                # En vrai, je ne suis pas certaine d'avoir bien compris, mais
+                # ça fonctionne
+                # Je n'ai pas l'impression qu'il y ait ce problème avec SQLite
+                # Sauvegarde de la 1ère source car l'explication est chouette :
+                # https://web.archive.org/web/20220112210448/https://bugs.mysql.com/bug.php?id=102053
+                
                 return self._conn.cursor( buffered = buffered )
             except ( mysql.connector.errors.OperationalError, mysql.connector.errors.InternalError ) :
                 print( "Reconnexion à la base de données MySQL..." )
@@ -194,6 +213,10 @@ class SQLite_or_MySQL :
                     password = param.MYSQL_PASSWORD,
                     database = param.MYSQL_DATABASE_NAME
                 )
+                
+                # Idem que ci-dessus
+                if commit : self._conn.commit()
+                
                 return self._conn.cursor( buffered = buffered )
         else :
             return self._conn.cursor()
@@ -306,7 +329,7 @@ class SQLite_or_MySQL :
         
         # Note : Ca ne sert à rien que le curseur soit buffered
         # En fait, en testant sur un gros compte (@MayoRiyo), ça fait perdre plus de temps que ça en fait gagner
-        c = self._get_cursor()
+        c = self._get_cursor( commit = account_id == 0 ) # Sinon on vient de faire un commit
         
         if param.ENABLE_METRICS :
             select_start = time()
@@ -396,7 +419,7 @@ class SQLite_or_MySQL :
             c.execute( update_count, ( account_id, ) )
             self._conn.commit()
         
-        c = self._get_cursor()
+        c = self._get_cursor( commit = account_id == 0 ) # Sinon on vient de faire un commit
         if account_id != 0 :
             c.execute( request, ( request_image_hash, request_image_hash, request_image_hash, request_image_hash, account_id ) )
         else :
@@ -512,7 +535,7 @@ class SQLite_or_MySQL :
             Ou None si le compte est inconnu
     """
     def get_account_SearchAPI_last_tweet_date( self, account_id : int ) -> str :
-        c = self._get_cursor()
+        c = self._get_cursor( commit = True )
         
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
             request = "SELECT last_SearchAPI_indexing_api_date FROM accounts WHERE account_id = %s"
@@ -535,7 +558,7 @@ class SQLite_or_MySQL :
             Ou None si le compte est inconnu
     """
     def get_account_TimelineAPI_last_tweet_id( self, account_id : int ) -> int :
-        c = self._get_cursor()
+        c = self._get_cursor( commit = True )
         
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
             request = "SELECT last_TimelineAPI_indexing_tweet_id FROM accounts WHERE account_id = %s"
@@ -561,7 +584,7 @@ class SQLite_or_MySQL :
             Ou None si le compte est inconnu
     """
     def get_account_SearchAPI_last_scan_local_date( self, account_id : int ) -> str :
-        c = self._get_cursor()
+        c = self._get_cursor( commit = True )
         
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
             request = "SELECT last_SearchAPI_indexing_local_date FROM accounts WHERE account_id = %s"
@@ -591,7 +614,7 @@ class SQLite_or_MySQL :
             Ou None si le compte est inconnu
     """
     def get_account_TimelineAPI_last_scan_local_date( self, account_id : int ) -> int :
-        c = self._get_cursor()
+        c = self._get_cursor( commit = True )
         
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
             request = "SELECT last_TimelineAPI_indexing_local_date FROM accounts WHERE account_id = %s"
@@ -617,7 +640,7 @@ class SQLite_or_MySQL :
             - Le nombre de comptes indexés
     """
     def get_stats( self ) :
-        c = self._get_cursor()
+        c = self._get_cursor( commit = True )
         c.execute( "SELECT COUNT(*) FROM tweets" )
         count_tweets = c.fetchone()[0]
         c.execute( "SELECT COUNT(*) FROM accounts" )
@@ -630,7 +653,7 @@ class SQLite_or_MySQL :
     @return True ou False
     """
     def is_tweet_indexed( self, tweet_id : int ) -> bool :
-        c = self._get_cursor()
+        c = self._get_cursor( commit = True )
         
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
             request = "SELECT tweet_id FROM tweets WHERE tweet_id = %s"
@@ -646,7 +669,7 @@ class SQLite_or_MySQL :
     @return True ou False
     """
     def is_account_indexed( self, account_id : int ) -> bool :
-        c = self._get_cursor()
+        c = self._get_cursor( commit = True )
         
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
             request = "SELECT account_id FROM accounts WHERE account_id = %s"
@@ -670,7 +693,7 @@ class SQLite_or_MySQL :
     - "last_TimelineAPI_indexing_local_date" : Sa date dernière MàJ avec l'API de timeline.
     """
     def get_oldest_updated_account( self ) :
-        c = self._get_cursor()
+        c = self._get_cursor( commit = True )
         
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
             # Le "ORDER BY LEAST()" considère bien la valeur NULL comme
@@ -759,7 +782,7 @@ class SQLite_or_MySQL :
     Les Tweets sont triés par ordre du plus récemment réessayé au plus récent.
     """
     def get_retry_tweets( self ) :
-        c = self._get_cursor()
+        c = self._get_cursor( commit = True )
         
         c.execute( "SELECT tweet_id, account_id, image_1_url, image_2_url, image_3_url, image_4_url, last_retry_date, retries_count FROM reindex_tweets ORDER BY last_retry_date" )
         
@@ -836,7 +859,7 @@ class SQLite_or_MySQL :
     - "last_SearchAPI_indexing_local_date" : Objet "datetime".
     """
     def get_oldest_reseted_account( self ) :
-        c = self._get_cursor()
+        c = self._get_cursor( commit = True )
         
         c.execute( """SELECT account_id,
                              last_SearchAPI_indexing_cursor_reset_date,
