@@ -76,12 +76,15 @@ class Threads_Manager :
         # Liste des threads XOR processus si on est en multi-processus
         self._threads_xor_process = []
         
+        # Permet de ne pas démarrer deux fois le serveur
+        self._launch_started = False
+        
         # Permet de ne pas oublie des processus fils si on éteint le serveur
         # alors qu'on est en train de les créer
-        self._launch_in_progress = None # None pour la phase d'init
+        self._launch_in_progress = False
         
         # Permet de ne lancer qu'une seule fois la procédure d'extinction
-        self._stop_in_progress = False
+        self._stop_started = False
     
     """
     Fonction appelée lorsqu'on reçoit un signal nous demandant d'arrêter le
@@ -123,8 +126,9 @@ class Threads_Manager :
     doivent être exécutés dans un processus conteneur.
     """
     def launch_threads ( self ) :
-        if self._stop_in_progress : return
-        if self._launch_in_progress : return
+        if self._launch_started : return
+        if self._stop_started : return
+        self._launch_started = True
         self._launch_in_progress = True
         
         print( f"[Threads_Manager] Démarrage des {'processus et threads' if param.ENABLE_MULTIPROCESSING else 'threads'}." )
@@ -227,14 +231,14 @@ class Threads_Manager :
     """
     def stop_threads ( self ) :
         # Vérifier que la procédure d'arrêt n'a pas déjà été appelée.
-        if self._stop_in_progress : return
-        self._stop_in_progress = True
+        if self._stop_started : return
+        self._stop_started = True
         
         self._debug.write( "[Threads_Manager] Arrêt initié." )
         
         # Si on est avant le démarrage des threads, la mémoire partagée ni
         # aucun thread n'existe. On peut donc s'arrêter sans rien faire.
-        if self._launch_in_progress == None :
+        if not self._launch_started :
             try : print( "Démarrage annulé." )
             except OSError : pass # Par mesure de sécurité
         
