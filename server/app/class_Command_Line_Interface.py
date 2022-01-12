@@ -51,9 +51,9 @@ class Command_Line_Interface :
         
         # Connexion à l'API Twitter (Pour certaines commandes)
         self._twitter = TweepyAbstraction( param.API_KEY,
-                                          param.API_SECRET,
-                                          param.OAUTH_TOKEN,
-                                          param.OAUTH_TOKEN_SECRET )
+                                           param.API_SECRET,
+                                           param.OAUTH_TOKEN,
+                                           param.OAUTH_TOKEN_SECRET )
     
     """
     Collecteur d'erreurs à l'entrée en ligne de commande. Si "app.py" plante,

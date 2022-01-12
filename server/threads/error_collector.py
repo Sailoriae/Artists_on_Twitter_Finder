@@ -81,7 +81,7 @@ def error_collector( thread_procedure, thread_id : int, shared_memory_uri : str 
                     error_name += f"URL de requête : {request.input_url}\n"
                 
                 # Si la requête est une requête de scan
-                # (On est donc un thread de traitement des requêtes de scan)   
+                # (On est donc un thread de traitement des requêtes de scan)
                 if request != None and request.request_type == "scan" :
                     request.has_failed = True # Mettre la requête en erreur
                     error_name += f"Compte Twitter : @{request.account_name} (ID {request.account_id})\n"

@@ -154,7 +154,7 @@ class Threads_Registry :
                 request = open_proxy( request )
                 
                 # Afficher un thread de traitement des requêtes utilisateurs
-                if request.request_type == "user" : 
+                if request.request_type == "user" :
                     to_print += f" : {request.input_url}\n"
                 
                 # Afficher un thread de traitement des requêtes de scan

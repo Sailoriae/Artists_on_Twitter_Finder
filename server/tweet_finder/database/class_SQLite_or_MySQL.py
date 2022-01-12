@@ -840,7 +840,7 @@ class SQLite_or_MySQL :
         
         c.execute( """SELECT account_id,
                              last_SearchAPI_indexing_cursor_reset_date,
-                             last_SearchAPI_indexing_local_date 
+                             last_SearchAPI_indexing_local_date
                       FROM accounts
                       ORDER BY last_SearchAPI_indexing_cursor_reset_date""" )
         

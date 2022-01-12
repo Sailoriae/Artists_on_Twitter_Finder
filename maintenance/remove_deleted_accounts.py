@@ -39,7 +39,7 @@ auth = tweepy.OAuthHandler(param.API_KEY, param.API_SECRET)
 auth.set_access_token(param.OAUTH_TOKEN, param.OAUTH_TOKEN_SECRET)
 
 # Tweepy gère l'attente lors d'une rate limit !
-api = tweepy.API( auth, 
+api = tweepy.API( auth,
                   wait_on_rate_limit = True )
 
 

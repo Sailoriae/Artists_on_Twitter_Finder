@@ -97,7 +97,7 @@ class CBIR_Engine :
     @param image Une image, au format de la librairie Python-OpenCV
     @return La liste des caractéristiques de l'image
     """
-    def index_cbir( self, image : np.ndarray ) -> List[float] :  
+    def index_cbir( self, image : np.ndarray ) -> List[float] :
         return self.cd.describe( image )
     
     """

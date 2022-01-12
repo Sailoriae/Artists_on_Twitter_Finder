@@ -2,7 +2,7 @@
 # coding: utf-8
 
 import cv2
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
 import itertools
 
 from url_to_cv2_image import url_to_cv2_image
@@ -76,9 +76,9 @@ def plot_histogram( url, test_proof = False ) :
     ax = plt.axes( projection = "3d" )
     
     # Ajouter la grille
-    ax.grid( b = True, color = "grey", 
-             linestyle = "-.", linewidth = 0.3, 
-             alpha = 0.2 ) 
+    ax.grid( b = True, color = "grey",
+             linestyle = "-.", linewidth = 0.3,
+             alpha = 0.2 )
     
     # Afficher les points
     sctt = ax.scatter3D( h, s, v,
@@ -92,8 +92,8 @@ def plot_histogram( url, test_proof = False ) :
     
     # Afficher des légendes
     plt.title( "Histogramme 3D de l'image en HSV" )
-    ax.set_xlabel( "Hue", fontweight = "bold" ) 
-    ax.set_ylabel( "Saturation", fontweight = "bold" ) 
+    ax.set_xlabel( "Hue", fontweight = "bold" )
+    ax.set_ylabel( "Saturation", fontweight = "bold" )
     ax.set_zlabel( "Value", fontweight = "bold" )
     cbar.ax.set_ylabel( "Intensités", fontweight = "bold" )
     

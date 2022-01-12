@@ -40,7 +40,7 @@ class TweepyAbstraction :
         auth.set_access_token(oauth_token, oauth_token_secret)
         
         # Tweepy gère l'attente lors d'une rate limit !
-        self._api = tweepy.API( auth, 
+        self._api = tweepy.API( auth,
                                 wait_on_rate_limit = True # Gérer les rate limits
                                )
         # Note : Ne pas utiliser l'option "retry_count"

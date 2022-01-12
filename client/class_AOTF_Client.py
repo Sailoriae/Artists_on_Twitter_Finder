@@ -42,7 +42,7 @@ class AOTF_Client :
                         serveur AOTF. Peut être mis sur True une fois le
                         débug du programme terminé.
     """
-    def __init__ ( self, 
+    def __init__ ( self,
                    base_api_address : str = "http://localhost:3301/",
                    ignore_check : bool = False ) :
         self._base_api_address : str = base_api_address

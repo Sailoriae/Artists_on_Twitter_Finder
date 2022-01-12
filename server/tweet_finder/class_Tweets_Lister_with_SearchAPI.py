@@ -46,7 +46,7 @@ class Tweets_Lister_with_SearchAPI :
     def __init__( self, api_key, api_secret, oauth_token, oauth_token_secret, auth_token,
                         tweets_queue_put,
                         DEBUG : bool = False, ENABLE_METRICS : bool = False,
-                        add_step_A_time = None, # Fonction de la mémoire partagée 
+                        add_step_A_time = None, # Fonction de la mémoire partagée
                  ) -> None :
         self._tweets_queue_put = tweets_queue_put
         self._DEBUG = DEBUG

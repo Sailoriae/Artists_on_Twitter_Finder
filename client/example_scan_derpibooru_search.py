@@ -9,7 +9,7 @@ from class_AOTF_Client import AOTF_Client
 """
 Fonction permettant de populer la base de données autour d'une recherche sur
 Derpibooru.
-@param SEARCH_TO_SCAN Recherche sur Derpibooru à scanner. 
+@param SEARCH_TO_SCAN Recherche sur Derpibooru à scanner.
 @param LIMIT Limite du nombre de posts Derpibooru à envoyer.
 
 Note : Les images sont envoyées dans l'ordre du score, en descendant. De plus,

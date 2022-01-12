@@ -103,7 +103,7 @@ class Link_Finder :
             - image_urls : Liste des URLs de l'image.  Si il y en a une, c'est
               l'image redimensionnée. Si il y en a deux, la première est la
               résolution originale de l'image, la seconde est redimensionnée.
-            - twitter_accounts : Une liste de comptes Twitter, ou une liste 
+            - twitter_accounts : Une liste de comptes Twitter, ou une liste
               vide si aucun URL de compte Twitter valide n'a été trouvé.
             - publish_date : L'objet datetime de la date de publication de
               l'image.
@@ -140,7 +140,7 @@ class Link_Finder :
         # DEVIANTART
         # ====================================================================
         elif re.match( deviantart_url, illust_url ) != None :
-            twitter_accounts = self._deviantart.get_twitter_accounts( illust_url, 
+            twitter_accounts = self._deviantart.get_twitter_accounts( illust_url,
                                                                       multiplexer = self._link_mutiplexer )
             if twitter_accounts != [] and twitter_accounts != None :
                 image_urls = self._deviantart.get_image_urls( illust_url )

@@ -12,7 +12,7 @@ Attendre précisemment jusqu'à un certain instant.
 
 @return True si on est arrivé au bout de l'attente, False sinon.
 """
-def wait_until ( end_sleep_time : float, break_wait ) -> bool :    
+def wait_until ( end_sleep_time : float, break_wait ) -> bool :
     # On fait des "sleep()" de 3 secondes, ce qui n'est pas précis. Cette
     # valeur est utilisée afin de savoir qu'on approche de la date de fin,
     # afin de faire une dernière attente très précise.

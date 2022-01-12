@@ -39,7 +39,7 @@ def define_max_file_descriptors () :
     
     try :
         import resource
-    except ModuleNotFoundError : # On n'est pas sous un système UNIX
+    except ModuleNotFoundError : # On n'est pas sous un système Unix
         pass
     else :
         resource.setrlimit( resource.RLIMIT_NOFILE, (max_fd, max_fd) )

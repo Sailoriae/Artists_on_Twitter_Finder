@@ -25,7 +25,7 @@ class TwitterSearchScraper ( snscrape.modules.twitter.TwitterSearchScraper ) :
     # un utilisateur sur l'UI web
     # Permet de recevoir les Tweets marqués sensibles
     def set_auth_token ( self, auth_token ) :
-        self._session.cookies.set("auth_token", 
+        self._session.cookies.set("auth_token",
                                   auth_token,
                                   domain = '.twitter.com',
                                   path = '/',

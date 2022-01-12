@@ -87,4 +87,3 @@ for table_id in [4, 3, 2, 1] :
         count += 1
         if count%10 == 0 : # On print() toutes les 10 images
             print( f"tweets_images_{table_id} : {count} images traitées, en moyenne {mean(times)} secondes par image")
-        
