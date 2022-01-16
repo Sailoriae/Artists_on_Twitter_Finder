@@ -184,8 +184,9 @@ class SQLite_or_MySQL :
                   BDD MySQL. Dans le cas du serveur AOTF, il faut toujours
                   mettre sur True si on va utiliser le curseur pour faire un
                   SELECT. Pas besoin pour un INSERT INTO ou un UPDATE.
+    @param retry_once Utilisation interne, ne pas modifier.
     """
-    def _get_cursor( self, buffered = False, commit = False ) :
+    def _get_cursor( self, buffered = False, commit = False, retry_once = True ) :
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
             try :
                 # Il faut faire un COMMIT avant de faire un SELECT afin
@@ -204,7 +205,11 @@ class SQLite_or_MySQL :
                 # https://web.archive.org/web/20220112210448/https://bugs.mysql.com/bug.php?id=102053
                 
                 return self._conn.cursor( buffered = buffered )
-            except ( mysql.connector.errors.OperationalError, mysql.connector.errors.InternalError ) :
+            
+            # On attrape n'importe quel erreur, parce qu'il y en a des privées
+            except Exception as error :
+                if not retry_once :
+                    raise error # Doit tomber dans le collecteur d'erreurs
                 print( "Reconnexion à la base de données MySQL..." )
                 self._conn = mysql.connector.connect(
                     host = param.MYSQL_ADDRESS,
@@ -213,11 +218,8 @@ class SQLite_or_MySQL :
                     password = param.MYSQL_PASSWORD,
                     database = param.MYSQL_DATABASE_NAME
                 )
-                
-                # Idem que ci-dessus
-                if commit : self._conn.commit()
-                
-                return self._conn.cursor( buffered = buffered )
+                return self._get_cursor( buffered = buffered, commit = commit, retry_once = False )
+        
         else :
             return self._conn.cursor()
     
