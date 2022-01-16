@@ -21,6 +21,7 @@ from shared_memory.class_Scan_Requests_Pipeline import Scan_Requests_Pipeline
 from shared_memory.class_HTTP_Requests_Limitator import HTTP_Requests_Limitator
 from shared_memory.class_Metrics_Container import Metrics_Container
 from shared_memory.class_Threads_Registry import Threads_Registry
+from shared_memory.class_Processes_Registry import Processes_Registry
 from shared_memory.open_proxy import open_proxy
 import parameters as param
 from tweet_finder.database.class_SQLite_or_MySQL import SQLite_or_MySQL
@@ -92,6 +93,13 @@ class Shared_Memory :
         # f"{thread_procedure.__name__}_th{thread_id}"
         self._threads_registry_obj = Threads_Registry( self )
         self._threads_registry = self.register_obj( self._threads_registry_obj )
+        
+        
+        # Objet où les processus fils s'enregistrent.
+        # Cela permet de leur passer des messages.
+        if param.ENABLE_MULTIPROCESSING :
+            self._processes_registry_obj = Processes_Registry( self )
+            self._processes_registry = self.register_obj( self._processes_registry_obj )
     
     """
     Getters et setters pour Pyro.
@@ -130,6 +138,12 @@ class Shared_Memory :
     
     @property
     def threads_registry( self ) : return open_proxy( self._threads_registry )
+    
+    @property
+    def processes_registry( self ) :
+        if param.ENABLE_MULTIPROCESSING :
+            return open_proxy( self._processes_registry )
+        raise AssertionError( "Mode multi-processus désactivé, il n'y a pas de registre des processus fils !" )
     
     """
     Lancer le sevreur de mémoire partagée, avec Pyro.

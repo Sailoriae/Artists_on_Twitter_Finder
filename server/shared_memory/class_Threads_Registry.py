@@ -25,7 +25,8 @@ import parameters as param
 """
 Objet pour que les thread enregistrent la requête qu'ils sont en train de
 traiter.
-ATTENTION : Un thread est un processus en mode multi-processus !
+ATTENTION : En mode multi-processus, des threads peuvent être contenus dans des
+processus fils ! Voir le fichier "threads_launcher.py".
 ATTENTION : Pyro crée aussi pleins de threads (Mais pas des processus comme
 nous en mode multi-processus) qui ne sont pas enregistrés ici !
 """
@@ -46,7 +47,7 @@ class Threads_Registry :
         self.register_thread( "thread_pyro_server_th1", os.getpid() )
     
     """
-    Enregistrer un thread / un processus.
+    Enregistrer un thread.
     @param thread_name L'identifiant du thread.
     """
     def register_thread ( self, thread_name : str, pid : int ) :

@@ -47,7 +47,7 @@ S’il utilise une base de données MySQL, vous pouvez aussi le tuer avec `Ctrl 
   - **Etape C :** Indexeur : Analyse et indexation de tous les Tweets trouvés par les étapes de listage (Tous les comptes sont mélangés). Classe principale : [`Tweets_Indexer`](tweet_finder/class_Tweets_Indexer.py).
 * Serveur web pour l'API HTTP qui renvoit les statuts des requêtes, avec les éventuels résultats, ou une erreur s'il y a un problème. Lire le fichier [`API_HTTP.md`](../doc/API_HTTP.md).
 * Limite du nombre de requête en cours de traitement par adresse IP.
-* Possibilité de lancer en mode multi-processus (Paramètre `ENABLE_MULTIPROCESSING`), plus lourd mais plus efficace pour traiter des requêtes (Des utilisateurs et de scans) en parallèle. Note : Dans toute la documentation, on parle toujours de threads, mais **un thread peut devenir un processus en mode multi-processus**.
+* Possibilité de lancer en mode multi-processus (Paramètre `ENABLE_MULTIPROCESSING`), plus lourd mais plus efficace pour traiter des requêtes (Des utilisateurs et de scans) en parallèle. Les threads sont alors contenus dans des processus. Voir l'arbre des processus et des threads plus bas.
 * Mémoire partagée entre tous les threads dans l'objet [`Shared_Memory`](shared_memory/class_Shared_Memory.py) du module [`shared_memory`](shared_memory) (Avec la librairie Pyro4 si démarré en mode multi-processus).
 * Threads de maintenance :
   - Délestage automatique des anciennes requêtes terminées.
@@ -91,28 +91,31 @@ Script [`app.py`](app.py) : Script central, crée et gère les threads de traite
 
 ## Arbre des processus et threads à l'exécution
 
-En mode multi-processus, le serveur AOTF exécute des processus et des threads. Les étapes de traitement nécessitant de la puissance de calcul sont exécutées en tant que processus. Les autres sont exécutées dans des processus regroupant des threads. Ainsi, les processus et threads suivants sont exécutés :
+En mode multi-processus, le serveur AOTF exécute des processus et des threads. Les étapes de traitement nécessitant de la puissance de calcul sont exécutées seules dans des processus conteneurs. Les autres sont exécutées dans des processus regroupant des threads. Ainsi, les processus et threads suivants sont exécutés :
 
 * Processus `app.py` :
   - Thread `thread_pyro_server` (La librairie Pyro4 exécute d'autres threads) : Mémoire partagée.
-  - Processus de groupe de threads :
+  - Processus conteneur :
     - Plusieurs threads `thread_step_1_link_finder` (Nombre défini dans `parameters.py`) : Etape 1, Link Finder.
-  - Processus de group de threads :
+  - Processus conteneur :
     - Plusieurs threads `thread_step_2_tweets_indexer` (Nombre défini dans `parameters.py`) : Etape 2, vérification de l'indexation et de la mise à jour.
-  - Plusieurs processus `thread_step_3_reverse_search` (Nombre défini dans `parameters.py`) : Etape 3, Recherche par image.
-  - Processus de group de threads :
+  - Plusieurs processus conteneurs (Possédant chacun un thread) :
+    - Thread `thread_step_3_reverse_search` (Nombre défini dans `parameters.py`) : Etape 3, Recherche par image.
+  - Processus conteneur :
     - Plusieurs threads `thread_step_A_SearchAPI_list_account_tweets` (Nombre défini dans `parameters.py`) : Etape A, listage avec l'API de recherche.
-  - Processus de group de threads :
+  - Processus conteneur :
     - Plusieurs threads `thread_step_B_TimelineAPI_list_account_tweets` (Nombre défini dans `parameters.py`) : Etape B, listage avec l'API de timeline.
-  - Plusieurs processus `thread_step_C_index_tweets` (Nombre défini dans `parameters.py`) : Etape C, indexation des Tweets trouvés.
-  - Processus `thread_http_server` : Serveur HTTP, API du serveur.
-  - Processus de groupe de threads :
+  - Plusieurs processus conteneurs (Possédant chacun un thread) :
+    - Thread `thread_step_C_index_tweets` (Nombre défini dans `parameters.py`) : Etape C, indexation des Tweets trouvés.
+  - Processus conteneur :
+    - Thread `thread_http_server` : Serveur HTTP, API du serveur.
+  - Processus conteneur :
     - Thread `thread_auto_update_accounts` : Mise à jour automatique.
     - Thread `thread_reset_SearchAPI_cursors` : Délestage des requêtes.
     - Thread `thread_remove_finished_requests` : Réinitialisation des curseurs de l'API de recherche.
     - Thread `thread_retry_failed_tweets` : Retentative d'indexation de Tweets échoués.
 
-Si le mode multi-processus est désactivé, tous les processus deviennent des threads (Sauf `app.py`), et les processus de groupes de threads disparaissent.
+Si le mode multi-processus est désactivé, les processus conteneurs disparaissent, et les threads sont éxécutés directement par `app.py`.
 
 
 ## Philosophie

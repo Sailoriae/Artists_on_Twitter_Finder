@@ -5,6 +5,8 @@ import os
 import sys
 import signal
 from time import sleep
+from datetime import datetime
+import traceback
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
 # Ainsi, si on veut utiliser ce script indépendamment (Notamment pour des
@@ -223,6 +225,30 @@ class Threads_Manager :
                 self._shared_memory.get_URI() ) )
         
         self._launch_in_progress = False
+    
+    """
+    Ecrire les piles d'appels des threads du serveur AOTF.
+    """
+    def write_stacks ( self ) :
+        file = open( "stacktrace.log", "a", encoding = "utf-8" )
+        file.write( f"ETAT DU SERVEUR AOTF LE {datetime.now().strftime('%Y-%m-%d A %H:%M:%S')} :\n" )
+        file.write( self._shared_memory.threads_registry.get_status() + "\n" )
+        file.write( "\n\n\n" )
+        file.close()
+        
+        if param.ENABLE_MULTIPROCESSING :
+            if self._shared_memory != None :
+                self._shared_memory.processes_registry.write_stacks()
+        
+        else :
+            # Même boucle dans le fichier "threads_launcher.py"
+            for thread in self._threads_xor_process :
+                to_write = f"[PID {os.getpid()}] Procédure {thread.name} le {datetime.now().strftime('%Y-%m-%d à %H:%M:%S')} :\n"
+                to_write += "".join( traceback.format_stack( sys._current_frames()[thread.ident] ) )
+                to_write += "\n\n\n"
+                file = open( "stacktrace.log", "a", encoding = "utf-8" )
+                file.write( to_write )
+                file.close()
     
     """
     Fonction permettant d'arrêter les threads du serveur AOTF. Utilisée lors de

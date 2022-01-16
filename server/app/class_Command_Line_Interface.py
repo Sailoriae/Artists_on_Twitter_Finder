@@ -40,8 +40,9 @@ class Command_Line_Interface :
     """
     Constructeur.
     """
-    def __init__ ( self, shared_memory ) :
+    def __init__ ( self, shared_memory, threads_manager ) :
         self._shared_memory = shared_memory
+        self._threads_manager = threads_manager
         
         # Garder des proxies ouverts
         self._shared_memory_user_requests = shared_memory.user_requests
@@ -152,6 +153,12 @@ class Command_Line_Interface :
                     self._do_metrics()
                 else :
                     print( "Utilisation : metrics")
+            
+            elif args[0] == "stacks" :
+                if len(args) == 1 :
+                    self._do_stacks()
+                else :
+                    print( "Utilisation : stacks")
             
             elif args[0] == "help" :
                 if len(args) == 1 :
@@ -266,8 +273,8 @@ class Command_Line_Interface :
                     print( "Aucun Tweet trouvé !" )
     
     """
-    Commande "threads" : Permet d'afficher les threads et/ou processus en cours
-    d'exécution, ainsi que ce qu'ils sont en trainde faire.
+    Commande "threads" : Permet d'afficher les threads en cours d'exécution,
+    ainsi que ce qu'ils sont en trainde faire.
     """
     def _do_threads ( self ) :
         print( self._shared_memory_threads_registry.get_status() )
@@ -311,6 +318,14 @@ class Command_Line_Interface :
             print( self._shared_memory_execution_metrics.get_metrics() )
     
     """
+    Commande "metrics" : Permet d'écrire les piles d'appels des threads dans un
+    fichier. En mode multi-processus, cela envoie un ordre aux processus fils.
+    """
+    def _do_stacks ( self ) :
+        print( "Ecriture des piles d'appels des threads." )
+        self._threads_manager.write_stacks()
+    
+    """
     Commande "help" : Permet d'afficher l'aide sur les commandes de la CLI.
     """
     def _do_help ( self ) :
@@ -326,7 +341,9 @@ class Command_Line_Interface :
                "Relancez cette commande pour voir l'avancement de la requête.\n" +
                "\n" +
                "Afficher des statistiques de la base de données : stats\n" +
-               f"Afficher les {'processus et threads' if param.ENABLE_MULTIPROCESSING else 'threads'} et ce qu'ils font : threads\n" +
+               f"Afficher les threads et ce qu'ils font : threads\n" +
                "Afficher la taille des files d'attente : queues\n" +
+               "Afficher les mesures de temps d'exécution : metrics\n" +
+               "Ecrire les piles d'appels dans un fichier : stacks\n" +
                "Arrêter le serveur : stop\n" +
                "Afficher l'aide : help" )

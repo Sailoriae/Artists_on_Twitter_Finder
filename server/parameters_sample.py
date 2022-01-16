@@ -4,7 +4,7 @@
 """
 Activer le mode multi-processus.
 
-Si ce paramètre activé, de nombreux sous-processus seront créés, ainsi qu'un
+Si ce paramètre activé, de nombreux processus fils seront créés, ainsi qu'un
 serveur de mémoire partagée reposant sur la librairie Pyro sera créé. Le
 serveur sera donc plus lourd, mais le traitement des requêtes sera bien plus
 efficace.

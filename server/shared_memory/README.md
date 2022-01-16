@@ -1,6 +1,6 @@
 # Mémoire partagée
 
-Lors de l'éxécution du serveur AOTF, les threads (Ou processus en mode mode multi-processus) ont besoin de partager des données, par exemple les files d'attentes avant une étape dans l'un des deux pipelines de traitement ([`user_pipeline`](../threads/user_pipeline) et [`scan_pipeline`](../threads/scan_pipeline)). La mémoire partagée permet de stocker et restituer ces données.
+Lors de l'éxécution du serveur AOTF, les threads (Et les processus conteneurs en mode mode multi-processus) ont besoin de partager des données, par exemple les files d'attentes avant une étape dans l'un des deux pipelines de traitement ([`user_pipeline`](../threads/user_pipeline) et [`scan_pipeline`](../threads/scan_pipeline)). La mémoire partagée permet de stocker et restituer ces données.
 
 Celle-ci consiste en un objet racine, `Shared_Memory`, et recursivement des sous-objets stockés dans les attributs. Si le serveur est démarré en mode multi-processus (`ENABLE_MULTIPROCESSING` est à `True`), la mémoire partagée est un serveur tournant avec la librairie Python `Pyro4`. Sinon, l'objet racine peut être simplement partagé entre les threads.
 
@@ -27,7 +27,7 @@ Le script `app.py` appelle la fonction `launch_shared_memory()`. Celle-ci lance 
 
 ## Procédure du thread du serveur Pyro
 
-La procédure racine du thread du serveur Pyro est `thread_pyro_server`. Elle ne peut pas être un sous-processus de `app.py`, car cela empêche les accès aux données depuis d'autres threads.
+La procédure racine du thread du serveur Pyro est `thread_pyro_server`. Elle ne peut pas être un processus fils de `app.py`, car cela empêche les accès aux données depuis d'autres threads.
 
 Note : Le script `thread_pyro_server.py` peut aussi être exécuté indépendamment... Mais ça ne sert à rien, sauf à débugger.
 
@@ -72,7 +72,8 @@ Arbre des objets :
 
   - Attribut `http_limitator` : URI vers objet `HTTP_Requests_Limitator` : Limitateur du nombre de requêtes sur l'API HTTP.
   - Attribut `execution_metrics` : URI vers objet `Metrics_Container` : Récepteur et conteneur des temps de calculs des threads de traitement.
-  - Attribut `threads_registry` : URI vers objet `Threads_Registry` : Objet auquel les threads / processus s'enregistrent. De plus, les threads de traitement déclarent les requêtes qu'ils sont en train de traiter (En donnent l'URI de la requête concernée).
+  - Attribut `threads_registry` : URI vers objet `Threads_Registry` : Objet auquel les threads s'enregistrent. De plus, les threads de traitement déclarent les requêtes qu'ils sont en train de traiter (En donnent l'URI de la requête concernée).
+  - Attribut `processes_registry` : URI vers objet `Processes_Registry` : Objet auquel les processus fils s'enregistrent Permet de leur passer des messages.
 
 Voir chaque classe pour plus de documentation.
 

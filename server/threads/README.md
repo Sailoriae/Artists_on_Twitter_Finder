@@ -1,6 +1,6 @@
 # Procédures des threads du serveur AOTF
 
-Le script `app.py` (Présent dans le répertoire parent à celui-ci), est le script central du serveur AOTF, et donc la racine de l'arbre des threads et sous processus (Si on est en mode multi-processus, c'est à dire que le paramètre `ENABLE_MULTIPROCESSING` est à `True`). Il gère ses threads ou sous-processus, ainsi que celui de la mémoire partagée; via la classe `Threads_Manager` (Répertoire [`app`](../app)).
+Le script `app.py` (Présent dans le répertoire parent à celui-ci), est le script central du serveur AOTF, et donc la racine de l'arbre des threads et processus fils (Si on est en mode multi-processus, c'est à dire que le paramètre `ENABLE_MULTIPROCESSING` est à `True`). Il gère ses threads et processus fils (Qui contiennent des threads), ainsi que celui de la mémoire partagée; via la classe `Threads_Manager` (Répertoire [`app`](../app)).
 
 Les procédures des threads sont présentes dans ce répertoire, ainsi que les fonctions utilisées pour les démarrer.
 Les objets de la mémoire partagée et sa procédure de thread sont présents dans le répertoire [`shared_memory`](../shared_memory).
@@ -24,7 +24,7 @@ Il y a deux types de requêtes : Les requêtes utilisateur, et les requêtes de 
 La fonction `error_collector()` est le collecteur d'erreurs. C'est la procédure conteneur de chaque thread du serveur. Comme son nom l'indique, elle permet de collecter les erreurs, de les enregistrer dans des fichiers, et de redémarrer le thread. Elle met aussi la requête en échec si le thread était en train de traiter une requête (Utilisateur ou scan).
 
 Les fonctions dans le script `threads_launchers.py` permettent de lancer des threads dans le collecteur d'erreurs :
-- `launch_thread()` : Lancer un thread ou un processus sans conteneur.
+- `launch_thread()` : Lancer un thread sans conteneur ou un thread seul dans un processus.
 - `launch_identical_threads_in_container()` : Lancer plusieurs threads ou processus identiques, c'est à dire qu'ils utilisent la même procédure. Si ce sont des threads et que le mode multi-processus est activé (`ENABLE_MULTIPROCESSING` à `True`), ils seront placés dans processus conteneur. Cela permet de rendre leur GIL indépendant, sans prendre autant de mémoire vive si tous ces threads étaient des processus.
 - `threads_container_for_unique_threads()` : Idem, mais pour des threads ou processus uniques.
 

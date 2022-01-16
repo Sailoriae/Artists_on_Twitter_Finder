@@ -39,7 +39,7 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
 # On écrase la fonction "print()" par défaut de Python. On peut vérifier
-# facilement que ceci s'appliquer récursivement à tous les modules importés, et
+# facilement que ceci s'applique récursivement à tous les modules importés, et
 # dans tous les threads et processus fils.
 import builtins
 builtin_print = print
@@ -123,14 +123,16 @@ if __name__ == "__main__" :
     shared_memory = threads_manager._shared_memory
     
     
-    # On s'enregistre comme thread / processus.
+    # On s'enregistre comme thread et processus.
     # Note : Pyro crée aussi pleins de threads (Mais pas des processus comme
     # nous en mode multi-processus) qui ne sont pas enregistrés dans notre
     # registre des threads. Et ce n'est pas grave.
     shared_memory.threads_registry.register_thread( "app.py", os.getpid() )
+    if param.ENABLE_MULTIPROCESSING :
+        shared_memory.processes_registry.register_process( os.getpid() )
     
     # Exécuter le back-end, c'est à dire l'entrée en ligne de commande (CLI).
-    cli = Command_Line_Interface( shared_memory )
+    cli = Command_Line_Interface( shared_memory, threads_manager )
     cli.do_cli_loop()
     
     # Si on est sorti de la boucle de la CLI, c'est que la commande "stop" a

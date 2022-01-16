@@ -102,7 +102,7 @@ def error_collector( thread_procedure, thread_id : int, shared_memory_uri : str 
             if error_count < 100 : # Ne pas créer trop de logs, s'il y a autant d'erreurs, c'est que c'est la même
                 file = open( f"{thread_procedure.__name__}_th{thread_id}_errors.log", "a" )
                 file.write( "ICI LE COLLECTEUR D'ERREURS GENERAL !\n" )
-                file.write( "Je suis dans le fichier suivant : app/error_collector.py\n" )
+                file.write( "Je suis dans le fichier suivant : threads/error_collector.py\n" )
                 file.write( error_name )
                 traceback.print_exc( file = file )
                 if pyro_traceback != None : file.write( pyro_traceback )
