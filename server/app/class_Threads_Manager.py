@@ -100,7 +100,10 @@ class Threads_Manager :
         # screen dans laquelle on est contenu n'existe plus, et donc que STDOUT
         # est fermé. Il faut informer nos processus fils si on est en mode
         # multi-processus, et restaurer notre STDOUT.
-        if signum == 1 :
+        is_sighup = False
+        try : is_sighup = signum == signal.SIGHUP.numerator
+        except AttributeError : pass # Windows
+        if is_sighup :
             if param.ENABLE_MULTIPROCESSING :
                 for process in self._threads_xor_process :
                     os.kill( process.pid, signal.SIGHUP )
