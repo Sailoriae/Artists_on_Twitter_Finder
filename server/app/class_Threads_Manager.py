@@ -27,7 +27,10 @@ from app.class_Debug_File import Debug_File
 
 from shared_memory.launch_shared_memory import launch_shared_memory
 
-from threads.threads_launchers import launch_thread, launch_identical_threads_in_container, launch_unique_threads_in_container
+from threads.threads_launchers import launch_thread
+from threads.threads_launchers import launch_identical_threads_in_container
+from threads.threads_launchers import launch_unique_threads_in_container
+from threads.threads_launchers import write_stacks
 
 from threads.user_pipeline.thread_step_1_link_finder import thread_step_1_link_finder
 from threads.user_pipeline.thread_step_2_tweets_indexer import thread_step_2_tweets_indexer
@@ -241,14 +244,7 @@ class Threads_Manager :
                 self._shared_memory.processes_registry.write_stacks()
         
         else :
-            # Même boucle dans le fichier "threads_launcher.py"
-            for thread in self._threads_xor_process :
-                to_write = f"[PID {os.getpid()}] Procédure {thread.name} le {datetime.now().strftime('%Y-%m-%d à %H:%M:%S')} :\n"
-                to_write += "".join( traceback.format_stack( sys._current_frames()[thread.ident] ) )
-                to_write += "\n\n\n"
-                file = open( "stacktrace.log", "a", encoding = "utf-8" )
-                file.write( to_write )
-                file.close()
+            write_stacks( self._threads_xor_process )
     
     """
     Fonction permettant d'arrêter les threads du serveur AOTF. Utilisée lors de

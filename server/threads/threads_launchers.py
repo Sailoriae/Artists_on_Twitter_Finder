@@ -104,14 +104,16 @@ def subprocess_procedure ( threads_list, shared_memory_uri ) :
         
         # Ordre d'écriture des piles d'éxécution de nos threads
         if message == "write_stacks" :
-            # Même boucle dans le fichier "class_Threads_Manager.py"
-            for thread in threads_list :
-                to_write = f"[PID {os.getpid()}] Procédure {thread.name} le {datetime.now().strftime('%Y-%m-%d à %H:%M:%S')} :\n"
-                to_write += "".join( traceback.format_stack( sys._current_frames()[thread.ident] ) )
-                to_write += "\n\n\n"
-                file = open( "stacktrace.log", "a", encoding = "utf-8" )
-                file.write( to_write )
-                file.close()
+            write_stacks( threads_list )
+
+def write_stacks ( threads_list ) :
+    for thread in threads_list :
+        to_write = f"[PID {os.getpid()}] Procédure {thread.name} le {datetime.now().strftime('%Y-%m-%d à %H:%M:%S')} :\n"
+        to_write += "".join( traceback.format_stack( sys._current_frames()[thread.ident] ) )
+        to_write += "\n\n\n"
+        file = open( "stacktrace.log", "a", encoding = "utf-8" )
+        file.write( to_write )
+        file.close()
 
 
 """
