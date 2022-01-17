@@ -31,3 +31,8 @@ Elle mène bien à une page web contenant l'image, et non à l'image directement
 L'URL de l'illustration est l'entrée utilisateur de l'API ou de la CLI, traités dans `app.py`.
 
 La classe `Link_Finder` (Dans le répertoire parent à celui-ci), permet de savoir quel site supporté utiliser, et donc quelle classe choisir.
+
+
+## Où mettre à jour si on ajoute un site supporté
+
+Il y a une liste des sites supportés dans le [`README.md`](../../../README.md) racine, ainsi que dans les fichiers HTML de l'interface web (Répertoire [`public`](../../../public)).
