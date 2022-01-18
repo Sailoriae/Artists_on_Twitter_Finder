@@ -74,6 +74,11 @@ Liste des erreurs possibles :
 - `PROCESSING_ERROR` : Un thread de traitement a planté durant son traitement de cette requête. Il est donc impossible de terminer cette requête !
 - `YOUR_IP_HAS_MAX_PROCESSING_REQUESTS` : L'adresse IP qui a envoyé la requête a atteint son quota maximum de requêtes en cours de traitement. Il faut donc attendre que les autres requêtes envoyées par cette adresse IP finissent leur traitement.
 
+Il existe aussi les erreurs suivantes pour les requêtes directes (Recherche dans toute la base de données ou sur un compte avec un fichier image), mais celles-ci sont utilisables uniquement avec la commnade `search` de la ligne de commande du serveur (Donc ces erreurs ne peuvent pas être obtenues via l'API) :
+- `CANNOT_GET_IMAGE` : Impossible d'obtenir l'image de l'URL entrée.
+- `INVALID_TWITTER_ACCOUNT` : Le compte Twitter sur lequel rechercher n'existe pas, ou n'est pas disponible.
+- `TWITTER_ACCOUNT_NOT_INDEXED` : Le compte Twitter sur lequel rechercher existe et est accessible, mais n'est pas indexé.
+
 
 ## Endpoint `POST /query`
 

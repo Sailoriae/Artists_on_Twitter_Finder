@@ -96,7 +96,7 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
                     # Si l'URL ne vient pas du Link Finder, c'est un problème d'entrée utilisateur
                     if request.is_direct :
                         print( f"[step_3_th{thread_id}] Impossible d'obtenir l'image entrée par l'utilisateur !" )
-                        request.problem = "ERROR_DURING_REVERSE_SEARCH"
+                        request.problem = "CANNOT_GET_IMAGE"
                         break # Sortir pour terminer le requête proprement
                     # Sinon, on plante en indiquant que c'est de la faute du Link Finder
                     request.release_proxy()
@@ -145,8 +145,10 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
                                                        account_id = twitter_account[1] )
                 except Unfound_Account_on_Reverse_Searcher :
                     print( f"[step_3_th{thread_id}] Le compte Twitter @{twitter_account[0]} est privé, désactivé ou inexistant !" )
+                    request.problem = "INVALID_TWITTER_ACCOUNT"
                 except Account_Not_Indexed :
                     print( f"[step_3_th{thread_id}] Le compte Twitter @{twitter_account[0]} n'est pas indexé !" )
+                    request.problem = "TWITTER_ACCOUNT_NOT_INDEXED"
                 else :
                     request.found_tweets += result
             
