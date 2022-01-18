@@ -1,9 +1,11 @@
 #!/usr/bin/python3
 # coding: utf-8
 
+import sys
 import re
 import traceback
 from datetime import datetime
+from time import sleep
 
 # Il suffit juste d'importer ce module pour avoir un historique des entrées
 # dans "input()", ce qui permet d'avoir un historique de la CLI.
@@ -75,6 +77,11 @@ class Command_Line_Interface :
             try :
                 self._do_cli_loop()
             except Exception :
+                # Si c'est que STDIN est fermé, on peut quitter
+                if sys.stdin.closed :
+                    print( "STDIN fermé ! Arrêt de la ligne de commande." )
+                    break
+                
                 error_name = "Erreur dans l'entrée en ligne de commande !\n"
                 error_name +=  f"S'est produite le {datetime.now().strftime('%Y-%m-%d à %H:%M:%S')}.\n"
                 
@@ -88,6 +95,9 @@ class Command_Line_Interface :
                 
                 print( error_name )
                 traceback.print_exc()
+                
+                # Eviter de trop reboucler
+                sleep( 1 )
             else :
                 break
     

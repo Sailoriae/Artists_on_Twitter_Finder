@@ -136,5 +136,6 @@ if __name__ == "__main__" :
     cli.do_cli_loop()
     
     # Si on est sorti de la boucle de la CLI, c'est que la commande "stop" a
-    # été exécutée. On peut donc lancer la procédure d'arrêt de serveur AOTF.
+    # été exécutée, ou que STDIN a été fermé. On peut donc lancer la procédure
+    # d'arrêt de serveur AOTF.
     threads_manager.stop_threads()
