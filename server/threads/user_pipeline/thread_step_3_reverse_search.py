@@ -146,9 +146,13 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
                 except Unfound_Account_on_Reverse_Searcher :
                     print( f"[step_3_th{thread_id}] Le compte Twitter @{twitter_account[0]} est privé, désactivé ou inexistant !" )
                     request.problem = "INVALID_TWITTER_ACCOUNT"
+                    if not request.is_direct :
+                        raise Exception( "Code théoriquement impossible à atteindre" )
                 except Account_Not_Indexed :
                     print( f"[step_3_th{thread_id}] Le compte Twitter @{twitter_account[0]} n'est pas indexé !" )
                     request.problem = "TWITTER_ACCOUNT_NOT_INDEXED"
+                    if not request.is_direct :
+                        raise Exception( "Code théoriquement impossible à atteindre" )
                 else :
                     request.found_tweets += result
             
