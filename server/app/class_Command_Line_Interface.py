@@ -235,12 +235,12 @@ class Command_Line_Interface :
     def _do_scan ( self, account_name ) :
         # Vérification que le nom d'utilisateur Twitter est possible
         if re.compile( r"^@?(\w){1,15}$" ).match( account_name ) :
-            print( f"Demande de scan / d'indexation du compte @{account_name}." )
             account_id = self._twitter.get_account_id( account_name )
             
             if account_id == None :
                 print( f"Compte @{account_name} inexistant ou indisponible !" )
             else :
+                print( f"Demande de scan / d'indexation du compte @{account_name}." )
                 self._shared_memory_scan_requests.launch_request( account_id, account_name )
         else :
             print( "Nom de compte Twitter impossible !" )
