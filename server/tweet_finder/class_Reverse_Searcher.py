@@ -63,13 +63,15 @@ class Reverse_Searcher :
     def search_tweet ( self, pil_image : Image,
                              account_name : str = None,
                              account_id : int = None ) :
-        if account_name != None or account_id != None:
+        if account_name != None and account_id == None :
+            account_id = self._twitter.get_account_id( account_name )
             if account_id == None :
-                account_id = self._twitter.get_account_id( account_name )
-            if account_id == None :
-                print( f"Compte @{account_name} inexistant, ou désactivé, ou privé !" )
+                print( f"[Reverse_Searcher] Compte @{account_name} inexistant, ou désactivé, ou privé !" )
                 return None
-        else :
+            if not self._bdd.is_account_indexed( account_id ) :
+                print( f"[Reverse_Searcher] Compte @{account_name} non-indexé !" )
+                return []
+        elif account_name == None :
             account_id = 0
         
         if self._DEBUG or self._ENABLE_METRICS :
@@ -121,13 +123,15 @@ class Reverse_Searcher :
     def search_exact_tweet ( self, pil_image : Image,
                                    account_name : str = None,
                                    account_id : int = None ) :
-        if account_name != None or account_id != None:
+        if account_name != None and account_id == None :
+            account_id = self._twitter.get_account_id( account_name )
             if account_id == None :
-                account_id = self._twitter.get_account_id( account_name )
-            if account_id == None :
-                print( f"Compte @{account_name} inexistant, ou désactivé, ou privé !" )
+                print( f"[Reverse_Searcher] Compte @{account_name} inexistant, ou désactivé, ou privé !" )
                 return None
-        else :
+            if not self._bdd.is_account_indexed( account_id ) :
+                print( f"[Reverse_Searcher] Compte @{account_name} non-indexé !" )
+                return []
+        elif account_name == None :
             account_id = 0
         
         if self._DEBUG or self._ENABLE_METRICS :
