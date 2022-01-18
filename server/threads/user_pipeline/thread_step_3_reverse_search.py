@@ -110,6 +110,9 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
                 request.problem = "NOT_AN_URL" # C'est une erreur du Link Finder, mais elle veut dire la même chose
                 break # On n'a pas pu obtenir l'image
             
+            # Reset "retry_once" pour l'étape suivante car on a réussi
+            retry_once = True
+            
             try :
                 request_image_pil = binary_image_to_PIL_image( query_image_as_bytes )
             except UnidentifiedImageError as error :
