@@ -21,6 +21,8 @@ if __name__ == "__main__" :
 
 import parameters as param
 from tweet_finder.class_Reverse_Searcher import Reverse_Searcher
+from tweet_finder.class_Reverse_Searcher import Unfound_Account_on_Reverse_Searcher
+from tweet_finder.class_Reverse_Searcher import Account_Not_Indexed
 from tweet_finder.utils.url_to_content import url_to_content, File_Too_Big
 from tweet_finder.utils.url_to_PIL_image import binary_image_to_PIL_image
 
@@ -137,21 +139,23 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
             for twitter_account in request.twitter_accounts_with_id :
                 print( f"[step_3_th{thread_id}] Recherche sur le compte Twitter @{twitter_account[0]}." )
                 
-                result = cbir_engine.search_tweet( request_image_pil,
-                                                   account_name = twitter_account[0],
-                                                   account_id = twitter_account[1] )
-                if result != None :
-                    request.found_tweets += result
-                else :
+                try :
+                    result = cbir_engine.search_tweet( request_image_pil,
+                                                       account_name = twitter_account[0],
+                                                       account_id = twitter_account[1] )
+                except Unfound_Account_on_Reverse_Searcher :
                     print( f"[step_3_th{thread_id}] Le compte Twitter @{twitter_account[0]} est privé, désactivé ou inexistant !" )
+                except Account_Not_Indexed :
+                    print( f"[step_3_th{thread_id}] Le compte Twitter @{twitter_account[0]} n'est pas indexé !" )
+                else :
+                    request.found_tweets += result
             
             # Si il n'y a pas de compte Twitter dans la requête
             if request.twitter_accounts_with_id == []:
                 print( f"[step_3_th{thread_id}] Recherche dans toute la base de données. Attention cela peut mener à des faux-négatifs (<10%) !" )
                 
                 result = cbir_engine.search_exact_tweet( request_image_pil )
-                if result != None :
-                    request.found_tweets += result
+                request.found_tweets += result
             
             # Avant de trier la liste des résultats, on pourrait utiliser l'API
             # Twitter pour vérifier que les Tweets trouvés existent encore. On

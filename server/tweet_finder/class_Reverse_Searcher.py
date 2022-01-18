@@ -23,6 +23,12 @@ from tweet_finder.twitter.class_TweepyAbstraction import TweepyAbstraction
 import parameters as param
 
 
+class Unfound_Account_on_Reverse_Searcher ( Exception ) :
+    pass
+class Account_Not_Indexed ( Exception ) :
+    pass
+
+
 class Reverse_Searcher :
     """
     Constructeur.
@@ -58,7 +64,10 @@ class Reverse_Searcher :
             - tweet_id : L'ID du Tweet contenant l'image
             - distance : La distance calculée avec l'image de requête
             - image_position : La position de l'image dans le Tweet (1-4)
-            None si "account_name" est inexistant, ou désactivé, ou privé
+    
+    Peut émettre une exception "Unfound_Account_on_Reverse_Searcher" si le
+    compte est introuvable.
+    Peut émettre des "Account_Not_Indexed" si le compte n'est pas indexé.
     """
     def search_tweet ( self, pil_image : Image,
                              account_name : str = None,
@@ -67,10 +76,10 @@ class Reverse_Searcher :
             account_id = self._twitter.get_account_id( account_name )
             if account_id == None :
                 print( f"[Reverse_Searcher] Compte @{account_name} inexistant, ou désactivé, ou privé !" )
-                return None
+                raise Unfound_Account_on_Reverse_Searcher
             if not self._bdd.is_account_indexed( account_id ) :
                 print( f"[Reverse_Searcher] Compte @{account_name} non-indexé !" )
-                return []
+                raise Account_Not_Indexed
         elif account_name == None :
             account_id = 0
         
@@ -118,7 +127,10 @@ class Reverse_Searcher :
             - distance : La distance calculée avec l'image de requête
                          Ici, cette distance est forcément de 0
             - image_position : La position de l'image dans le Tweet (1-4)
-            None si "account_name" est inexistant, ou désactivé, ou privé
+    
+    Peut émettre une exception "Unfound_Account_on_Reverse_Searcher" si le
+    compte est introuvable.
+    Peut émettre des "Account_Not_Indexed" si le compte n'est pas indexé.
     """
     def search_exact_tweet ( self, pil_image : Image,
                                    account_name : str = None,
@@ -127,10 +139,10 @@ class Reverse_Searcher :
             account_id = self._twitter.get_account_id( account_name )
             if account_id == None :
                 print( f"[Reverse_Searcher] Compte @{account_name} inexistant, ou désactivé, ou privé !" )
-                return None
+                raise Unfound_Account_on_Reverse_Searcher
             if not self._bdd.is_account_indexed( account_id ) :
                 print( f"[Reverse_Searcher] Compte @{account_name} non-indexé !" )
-                return []
+                raise Account_Not_Indexed
         elif account_name == None :
             account_id = 0
         
