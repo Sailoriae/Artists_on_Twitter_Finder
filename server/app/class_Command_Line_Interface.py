@@ -253,6 +253,11 @@ class Command_Line_Interface :
     def _do_search ( self, image_url, account_name = None ) :
         request = None
         
+        # Note : Ne pas être tenté d'aller vérifier l'ID du compte Twitter.
+        # Parce que du coup il sera validé à chaque requête, ou alors il faut
+        # faire un cache, donc un truc complexe en plus. Il y a des erreurs
+        # dans les requêtes directes qui sont adaptées. Ca ne sert à rien
+        # d'ajouter une vérification ici.
         if account_name != None :
             # Vérification que le nom d'utilisateur Twitter est possible
             if re.compile( r"^@?(\w){1,15}$" ).match( account_name ) :
