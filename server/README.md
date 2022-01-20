@@ -1,7 +1,7 @@
 # Serveur Artists on Twitter Finder
 
 Le serveur de "Artists on Twitter Finder" exécute tout le traitement des requêtes, et gère sa base de données.
-Il possède une API HTTP pour recevoir les requêtes, et y répondre.
+Il possède une API HTTP pour recevoir les requêtes, et y répondre (Lire sa documentation dans [`API_HTTP.md`](../doc/API_HTTP.md)).
 Lorsqu'il est démarré, il affiche une interface en ligne de commande. Tapez `help` dans cette interface pour avoir la liste des commandes disponibles.
 
 
@@ -27,6 +27,18 @@ Ceci lance le serveur et vous met en ligne de commande. Si vous souhaitez quitte
 
 Pour arrêter le serveur, vous pouvez soit exécuter la commande `stop` dans sa ligne de commande, soit lui envoyer un signal `SIGTERM`.
 S’il utilise une base de données MySQL, vous pouvez aussi le tuer avec `Ctrl + C` ou un signal `SIGKILL`. Ceci n'est pas embêtant pour la cohérence des données.
+
+Pendant l'exécution du serveur (Hors des phases de démarrage et d'arrêt), les commandes suivantes sont disponibles :
+* `query [URL de l'illustration]` : Lancer une requête et voir son état. Il faut donc relancer cette commande pour obtenir l'état et les résultats de la requête. Cette commande fonctionne de manière similaire à l'endpoint `/query` de l'API HTTP.
+* `scan [Nom du compte à scanner]` : Indexer ou mettre à jour l'indexation des Tweets d'un compte Twitter.
+* `search [URL du fichier image] [Optionnel : Nom du compte Twitter sur lequel rechercher]` : Rechercher une image dans toute la base de données, ou sur un compte en particulier. Permet une utilisation plus souple du serveur. Comme pour la commande `query`, il faut relancer la commande pour obtenir l'état et les résultats de la recherche.
+* `stats` : Afficher des statistiques de la base de données.
+* `threads` : Afficher les threads et ce qu'ils font.
+* `queues` : Afficher la taille des files d'attente.
+* `metrics`: Afficher les mesures de temps d'exécution. Le paramètre `ENABLE_METRICS` doit être sur `True` pour autoriser le serveur à mesurer des temps d'exécution. Ces mesures ont étés placées à des endroits précis du traitement des requêtes.
+* `stacks` : Ecrire les piles d'appels des threads dans un fichier `stacktrace.log`. Si un thread est bloqué, cette commande est très utile pour comprendre où il coincé, et ainsi débugger.
+* `stop` : Arrêter le serveur.
+* `help` : Afficher l'aider.
 
 
 ## Fonctionnalités
