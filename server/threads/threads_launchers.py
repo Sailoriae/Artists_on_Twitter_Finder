@@ -232,7 +232,10 @@ def launch_unique_threads_in_container( thread_procedures, in_process, container
 # En mode multi-processus, cette fonction est appelée par "subprocess()"
 def _threads_container_for_unique_threads( thread_procedures, in_process, shared_memory_uri ) :
     threads_or_process = []
+    counts = {} # Si il y a plusieurs fois la même procédure dans la liste
     for procedure in thread_procedures :
+        if procedure in counts : counts[ procedure ] += 1
+        else : counts[ procedure ] = 1
         threads_or_process.append(
-            launch_thread( procedure, 1, in_process, shared_memory_uri ) )
+            launch_thread( procedure, counts[ procedure ], in_process, shared_memory_uri ) )
     return threads_or_process
