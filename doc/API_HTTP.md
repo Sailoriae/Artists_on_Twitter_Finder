@@ -17,7 +17,7 @@ Les requêtes sont identifiées par leur URL (C'est à dire l'URL de l'illustrat
 Par exemple : `GET /query?url=https://www.deviantart.com/serafleur/art/Sailor-Moon-604185347`
 
 Le serveur répond par un JSON qui contient toujours les mêmes champs :
-```
+```json
 {
 	"status" : "END",
 	"has_first_time_scan" : true,
