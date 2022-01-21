@@ -16,10 +16,12 @@ class Mean_Container:
         self._count = 0 # Compteur des valeurs ajoutées
     
     def add_one ( self, value ) :
+        if value == None : return
         self._sum += value
         self._count += 1
     
     def add_many ( self, values ) :
+        if values == None : return
         self._sum += sum( values )
         self._count += len( values )
     
@@ -100,14 +102,14 @@ class Metrics_Container :
     """
     @param step_3_times Temps d'exécution pour faire la recherche inversée.
                         Doit être dans une liste.
-    @param step_3_select_times Liste des temps d'exécution des SELECT en SQL.
+    @param step_3_select_times Temps d'exécution du SELECT en SQL.
     @param step_3_iteration_times Liste des temps d'exécution pour itérer sur
                                   la base de données.
     @param step_3_usage_times Liste des temps d'exécution de l'utilisation.
     """
     def add_step_3_times ( self, step_3_times, step_3_select_times, step_3_iteration_times, step_3_usage_times ) :
         self._step_3_times.add_many( step_3_times )
-        self._step_3_select_times.add_many( step_3_select_times )
+        self._step_3_select_times.add_one( step_3_select_times )
         self._step_3_iteration_times.add_many( step_3_iteration_times )
         self._step_3_usage_times.add_many( step_3_usage_times )
     

@@ -305,7 +305,7 @@ class SQLite_or_MySQL :
         request = "SELECT * FROM tweets"
         
         if param.ENABLE_METRICS :
-            select_time = [] # Durée pour faire le SELECT
+            select_time = None # Durée pour faire le SELECT
             iteration_times = [] # Durées des itérations
             usage_times = [] # Durées des utilisations
             start = time()
@@ -340,7 +340,7 @@ class SQLite_or_MySQL :
         else :
             c.execute( request )
         if param.ENABLE_METRICS :
-            select_time.append( time() - select_start )
+            select_time = time() - select_start
         
         # Itérer sur les Tweets
         while True :
@@ -353,13 +353,13 @@ class SQLite_or_MySQL :
             # Si on a fini d'itérer sur tous les Tweets
             if tweet_line == None :
                 if param.ENABLE_METRICS :
-                    if select_time !=[] and iteration_times != [] and usage_times != [] :
+                    if select_time != None and iteration_times != [] and usage_times != [] :
                         print( f"[Images_It] Itération sur {len(usage_times)} images en {time() - start} secondes." )
-                        print( f"[Images_It] Temps moyen de requête SQL : {mean(select_time)} secondes." )
+                        print( f"[Images_It] Temps de la requête SQL : {select_time} secondes." )
                         print( f"[Images_It] Temps moyen d'itération : {mean(iteration_times)} secondes." )
                         print( f"[Images_It] Temps moyen d'utilisation : {mean(usage_times)} secondes." )
                     if add_step_3_times != None :
-                        add_step_3_times( [], select_time, iteration_times, usage_times )
+                        add_step_3_times( None, select_time, iteration_times, usage_times )
                 break
             
             # Itérer sur les images du Tweet

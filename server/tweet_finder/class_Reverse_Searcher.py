@@ -93,7 +93,7 @@ class Reverse_Searcher :
         
         if self._DEBUG or self._ENABLE_METRICS :
             print( f"[Reverse_Searcher] La recherche s'est faite en {time() - start} secondes." )
-            self._add_step_3_times( [ time() - start ], [], [], [] )
+            self._add_step_3_times( [ time() - start ], None, None, None )
         
         return to_return
     
