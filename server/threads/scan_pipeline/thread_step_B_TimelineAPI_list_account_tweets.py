@@ -145,7 +145,7 @@ def thread_step_B_TimelineAPI_list_account_tweets( thread_id : int, shared_memor
         
         # En cas de plantage lors du listage, il faut envoyer une instruction
         # d'enregistrement du curseur afin que la requête de scan soit terminée
-        # proprement lors que tous les Tweets qui ont pu être listés seront
+        # proprement lorsque tous les Tweets qui ont pu être listés seront
         # enregistrés
         except Exception as error:
             request.has_failed = True # A faire avant

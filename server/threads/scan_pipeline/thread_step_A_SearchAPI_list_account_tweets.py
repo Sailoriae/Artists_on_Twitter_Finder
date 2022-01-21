@@ -147,14 +147,14 @@ def thread_step_A_SearchAPI_list_account_tweets( thread_id : int, shared_memory 
         
         # En cas de plantage lors du listage, il faut envoyer une instruction
         # d'enregistrement du curseur afin que la requête de scan soit terminée
-        # proprement lors que tous les Tweets qui ont pu être listés seront
+        # proprement lorsque tous les Tweets qui ont pu être listés seront
         # enregistrés
         except Exception as error:
             request.has_failed = True # A faire avant
-            timelineAPI_lister._send_save_cursor_instruction( request.account_name,
-                                                              request.account_id,
-                                                              request.get_URI(),
-                                                              unchange_cursor = True )
+            searchAPI_lister._send_save_cursor_instruction( request.account_name,
+                                                            request.account_id,
+                                                            request.get_URI(),
+                                                            unchange_cursor = True )
             raise error # Passer au collecteur d'erreurs
         
         # Dire qu'on n'est plus en train de traiter cette requête
