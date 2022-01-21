@@ -50,5 +50,6 @@ var lang = {
 	"WARNING_1" : "Il y a actuellement beaucoup de requêtes en cours de traitement. La votre risque donc de prendre du temps.",
 	"WARNING_2" : "De plus, il y a %s Tweets en attente d'indexation. Si votre requête requiert une indexation, elle risque de prendre encore plus du temps.",
 	"WARNING_3" : "Il y a %s Tweets en attente d'indexation. Si votre requête requiert une indexation, elle risque de prendre du temps.",
-	"INFO" : "Le nombre de requêtes en cours de traitement par adresse IP est limité à %s."
+	"INFO" : "Le nombre de requêtes en cours de traitement par adresse IP est limité à %s.",
+	"IP_CAN_BYPASS_LIMIT" : "Vous pouvez dépasser cette limite depuis votre adresse IP actuelle."
 };

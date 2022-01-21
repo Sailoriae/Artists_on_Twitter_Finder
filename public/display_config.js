@@ -12,6 +12,8 @@ function displayConfig() {
 					var json = JSON.parse( request.responseText );
 					console.log( json );
 					infosP.textContent = parse( lang[ "INFO" ], json["limit_per_ip_address"] );
+					if ( json["ip_can_bypass_limit"] )
+						infosP.innerHTML += "<br/>" + lang[ "IP_CAN_BYPASS_LIMIT" ];
 				}
 			} else if ( request.status === 429 ) {
 				await new Promise(r => setTimeout(r, 1000));
