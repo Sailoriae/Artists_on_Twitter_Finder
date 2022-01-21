@@ -187,9 +187,12 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
             hundred_tweets = []
         
         # Sortir du dictionnaire "retried_tweets" les Tweets qui ne sont plus
-        # dans la table "reindex_tweets", c'est à dure qu'on n'a pas vu dans
+        # dans la table "reindex_tweets", c'est à dire qu'on n'a pas vu dans
         # l'itérateur précédent
-        for tweet_id in retried_tweets :
+        # Note : On doit itérer sur une liste, et non sur un itérateur, sinon
+        # on obtient l'exception suivante : "RuntimeError: dictionary changed
+        # size during iteration"
+        for tweet_id in list( retried_tweets.keys() ) :
             if not tweet_id in retried_tweets_ids :
                 del retried_tweets[tweet_id]
         
