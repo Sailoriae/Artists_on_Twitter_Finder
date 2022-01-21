@@ -235,6 +235,7 @@ def http_server_container ( shared_memory_uri_arg ) :
                 
                 response_dict = {
                     "limit_per_ip_address" : param.MAX_PROCESSING_REQUESTS_PER_IP_ADDRESS,
+                    "ip_can_bypass_limit" : client_ip in param.UNLIMITED_IP_ADDRESSES,
                     "update_accounts_frequency" : param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE,
                     "max_uri_length" : MAX_URI_LENGTH,
                     "max_content_length" : MAX_CONTENT_LENGTH,
