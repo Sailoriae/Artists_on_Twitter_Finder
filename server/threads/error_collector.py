@@ -26,6 +26,30 @@ from threads.network_crash import is_network_crash
 from threads.network_crash import network_available
 
 
+# Petit collecteur d'erreurs au collecteur d'erreur général (Ci-dessous).
+# Car notre gros collecteur d'erreurs fait beaucoup de choses.
+# Doit être le plus minimal possible, car c'est notre dernière chance.
+def error_collector( *args, **kwargs ) :
+    try :
+        _error_collector( *args, **kwargs )
+    except Exception :
+        error_name = "Erreur dans le collecteur d'erreur général !\n"
+        error_name += f"S'est produite le {datetime.now().strftime('%Y-%m-%d à %H:%M:%S')}.\n"
+        error_name += "Si vous voyez ceci, c'est que c'est vraiment la merde.\n"
+        error_name += "Le thread ne sera pas redémarré, pouvant mener à un dysfonctionnement du serveur\n"
+        
+        file = open( "error_collector_errors.log", "a" )
+        file.write( "ICI LE COLLECTEUR D'ERREURS DE SECOURS !\n" )
+        file.write( "Je suis dans le fichier suivant : threads/error_collector.py\n" )
+        file.write( error_name )
+        traceback.print_exc( file = file )
+        file.write( "\n\n\n" )
+        file.close()
+        
+        print( error_name )
+        traceback.print_exc()
+
+
 """
 En vérité, les procédures des threads ne sont pas exécutées directement, mais
 le sont par ce collecteur d'erreur.
@@ -41,7 +65,7 @@ peuvent l'être.
                          partagée Pyro, ou directement l'objet de mémoire
                          partagée si on n'est pas en mode multi-processus.
 """
-def error_collector( thread_procedure, thread_id : int, shared_memory_uri : str ) :
+def _error_collector( thread_procedure, thread_id : int, shared_memory_uri : str ) :
     # Connexion au serveur de mémoire partagée
     if param.ENABLE_MULTIPROCESSING :
         Pyro4.config.SERIALIZER = "pickle"
