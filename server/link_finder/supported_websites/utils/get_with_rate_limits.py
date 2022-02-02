@@ -18,7 +18,7 @@ if __name__ == "__main__" :
     from os import getcwd as get_wdir
     from sys import path
     change_wdir(get_dirname(get_abspath(__file__)))
-    change_wdir( "../.." )
+    change_wdir( "../../.." )
     path.append(get_wdir())
 
 import parameters as param
@@ -32,29 +32,31 @@ headers = {
 """
 Faire un GET HTTP en réessant de manière bourrin si jamais on a une erreur,
 comme par exemple une rate limit.
+Peut retourner des codes différents de HTTP 200 (Par exemple des 404 ou 403),
+car utilise le module "requests", et non "urllib".
 @param retry_on_those_http_errors Liste d'erreurs HTTP sur lesquelles on
                                   réessaye.
 """
-def get_with_rate_limits ( url, max_retry = 10, retry_on_those_http_errors = [] ):
+def get_with_rate_limits ( url, max_retry = 5, retry_on_those_http_errors = [] ):
     retry_count = 0
     while True : # Solution très bourrin pour gèrer les rate limits
         try :
             to_return = requests.get( url, headers = headers, timeout = 60 )
             if to_return.status_code in retry_on_those_http_errors :
                 print( f"[get_with_rate_limits] Erreur {to_return.status_code} pour : {url}" )
-                sleep( uniform( 30, 60 ) )
                 retry_count += 1
                 if retry_count > max_retry :
                     raise Exception( f"Nombre maximal de tentatives pour un ré-essai sur une erreur HTTP (Ici, erreur {to_return.status_code})" ) # Doit tomber dans le collecteur d'erreurs
+                sleep( uniform( 30, 60 ) )
             else :
                 return to_return
         
         except http.client.RemoteDisconnected as error :
             print( error )
-            sleep( uniform( 5, 15 ) )
             retry_count += 1
             if retry_count > max_retry :
                 raise error # Sera récupérée par le collecteur d'erreurs
+            sleep( uniform( 5, 15 ) )
         
         except urllib.error.HTTPError as error : # Je ne sais plus si c'est cette erreur peut tomber
             if error.code == 404 : # N'arrive pas en fait, la lib laisse passer les erreurs 404
@@ -62,14 +64,14 @@ def get_with_rate_limits ( url, max_retry = 10, retry_on_those_http_errors = [] 
                 raise error # On peut raise tout de suite car 404
             else :
                 print( error )
-                sleep( uniform( 5, 15 ) )
                 retry_count += 1
                 if retry_count > max_retry :
                     raise error # Sera récupérée par le collecteur d'erreurs
+                sleep( uniform( 5, 15 ) )
         
         except Exception as error :
             print( error )
-            sleep( uniform( 5, 15 ) )
             retry_count += 2
             if retry_count > max_retry :
                 raise error # Sera récupérée par le collecteur d'erreurs
+            sleep( uniform( 5, 15 ) )
