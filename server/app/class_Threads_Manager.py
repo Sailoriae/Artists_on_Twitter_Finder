@@ -153,6 +153,12 @@ class Threads_Manager :
             self.stop_threads()
             return
         
+        # Si l'arrêt a démarré pendant qu'on lançait la mémoire, on ne va pas
+        # plus loin dans le démarrage du serveur
+        if self._stop_started :
+            self._launch_in_progress = False
+            return
+        
         # Threads étape 1 (Link Finder)
         self._threads_xor_process.extend(
             launch_identical_threads_in_container(
@@ -276,8 +282,9 @@ class Threads_Manager :
             if self._shared_memory != None :
                 self._shared_memory.keep_threads_alive = False
             
-            # Attendre 10 secondes si le lancement était en cours
-            if self._launch_in_progress :
+            # Attendre si le lancement était en cours (Maximum 60 secondes)
+            for i in range(6) :
+                if not self._launch_in_progress : break
                 try : print( "[Threads_Manager] Lancement déjà en cours, attente de 10 secondes..." )
                 except OSError : pass # Par mesure de sécurité
                 sleep( 10 )
