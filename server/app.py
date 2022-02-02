@@ -48,7 +48,7 @@ def custom_print ( *args, **kwargs ) :
         # Ligne de test pour vérifier que cette fonction soit bien appelée.
 #        builtin_print( "[TEST]", *args, **kwargs )
         # On force le vidage du buffer de sortie à chaque appel.
-        builtin_print( *args, **kwargs, flush = True )
+        builtin_print( *args, **dict( kwargs, flush = True) )
     # On gère le cas où STDOUT est fermé. Cela arrive notamment lorsqu'on
     # reçoit un signal SIGHUP (Voir la gestion de ce signal plus bas).
     except OSError as error :
@@ -90,6 +90,7 @@ if __name__ == "__main__" :
         from app.check_parameters import check_parameters
         from app.class_Command_Line_Interface import Command_Line_Interface
         from app.class_Threads_Manager import Threads_Manager
+        from threads.network_crash import is_network_crash
     
     except ModuleNotFoundError as error :
         # Si c'est une vraie ModuleNotFoundError, elle contient le nom du module.
@@ -115,7 +116,13 @@ if __name__ == "__main__" :
     
     # Vérification des paramètres.
     # Voir le fichier "check_parameters.py".
-    if not check_parameters() : sys.exit(0)
+    try :
+        if not check_parameters() : sys.exit(0)
+    except Exception as error :
+        if is_network_crash( error ) :
+            print( "Pas de connexion à internet !" )
+            sys.exit(0)
+        else : raise error
     
     # Lancer le serveur de mémoire partagée et les threads.
     # Voir le fichier "class_Threads_Manager.py".

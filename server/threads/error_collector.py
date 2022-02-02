@@ -22,6 +22,8 @@ if __name__ == "__main__" :
 
 import parameters as param
 from shared_memory.open_proxy import open_proxy
+from threads.network_crash import is_network_crash
+from threads.network_crash import network_available
 
 
 """
@@ -55,9 +57,16 @@ def error_collector( thread_procedure, thread_id : int, shared_memory_uri : str 
         
         try :
             thread_procedure( thread_id, shared_memory )
+        
         except Exception as error :
+            # On détecte d'abord si c'est un problème de déconnexion au réseau
+            network_crash = is_network_crash( error )
+            
+            
             error_name = f"Erreur dans le thread {thread_id} de la procédure {thread_procedure.__name__} !\n"
             error_name += f"S'est produite le {datetime.now().strftime('%Y-%m-%d à %H:%M:%S')}.\n"
+            if network_crash :
+                error_name += "Cette erreur est dûe à une déconnexion du réseau.\n"
             
             # Mettre la requête en erreur si c'est une requête utilisateur ou
             # une requête de scan
@@ -134,5 +143,11 @@ def error_collector( thread_procedure, thread_id : int, shared_memory_uri : str 
                         break
                     if not shared_memory.keep_threads_alive :
                         break
+            
+            # Attendre du réseau si c'est un problème de déconnexion
+            if network_crash :
+                while shared_memory.keep_threads_alive :
+                    if network_available() : break
+                    time.sleep( 3 )
             
             error_count += 1
