@@ -142,6 +142,13 @@ def launch_thread( thread_procedure, thread_id : int, in_process : bool, shared_
             name = f"{thread_procedure.__name__}_th{thread_id}",
             target = error_collector,
             args = ( thread_procedure, thread_id, shared_memory_uri ) )
+        
+        # Par défaut, si le processus se termine, Python s'arrête lorsqe tous
+        # les threads ont terminé. Ce comportement est embêtant dans le cas de
+        # l'arrêt du serveur AOTF, surtout qu'on fait des "joint()" proprement.
+        # On désactive donc ce comportement. Ainsi, les threads s'arrêtent
+        # lorsque le processus arrive au bout de ses instruction.
+        thread_or_process.daemon = True
     
     thread_or_process.start()
     return thread_or_process
