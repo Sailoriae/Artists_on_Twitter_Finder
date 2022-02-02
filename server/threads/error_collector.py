@@ -32,7 +32,7 @@ from threads.network_crash import network_available
 def error_collector( *args, **kwargs ) :
     try :
         _error_collector( *args, **kwargs )
-    except Exception :
+    except Exception as error :
         error_name = "Erreur dans le collecteur d'erreur général !\n"
         error_name += f"S'est produite le {datetime.now().strftime('%Y-%m-%d à %H:%M:%S')}.\n"
         error_name += "Si vous voyez ceci, c'est que c'est vraiment la merde.\n"
@@ -46,8 +46,9 @@ def error_collector( *args, **kwargs ) :
         file.write( "\n\n\n" )
         file.close()
         
-        print( error_name )
-        traceback.print_exc()
+        print( error_name, end = "" )
+        print( error )
+        print( "La pile d'appel complète a été écrite dans un fichier." )
 
 
 """
@@ -138,14 +139,16 @@ def _error_collector( thread_procedure, thread_id : int, shared_memory_uri : str
                 file.write( "Je suis dans le fichier suivant : threads/error_collector.py\n" )
                 file.write( error_name )
                 traceback.print_exc( file = file )
-                if pyro_traceback != None : file.write( pyro_traceback )
+                if pyro_traceback != None :
+                    file.write( "\nLe serveur Pyro a retourné la trace suivante :\n" )
+                    file.write( pyro_traceback )
                 file.write( "\n\n\n" )
                 file.close()
             
             # Afficher dans le terminal
-            print( error_name )
-            traceback.print_exc()
-            if pyro_traceback != None : print( pyro_traceback )
+            print( error_name, end = "" )
+            print( error )
+            print( "La pile d'appel complète a été écrite dans un fichier." )
             
             # Si on a crash en moins de 10 secondes, c'est qu'il y a un
             # problème d'initialisation de la procédure

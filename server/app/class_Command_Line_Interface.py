@@ -76,7 +76,7 @@ class Command_Line_Interface :
         while True :
             try :
                 self._do_cli_loop()
-            except Exception :
+            except Exception as error :
                 # Si c'est que STDIN est fermé, on peut quitter
                 if sys.stdin.closed :
                     print( "STDIN fermé ! Arrêt de la ligne de commande." )
@@ -93,8 +93,9 @@ class Command_Line_Interface :
                 file.write( "\n\n\n" )
                 file.close()
                 
-                print( error_name )
-                traceback.print_exc()
+                print( error_name, end = "" )
+                print( error )
+                print( "La pile d'appel complète a été écrite dans un fichier." )
                 
                 # Eviter de trop reboucler
                 sleep( 1 )

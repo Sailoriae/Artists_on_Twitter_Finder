@@ -35,7 +35,7 @@ def thread_pyro_server( pyro_port = 3300, pool_size = 100000 ) :
         shared_memory.launch_pyro_server()
         print( "[pyro_server_th1] Serveur de mémoire partagée Pyro arrêté !" )
     
-    except Exception :
+    except Exception as error :
         error_name = "Erreur dans le serveur de mémoire partagée Pyro !\n"
         error_name +=  f"S'est produite le {datetime.now().strftime('%Y-%m-%d à %H:%M:%S')}.\n"
         error_name +=  "Si vous voyez ceci, c'est que c'est vraiment la merde.\n"
@@ -48,8 +48,9 @@ def thread_pyro_server( pyro_port = 3300, pool_size = 100000 ) :
         file.write( "\n\n\n" )
         file.close()
         
-        print( error_name )
-        traceback.print_exc()
+        print( error_name, end = "" )
+        print( error )
+        print( "La pile d'appel complète a été écrite dans un fichier." )
 
 
 if __name__ == "__main__" :

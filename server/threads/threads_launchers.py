@@ -61,8 +61,8 @@ def subprocess ( parent_pid, procedure, *arguments ) :
     
     try :
         subprocess_procedure( threads_list, arguments[-1] )
-    except Exception :
-        error_name = "Erreur dans la procédure d'un processus fils !\n"
+    except Exception as error :
+        error_name = f"Erreur dans la procédure du processus fils PID {os.getpid()} !\n"
         error_name +=  f"S'est produite le {datetime.now().strftime('%Y-%m-%d à %H:%M:%S')}.\n"
         
         file = open( "subprocess_procedure_errors.log", "a" )
@@ -73,8 +73,9 @@ def subprocess ( parent_pid, procedure, *arguments ) :
         file.write( "\n\n\n" )
         file.close()
         
-        print( error_name )
-        traceback.print_exc()
+        print( error_name, end = "" )
+        print( error )
+        print( "La pile d'appel complète a été écrite dans un fichier." )
     
     for thread in threads_list :
         thread.join()
