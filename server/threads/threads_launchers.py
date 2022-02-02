@@ -62,6 +62,12 @@ def subprocess ( parent_pid, procedure, *arguments ) :
     try :
         subprocess_procedure( threads_list, arguments[-1] )
     except Exception as error :
+        # Si le processus racine a été tué, on peut s'arrêter maintenant
+        # On le détecte avec une erreur de connexion au serveur Pyro
+        # On ne peut pas le détecter avec le PID
+        if isinstance( error, Pyro4.errors.CommunicationError ) :
+            sys.exit(0) # Nos threads ont leur attribut "daemon" à "True"
+        
         error_name = f"Erreur dans la procédure du processus fils PID {os.getpid()} !\n"
         error_name +=  f"S'est produite le {datetime.now().strftime('%Y-%m-%d à %H:%M:%S')}.\n"
         
