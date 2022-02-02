@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 # coding: utf-8
 
+from datetime import datetime
+
 # Les importations se font depuis le répertoire racine du serveur AOTF
 # Ainsi, si on veut utiliser ce script indépendamment (Notamment pour des
 # tests), il faut que son répertoire de travail soit ce même répertoire
@@ -39,7 +41,7 @@ class Debug_File :
     """
     def write ( self, line ) :
         if not param.DEBUG : return
-        try : self._file.write( line + "\n" )
+        try : self._file.write( datetime.now().strftime("[%Y-%m-%d %H:%M:%S] ") + line + "\n" )
         except Exception : pass # Mesure de sécurité
     
     """
