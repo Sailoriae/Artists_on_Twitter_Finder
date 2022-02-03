@@ -51,28 +51,46 @@ class TweepyAbstraction :
     Cette fonction est uniquement à utiliser dans "check_parameters()".
     
     @param tweet_id L'ID du Tweet
+    @param retry_once Réessayer une fois sur une erreur de connexion
+    
     @return Un objet Status (= Tweet de la librairie Tweepy)
             None si il y a eu un problème
     """
-    def get_tweet ( self, tweet_id, trim_user = False ) :
+    def get_tweet ( self, tweet_id, trim_user = False, retry_once = True ) :
         try :
             return self._api.get_status( tweet_id, trim_user = trim_user, tweet_mode = 'extended' )
+        
         except tweepy.errors.HTTPException as error :
             print( f"[Tweepy] Erreur en récupérant les informations du Tweet ID {tweet_id}." )
             print( error )
             return None # Bien laisser le "return None" pour le check_parameters()
+        
+        except tweepy.errors.TwitterServerError as error :
+            if retry_once :
+                time.sleep( 10 )
+                return self.get_tweet( tweet_id, trim_user = trim_user, retry_once = False )
+            raise error
     
     """
     @param tweet_id Liste d'ID de Tweets
+    @param retry_once Réessayer une fois sur une erreur de connexion
+    
     @return Liste d'objet Status (= Tweet de la librairie Tweepy)
             None si il y a eu un problème
     """
-    def get_multiple_tweets ( self, tweets_ids, trim_user = False ) :
+    def get_multiple_tweets ( self, tweets_ids, trim_user = False, retry_once = True ) :
         to_return = []
         
         # Séparer la liste "accounts_names" en sous-listes de 100 éléments
         for tweets_ids_sublist in [tweets_ids[i:i+100] for i in range(0,len(tweets_ids),100)] :
-            to_return += self._api.lookup_statuses( tweets_ids_sublist, trim_user = trim_user, tweet_mode = "extended" )
+            try :
+                to_return += self._api.lookup_statuses( tweets_ids_sublist, trim_user = trim_user, tweet_mode = "extended" )
+            
+            except tweepy.errors.TwitterServerError as error :
+                if retry_once :
+                    time.sleep( 10 )
+                    return self.get_multiple_tweets( tweets_ids, trim_user = trim_user, retry_once = False )
+                raise error
         
         return to_return
     
@@ -108,6 +126,7 @@ class TweepyAbstraction :
 #                    print( "[Tweepy] Le compte est en privé / est protégé." )
                     return None
                 return json.id
+        
         except tweepy.errors.HTTPException as error :
 #            if invert_mode :
 #                print( f"[Tweepy] Erreur en récupérant le nom du compte ID {account_name}." )
@@ -119,6 +138,12 @@ class TweepyAbstraction :
             if 63 in error.api_codes : # User has been suspended
                 return None
             if retry_once and error.api_codes == [] :
+                time.sleep( 10 )
+                return self.get_account_id( account_name, invert_mode = invert_mode, retry_once = False )
+            raise error
+        
+        except tweepy.errors.TwitterServerError as error :
+            if retry_once :
                 time.sleep( 10 )
                 return self.get_account_id( account_name, invert_mode = invert_mode, retry_once = False )
             raise error
@@ -150,6 +175,12 @@ class TweepyAbstraction :
                 if 17 in error.api_codes : # No user matches for specified terms
                     continue
                 if retry_once and error.api_codes == [] :
+                    time.sleep( 10 )
+                    return self.get_multiple_accounts_ids( accounts_names, retry_once = False )
+                raise error
+            
+            except tweepy.errors.TwitterServerError as error :
+                if retry_once :
                     time.sleep( 10 )
                     return self.get_multiple_accounts_ids( accounts_names, retry_once = False )
                 raise error
@@ -216,6 +247,7 @@ class TweepyAbstraction :
                 return friendship[0].blocked_by, friendship[1].screen_name
             else :
                 return friendship[0].blocked_by
+        
         except tweepy.errors.HTTPException as error :
             if 50 in error.api_codes : # User not found
                 return None
@@ -223,5 +255,11 @@ class TweepyAbstraction :
                 return None
             if retry_once and error.api_codes == [] :
                 time.sleep( 10 )
-                return self.blocks_me( account_id, retry_once = False )
+                return self.blocks_me( account_id, append_account_name = append_account_name, retry_once = False )
+            raise error
+        
+        except tweepy.errors.TwitterServerError as error :
+            if retry_once :
+                time.sleep( 10 )
+                return self.blocks_me( account_id, append_account_name = append_account_name, retry_once = False )
             raise error
