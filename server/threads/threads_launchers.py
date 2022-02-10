@@ -128,128 +128,79 @@ Lancer un thread seul.
 Cette procédure est lancée dans le collecteur d'erreurs.
 
 @param thread_procedure Procédure à exécuter.
-@param thread_id ID du thread ou de la procédure.
-@param in_process False pour le lancer directement,
-                  True pour le lancer seul dans un processus fils.
+@param procedure_id ID de la procédure. Doit être uniquement si elle est lancée
+                    plusieurs fois, c'est à dire dans plusieurs threads.
 @param shared_memory_uri L'URI menant à la racine du serveur de mémoire
                          partagée Pyro, ou directement l'objet de mémoire
                          partagée si on n'est pas en mode multi-processus.
 
 @return Thread XOR processus créé.
 """
-def launch_thread( thread_procedure, thread_id : int, in_process : bool, shared_memory_uri : str ) :
-    if in_process and param.ENABLE_MULTIPROCESSING :
-        thread_or_process = multiprocessing.Process(
-            name = f"{thread_procedure.__name__}_th{thread_id}_container",
-            target = subprocess,
-            args = ( os.getpid(), _launch_subprocess_thread, thread_procedure, thread_id, shared_memory_uri ) )
-    else :
-        thread_or_process = threading.Thread(
-            name = f"{thread_procedure.__name__}_th{thread_id}",
-            target = error_collector,
-            args = ( thread_procedure, thread_id, shared_memory_uri ) )
-        
-        # Par défaut, si le processus se termine, Python s'arrête lorsqe tous
-        # les threads ont terminé. Ce comportement est embêtant dans le cas de
-        # l'arrêt du serveur AOTF, surtout qu'on fait des "joint()" proprement.
-        # On désactive donc ce comportement. Ainsi, les threads s'arrêtent
-        # lorsque le processus arrive au bout de ses instruction.
-        thread_or_process.daemon = True
+def launch_thread( thread_procedure, procedure_id : int, shared_memory_uri : str ) :
+    thread = threading.Thread(
+        name = f"{thread_procedure.__name__}_th{procedure_id}",
+        target = error_collector,
+        args = ( thread_procedure, procedure_id, shared_memory_uri ) )
     
-    thread_or_process.start()
-    return thread_or_process
-
-# Lancer un thread qui est seul dans un processus fils
-# Cette fonction peut être appelée uniquement par "subprocess()"
-def _launch_subprocess_thread( thread_procedure, thread_id, shared_memory_uri ) :
-    return [ launch_thread( thread_procedure, thread_id, False, shared_memory_uri ) ]
+    # Par défaut, si le processus se termine, Python s'arrête lorsqe tous les
+    # threads ont terminé. Ce comportement est embêtant dans le cas de l'arrêt
+    # du serveur AOTF, surtout qu'on fait des "joint()" proprement.
+    # On désactive donc ce comportement. Ainsi, les threads s'arrêtent lorsque
+    # le processus arrive au bout de ses instruction.
+    thread.daemon = True
+    
+    thread.start()
+    return thread
 
 
 """
-Lancer plusieurs threads identiques.
+Lancer plusieurs threads.
 Ces procédures sont lancées dans le collecteur d'erreurs.
 
-Si on est en mode multi-processus, ils sont lancés dans un processus conteneur.
-Le paramètre "in_process" permet de définir si ils ont chacun leur processus
-conteneur, ou s'ils en ont un pour tous.
-Sinon, ils sont lancés directement en tant que threads.
+@param thread_procedures Liste des procédures à exécuter, associées à leur ID.
+                         Les ID doivent être uniques si une même procédure est
+                         lancée plusieurs fois (Donc dans plusieurs threads).
+@param shared_memory_uri L'URI menant à la racine du serveur de mémoire
+                         partagée Pyro, ou directement l'objet de mémoire
+                         partagée si on n'est pas en mode multi-processus.
 
-@param thread_procedure Procédure à exécuter.
-@param number_of_threads Nombre de fois qu'il faut lancer cette procédure,
-                         c'est à dire le nombre de threads à créer.
-@param in_process False pour les lancer tous dans le même processus fils,
-                  True pour les lancer chacun dans un processus fils.
+@return Liste des threads créés.
+"""
+def launch_threads( thread_procedures, shared_memory_uri ) :
+    threads = []
+    for procedure, procedure_id in thread_procedures :
+        threads.append(
+            launch_thread( procedure, procedure_id, shared_memory_uri ) )
+    return threads
+
+
+"""
+Lancer plusieurs threads dans un seul processus conteneur.
+Ces procédures sont lancées dans le collecteur d'erreurs.
+
+Peut aussi être utilisé pour lancer un thread seul dans un processus conteneur.
+
+Si on n'est pas en mode multi-processus, il n'y a pas de processus conteneur,
+et les threads sont lancés directement.
+
+@param thread_procedures Liste des procédures à exécuter, associées à leurs ID.
+                         Les ID doivent être uniques si une même procédure est
+                         lancée plusieurs fois (Donc dans plusieurs threads).
+@param container_name Nom du processus conteneur.
 @param shared_memory_uri L'URI menant à la racine du serveur de mémoire
                          partagée Pyro, ou directement l'objet de mémoire
                          partagée si on n'est pas en mode multi-processus.
 
 @return Liste des threads XOR processus créés.
 """
-def launch_identical_threads_in_container( thread_procedure, number_of_threads, in_process, shared_memory_uri ) :
-    # On crée un conteneur uniquement si ses enfants sont des threads
-    if param.ENABLE_MULTIPROCESSING and not in_process :
+def launch_threads_in_container( thread_procedures, container_name, shared_memory_uri ) :
+    if param.ENABLE_MULTIPROCESSING :
         process = multiprocessing.Process(
-            name = f"{thread_procedure.__name__}_th_container",
+            name = container_name,
             target = subprocess,
-            args = ( os.getpid(), _threads_container_for_identical_threads, thread_procedure, number_of_threads, in_process, shared_memory_uri ) )
+            args = ( os.getpid(), launch_threads, thread_procedures, shared_memory_uri ) )
         process.start()
         return [ process ]
     else :
-        return _threads_container_for_identical_threads( thread_procedure,
-                                                         number_of_threads,
-                                                         in_process,
-                                                         shared_memory_uri )
-
-# Lancer plusieurs threads ou processus identiques
-# En mode multi-processus, cette fonction est appelée par "subprocess()"
-def _threads_container_for_identical_threads( thread_procedure, number_of_threads, in_process, shared_memory_uri ) :
-    threads_or_process = []
-    for i in range( number_of_threads ) :
-        threads_or_process.append(
-            launch_thread( thread_procedure, i+1, in_process, shared_memory_uri ) )
-    return threads_or_process
-
-"""
-Lancer plusieurs threads différents.
-Ces procédures sont lancées dans le collecteur d'erreurs.
-
-Si on est en mode multi-processus, ils sont lancés dans un processus conteneur.
-Le paramètre "in_process" permet de définir si ils ont chacun leur processus
-conteneur, ou s'ils en ont un pour tous.
-Sinon, ils sont lancés directement en tant que threads.
-
-@param thread_procedures Liste des procédures à exécuter.
-@param in_process False pour les lancer tous dans le même processus fils,
-                  True pour les lancer chacun dans un processus fils.
-@param container_name Nom du processus conteneur (Si "in_process = False").
-@param shared_memory_uri L'URI menant à la racine du serveur de mémoire
-                         partagée Pyro, ou directement l'objet de mémoire
-                         partagée si on n'est pas en mode multi-processus.
-
-@return Liste des threads XOR processus créés.
-"""
-def launch_unique_threads_in_container( thread_procedures, in_process, container_name, shared_memory_uri ) :
-    # On crée un conteneur uniquement si ses enfants sont des threads
-    if param.ENABLE_MULTIPROCESSING and not in_process :
-        process = multiprocessing.Process(
-            name = f"{container_name}_th_container",
-            target = subprocess,
-            args = ( os.getpid(), _threads_container_for_unique_threads, thread_procedures, in_process, shared_memory_uri ) )
-        process.start()
-        return [ process ]
-    else :
-        return _threads_container_for_unique_threads( thread_procedures,
-                                                      in_process,
-                                                      shared_memory_uri )
-
-# Lancer plusieurs threads ou processus différents
-# En mode multi-processus, cette fonction est appelée par "subprocess()"
-def _threads_container_for_unique_threads( thread_procedures, in_process, shared_memory_uri ) :
-    threads_or_process = []
-    counts = {} # Si il y a plusieurs fois la même procédure dans la liste
-    for procedure in thread_procedures :
-        if procedure in counts : counts[ procedure ] += 1
-        else : counts[ procedure ] = 1
-        threads_or_process.append(
-            launch_thread( procedure, counts[ procedure ], in_process, shared_memory_uri ) )
-    return threads_or_process
+        return launch_threads( thread_procedures,
+                               shared_memory_uri )

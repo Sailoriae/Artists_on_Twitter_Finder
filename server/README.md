@@ -109,16 +109,14 @@ En mode multi-processus, le serveur AOTF exécute des processus et des threads. 
   - Thread `thread_pyro_server` (La librairie Pyro4 exécute d'autres threads) : Mémoire partagée.
   - Processus conteneur :
     - Plusieurs threads `thread_step_1_link_finder` (Nombre défini dans `parameters.py`) : Etape 1, Link Finder.
-  - Processus conteneur :
     - Plusieurs threads `thread_step_2_tweets_indexer` (Nombre défini dans `parameters.py`) : Etape 2, vérification de l'indexation et de la mise à jour.
-  - Plusieurs processus conteneurs (Possédant chacun un thread) :
-    - Thread `thread_step_3_reverse_search` (Nombre défini dans `parameters.py`) : Etape 3, Recherche par image.
+  - Plusieurs processus conteneurs (Possédant chacun un ou deux threads) :
+    - Thread(s) `thread_step_3_reverse_search` (Nombre défini dans `parameters.py`) : Etape 3, Recherche par image.
   - Processus conteneur :
     - Plusieurs threads `thread_step_A_SearchAPI_list_account_tweets` (Nombre défini dans `parameters.py`) : Etape A, listage avec l'API de recherche.
-  - Processus conteneur :
     - Plusieurs threads `thread_step_B_TimelineAPI_list_account_tweets` (Nombre défini dans `parameters.py`) : Etape B, listage avec l'API de timeline.
-  - Plusieurs processus conteneurs (Possédant chacun un thread) :
-    - Thread `thread_step_C_index_tweets` (Nombre défini dans `parameters.py`) : Etape C, indexation des Tweets trouvés.
+  - Plusieurs processus conteneurs (Possédant chacun un ou deux threads) :
+    - Thread(s) `thread_step_C_index_tweets` (Nombre défini dans `parameters.py`) : Etape C, indexation des Tweets trouvés.
   - Processus conteneur :
     - Thread `thread_http_server` : Serveur HTTP, API du serveur.
   - Processus conteneur :

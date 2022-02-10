@@ -27,9 +27,7 @@ from app.class_Debug_File import Debug_File
 
 from shared_memory.launch_shared_memory import launch_shared_memory
 
-from threads.threads_launchers import launch_thread
-from threads.threads_launchers import launch_identical_threads_in_container
-from threads.threads_launchers import launch_unique_threads_in_container
+from threads.threads_launchers import launch_threads_in_container
 from threads.threads_launchers import write_stacks
 
 from threads.user_pipeline.thread_step_1_link_finder import thread_step_1_link_finder
@@ -159,79 +157,78 @@ class Threads_Manager :
             self._launch_in_progress = False
             return
         
+        # Dictionnaire des processus et threads à créer
+        # Nom du processus -> Liste des threads / Liste de procédures
+        to_start = {}
+        
         # Threads étape 1 (Link Finder)
-        self._threads_xor_process.extend(
-            launch_identical_threads_in_container(
-                thread_step_1_link_finder,
-                param.NUMBER_OF_STEP_1_LINK_FINDER_THREADS,
-                False, # Ne nécessitent pas des processus séparés
-                self._shared_memory.get_URI() ) )
+        # Réunis dans un même processus avec les threads de l'étape 2
+        to_start["threads_user_pipeline_container"] = [ thread_step_1_link_finder ] * param.NUMBER_OF_STEP_1_LINK_FINDER_THREADS
         
         # Threads étape 2 : Lancement de l'indexation ou mise à jour
-        self._threads_xor_process.extend(
-            launch_identical_threads_in_container(
-                thread_step_2_tweets_indexer,
-                param.NUMBER_OF_STEP_2_TWEETS_INDEXER_THREADS,
-                False, # Ne nécessitent pas des processus séparés
-                self._shared_memory.get_URI() ) )
+        # Réunis dans un même processus avec les threads de l'étape 1
+        to_start["threads_user_pipeline_container"] += [ thread_step_2_tweets_indexer ] * param.NUMBER_OF_STEP_2_TWEETS_INDEXER_THREADS
         
         # Threads étape 3 : Recherche par image
-        self._threads_xor_process.extend(
-            launch_identical_threads_in_container(
-                thread_step_3_reverse_search,
-                param.NUMBER_OF_STEP_3_REVERSE_SEARCH_THREADS,
-                True, # Nécessitent des processus séparés (Recherche par image)
-                self._shared_memory.get_URI() ) )
+        # Réunis par paire (Car nécessitent de la puissance de calcul)
+        for i in range( int( param.NUMBER_OF_STEP_3_REVERSE_SEARCH_THREADS / 2 ) ) :
+            to_start[f"threads_step_3_container{i}"] = [ thread_step_3_reverse_search ] * 2
+        
+        # Si nombre impair, le dernier est tout seul dans son processus
+        if param.NUMBER_OF_STEP_3_REVERSE_SEARCH_THREADS % 2 == 1 :
+            to_start[f"threads_step_3_container{i+1}"] = [ thread_step_3_reverse_search ]
         
         # Threads étape A : Listage avec l'API de recherche
-        self._threads_xor_process.extend(
-            launch_identical_threads_in_container(
-                thread_step_A_SearchAPI_list_account_tweets,
-                len( param.TWITTER_API_KEYS ), # Threads de listage
-                False, # Ne nécessitent pas des processus séparés
-                self._shared_memory.get_URI() ) )
+        # Réunis dans un même processus avec les threads de l'étape B
+        to_start["threads_scan_pipeline_container"] = [ thread_step_A_SearchAPI_list_account_tweets ] * len( param.TWITTER_API_KEYS )
         
         # Threads étape B : Listage avec l'API de timeline
-        self._threads_xor_process.extend(
-            launch_identical_threads_in_container(
-                thread_step_B_TimelineAPI_list_account_tweets,
-                len( param.TWITTER_API_KEYS ), # Threads de listage
-                False, # Ne nécessitent pas des processus séparés
-                self._shared_memory.get_URI() ) )
+        # Réunis dans un même processus avec les threads de l'étape A
+        to_start["threads_scan_pipeline_container"] += [ thread_step_B_TimelineAPI_list_account_tweets ] * len( param.TWITTER_API_KEYS )
         
         # Threads étape C : Indexation des Tweets trouvés
-        self._threads_xor_process.extend(
-            launch_identical_threads_in_container(
-                thread_step_C_index_tweets,
-                param.NUMBER_OF_STEP_C_INDEX_TWEETS,
-                True, # Nécessitent des processus séparés (Analyse d'images)
-                self._shared_memory.get_URI() ) )
+        # Réunis par paire (Car nécessitent de la puissance de calcul)
+        for i in range( int( param.NUMBER_OF_STEP_C_INDEX_TWEETS / 2 ) ) :
+            to_start[f"threads_step_C_container{i}"] = [ thread_step_C_index_tweets ] * 2
         
+        # Si nombre impair, le dernier est tout seul dans son processus
+        if param.NUMBER_OF_STEP_C_INDEX_TWEETS % 2 == 1 :
+            to_start[f"threads_step_C_container{i+1}"] = [ thread_step_C_index_tweets ]
         
         # On ne crée qu'un seul thread (ou processus) du serveur HTTP
         # C'est lui qui va créer plusieurs threads grace à la classe :
         # http.server.ThreadingHTTPServer()
-        self._threads_xor_process.append(
-            launch_thread(
-                thread_http_server,
-                1, True, # Nécessite un processus séparé (Serveur HTTP)
-                self._shared_memory.get_URI() ) )
+        to_start["thread_http_server_container"] = [ thread_http_server ]
         
+        # Threads des procédures de maintenance (Doivent être uniques)
+        to_start["threads_maintenance_container"] = [ thread_auto_update_accounts,
+                                                      thread_reset_SearchAPI_cursors,
+                                                      thread_remove_finished_requests,
+                                                      thread_retry_failed_tweets ]
         
-        # Liste des procédures de maintenance (Doivent être uniques)
-        maintenance_procedures = []
-        maintenance_procedures.append( thread_auto_update_accounts )
-        maintenance_procedures.append( thread_reset_SearchAPI_cursors )
-        maintenance_procedures.append( thread_remove_finished_requests )
-        maintenance_procedures.append( thread_retry_failed_tweets )
+        # Compteur des procédures rencontrées lors du lancement
+        # Permet de ne pas avoir deux threads qui ont le même ID
+        # Procédure -> Compteur
+        counts_procedures = {}
         
-        # Lancer les procédures de maintenance
-        self._threads_xor_process.extend(
-            launch_unique_threads_in_container(
-                maintenance_procedures,
-                False, # Ne nécessitent pas des processus séparés
-                "thread_maintenance", # Convention de nommage
-                self._shared_memory.get_URI() ) )
+        # Lancer les procédures et les threads
+        # Si on n'est pas en mode multiprocessus, les fonctions du fichier
+        # "threads_launchers.py" ne lancent que des threads
+        for container_name, procedures_list in to_start.items() :
+            # Liste des procédures à lancer, chacune associée à un ID unique
+            threads_to_start = []
+            
+            for procedure in procedures_list :
+                if procedure in counts_procedures :
+                    counts_procedures[ procedure ] += 1
+                else :
+                    counts_procedures[ procedure ] = 1
+                threads_to_start.append( ( procedure, counts_procedures[ procedure ] ) )
+            
+            self._threads_xor_process.extend(
+                launch_threads_in_container( threads_to_start,
+                                             container_name,
+                                             self._shared_memory.get_URI() ) )
         
         self._launch_in_progress = False
     
