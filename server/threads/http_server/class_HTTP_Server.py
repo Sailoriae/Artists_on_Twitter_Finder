@@ -102,7 +102,7 @@ def http_server_container ( shared_memory_uri_arg ) :
             # =================================================================
             # Vérifier que l'utilisateur ne fait pas trop de requêtes
             # En premier, c'est plus logique
-            if not self.http_limitator.can_request( client_ip ) :
+            if not HTTP_Server.http_limitator.can_request( client_ip ) :
                 http_code = 429
                 self.send_response(http_code)
                 self.send_header("Content-type", "text/plain; charset=utf-8")
@@ -186,8 +186,8 @@ def http_server_container ( shared_memory_uri_arg ) :
                 
                 else :
                     # Lance une nouvelle requête, ou donne la requête déjà existante
-                    request = self.user_requests.launch_request( illust_url,
-                                                                 ip_address = client_ip )
+                    request = HTTP_Server.user_requests.launch_request( illust_url,
+                                                                        ip_address = client_ip )
                     
                     # Si request == None, c'est qu'on ne peut pas lancer une
                     # nouvelle requête car l'adresse IP a trop de requêtes en
@@ -214,11 +214,11 @@ def http_server_container ( shared_memory_uri_arg ) :
                 self.end_headers()
                 
                 response_dict = {
-                    "indexed_tweets_count" : self.shared_memory.tweets_count,
-                    "indexed_accounts_count" : self.shared_memory.accounts_count,
-                    "processing_user_requests_count" : self.user_requests.processing_requests_count,
-                    "processing_scan_requests_count" : self.scan_requests.processing_requests_count,
-                    "pending_tweets_count" : self.step_C_index_tweets_queue.qsize()
+                    "indexed_tweets_count" : HTTP_Server.shared_memory.tweets_count,
+                    "indexed_accounts_count" : HTTP_Server.shared_memory.accounts_count,
+                    "processing_user_requests_count" : HTTP_Server.user_requests.processing_requests_count,
+                    "processing_scan_requests_count" : HTTP_Server.scan_requests.processing_requests_count,
+                    "pending_tweets_count" : HTTP_Server.step_C_index_tweets_queue.qsize()
                 }
                 
                 json_text = json.dumps( response_dict )
