@@ -137,9 +137,6 @@ class Threads_Manager :
         self._launch_started = True
         self._launch_in_progress = True
         
-        print( f"[Threads_Manager] Démarrage des {'processus et threads' if param.ENABLE_MULTIPROCESSING else 'threads'}." )
-        self._debug.write( f"[Threads_Manager] Démarrage des {'processus et threads' if param.ENABLE_MULTIPROCESSING else 'threads'}." )
-        
         # Augmenter le nombre maximal de descripteurs de fichiers et
         # démarrer le serveur de mémoire partagée
         max_fd = define_max_file_descriptors()
@@ -156,6 +153,9 @@ class Threads_Manager :
         if self._stop_started :
             self._launch_in_progress = False
             return
+        
+        print( f"[Threads_Manager] Démarrage des {'processus et threads' if param.ENABLE_MULTIPROCESSING else 'threads'}." )
+        self._debug.write( f"[Threads_Manager] Démarrage des {'processus et threads' if param.ENABLE_MULTIPROCESSING else 'threads'}." )
         
         # Dictionnaire des processus et threads à créer
         # Nom du processus -> Liste des threads / Liste de procédures
