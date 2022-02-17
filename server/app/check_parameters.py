@@ -260,6 +260,12 @@ def check_parameters () :
     
     # ========================================================================
     
+    # Avertissement si utilisation de SQLite
+    if not param.USE_MYSQL_INSTEAD_OF_SQLITE :
+        print( "Attention, vous utilisez SQLite. Pour de meilleure performances, il est très vivement conseillé d'utiliser MySQL !" )
+    
+    # ========================================================================
+    
     print( "Tous les tests ont réussi ! Démarrage du serveur..." )
     
     return True

@@ -66,9 +66,6 @@ class Command_Line_Interface :
         print( "Vous êtes en ligne de commande.")
         print( "Tapez `help` pour afficher l'aide.")
         
-        if not param.USE_MYSQL_INSTEAD_OF_SQLITE :
-            print( "ATTENTION, vous utilisez SQLite. Pour de meilleure performances, il est très vivement conseillé d'utiliser MySQL !" )
-        
         while True :
             try :
                 self._do_cli_loop()
