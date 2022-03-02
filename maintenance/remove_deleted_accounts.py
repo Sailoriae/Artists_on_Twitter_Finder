@@ -73,7 +73,7 @@ accounts_in_db = []
 for account_id in accounts_list :
     accounts_in_db.append( account_id[0] )
 
-print( "Il y a", len(accounts_in_db), "comptes Twitter dans la base de données." )
+print( f"Il y a {len(accounts_in_db)} comptes Twitter dans la base de données." )
 
 
 """
@@ -99,12 +99,12 @@ while True :
                 accounts_on_twitter.append( account.id )
     except tweepy.errors.NotFound as error :
         if 17 in error.api_codes : # No user matches for specified terms
-            print( "C'est étrange que 100 comptes d'un bloc ne soient plus valides..." )
+            print( "C'est étrange que 100 comptes d'un bloc ne soient plus valides !" )
             pass
         else :
             raise error
     
-    print( "Comptes analysés :", cursor, "/", str(len(accounts_in_db)) + ", valides :", len(accounts_on_twitter) )
+    print( f"Comptes analysés : {cursor}/{str(len(accounts_in_db))}, valides : {len(accounts_on_twitter)}" )
     cursor += 100
 
 for account_name, account_id in blacklisted :
@@ -129,30 +129,20 @@ if to_remove == [] :
     print( "Aucun compte à supprimer !" )
     sys.exit(0)
 
-print( "Comptes à supprimer :", to_remove )
+print( f"Comptes à supprimer : {', '.join( [ str(account_id) for account_id in to_remove ] )}" )
 while True :
     answer = input( "Souhaitez-vous procéder ? [y/n] " )
     if answer == "y" :
         for account_id in to_remove :
             c = conn.cursor()
             
-            print( "Suppression des Tweets du compte ID :", account_id )
+            print( f"Suppression des Tweets du compte ID {account_id}..." )
             if param.USE_MYSQL_INSTEAD_OF_SQLITE :
-                c.execute( "SELECT tweet_id FROM tweets WHERE account_id = %s", (account_id,) )
+                c.execute( "DELETE FROM tweets WHERE account_id = %s", (account_id,) )
             else :
-                c.execute( "SELECT tweet_id FROM tweets WHERE account_id = ?", (account_id,) )
-            tweets_id = c.fetchall()
+                c.execute( "DELETE FROM tweets WHERE account_id = ?", (account_id,) )
             
-            if param.USE_MYSQL_INSTEAD_OF_SQLITE :
-                for tweet_id in tweets_id :
-                    print( "Suppression du Tweet :", tweet_id[0] )
-                    c.execute( "DELETE FROM tweets WHERE tweet_id = %s", tweet_id )
-            else :
-                for tweet_id in tweets_id :
-                    print( "Suppression du Tweet :", tweet_id[0] )
-                    c.execute( "DELETE FROM tweets WHERE tweet_id = ?", tweet_id )
-            
-            print( "Suppression du compte ID :", account_id )
+            print( f"Suppression du compte ID {account_id}..." )
             if param.USE_MYSQL_INSTEAD_OF_SQLITE :
                 c.execute( "DELETE FROM accounts WHERE account_id = %s", (account_id,) )
             else :
@@ -160,7 +150,9 @@ while True :
             
             conn.commit()
         
+        print( "Terminé !" )
         break
     
     elif answer == "n" :
+        print( "Aucun compte n'a été supprimé !" )
         sys.exit(0)

@@ -61,7 +61,6 @@ Listage des ID des Tweets qui n'ont pas d'enregistrement dans la table des
 comptes Twitter.
 """
 print( "Vérification des enregistrements dans la table des Tweets..." )
-print( " => Nom réel de la table : tweets" )
 
 c = conn.cursor()
 c.execute( """SELECT tweet_id
@@ -77,11 +76,9 @@ tweets_id = c.fetchall()
 """
 On demande à l'utilisateur si il souhaite continuer.
 """
-count = str(len(tweets_id))
-# Sinon, on le laisse continuer pour aller à la vérification de l'intégrité
 if len(tweets_id) > 0 :
     while True :
-        answer = input( count + " Tweets à supprimer, souhaitez-vous continuer ? [y/n] " )
+        answer = input( f"{len(tweets_id)} Tweets à supprimer, souhaitez-vous continuer ? [y/n] " )
         if answer == "y" :
             break
         elif answer == "n" :
@@ -89,12 +86,13 @@ if len(tweets_id) > 0 :
             sys.exit(0)
 else :
     print( "Aucun Tweet à supprimer !" )
+    sys.exit(0)
 
 """
 Effacer les Tweets à supprimer.
 """
 for tweet_id in tweets_id :
-    print( "Suppression du Tweet :", tweet_id[0] )
+    print( f"Suppression du Tweet ID {tweet_id[0]}..." )
     
     if param.USE_MYSQL_INSTEAD_OF_SQLITE :
         c.execute( "DELETE FROM tweets WHERE tweet_id = %s", tweet_id )
@@ -103,3 +101,5 @@ for tweet_id in tweets_id :
         c.execute( "DELETE FROM tweets WHERE tweet_id = ?", tweet_id )
     
     conn.commit()
+
+print( "Terminé !" )
