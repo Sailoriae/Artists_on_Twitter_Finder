@@ -49,9 +49,11 @@ Lorsqu'on parle d'un "site supporté" par le serveur, on parle de l'un des sites
 
 ## Installation et utilisation du serveur
 
-Voir le fichier [`server/README.md`](server/README.md).
+Voir le fichier [`server/README.md`](server/README.md) pour l'installation et l'utilisation du serveur AOTF.
 
 Puis, si vous souhaitez activer l'interface web publique, consultez le fichier [`configs/README.md`](configs/README.md).
+
+Enfin, pour utiliser l'API HTTP d'un serveur AOTF (Que ce soit le votre ou un serveur publique), consultez le fichier [`API_HTTP.md`](doc/API_HTTP.md), ou directement la page de documentation sur son interface web.
 
 
 ## Note de fin
