@@ -807,6 +807,8 @@ class SQLite_or_MySQL :
     """
     API DE RECHERCHE
     Supprimer date du Tweet le plus récent d'un compte Twitter.
+    On ne supprime pas la date locale afin de ne pas interférer avec la mise à
+    jour automatique.
     
     @param account_id ID du compte Twitter.
     """
@@ -814,13 +816,11 @@ class SQLite_or_MySQL :
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
             request = """UPDATE accounts
                          SET last_SearchAPI_indexing_api_date = NULL,
-                             last_SearchAPI_indexing_local_date = NULL,
                              last_SearchAPI_indexing_cursor_reset_date = %s
                          WHERE account_id = %s"""
         else :
             request = """UPDATE accounts
                          SET last_SearchAPI_indexing_api_date = NULL,
-                             last_SearchAPI_indexing_local_date = NULL,
                              last_SearchAPI_indexing_cursor_reset_date = ?
                          WHERE account_id = ?"""
         

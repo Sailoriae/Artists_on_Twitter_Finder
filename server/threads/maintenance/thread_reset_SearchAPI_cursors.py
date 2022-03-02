@@ -159,6 +159,8 @@ def thread_reset_SearchAPI_cursors( thread_id : int, shared_memory ) :
             account_name = twitter.get_account_id( account["account_id"], invert_mode = True )
             
             # Dans tous les cas, on reset son curseur
+            # Note : Cela ne supprime pas la date locale d'indexation, afin de
+            # ne pas interférer avec le thread de mise à jour automatique
             bdd.reset_account_SearchAPI_last_tweet_date( account["account_id"] )
             
             # Si l'ID du compte Twitter n'existe plus, on le laisse tel quel,
@@ -197,7 +199,7 @@ def thread_reset_SearchAPI_cursors( thread_id : int, shared_memory ) :
                 
                 # Si la requête est plus jeune que le reset du curseur, c'est
                 # que nous ou quelqu'un d'autre l'a lancée, mais elle a pris
-                # on prendra le curseur reset
+                # le curseur reset (A None, donc va tout relister)
                 # Donc on peut laisser ce compte tranquille
                 if request.start > account["reset_time"] :
                     continue
