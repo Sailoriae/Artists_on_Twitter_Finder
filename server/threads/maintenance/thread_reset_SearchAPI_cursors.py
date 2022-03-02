@@ -164,7 +164,7 @@ def thread_reset_SearchAPI_cursors( thread_id : int, shared_memory ) :
             # Si l'ID du compte Twitter n'existe plus, on le laisse tel quel,
             # avec son curseur reset
             if account_name == None :
-                print( f"[reset_cursors_th{thread_id}] L'ID de compte Twitter {account['account_id']} n'est plus accessible ou n'existe plus !" )
+                print( f"[reset_cursors_th{thread_id}] Le compte Twitter ID {account['account_id']} n'est plus accessible ou n'existe plus !" )
             
             # Sinon, on l'ajoute à la file d'attente des comptes dont il faut
             # lancer l'indexation

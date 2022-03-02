@@ -150,7 +150,7 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
             
             # Si l'ID du compte Twitter n'existe plus
             if account_name == None :
-                print( f"[auto_update_th{thread_id}] L'ID de compte Twitter {oldest_updated_account['account_id']} n'est plus accessible ou n'existe plus !" )
+                print( f"[auto_update_th{thread_id}] Le compte Twitter ID {oldest_updated_account['account_id']} n'est plus accessible ou n'existe plus !" )
                 
                 # On met la date locale de la dernière MàJ à aujourd'hui pour
                 # éviter de ré-avoir cet ID à la prochaine itération

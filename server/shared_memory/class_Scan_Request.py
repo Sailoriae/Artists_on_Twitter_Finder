@@ -6,7 +6,7 @@ from time import time
 
 
 """
-Classe représentant une indexation (Nouvelle ou mise à jour) d'un ID de compte
+Classe représentant une indexation (Nouvelle ou mise à jour) d'un compte
 Twitter dans la base de données. Cet objet est le même durant tout le processus
 de traitement.
 

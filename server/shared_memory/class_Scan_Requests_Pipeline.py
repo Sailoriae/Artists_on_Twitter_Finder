@@ -30,8 +30,8 @@ from tweet_finder.blacklist import BLACKLIST
 
 
 """
-Classe de gestion des requêtes d'indexation (Nouvelle ou mise à jour) comptes
-Twitter dans la base de données.
+Classe de gestion des requêtes d'indexation (Nouvelle ou mise à jour) de
+comptes Twitter dans la base de données.
 Instanciée une seule fois lors de l'unique instanciation de la mémoire
 partagée, c'est à dire de la classe Shared_Memory.
 
