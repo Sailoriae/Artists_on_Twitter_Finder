@@ -354,10 +354,10 @@ class SQLite_or_MySQL :
             if tweet_line == None :
                 if param.ENABLE_METRICS :
                     if select_time != None and iteration_times != [] and usage_times != [] :
-                        print( f"[Images_It] Itération sur {len(usage_times)} images en {time() - start} secondes." )
-                        print( f"[Images_It] Temps pour obtenir les Tweets : {select_time} secondes." )
-                        print( f"[Images_It] Temps moyen d'itération : {mean(iteration_times)} secondes." )
-                        print( f"[Images_It] Temps moyen d'utilisation : {mean(usage_times)} secondes." )
+                        print( f"[Images_It] Itération sur {len(usage_times)} images en {time() - start :.5g} secondes." )
+                        print( f"[Images_It] Temps pour obtenir les Tweets : {select_time :.5g} secondes." )
+                        print( f"[Images_It] Temps moyen d'itération : {mean(iteration_times) :.5g} secondes." )
+                        print( f"[Images_It] Temps moyen d'utilisation : {mean(usage_times) :.5g} secondes." )
                     if add_step_3_times != None :
                         add_step_3_times( None, select_time, iteration_times, usage_times )
                 break

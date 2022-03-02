@@ -400,14 +400,14 @@ class Tweets_Indexer :
     à la mémoire partagée).
     """
     def _display_and_save_metrics ( self ) -> None :
-        print( f"[Tweets_Indexer] {len(self._times)} Tweets indexés avec une moyenne de {mean(self._times)} secondes par Tweet." )
+        print( f"[Tweets_Indexer] {len(self._times)} Tweets indexés avec une moyenne de {mean(self._times) :.5g} secondes par Tweet." )
         
         if len(self._download_image_times) > 0 :
-            print( f"[Tweets_Indexer] Temps moyen de téléchargement d'une image : {mean(self._download_image_times)} secondes." )
+            print( f"[Tweets_Indexer] Temps moyen de téléchargement d'une image : {mean(self._download_image_times) :.5g} secondes." )
         if len(self._calculate_features_times) > 0 :
-            print( f"[Tweets_Indexer] Temps moyen de calcul de l'empreinte d'une image : {mean(self._calculate_features_times)} secondes." )
+            print( f"[Tweets_Indexer] Temps moyen de calcul de l'empreinte d'une image : {mean(self._calculate_features_times) :.5g} secondes." )
         if len(self._insert_into_times) > 0 :
-            print( f"[Tweets_Indexer] Temps moyen d'enregistrement d'un Tweet : {mean(self._insert_into_times)} secondes." )
+            print( f"[Tweets_Indexer] Temps moyen d'enregistrement d'un Tweet : {mean(self._insert_into_times) :.5g} secondes." )
         
         if self._add_step_C_times != None :
             self._add_step_C_times( self._times, self._download_image_times, self._calculate_features_times, self._insert_into_times )

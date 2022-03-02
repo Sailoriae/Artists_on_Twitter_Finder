@@ -92,7 +92,7 @@ class Reverse_Searcher :
         to_return = self._cbir_engine.search_cbir( pil_image, iterator )
         
         if self._DEBUG or self._ENABLE_METRICS :
-            print( f"[Reverse_Searcher] La recherche s'est faite en {time() - start} secondes." )
+            print( f"[Reverse_Searcher] La recherche s'est faite en {time() - start :.5g} secondes." )
             self._add_step_3_times( [ time() - start ], None, None, None )
         
         return to_return
@@ -153,6 +153,6 @@ class Reverse_Searcher :
         to_return = list( self._bdd.exact_image_hash_search( image_hash, account_id = account_id ) )
         
         if self._DEBUG or self._ENABLE_METRICS :
-            print( f"[Reverse_Searcher] La recherche exacte s'est faite en {time() - start} secondes." )
+            print( f"[Reverse_Searcher] La recherche exacte s'est faite en {time() - start :.5g} secondes." )
         
         return to_return

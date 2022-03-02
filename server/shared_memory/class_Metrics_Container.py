@@ -134,36 +134,36 @@ class Metrics_Container :
         to_print = ""
         
         if self._step_A_times.get_count() != 0 :
-            to_print += f"Etape A : Temps moyen pour lister avec SearchAPI : {self._step_A_times.get_mean()} ({self._step_A_times.get_count()} listages)\n"
+            to_print += f"Etape A : Temps moyen pour lister avec SearchAPI : {self._step_A_times.get_mean() :.5g} ({self._step_A_times.get_count()} listages)\n"
         
         if self._step_B_times.get_count() != 0 :
-            to_print += f"Etape B : Temps moyen pour lister avec TimelineAPI : {self._step_B_times.get_mean()} ({self._step_B_times.get_count()} listages)\n"
+            to_print += f"Etape B : Temps moyen pour lister avec TimelineAPI : {self._step_B_times.get_mean() :.5g} ({self._step_B_times.get_count()} listages)\n"
         
         if self._step_C_times.get_count() != 0 :
-            to_print += f"Etape C : Temps moyen pour indexer : {self._step_C_times.get_mean()} ({self._step_C_times.get_count()} Tweets)\n"
+            to_print += f"Etape C : Temps moyen pour indexer : {self._step_C_times.get_mean() :.5g} ({self._step_C_times.get_count()} Tweets)\n"
         if self._step_C_download_image_times.get_count() != 0 :
-            to_print += f" - Dont : Téléchargement d'une image : {self._step_C_download_image_times.get_mean()} ({self._step_C_download_image_times.get_count()} images)\n"
+            to_print += f" - Dont : Téléchargement d'une image : {self._step_C_download_image_times.get_mean() :.5g} ({self._step_C_download_image_times.get_count()} images)\n"
         if self._step_C_cbir_engine_times.get_count() != 0 :
-            to_print += f" - Dont : Calcul de l'empreinte d'une image : {self._step_C_cbir_engine_times.get_mean()} ({self._step_C_cbir_engine_times.get_count()} images)\n"
+            to_print += f" - Dont : Calcul de l'empreinte d'une image : {self._step_C_cbir_engine_times.get_mean() :.5g} ({self._step_C_cbir_engine_times.get_count()} images)\n"
         if self._step_C_insert_into_times.get_count() != 0 :
-            to_print += f" - Dont : Enregistrement d'un Tweet : {self._step_C_insert_into_times.get_mean()} ({self._step_C_insert_into_times.get_count()} Tweets)\n"
+            to_print += f" - Dont : Enregistrement d'un Tweet : {self._step_C_insert_into_times.get_mean() :.5g} ({self._step_C_insert_into_times.get_count()} Tweets)\n"
         
         if self._step_1_times.get_count() != 0 :
-            to_print += f"Etape 1 : Temps moyen pour passer dans le Link Finder : {self._step_1_times.get_mean()} ({self._step_1_times.get_count()} exécutions)\n"
+            to_print += f"Etape 1 : Temps moyen pour passer dans le Link Finder : {self._step_1_times.get_mean() :.5g} ({self._step_1_times.get_count()} exécutions)\n"
         
         if self._step_3_times.get_count() != 0 :
-            to_print += f"Etape 3 : Temps moyen pour rechercher sur un compte : {self._step_3_times.get_mean()} ({self._step_3_times.get_count()} recherches de {int(self._step_3_usage_times.get_count()/self._step_3_times.get_count())} comparaisons en moyenne)\n"
+            to_print += f"Etape 3 : Temps moyen pour rechercher sur un compte : {self._step_3_times.get_mean() :.5g} ({self._step_3_times.get_count()} recherches de {int(self._step_3_usage_times.get_count()/self._step_3_times.get_count())} comparaisons en moyenne)\n"
         if self._step_3_select_times.get_count() != 0 :
-            to_print += f" - Dont : Obtenir les Tweets enregistrés : {self._step_3_select_times.get_mean()} ({self._step_3_select_times.get_count()} requêtes)\n"
+            to_print += f" - Dont : Obtenir les Tweets enregistrés : {self._step_3_select_times.get_mean() :.5g} ({self._step_3_select_times.get_count()} requêtes)\n"
         if self._step_3_iteration_times.get_count() != 0 :
-            to_print += f" - Dont : Itérer sur les Tweets : {self._step_3_iteration_times.get_mean()} ({self._step_3_iteration_times.get_count()} itérations)\n"
+            to_print += f" - Dont : Itérer sur les Tweets : {self._step_3_iteration_times.get_mean() :.5g} ({self._step_3_iteration_times.get_count()} itérations)\n"
         if self._step_3_usage_times.get_count() != 0 :
-            to_print += f" - Dont : Comparer les empreintes : {self._step_3_usage_times.get_mean()} ({self._step_3_usage_times.get_count()} images)\n"
+            to_print += f" - Dont : Comparer les empreintes : {self._step_3_usage_times.get_mean()} ({self._step_3_usage_times.get_count() :.5g} images)\n"
         
         if self._user_request_full_time.get_count() != 0 :
-            to_print += f"Temps moyen pour traiter une requête utilisateur : {self._user_request_full_time.get_mean()} ({self._user_request_full_time.get_count()} requêtes)\n"
+            to_print += f"Temps moyen pour traiter une requête utilisateur : {self._user_request_full_time.get_mean() :.5g} ({self._user_request_full_time.get_count()} requêtes)\n"
         if self._scan_request_full_time.get_count() != 0 :
-            to_print += f"Temps moyen pour traiter une requête de scan : {self._scan_request_full_time.get_mean()} ({self._scan_request_full_time.get_count()} requêtes)\n"
+            to_print += f"Temps moyen pour traiter une requête de scan : {self._scan_request_full_time.get_mean() :.5g} ({self._scan_request_full_time.get_count()} requêtes)\n"
         
         if to_print == "" :
             to_print = "Aucune moyenne disponible, car aucune requête n'a été lancée."
