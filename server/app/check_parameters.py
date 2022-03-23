@@ -102,7 +102,6 @@ def check_parameters () :
     
     check_list.append( test_parameter( "DEBUG", bool ) )
     check_list.append( test_parameter( "ENABLE_METRICS", bool ) )
-    check_list.append( test_parameter( "USER_AGENT", str ) )
     check_list.append( test_strictly_postive_int_parameter( "DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE" ) )
     check_list.append( test_strictly_postive_int_parameter( "RESET_SEARCHAPI_CURSORS_PERIOD" ) )
     check_list.append( test_strictly_postive_int_parameter( "MAX_PROCESSING_REQUESTS_PER_IP_ADDRESS" ) )
