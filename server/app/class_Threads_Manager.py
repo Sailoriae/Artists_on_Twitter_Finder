@@ -109,8 +109,14 @@ class Threads_Manager :
         if is_sighup :
             if param.ENABLE_MULTIPROCESSING :
                 for process in self._threads_xor_process :
-                    os.kill( process.pid, signal.SIGHUP )
-            sys.stdout = open( os.devnull, "w" )
+                    try :
+                        os.kill( process.pid, signal.SIGHUP )
+                    except Exception as error :
+                        self._debug.write( f"[Threads_Manager] Impossible d'arrêter le processus PID {process.pid} : {type(error).__name__} ({error})" )
+            try :
+                sys.stdout = open( os.devnull, "w" )
+            except Exception as error :
+                self._debug.write( f"[Threads_Manager] Impossible de restaurer STDOUT : {type(error).__name__} ({error})" )
         
         self.stop_threads()
     
