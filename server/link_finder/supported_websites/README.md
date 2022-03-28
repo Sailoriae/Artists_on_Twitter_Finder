@@ -20,6 +20,12 @@ Chaque classe doit contenir les deux fonctions suivantes :
 Ces classes peuvent contenir d'autres fonctions pour leur optimisation.
 
 
-## Où mettre à jour si on ajoute un site supporté
+## Ajouter un site supporté
 
-Il y a une liste des sites supportés dans le [`README.md`](../../../README.md) racine, ainsi que dans les fichiers HTML de l'interface web (Répertoire [`public`](../../../public)).
+**Un site supporté doit être un site sur lequel on peut trouver des illustrations, associées aux comptes Twitter des artistes.** Ainsi, les site sur lesquels les artistes publient eux-mêmes leurs illustrations, comme par exemple DeviantArt ou Pixiv, peuvent être des site supportés par AOTF. Les sites de republications, comme les boorus et les imageboards, peuvent aussi être supporté à la condition qu'ils fassent l'effort de lister les comptes des artistes, notamment leurs comptes Twitter. Danbooru le fait très bien, Derpibooru plutôt bien, et Furbooru pas trop mal. D'autres boorus comme par exemple SankakuComplex, Gelbooru, Rule34 ou E621, ne le font pas du tout, et par conséquent ne peuvent pas être des sites supportés par AOTF. En effet, comme ces boorus ne lient que la source des illustrations, ils sont inutiles pour chercher les comptes Twitter des artistes (Et si la source est un Tweet, AOTF ne sert alors à rien).
+
+Conséquemment à cette règle :
+* AOTF devrait supporter plus de sites sur lesquels les artistes publient eux-mêmes leurs illustrations, comme par exemple ArtStation, FurAffinity, ou InkBunny.
+* AOTF pourrait supporter "à moitié" les boorus cités ci-dessus, c'est à dire qu'il irait juste explorer la source des illustrations. Ils ne seraient alors par listés comme des sites supportés. C'est ce qu'on fait déjà avec Linktree et Patreon (Voir la méthode `Link_Finder._link_mutiplexer()`).
+
+Une fois un site supporté ajouté, il faut mettre à jour la liste des sites supportés dans le [`README.md`](../../../README.md) racine, ainsi que les fichiers HTML de l'interface web (Répertoire [`public`](../../../public)) pour indiquer que ce site est supporté.
