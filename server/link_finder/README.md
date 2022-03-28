@@ -17,9 +17,9 @@ Elle contient deux fonctions :
 Le script `link_finder_tester` permet de tester que la classe `Link_Finder` fonctionne bien.
 
 
-## Attention : "URL de l'illustration"
+## Attention : "URL de requête / de l'illustration"
 
-Attention, quand on parle de l'URL de l'illustration, on parle de l'URL qui mène à une page web contenant l'illustration postée.
+Attention, quand on parle de l'URL de requête (= "URL de l'illustration"), on parle de l'URL qui mène à une page web contenant l'illustration postée.
 
 Exemple avec DeviantArt :
 Ceci est l'URL d'une illustration postée sur ce site : `https://www.deviantart.com/darkereve/art/She-Ra-The-Siege-833260345`.

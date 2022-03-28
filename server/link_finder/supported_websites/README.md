@@ -20,19 +20,6 @@ Chaque classe doit contenir les deux fonctions suivantes :
 Ces classes peuvent contenir d'autres fonctions pour leur optimisation.
 
 
-## Attention : "URL de l'illustration"
-
-Attention, quand on parle de l'URL de l'illustration, on parle de l'URL qui mène à une page web contenant l'illustration postée.
-
-Exemple avec DeviantArt :
-Ceci est l'URL d'une illustration postée sur ce site : `https://www.deviantart.com/darkereve/art/She-Ra-The-Siege-833260345`.
-Elle mène bien à une page web contenant l'image, et non à l'image directement.
-
-L'URL de l'illustration est l'entrée utilisateur de l'API ou de la CLI, traités dans `app.py`.
-
-La classe `Link_Finder` (Dans le répertoire parent à celui-ci), permet de savoir quel site supporté utiliser, et donc quelle classe choisir.
-
-
 ## Où mettre à jour si on ajoute un site supporté
 
 Il y a une liste des sites supportés dans le [`README.md`](../../../README.md) racine, ainsi que dans les fichiers HTML de l'interface web (Répertoire [`public`](../../../public)).
