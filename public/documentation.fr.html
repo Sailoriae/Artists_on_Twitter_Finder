@@ -26,8 +26,6 @@
 
 		<p>La liste des sites supportés est disponible <a href="./">sur la page d'accueil</a>.</p>
 
-		<p>Si le site supporté donne la possibilité aux artistes de mettre plusieurs illustrations en une seule page (C'est le cas de Pixiv), seule la première illustration sera traitée.</p>
-
 		<p>L'accès à tout moment au serveur n'est pas garanti, il peut être indisponible.<p>
 
 		<p>Même si nous faisons de notre mieux, aucun résultat n'est granti comme juste :</p>
@@ -60,6 +58,14 @@
 
 		<p>Retourne un JSON décrit ci-dessous.</p>
 
+		<p>Cas particulier&nbsp;: Pixiv donne la possibilité aux artistes de publier plusieurs illustrations sur une même page web. Vous pouvez préciser quelle illustration vous voulez rechercher en ajoutant <code>#POSITION</code> au bout de l'URL, avec <code>POSITION</code> un nombre entier entre 1 et 200 (La numérotation commence à 1). Exemple&nbsp;:</p>
+
+		<ul>
+			<li><code>https://www.pixiv.net/en/artworks/92512929#44</code></li>
+		</ul>
+
+		<p>Si aucune précision n'est donnée, ou qu'elle est impossible, AOTF recherchera par défaut la première image (<code>POSITION</code> à <code>1</code>).</p>
+
 
 		<h2>Endpoint <code>GET <a href="./api/query">/api/query</a></code> (Non-recommandé)</h2>
 
@@ -75,6 +81,7 @@
 			<li><a href="./api/query?url=https://www.deviantart.com/raemz-desu/art/Miku-498506170">/api/query?url=https://www.deviantart.com/raemz-desu/art/Miku-498506170</a></li>
 			<li><a href="./api/query?url=https://danbooru.donmai.us/posts/2790874">/api/query?url=https://danbooru.donmai.us/posts/2790874</a></li>
 			<li><a href="./api/query?url=https://www.pixiv.net/en/artworks/78119407">/api/query?url=https://www.pixiv.net/en/artworks/78119407</a></li>
+			<li><a href="./api/query?url=https://www.pixiv.net/en/artworks/92512929%2344">/api/query?url=https://www.pixiv.net/en/artworks/92512929#44</a></li>
 		</ul>
 
 		<p>Retourne un JSON décrit ci-dessous.</p>
