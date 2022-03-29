@@ -14,7 +14,14 @@ Attention :
 
 Les requêtes sont identifiées par leur URL (C'est à dire l'URL de l'illustration sur un des sites supportés). La méthode pour lancer une procédure ou obtenir le résultat est la même : `GET /query?url=[URL de l'illustration de requête]`
 
-Par exemple : `GET /query?url=https://www.deviantart.com/serafleur/art/Sailor-Moon-604185347`
+Exemples :
+* `GET /query?url=https://www.deviantart.com/serafleur/art/Sailor-Moon-604185347`
+* `GET /query?url=https://www.deviantart.com/raemz-desu/art/Miku-498506170`
+* `GET /query?url=https://danbooru.donmai.us/posts/2790874`
+* `GET /query?url=https://www.pixiv.net/en/artworks/78119407`
+* `GET /query?url=https://www.pixiv.net/en/artworks/92512929#44`
+
+Pixiv donne la possibilité aux artistes de publier plusieurs illustrations sur une même page web. Ce dernier exemple montre comment préciser la position de l'illustration à rechercher (Entre 1 et 200, 44 dans cet exemple). Si aucune précision n'est donnée, ou qu'elle est impossible, AOTF recherchera par défaut la première image.
 
 Le serveur répond par un JSON qui contient toujours les mêmes champs :
 ```json
