@@ -172,7 +172,7 @@ class Philomena :
         # Gérer les images de redirection
         if self._cache_illust_url_json["image"]["duplicate_of"] != None :
             return self.get_twitter_accounts(
-                "https://derpibooru.org/images/" + str( self._cache_illust_url_json["image"]["duplicate_of"] ),
+                self._base_URL + "images/" + str( self._cache_illust_url_json["image"]["duplicate_of"] ),
                 multiplexer
             )
         
@@ -194,11 +194,11 @@ class Philomena :
             # Problème Philomena : Le JSON d'une page sur un tag ne donne pas tous
             # URL qu'ils ont trouvés. Donc on doit le faire sur une page HTML.
             scanner = Webpage_to_Twitter_Accounts(
-                "https://derpibooru.org/search?q=" + tag,
+                self._base_URL + "search?q=" + tag,
                 )
             
             # Se concentrer que sur la div contenant les données.
-            scanner.soup = scanner.soup.find("div", {"class": "tag-info__more"})
+            scanner.soup = scanner.soup.find("main", {"id": "content"})
             
             # Rechercher (Désactiver car le multiplexeur les cherche aussi)
             if multiplexer == None :

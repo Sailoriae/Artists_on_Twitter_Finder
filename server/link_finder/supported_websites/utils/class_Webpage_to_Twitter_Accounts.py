@@ -48,6 +48,7 @@ class Webpage_to_Twitter_Accounts :
                    BeautifulSoup4.
                    Si mis sur False, Régex est utilisé, ce qui permet de
                    trouver toutes les URL dans le code de la page.
+                   EVITER D'UTILISE REGEX PARCE QUE C'EST TROP COMPLEXE !
                    (OPTIONNEL)
     @param retry_on_those_http_errors Liste d'erreurs HTTP sur lesquelles on
                                       réessaye.
@@ -57,6 +58,8 @@ class Webpage_to_Twitter_Accounts :
                    response = None,
                    USE_BS4 : bool = True,
                    retry_on_those_http_errors = [] ) :
+        self._url = url
+        
         # Prendre le code HTML de la page
         if response == None :
             self._response = get_with_rate_limits( url, retry_on_those_http_errors = retry_on_those_http_errors )
@@ -74,12 +77,19 @@ class Webpage_to_Twitter_Accounts :
                               Permet de chercher autre chose que des comptes
                               Twitter.
                               (OPTIONNEL)
+    @param retry_on_those_http_errors Liste d'erreurs HTTP sur lesquelles on
+                                      ne fait rien (Retourne une liste vide).
+                                      (OPTIONNEL)
     @return La liste des comptes Twitter trouvés.
             Ou None si il y a un problème avec l'URL.
             Peut retourner une liste vide si aucun compte Twitter n'a été
             trouvé.
     """
-    def scan ( self, validator_function = validate_twitter_account_url ) -> List[str] :
+    def scan ( self, validator_function = validate_twitter_account_url,
+               pass_on_those_http_errors = [ 404 ] ) -> List[str] :
+        if self._response.status_code in pass_on_those_http_errors :
+            return []
+        
         # Scan avec BeautifulSoup4
         if self.USE_BS4  :
             accounts_found = self._scan_beautifulsoup( validator_function )
@@ -107,6 +117,10 @@ class Webpage_to_Twitter_Accounts :
                 result = validator_function( link.get("href") )
                 if result != None :
                     accounts_found.append( result )
+        else :
+            message = "Il n'y a rien à analyser ! Vérifiez ce que vous avez sélectionné avant d'appeler cette méthode."
+            message += f"\nURL : {self._url}"
+            raise Exception( message )
         
         # Retourner
         return accounts_found

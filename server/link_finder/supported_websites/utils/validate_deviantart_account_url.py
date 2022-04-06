@@ -24,6 +24,16 @@ deviantart_account_name_regex_old = re.compile(
 # Le "http://" ou "https://" est optionnel.
 
 
+# Faux-positifs connus (Ce ne sont pas des comptes)
+# On a aussi ajouté toutes les URL qu'ils se sont réservées
+# Permet de prévenir les emmerdes
+FALSE_POSITIVES =  [ "tag", "art", "users", "search", "about", "join",
+                     "submit", "core-membership", "account", "settings",
+                     "chat", "groups", "shop", "forum", "notifications",
+                     "watch", "daily-deviations", "topic", "popular",
+                     "developers", "team" ]
+
+
 """
 Est ce que cet URL est l'URL d'un compte DeviantArt ?
 
@@ -42,7 +52,7 @@ def validate_deviantart_account_url ( url : str ) -> str :
         result = result_old.group( 2 )
     else : return None
     
-    if result in [ "tag", "art", "users" ] : # Supprimer les faux-positifs connus
+    if result in FALSE_POSITIVES : # Supprimer les faux-positifs connus
         return None
     if url.split(full)[-1][:5] == "/art/" : # Supprimer les pages d'illustrations
         return None
