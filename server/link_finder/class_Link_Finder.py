@@ -3,6 +3,7 @@
 
 import re
 import inspect
+import json
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
 # Ainsi, si on veut utiliser ce script indépendamment (Notamment pour des
@@ -322,9 +323,14 @@ class Link_Finder :
         if linktree != None :
             if not self._already_visited( "linktree", linktree ) :
                 scanner = Webpage_to_Twitter_Accounts( "https://linktr.ee/" + linktree )
+                # En vérité, on utilise BeautifulSoup juste pour aller chercher
+                # un JSON qui contient toutes les URLs
+                json_dict = json.loads(
+                    "".join( scanner.soup.find("script", {"id": "__NEXT_DATA__"}).contents ) )
                 twitter_accounts = []
-                for link in scanner.scan( validator_function = validate_url ) :
-                    get_multiplex = self._link_mutiplexer( link )
+                account_obj = json_dict["props"]["pageProps"]["account"]
+                for link_objs in account_obj["links"] + account_obj["socialLinks"] :
+                    get_multiplex = self._link_mutiplexer( link_objs["url"] )
                     if get_multiplex != None :
                         twitter_accounts += get_multiplex
                 return twitter_accounts
