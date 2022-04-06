@@ -4,7 +4,7 @@
 # Liste des comptes Twitter officiels des sites qu'on explore
 # METTRE ENTIEREMENT EN MINUSCULE ! Twitter n'est pas sensible à la casse pour
 # les noms d'utilisateurs.
-OFFICIAL_ACCOUNTS_LIST = [ "deviantart", "twitter" ]
+OFFICIAL_ACCOUNTS_LIST = [ "deviantart", "twitter", "derpibooru", "patreon" ]
 
 from typing import List
 
