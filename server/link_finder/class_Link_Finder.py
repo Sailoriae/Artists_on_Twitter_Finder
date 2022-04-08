@@ -341,7 +341,9 @@ class Link_Finder :
         if patreon != None :
             if not self._already_visited( "patreon", patreon ) :
                 scanner = Webpage_to_Twitter_Accounts( "https://www.patreon.com/" + patreon )
-                scanner.soup = scanner.soup.find("main", {"id": "renderPageContentWrapper"})
+                # Patreon sont vraiment chiant, on ne cible pas plus le contenu
+                scanner.soup = scanner.soup.find("body")
+#                scanner.soup = scanner.soup.find("main", {"id": "renderPageContentWrapper"})
                 twitter_accounts = []
                 for link in scanner.scan( validator_function = validate_url ) :
                     get_multiplex = self._link_mutiplexer( link )
