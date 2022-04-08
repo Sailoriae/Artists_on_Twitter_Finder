@@ -18,6 +18,12 @@ patreon_creator_page_regex = re.compile(
 # Le "http://" ou "https://" est optionnel.
 
 
+# Faux-positifs connus (Ce ne sont pas des comptes)
+# On a aussi ajouté toutes les URL qu'ils se sont réservées
+# Permet de prévenir les emmerdes
+FALSE_POSITIVES =  [ "posts" ]
+
+
 """
 Est ce que cet URL est l'URL d'une page créateur Patreon ?
 
@@ -27,7 +33,9 @@ Est ce que cet URL est l'URL d'une page créateur Patreon ?
 """
 def validate_patreon_account_url ( url : str ) -> str :
     result = re.search( patreon_creator_page_regex, url )
-    if result != None : return result.group( 1 )
+    if result != None :
+        result = result.group( 1 ) 
+        if not result in FALSE_POSITIVES : return result
     return None
 
 
