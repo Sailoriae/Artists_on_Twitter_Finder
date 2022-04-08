@@ -119,7 +119,7 @@ class Webpage_to_Twitter_Accounts :
                     accounts_found.append( result )
         else :
             message = "Il n'y a rien à analyser ! Vérifiez ce que vous avez sélectionné avant d'appeler cette méthode."
-            message += f"\nURL : {self._url}"
+            message += f"\nHTTP {self._response.status_code}, URL : {self._url}"
             raise Exception( message )
         
         # Retourner
