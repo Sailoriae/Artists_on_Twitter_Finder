@@ -33,6 +33,7 @@ from link_finder.supported_websites.utils.validate_patreon_account_url import va
 from link_finder.class_Link_Finder_Result import Link_Finder_Result
 from link_finder.class_Link_Finder_Result import Not_an_URL
 from link_finder.class_Link_Finder_Result import Unsupported_Website
+from link_finder.class_Link_Finder_Result import Already_Visited
 
 
 # ^ = Début de la chaine, $ = Fin de la chaine
@@ -245,9 +246,20 @@ class Link_Finder :
             profondeur maximale de recherche
     """
     def _link_mutiplexer ( self, url : str, source : str = "" ) :
+        try :
+            to_return = self._link_mutiplexer_with_exceptions( url, source )
+        except Already_Visited :
+            if self._DEBUG : print( f"[Link_Finder] Multiplexeur (Supporté, déjà visité): {url}" )
+            return []
+        except Unsupported_Website :
+            if self._DEBUG : print( f"[Link_Finder] Multiplexeur (Non supporté): {url}" )
+            return None
         if self._DEBUG :
-            print( f"[Link_Finder] Multiplexeur : {url}" )
+            if to_return == None : print( f"[Link_Finder] Multiplexeur (Supporté, non reconnu): {url}" )
+            else : print( f"[Link_Finder] Multiplexeur (Supporté et reconnu): {url}" )
+        return to_return
         
+    def _link_mutiplexer_with_exceptions ( self, url : str, source : str = "" ) :
         # TWITTER
         # Attention : Cette fonction sort le compte Twitter même si c'est un
         # URL de Tweet : https://twitter.com/USER/status/ID
@@ -276,7 +288,7 @@ class Link_Finder :
             if not self._already_visited( "deviantart", deviantart ) :
                 return self._deviantart.get_twitter_accounts( "", force_deviantart_account_name = deviantart,
                                                               multiplexer = self._link_mutiplexer )
-            return []
+            raise Already_Visited
         
         # ILLUSTRATION SUR DEVIANTART
         # Permet aux boorus d'envoyer leur champs "source"
@@ -287,6 +299,7 @@ class Link_Finder :
                                                                    multiplexer = self._link_mutiplexer )
                 self.current_max_depth -= 1
                 return to_return
+            raise Already_Visited
         
         
         # ====================================================================
@@ -299,7 +312,7 @@ class Link_Finder :
             if not self._already_visited( "pixiv", pixiv ) :
                 return self._pixiv.get_twitter_accounts( "", force_pixiv_account_id = pixiv,
                                                          multiplexer = self._link_mutiplexer )
-            return []
+            raise Already_Visited
         
         # ILLUSTRATION SUR PIXIV
         # Permet aux boorus d'envoyer leur champs "source"
@@ -310,6 +323,7 @@ class Link_Finder :
                                                               multiplexer = self._link_mutiplexer )
                 self.current_max_depth -= 1
                 return to_return
+            raise Already_Visited
         
         
         # ====================================================================
@@ -334,7 +348,7 @@ class Link_Finder :
                     if get_multiplex != None :
                         twitter_accounts += get_multiplex
                 return twitter_accounts
-            return []
+            raise Already_Visited
         
         # PATREON
         patreon = validate_patreon_account_url( url )
@@ -350,10 +364,10 @@ class Link_Finder :
                     if get_multiplex != None :
                         twitter_accounts += get_multiplex
                 return twitter_accounts
-            return []
+            raise Already_Visited
         
         # PAGE NON SUPPORTEE
-        return None
+        raise Unsupported_Website
     
     """
     Utiliser le dictionnaire du multiplexeur de liens pour empêcher de visiter

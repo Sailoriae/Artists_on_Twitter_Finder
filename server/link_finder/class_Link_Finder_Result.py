@@ -29,3 +29,10 @@ Exception si le site n'est pas supporté.
 """
 class Unsupported_Website ( Exception ) :
     pass
+
+"""
+Exception si la page a déjà été visitée.
+Utilisée uniquement en interne par le multiplexeur de liens.
+"""
+class Already_Visited ( Exception ) :
+    pass
