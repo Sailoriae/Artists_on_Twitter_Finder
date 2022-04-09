@@ -166,3 +166,14 @@ Attention ! Les résultats sont journalisés uniquement s’il n'y a pas eu de
 problème ou d'erreur.
 """
 ENABLE_LOGGING = False
+
+"""
+Ce fichier contient des clés d'accès à l'API de Twitter. Par mesure de
+sécurité, on supprime son accès par n'importe qui. Cette ligne est
+l'équivalent de la commande "chmod o-rwx".
+Si vous le souhaitez, vous pouvez personnaliser ou supprimer ce
+comportement.
+"""
+from os import chmod, lstat
+from stat import S_IRWXO
+chmod(__file__, lstat(__file__).st_mode & ~S_IRWXO)
