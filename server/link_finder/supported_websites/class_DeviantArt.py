@@ -170,7 +170,7 @@ class DeviantArt :
             # Envoyer dans le multiplexer les autres URL qu'on peut trouver
             if multiplexer != None :
                 for link in scanner1.scan( validator_function = validate_url ) :
-                    get_multiplex = multiplexer( link )
+                    get_multiplex = multiplexer( link, source = "deviantart_textarea" )
                     if get_multiplex != None :
                         twitter_accounts += get_multiplex
             
@@ -184,6 +184,7 @@ class DeviantArt :
             # qu'il est bien passé par cette page, et donc empêche d'y
             # passer deux fois.
             if multiplexer != None :
+                # Ne précise pas la source car on veut reboucler sur DeviantArt
                 twitter_accounts += multiplexer( artist_about_page )
                 return twitter_accounts
             
@@ -206,7 +207,7 @@ class DeviantArt :
         # liens vers les pages de leurs ami(e)s
         if multiplexer != None :
             for link in scanner2.scan( validator_function = validate_url ) :
-                get_multiplex = multiplexer( link, source = "block_deviantart_account" )
+                get_multiplex = multiplexer( link, source = "deviantart_textarea" )
                 if get_multiplex != None :
                     twitter_accounts += get_multiplex
         
