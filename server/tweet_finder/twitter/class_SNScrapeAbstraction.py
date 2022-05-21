@@ -5,8 +5,8 @@ import snscrape.modules.twitter
 
 # Vérifier que SNSCrape est à une version supérieure à la 0.4.0
 from snscrape.version import __version__
-version = __version__.split(".")
-if int( version[0] ) == 0 and int( version[1] ) < 4 :
+from pkg_resources import parse_version as version
+if version( __version__ ) < version( "0.4.0" ) :
     raise ModuleNotFoundError( "La version de la librairie SNScrape doit être supérieure à la 0.4.0 !" )
 
 

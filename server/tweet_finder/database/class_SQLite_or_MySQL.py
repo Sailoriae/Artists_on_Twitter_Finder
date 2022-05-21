@@ -24,6 +24,17 @@ from tweet_finder.cbir_engine.class_CBIR_Engine import HASH_SIZE
 
 if param.USE_MYSQL_INSTEAD_OF_SQLITE :
     import mysql.connector
+    from pkg_resources import parse_version as version
+    
+    # Les version antérieures à la 8.0.24 peuvent retourner des chaines de
+    # caractères à la place de données binaires (Pour le type BINARY)
+    if version( mysql.connector.__version__ ) < version( "8.0.24" ) :
+        raise ModuleNotFoundError( "La version de la librairie MySQL-Connector-Python doit être supérieure à la 8.0.24 !" )
+    
+    # La version 8.0.29 peut retourner des chaines de caractères à la place de
+    # données binaires (Pour le type BINARY)
+    if version( mysql.connector.__version__ ) > version( "8.0.28" ) :
+        raise ModuleNotFoundError( "La version de la librairie MySQL-Connector-Python doit être inférieure à la 8.0.28 !" )
 else :
     import sqlite3
 

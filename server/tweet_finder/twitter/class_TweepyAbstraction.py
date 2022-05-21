@@ -5,7 +5,8 @@ import tweepy
 import time
 
 # Vérifier que Tweepy est à une version supérieure à la 4.0.0
-if int( tweepy.__version__.split(".")[0] ) < 4 :
+from pkg_resources import parse_version as version
+if version( tweepy.__version__ ) < version( "4.0.0" ):
     raise ModuleNotFoundError( "La version de la librairie Tweepy doit être supérieure à la 4.0.0 !" )
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
