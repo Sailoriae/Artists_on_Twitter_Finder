@@ -25,6 +25,14 @@ from tweet_finder.class_Reverse_Searcher import Unfound_Account_on_Reverse_Searc
 from tweet_finder.class_Reverse_Searcher import Account_Not_Indexed
 from tweet_finder.utils.url_to_content import url_to_content, File_Too_Big
 from tweet_finder.utils.url_to_PIL_image import binary_image_to_PIL_image
+from tweet_finder.twitter.class_TweepyAbstraction import TweepyAbstraction
+
+
+# Vérifier que les Tweets trouvés existent toujours
+# Cela ajoute une requête à l'API Twitter, mais ne pose pas de problème de
+# rate-limits, car le Link Finder fait déjà une requête sur une autre API qui a
+# la même limitation (900 requêtes par tranches de 15 minutes)
+CHECK_TWEETS_EXISTENCE = True
 
 
 """
@@ -43,6 +51,17 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
     # Initialisation de notre moteur de recherche d'image par le contenu
     cbir_engine = Reverse_Searcher( DEBUG = param.DEBUG, ENABLE_METRICS = param.ENABLE_METRICS,
                                     add_step_3_times = shared_memory_execution_metrics.add_step_3_times )
+    
+    # Ajouter à la liste des comptes disponibles le compte par défaut
+    param.TWITTER_API_KEYS.append( { "OAUTH_TOKEN" : param.OAUTH_TOKEN,
+                                     "OAUTH_TOKEN_SECRET" : param.OAUTH_TOKEN_SECRET,
+                                     "AUTH_TOKEN" : None } )
+    
+    # Initialisation de notre couche d'abstraction à l'API Twitter
+    twitter = TweepyAbstraction( param.API_KEY,
+                                 param.API_SECRET,
+                                 param.TWITTER_API_KEYS[ thread_id - 1 ]["OAUTH_TOKEN"],
+                                 param.TWITTER_API_KEYS[ thread_id - 1 ]["OAUTH_TOKEN_SECRET"], )
     
     # Dire qu'on ne fait rien
     shared_memory_threads_registry.set_request( f"thread_step_3_reverse_search_th{thread_id}", None )
@@ -163,16 +182,19 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
                 result = cbir_engine.search_exact_tweet( request_image_pil )
                 request.found_tweets += result
             
-            # Avant de trier la liste des résultats, on pourrait utiliser l'API
-            # Twitter pour vérifier que les Tweets trouvés existent encore. On
-            # a déjà une fonction dans la classe "TweepyAbstraction" qui fait
-            # ça : "get_multiple_tweets()". Cependant, cela ferait une requête
-            # en plus sur l'API Twitter, et je n'ai pas trop envie pour le
-            # moment. Surtout que le widget Twitter n'affiche pas les Tweets
-            # supprimés.
-            # Si on change d'avis, penser à supprimer la ligne dans la page de
-            # documentation de l'UI web, où l'on dit que AOTF peut retourner
-            # des Tweets supprimés.
+            # Vérifier que les Tweets trouvés existent encore
+            # Il y a autant de threads de recherche par image (Etape 3) que de
+            # threads de Link Finder (Etape 1), donc comme on utilise deux API
+            # différentes avec les mêmes rate-limits (900 requêtes par tranches
+            # de 15 minutes), on ne ralentit par vraiment le traitement
+            if CHECK_TWEETS_EXISTENCE :
+                check_found_tweets = twitter.get_multiple_tweets( [ x.tweet_id for x in request.found_tweets ], trim_user = True )
+                check_found_tweets = [ int( x.id ) for x in check_found_tweets ]
+                filtered_found_tweets = []
+                for found_tweet in request.found_tweets :
+                    if int( found_tweet.tweet_id ) in check_found_tweets :
+                        filtered_found_tweets.append( found_tweet )
+                request.found_tweets = filtered_found_tweets
             
             # Trier la liste des résultats
             # Tri par la distance, puis si égalité par le nombre d'images dans

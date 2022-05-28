@@ -27,7 +27,8 @@ NUMBER_OF_STEP_1_LINK_FINDER_THREADS = len( param.TWITTER_API_KEYS ) + 1
 # Etape 2 : Autant de threads que de threads de Link Finder
 NUMBER_OF_STEP_2_TWEETS_INDEXER_THREADS = NUMBER_OF_STEP_1_LINK_FINDER_THREADS
 
-# Etape 3 : Autant de threads que de threads de Link Finder
+# Etape 3 : Autant de threads que de couples d'accès à l'API Twitter
+# "+1" parce qu'il y a aussi le compte par défaut
 NUMBER_OF_STEP_3_REVERSE_SEARCH_THREADS = NUMBER_OF_STEP_1_LINK_FINDER_THREADS
 
 # Etape A : Autant de threads que clés d'accès à l'API Twitter de recherche

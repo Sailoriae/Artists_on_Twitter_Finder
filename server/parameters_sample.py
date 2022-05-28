@@ -38,6 +38,7 @@ Ce compte est utilisé par :
 - Le thread de retentative d'indexation des Tweets (Uniquement si un ID de
   Tweet a été inséré manuellement dans la base de données)
 - Certains threads de Link Finder (Etape 1)
+- Certains threads de recherche par image (Etape 3)
 - Le script de maintenance permettant de désindexer les comptes supprimés
 
 Pour obtenir des couples de clés OAUTH_TOKEN et OAUTH_TOKEN_SECRET, vous pouvez
@@ -52,6 +53,7 @@ Liste de couples de clés d'accès à des comptes Twitter.
 Cela permet de paralléliser le traitement, et donc d'améliorer les performances
 du serveur. Ces comptes sont utilisés pour :
 - Les threads de Link Finder (Etape 1)
+- Les threads de recherche par image (Etape 3)
 - Les threads de listage avec l'API de recherche (Etape A)
 - Les threads de listage avec l'API de timeline (Etape B)
 
