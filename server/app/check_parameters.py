@@ -143,36 +143,54 @@ def check_parameters () :
     
     print( "Verification de la connexion à l'API publique Twitter..." )
     
-    def test_twitter ( api ) :
+    def test_twitter ( api, account_number ) :
+        if account_number == 0 : account = "par défaut"
+        else : account = f"numéro {account_number}"
+        
         # On essaye d'avoir le premier Tweet sur Twitter
         # https://twitter.com/jack/status/20
         if twitter.get_tweet( 20 ) == None :
-            print( "Echec de connexion à l'API publique Twitter !")
+            print( f"Echec de connexion à l'API publique Twitter pour le compte {account} !")
             print( "Veuillez vérifier votre fichier \"parameters.py\" !" )
             print( "Notamment les clés suivantes : API_KEY, API_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET" )
             return False
-        else :
-            print( "Connexion à l'API publique Twitter réussie !")
-            return True
+        
+        settings = twitter._api.get_settings()
+        account += f" (@{settings['screen_name']})"
+        
+        if not settings["display_sensitive_media"] :
+            print( f"Le compte {account} doit pouvoir voir les médias sensibles !" )
+            return False
+        
+        print( f"Connexion à l'API publique Twitter réussie pour le compte {account} !")
+        return True
     
     twitter = TweepyAbstraction( param.API_KEY,
                                  param.API_SECRET,
                                  param.OAUTH_TOKEN,
                                  param.OAUTH_TOKEN_SECRET )
-    if not test_twitter( twitter ) :
+    if not test_twitter( twitter, 0 ) :
         return False
     
+    account_number = 0
     for creds in param.TWITTER_API_KEYS :
         twitter = TweepyAbstraction( param.API_KEY,
                                      param.API_SECRET,
                                      creds["OAUTH_TOKEN"],
                                      creds["OAUTH_TOKEN_SECRET"] )
-        if not test_twitter( twitter ) :
+        account_number += 1
+        if not test_twitter( twitter, account_number ) :
             return False
     
     # ========================================================================
     
+    print( "Verification de la connexion à l'API de recherche Twitter..." )
+    
+    account_number = 0
     for creds in param.TWITTER_API_KEYS :
+        account_number += 1
+        account = f"numéro {account_number}"
+        
         token = creds["AUTH_TOKEN"]
         snscrape = SNScrapeAbstraction( token )
         query = "from:@Twitter since:2020-08-11 until:2020-08-12"
@@ -182,15 +200,15 @@ def check_parameters () :
             tweets_jsons.append( tweet_json )
         
         try :
-            snscrape.search( query, save_tweet )
+            snscrape.search( query, save_tweet, RETRIES = 1 )
         except Exception as error :
-            print( "Echec de connexion à l'API de recherche de SNScrape...")
-            print( error )
+            print( f"Echec de connexion à l'API de recherche de SNScrape pour le compte {account}...")
+#            print( error ) # SNScrape log déjà
             print( "Veuillez vérifier votre fichier \"parameters.py\" !" )
             print( "Notamment les clés suivantes : AUTH_TOKEN" )
             return False
         else :
-            print( "Connexion à l'API de recherche de SNScrape réussie !")
+            print( f"Connexion à l'API de recherche de SNScrape réussie pour le compte {account} !")
     
     # Ca serait intéressant de tester avec un Tweet qui apparait dans une
     # recherche avec un compte Twitter, et pas dans une recherche en tant

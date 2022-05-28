@@ -84,8 +84,8 @@ class SNScrapeAbstraction :
             - La date Tweet trouvé le plus récent,
             - Le nombre de Tweet trouvés.
     """
-    def search( self, query : str, output_function = print ) :
-        scraper = TwitterSearchScraper( query, retries = 10 )
+    def search( self, query : str, output_function = print, RETRIES = 10 ) :
+        scraper = TwitterSearchScraper( query, retries = RETRIES )
         # Peut réessayer 10 fois, car il fait des attentes exponentielles
         # La somme de toutes ces attentes sera donc la suivante (en secondes):
         # 2**0 + 2**1 + 2**2 + 2**3 + 2**4 + 2**5 + 2**6 + 2**7 + 2**8 + 2**9
