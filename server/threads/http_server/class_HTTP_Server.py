@@ -4,6 +4,7 @@
 from http.server import BaseHTTPRequestHandler
 from urllib.parse import parse_qs, urlsplit
 import json
+from time import time
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
 # Ainsi, si on veut utiliser ce script indépendamment (Notamment pour des
@@ -35,6 +36,10 @@ MAX_CONTENT_LENGTH = 1024 # octets
 # On sépare pour permettre une potentielle autre utilisation du POST
 MAX_ILLUST_URL_SIZE = 256 # caractères
 
+# Nombre de secondes pendant lesquelles ont garde en cache le JSON retourné par
+# l'endpoint GET /stats (Au delà, il sera régénéré)
+STATS_CACHE_TTL = 3 # secondes
+
 
 """
 Serveur HTTP, permettant d'utiliser AOTF.
@@ -63,6 +68,11 @@ def http_server_container ( shared_memory_uri_arg ) :
         # Envoyer un header "Server" personnalisé
         server_version = "Artists on Twitter Finder"
         sys_version = ""
+        
+        # Mise en cache
+        stats_cache = None # Endpoint GET /stats
+        stats_cache_date = 0 # Besoin de rafraichir toutes les STATS_CACHE_TTL secondes
+        config_cache = None # Endpoint GET /config
         
         def __init__( self, *args, **kwargs ) :
             super(BaseHTTPRequestHandler, self).__init__(*args, **kwargs)
@@ -102,7 +112,8 @@ def http_server_container ( shared_memory_uri_arg ) :
             # =================================================================
             # Vérifier que l'utilisateur ne fait pas trop de requêtes
             # En premier, c'est plus logique
-            if not HTTP_Server.http_limitator.can_request( client_ip ) :
+            if ( endpoint not in [ "/stats", "/config" ] and
+                 not HTTP_Server.http_limitator.can_request( client_ip ) ) :
                 http_code = 429
                 self.send_response(http_code)
                 self.send_header("Content-type", "text/plain; charset=utf-8")
@@ -213,16 +224,18 @@ def http_server_container ( shared_memory_uri_arg ) :
                 self.send_header("Access-Control-Allow-Origin", "*")
                 self.end_headers()
                 
-                response_dict = {
-                    "indexed_tweets_count" : HTTP_Server.shared_memory.tweets_count,
-                    "indexed_accounts_count" : HTTP_Server.shared_memory.accounts_count,
-                    "processing_user_requests_count" : HTTP_Server.user_requests.processing_requests_count,
-                    "processing_scan_requests_count" : HTTP_Server.scan_requests.processing_requests_count,
-                    "pending_tweets_count" : HTTP_Server.step_C_index_tweets_queue.qsize()
-                }
+                if ( self.stats_cache == None or
+                     time() - self.stats_cache_date >= STATS_CACHE_TTL ) :
+                    self.stats_cache = json.dumps({
+                        "indexed_tweets_count" : HTTP_Server.shared_memory.tweets_count,
+                        "indexed_accounts_count" : HTTP_Server.shared_memory.accounts_count,
+                        "processing_user_requests_count" : HTTP_Server.user_requests.processing_requests_count,
+                        "processing_scan_requests_count" : HTTP_Server.scan_requests.processing_requests_count,
+                        "pending_tweets_count" : HTTP_Server.step_C_index_tweets_queue.qsize()
+                    })
+                    self.stats_cache_date = time()
                 
-                json_text = json.dumps( response_dict )
-                self.wfile.write( json_text.encode("utf-8") )
+                self.wfile.write( self.stats_cache.encode("utf-8") )
             
             # Si on demande les informations sur le serveur
             # GET /config
@@ -233,17 +246,17 @@ def http_server_container ( shared_memory_uri_arg ) :
                 self.send_header("Access-Control-Allow-Origin", "*")
                 self.end_headers()
                 
-                response_dict = {
-                    "limit_per_ip_address" : param.MAX_PROCESSING_REQUESTS_PER_IP_ADDRESS,
-                    "ip_can_bypass_limit" : client_ip in param.UNLIMITED_IP_ADDRESSES,
-                    "update_accounts_frequency" : param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE,
-                    "max_uri_length" : MAX_URI_LENGTH,
-                    "max_content_length" : MAX_CONTENT_LENGTH,
-                    "max_illust_url_size" : MAX_ILLUST_URL_SIZE
-                }
+                if self.config_cache == None :
+                    self.config_cache = json.dumps({
+                        "limit_per_ip_address" : param.MAX_PROCESSING_REQUESTS_PER_IP_ADDRESS,
+                        "ip_can_bypass_limit" : client_ip in param.UNLIMITED_IP_ADDRESSES,
+                        "update_accounts_frequency" : param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE,
+                        "max_uri_length" : MAX_URI_LENGTH,
+                        "max_content_length" : MAX_CONTENT_LENGTH,
+                        "max_illust_url_size" : MAX_ILLUST_URL_SIZE
+                    })
                 
-                json_text = json.dumps( response_dict )
-                self.wfile.write( json_text.encode("utf-8") )
+                self.wfile.write( self.config_cache.encode("utf-8") )
             
             # =================================================================
             # HTTP 404

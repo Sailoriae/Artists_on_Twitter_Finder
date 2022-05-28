@@ -5,7 +5,7 @@ Le serveur AOTF est utilisable via son serveur HTTP, depuis la même machine (`h
 Cette documentation est très similaire à la [documentation de l'API sur l'interface web](../public/documentation.fr.html).
 
 Attention :
-- Le serveur limite chaque adresse IP à 1 requête HTTP par secondes. Si dépassement, il renvoie une erreur HTTP 429.
+- Le serveur limite chaque adresse IP à 1 requête HTTP par secondes (Uniquement pour les endpoints `/query`). Si dépassement, il renvoie une erreur HTTP 429.
 - Le serveur limite la taille de l'URL de requête. Si dépassement, il renvoie une erreur HTTP 414.
 - Le serveur limite la taille du contenu des requêtes `POST`. Si dépassement, il renvoie une erreur HTTP 413.
 
