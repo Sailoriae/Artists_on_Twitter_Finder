@@ -34,11 +34,16 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
     # Initialisation de notre moteur de recherche des comptes Twitter
     finder_engine = Link_Finder( DEBUG = param.DEBUG )
     
+    # Ajouter à la liste des comptes disponibles le compte par défaut
+    param.TWITTER_API_KEYS.append( { "OAUTH_TOKEN" : param.OAUTH_TOKEN,
+                                     "OAUTH_TOKEN_SECRET" : param.OAUTH_TOKEN_SECRET,
+                                     "AUTH_TOKEN" : None } )
+    
     # Initialisation de notre couche d'abstraction à l'API Twitter
     twitter = TweepyAbstraction( param.API_KEY,
                                  param.API_SECRET,
-                                 param.OAUTH_TOKEN,
-                                 param.OAUTH_TOKEN_SECRET )
+                                 param.TWITTER_API_KEYS[ thread_id - 1 ]["OAUTH_TOKEN"],
+                                 param.TWITTER_API_KEYS[ thread_id - 1 ]["OAUTH_TOKEN_SECRET"], )
     
     # Maintenir ouverts certains proxies vers la mémoire partagée
     shared_memory_threads_registry = shared_memory.threads_registry

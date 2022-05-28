@@ -16,7 +16,7 @@ if __name__ == "__main__" :
     change_wdir( "../.." )
     path.append(get_wdir())
 
-import utils.constants as cons
+import utils.constants as const
 
 
 # Taille maximale que AOTF peut télécharger
@@ -50,7 +50,7 @@ def url_to_content ( url : str, max_size : int = MAX_SIZE ) -> bytes :
         request.add_header("Referer", "https://www.pixiv.net/")
     
     # Ajouter notre "User-Agent" à la requête
-    request.add_header("User-Agent", cons.USER_AGENT)
+    request.add_header("User-Agent", const.USER_AGENT)
     
     # Créer la requête (Ceci va faire une requête HTTP "HEAD")
     response = urllib.request.urlopen( request, timeout = 60 )

@@ -22,6 +22,8 @@ if __name__ == "__main__" :
     path.append(get_wdir())
 
 import parameters as param
+import utils.constants as const
+
 from app.define_max_file_descriptors import define_max_file_descriptors
 from app.class_Debug_File import Debug_File
 
@@ -169,36 +171,36 @@ class Threads_Manager :
         
         # Threads étape 1 (Link Finder)
         # Réunis dans un même processus avec les threads de l'étape 2
-        to_start["threads_user_pipeline_container"] = [ thread_step_1_link_finder ] * param.NUMBER_OF_STEP_1_LINK_FINDER_THREADS
+        to_start["threads_user_pipeline_container"] = [ thread_step_1_link_finder ] * const.NUMBER_OF_STEP_1_LINK_FINDER_THREADS
         
         # Threads étape 2 : Lancement de l'indexation ou mise à jour
         # Réunis dans un même processus avec les threads de l'étape 1
-        to_start["threads_user_pipeline_container"] += [ thread_step_2_tweets_indexer ] * param.NUMBER_OF_STEP_2_TWEETS_INDEXER_THREADS
+        to_start["threads_user_pipeline_container"] += [ thread_step_2_tweets_indexer ] * const.NUMBER_OF_STEP_2_TWEETS_INDEXER_THREADS
         
         # Threads étape 3 : Recherche par image
         # Réunis par paire (Car nécessitent de la puissance de calcul)
-        for i in range( int( param.NUMBER_OF_STEP_3_REVERSE_SEARCH_THREADS / 2 ) ) :
+        for i in range( int( const.NUMBER_OF_STEP_3_REVERSE_SEARCH_THREADS / 2 ) ) :
             to_start[f"threads_step_3_container{i}"] = [ thread_step_3_reverse_search ] * 2
         
         # Si nombre impair, le dernier est tout seul dans son processus
-        if param.NUMBER_OF_STEP_3_REVERSE_SEARCH_THREADS % 2 == 1 :
+        if const.NUMBER_OF_STEP_3_REVERSE_SEARCH_THREADS % 2 == 1 :
             to_start[f"threads_step_3_container{i+1}"] = [ thread_step_3_reverse_search ]
         
         # Threads étape A : Listage avec l'API de recherche
         # Réunis dans un même processus avec les threads de l'étape B
-        to_start["threads_scan_pipeline_container"] = [ thread_step_A_SearchAPI_list_account_tweets ] * len( param.TWITTER_API_KEYS )
+        to_start["threads_scan_pipeline_container"] = [ thread_step_A_SearchAPI_list_account_tweets ] * const.NUMBER_OF_STEP_A_SEARCHAPI_LIST_ACCOUNT_TWEETS
         
         # Threads étape B : Listage avec l'API de timeline
         # Réunis dans un même processus avec les threads de l'étape A
-        to_start["threads_scan_pipeline_container"] += [ thread_step_B_TimelineAPI_list_account_tweets ] * len( param.TWITTER_API_KEYS )
+        to_start["threads_scan_pipeline_container"] += [ thread_step_B_TimelineAPI_list_account_tweets ] * const.NUMBER_OF_STEP_B_TIMELINEAPI_LIST_ACCOUNT_TWEETS
         
         # Threads étape C : Indexation des Tweets trouvés
         # Réunis par paire (Car nécessitent de la puissance de calcul)
-        for i in range( int( param.NUMBER_OF_STEP_C_INDEX_TWEETS / 2 ) ) :
+        for i in range( int( const.NUMBER_OF_STEP_C_INDEX_TWEETS / 2 ) ) :
             to_start[f"threads_step_C_container{i}"] = [ thread_step_C_index_tweets ] * 2
         
         # Si nombre impair, le dernier est tout seul dans son processus
-        if param.NUMBER_OF_STEP_C_INDEX_TWEETS % 2 == 1 :
+        if const.NUMBER_OF_STEP_C_INDEX_TWEETS % 2 == 1 :
             to_start[f"threads_step_C_container{i+1}"] = [ thread_step_C_index_tweets ]
         
         # On ne crée qu'un seul thread (ou processus) du serveur HTTP

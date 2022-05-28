@@ -5,9 +5,8 @@
 Activer le mode multi-processus.
 
 Si ce paramètre activé, de nombreux processus fils seront créés, ainsi qu'un
-serveur de mémoire partagée reposant sur la librairie Pyro sera créé. Le
-serveur sera donc plus lourd, mais le traitement des requêtes sera bien plus
-efficace.
+serveur de mémoire partagée reposant sur la librairie Pyro. Le serveur sera
+donc plus lourd, mais le traitement des requêtes sera bien plus efficace.
 
 Si ce paramètre est désactivé, seulement des threads seront créés, et la
 mémoire partagée sera simplement un objet Python. Le serveur sera donc plus
@@ -20,31 +19,54 @@ paramètre si vous utilisez SQLite !
 ENABLE_MULTIPROCESSING = True
 
 """
-Paramètres pour l'accès à l'API Twitter.
-https://developer.twitter.com/en/apps
-Il est très recommandé de paramétrer l'app Twitter pour qu'elle un accès en
-lecture seule.
+Couple de clés d'accès à l'API Twitter. Pour ovenir un couple de clés API_KEYS
+et API_SECRET, il faut créer une "application" sur l'interface Twitter pour les
+développeurs : https://developer.twitter.com/en/apps
 
-Pour obtenir OAUTH_TOKEN et OAUTH_TOKEN_SECRET, vous pouvez utiliser le script
-"get_oauth_token.py" présent dans le répertoire "misc".
+Il est très recommandé de paramétrer cette app Twitter pour qu'elle un accès en
+lecture seule.
 """
 API_KEY = ""
 API_SECRET = ""
 
+"""
+Couple de clés d'accès au compte Twitter par défaut.
+Ce compte est utilisé par :
+- L'interface en ligne de commande
+- Le thread de mise à jour automatique
+- Le thread de reset des curseurs d'indexation avec l'API de recherche
+- Le thread de retentative d'indexation des Tweets (Uniquement si un ID de
+  Tweet a été inséré manuellement dans la base de données)
+- Certains threads de Link Finder (Etape 1)
+- Le script de maintenance permettant de désindexer les comptes supprimés
+
+Pour obtenir des couples de clés OAUTH_TOKEN et OAUTH_TOKEN_SECRET, vous pouvez
+utiliser le script "get_oauth_token.py" présent dans le répertoire "misc". Il
+faudra vous munir du couple de clé API_KEY et API_SECRET ci-dessus.
+"""
 OAUTH_TOKEN = ""
 OAUTH_TOKEN_SECRET = ""
 
 """
-OAUTH_TOKEN et OAUTH_TOKEN_SECRET :
-Liste de paramètres pour l'accès à l'API Twitter, idem à ci-dessus, mais en
-plusieurs exemplaires (Donc sur plusieurs comptes) pour paralléliser les
-listages de Tweets
+Liste de couples de clés d'accès à des comptes Twitter.
+Cela permet de paralléliser le traitement, et donc d'améliorer les performances
+du serveur. Ces comptes sont utilisés pour :
+- Les threads de Link Finder (Etape 1)
+- Les threads de listage avec l'API de recherche (Etape A)
+- Les threads de listage avec l'API de timeline (Etape B)
 
-AUTH_TOKEN : Token de connexion à des comptes Twitter.
+Ces couples de clés sont associées à une troisième clé AUTH_TOKEN, permettant
+l'accès aux mêmes compte Twitter, mais via l'API de recherche (Etape A). Pour
+obtenir ces clés, vous devez :
 1. Ouvrir un compte Twitter dans un navigateur,
-2. Mettre ici la valeur du cookie "auth_token",
+2. Copier ici la valeur du cookie "auth_token",
 3. Et ne surtout pas déconnecter ce compte, ni effacer la session !
    Effacer les cookies du navigateur plutôt.
+
+LES AUTH_TOKEN DOIVENT CORRESPONDRE AUX COUPLES OAUTH_TOKEN/OAUTH_TOKEN_SECRET.
+C'est super méga important ! Sinon la vérification du blocage par un compte
+lors de son indexation avec l'API de recherche risque d'être faussée, et le
+compte mal indexé.
 
 Ces comptes utilisés doivent pouvoir voir les médias sensibles dans les
 recherches ! OPTION A DECOCHER :
@@ -54,8 +76,9 @@ Paramètres -> Confidentialité et sécurité -> Sécurité -> Filtres de recher
 Il est très recommandé d'utiliser ici des comptes "inutiles", en cas de
 piratage du serveur (Et de vol des "auth_token" ci-dessous).
 
-LES AUTH_TOKEN DOIVENT CORRESPONDRE AUX COUPLES OAUTH_TOKEN / OAUTH_TOKEN_SECRET !
-C'est super méga important !
+Plus vous mettez de clés ici, plus le serveur aura de threads (Et de processus
+fils si le mode multi-processus est activé). Il est inutile de mettre plus de
+comptes que vous n'avez de cœurs dans votre processeur.
 """
 TWITTER_API_KEYS = [ {
                        "OAUTH_TOKEN" : "",
@@ -92,21 +115,6 @@ NE PAS OUVRIR AU PUBLIC ! Utiliser un vrai serveur web comme Apache 2 ou Nginx
 pour faire un proxy vers le serveur AOTF.
 """
 HTTP_SERVER_PORT = 3301
-
-"""
-Paramétrage du nombre de threads.
-
-Note : Le nombre de threads de listages (Etapes A et C) dépendent du nombre de
-tokens de connexion à l'API Twitter que vous passez. Voir la liste
-"TWITTER_API_KEYS".
-Plus exactement, il y a un thread de listage avec l'API de recherche (Etape A)
-par clé "AUTH_TOKEN", et un thread de listage avec l'API de timeline (Etape B)
-par couples de clés "OAUTH_TOKEN" et "OAUTH_TOKEN_SECRET".
-"""
-NUMBER_OF_STEP_1_LINK_FINDER_THREADS = 5
-NUMBER_OF_STEP_2_TWEETS_INDEXER_THREADS = 5
-NUMBER_OF_STEP_3_REVERSE_SEARCH_THREADS = 5
-NUMBER_OF_STEP_C_INDEX_TWEETS = len( TWITTER_API_KEYS ) * 2
 
 """
 Faire plus de print().

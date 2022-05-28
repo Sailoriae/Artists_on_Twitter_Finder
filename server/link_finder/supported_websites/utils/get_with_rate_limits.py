@@ -21,12 +21,12 @@ if __name__ == "__main__" :
     change_wdir( "../../.." )
     path.append(get_wdir())
 
-import utils.constants as cons
+import utils.constants as const
 
 
 # Se faire passer pour un vrai navigateur, hyper important pour Pixiv !
 headers = {
-    "User-Agent" : cons.USER_AGENT
+    "User-Agent" : const.USER_AGENT
 }
 
 
