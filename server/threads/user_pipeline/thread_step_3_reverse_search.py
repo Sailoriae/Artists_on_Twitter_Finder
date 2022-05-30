@@ -96,8 +96,8 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
                 # ATTENTION : Bien utiliser url_to_content(), car elle contient
                 # une bidouille pour GET les image sur Pixiv
                 query_image_as_bytes = url_to_content( request.image_urls[image_id] )
-            except File_Too_Big :
-                print( f"[step_3_th{thread_id}] L'image d'entrée est trop grande." )
+            except File_Too_Big as error :
+                print( f"[step_3_th{thread_id}] L'image d'entrée est trop grande ({error})." )
                 if len(request.image_urls) > image_id+1 :
                     image_id += 1 # Reboucler au "while True"
                     continue
@@ -141,7 +141,7 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
                 print( error )
                 request.problem = "ERROR_DURING_REVERSE_SEARCH"
             except DecompressionBombError as error :
-                print( f"[step_3_th{thread_id}] L'image d'entrée est trop grande." )
+                print( f"[step_3_th{thread_id}] L'image d'entrée est trop grande (Decompression Bomb)." )
                 print( error )
                 if len(request.image_urls) > image_id+1 :
                     image_id += 1 # Reboucler au "while True"
