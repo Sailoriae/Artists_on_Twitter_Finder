@@ -74,7 +74,6 @@ def http_server_container ( shared_memory_uri_arg ) :
         # Mise en cache
         stats_cache = None # Endpoint GET /stats
         stats_cache_date = 0 # Besoin de rafraichir toutes les STATS_CACHE_TTL secondes
-        config_cache = None # Endpoint GET /config
         
         def __init__( self, *args, **kwargs ) :
             super(BaseHTTPRequestHandler, self).__init__(*args, **kwargs)
@@ -138,6 +137,11 @@ def http_server_container ( shared_memory_uri_arg ) :
             # =================================================================
             # Vérifier que l'utilisateur ne fait pas trop de requêtes
             # En premier, c'est plus logique
+            # Uniquement pour les API "lourdes" (C'est à dire qui font appel à
+            # la mémoire partagée) et qui ne sont pas mises en cache
+            # - "/query" en fait partie
+            # - "/stats" peut être mise en cache
+            # - "/config" est légère
             if ( endpoint not in [ "/stats", "/config" ] and
                  not HTTP_Server.http_limitator.can_request( client_ip ) ) :
                 http_code = 429
@@ -277,17 +281,18 @@ def http_server_container ( shared_memory_uri_arg ) :
                 self.send_header("Access-Control-Allow-Origin", "*")
                 self.end_headers()
                 
-                if self.config_cache == None :
-                    self.config_cache = json.dumps({
-                        "limit_per_ip_address" : param.MAX_PROCESSING_REQUESTS_PER_IP_ADDRESS,
-                        "ip_can_bypass_limit" : client_ip in param.UNLIMITED_IP_ADDRESSES,
-                        "update_accounts_frequency" : param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE,
-                        "max_uri_length" : MAX_URI_LENGTH,
-                        "max_content_length" : MAX_CONTENT_LENGTH,
-                        "max_illust_url_size" : MAX_ILLUST_URL_SIZE
-                    })
+                # Ne peut pas être mis en cache car dépend de l'adresse IP
+                response_dict = {
+                    "limit_per_ip_address" : param.MAX_PROCESSING_REQUESTS_PER_IP_ADDRESS,
+                    "ip_can_bypass_limit" : client_ip in param.UNLIMITED_IP_ADDRESSES,
+                    "update_accounts_frequency" : param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE,
+                    "max_uri_length" : MAX_URI_LENGTH,
+                    "max_content_length" : MAX_CONTENT_LENGTH,
+                    "max_illust_url_size" : MAX_ILLUST_URL_SIZE
+                }
                 
-                self.wfile.write( self.config_cache.encode("utf-8") )
+                json_text = json.dumps( response_dict )
+                self.wfile.write( json_text.encode("utf-8") )
             
             # =================================================================
             # HTTP 404
