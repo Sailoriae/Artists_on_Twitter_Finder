@@ -179,7 +179,11 @@ def http_server_container ( shared_memory_uri_arg ) :
                 illust_url = None
                 if method == "POST" :
                     if content_length != 0 :
-                        illust_url = self.rfile.read(content_length).decode('utf-8')
+                        try :
+                            illust_url = self.rfile.read(content_length).decode('utf-8')
+                        except UnicodeDecodeError :
+                            response_dict["status"] = "END"
+                            response_dict["error"] = "NOT_AN_URL"
                 else :
                     try :
                         illust_url = parameters["url"][0]
@@ -188,8 +192,9 @@ def http_server_container ( shared_memory_uri_arg ) :
                 
                 # On envoit forcément les mêmes champs, même si ils sont vides !
                 if illust_url == None :
-                    response_dict["status"] = "END"
-                    response_dict["error"] = "NO_URL_FIELD"
+                    if response_dict["error"] == None :
+                        response_dict["status"] = "END"
+                        response_dict["error"] = "NO_URL_FIELD"
                 
                 elif len( illust_url ) > MAX_ILLUST_URL_SIZE :
                     response_dict["status"] = "END"
