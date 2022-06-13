@@ -111,3 +111,13 @@ class SNScrapeAbstraction :
         
         # Retourner
         return first_tweet_date, count
+    
+    """
+    Bidouille pour obtenir des informations sur l'utilisateur.
+    
+    @return Le JSON de l'API "account/settings".
+    """
+    def get_settings( self ) :
+        scraper = TwitterSearchScraper( "nothing" )
+        scraper.set_auth_token( self.auth_token )
+        return scraper._get_api_data( "https://twitter.com/i/api/1.1/account/settings.json", {} )

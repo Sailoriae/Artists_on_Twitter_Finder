@@ -143,6 +143,11 @@ def check_parameters () :
     
     print( "Verification de la connexion à l'API publique Twitter..." )
     
+    # Numéro du compte -> Nom du compte
+    # Pour vérifier après que les couples de clés OAUTH_TOKEN et la clé
+    # AUTH_TOKEN mènent bien au même compte
+    account_names = {}
+    
     def test_twitter ( api, account_number ) :
         if account_number == 0 : account = "par défaut"
         else : account = f"numéro {account_number}"
@@ -157,6 +162,7 @@ def check_parameters () :
         
         settings = twitter._api.get_settings()
         account += f" (@{settings['screen_name']})"
+        account_names[ account_number ] = settings['screen_name']
         
         if not settings["display_sensitive_media"] :
             print( f"Le compte {account} doit pouvoir voir les médias sensibles !" )
@@ -207,8 +213,19 @@ def check_parameters () :
             print( "Veuillez vérifier votre fichier \"parameters.py\" !" )
             print( "Notamment les clés suivantes : AUTH_TOKEN" )
             return False
-        else :
-            print( f"Connexion à l'API de recherche de SNScrape réussie pour le compte {account} !")
+        
+        settings = snscrape.get_settings()
+        
+        if settings['screen_name'] != account_names[ account_number ] :
+            print( f"Les clés du compte {account} doivent donner accès au même compte !" )
+            print( f"Or, le couple de clés OAUTH_TOKEN donnent accès à @{account_names[ account_number ]}, et la clé AUTH_TOKEN à @{settings['screen_name']} !" )
+            return False
+        
+        account += f" (@{settings['screen_name']})"
+        
+        # Pas besoin de revérifier que le compte a accès aux médias sensibles
+        
+        print( f"Connexion à l'API de recherche de SNScrape réussie pour le compte {account} !")
     
     # Ca serait intéressant de tester avec un Tweet qui apparait dans une
     # recherche avec un compte Twitter, et pas dans une recherche en tant
