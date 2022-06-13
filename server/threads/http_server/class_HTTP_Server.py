@@ -5,6 +5,8 @@ from http.server import BaseHTTPRequestHandler
 from urllib.parse import parse_qs, urlsplit
 import json
 from time import time
+from datetime import datetime
+import traceback
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
 # Ainsi, si on veut utiliser ce script indépendamment (Notamment pour des
@@ -90,7 +92,31 @@ def http_server_container ( shared_memory_uri_arg ) :
         def do_HEAD( self ) :
             return self.do_GET( method = "HEAD" )
         
+        # Collecteur d'erreurs du traitement des requêtes HTTP
         def do_GET( self, method = "GET" ) :
+            try :
+                self._do_GET( method = method )
+            except Exception as error :
+                error_name = "Erreur lors du traitement d'une requête HTTP !\n"
+                error_name += f"S'est produite le {datetime.now().strftime('%Y-%m-%d à %H:%M:%S')}.\n"
+                
+                file = open( "http_server_errors.log", "a" )
+                file.write( "ICI LE COLLECTEUR D'ERREURS DU SERVEUR HTTP !\n" )
+                file.write( "Je suis dans le fichier suivant : threads/http_server/class_HTTP_Server.py\n" )
+                file.write( error_name )
+                traceback.print_exc( file = file )
+                file.write( "\n\n\n" )
+                file.close()
+                
+                print( error_name, end = "" )
+                print( error )
+                print( "La pile d'appel complète a été écrite dans un fichier." )
+                
+                # Ne pas chercher à envoyer une erreur 500, on a surement déjà
+                # envoyé des données, et peut-être même les headers complets
+        
+        # Notre méthode GET gère aussi le POST et le HEAD
+        def _do_GET( self, method = "GET" ) :
             # Analyser le chemin du GET HTTP
             endpoint = urlsplit( self.path ).path
             parameters = dict( parse_qs( urlsplit( self.path ).query ) )
