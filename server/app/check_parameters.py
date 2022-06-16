@@ -16,6 +16,7 @@ if __name__ == "__main__" :
 
 import parameters as param
 from tweet_finder.twitter.class_SNScrapeAbstraction import SNScrapeAbstraction
+from tweet_finder.twitter.class_SNScrapeAbstraction import TwitterSearchScraper
 from tweet_finder.twitter.class_TweepyAbstraction import TweepyAbstraction
 from tweet_finder.database.class_SQLite_or_MySQL import SQLite_or_MySQL
 
@@ -143,7 +144,7 @@ def check_parameters () :
     
     print( "Verification de la connexion à l'API publique Twitter..." )
     
-    # Numéro du compte -> Nom du compte
+    # Numéro du compte -> (Nom du compte, ID du compte)
     # Pour vérifier après que les couples de clés OAUTH_TOKEN et la clé
     # AUTH_TOKEN mènent bien au même compte
     account_names = {}
@@ -160,10 +161,13 @@ def check_parameters () :
             print( "Notamment les clés suivantes : API_KEY, API_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET" )
             return False
         
-        settings = twitter._api.get_settings()
-        account += f" (@{settings['screen_name']})"
-        account_names[ account_number ] = settings['screen_name']
+        # Obtenir le nom ainsi que l'ID du compte
+        verify_creds = twitter._api.verify_credentials()._json
+        account += f" (@{verify_creds['screen_name']})"
+        account_names[ account_number ] = ( verify_creds['screen_name'], verify_creds['id'] )
         
+        # Vérifier que le compte ne masque pas les médias sensibles
+        settings = twitter._api.get_settings()
         if not settings["display_sensitive_media"] :
             print( f"Le compte {account} doit pouvoir voir les médias sensibles !" )
             return False
@@ -214,16 +218,27 @@ def check_parameters () :
             print( "Notamment les clés suivantes : AUTH_TOKEN" )
             return False
         
-        settings = snscrape.get_settings()
+        # Obtenir le nom du compte
+        scraper = TwitterSearchScraper( "nothing" )
+        scraper.set_auth_token( token )
+        settings = scraper._get_api_data( "https://twitter.com/i/api/1.1/account/settings.json", {} )
         
-        if settings['screen_name'] != account_names[ account_number ] :
+        # Vérifier que le nom du compte soit le même qu'avec Tweepy
+        if settings['screen_name'] != account_names[ account_number ][0] :
             print( f"Les clés du compte {account} doivent donner accès au même compte !" )
             print( f"Or, le couple de clés OAUTH_TOKEN donnent accès à @{account_names[ account_number ]}, et la clé AUTH_TOKEN à @{settings['screen_name']} !" )
             return False
         
+        # On ajoute le nom du compte une fois qu'on a vérifié qu'il corresponde
         account += f" (@{settings['screen_name']})"
         
-        # Pas besoin de revérifier que le compte a accès aux médias sensibles
+        # Vérifier que la recherche affiche les médias sensibles
+        scraper = TwitterSearchScraper( "nothing" )
+        scraper.set_auth_token( token )
+        settings = scraper._get_api_data( f"https://twitter.com/i/api/1.1/strato/column/User/{account_names[ account_number ][1]}/search/searchSafetyReadonly", {} )
+        if settings["optInFiltering"] :
+            print( f"Le compte {account} ne doit pas masquer les contenus offensants dans les recherches !" )
+            return False
         
         print( f"Connexion à l'API de recherche de SNScrape réussie pour le compte {account} !")
     
