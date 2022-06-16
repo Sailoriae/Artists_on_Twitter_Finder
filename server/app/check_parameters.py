@@ -170,9 +170,10 @@ def check_parameters () :
         settings = twitter._api.get_settings()
         if not settings["display_sensitive_media"] :
             print( f"Le compte {account} doit pouvoir voir les médias sensibles !" )
+            print( "Merci de vous connecter à ce compte et de cocher la case \"Afficher les médias au contenu potentiellement sensible\" dans \"Paramètres\" -> \"Confidentialité et sécurité\" -> \"Contenu que vous voyez\"." )
             return False
         
-        print( f"Connexion à l'API publique Twitter réussie pour le compte {account} !")
+        print( f"Connexion à l'API publique réussie pour le compte {account} !")
         return True
     
     twitter = TweepyAbstraction( param.API_KEY,
@@ -238,9 +239,10 @@ def check_parameters () :
         settings = scraper._get_api_data( f"https://twitter.com/i/api/1.1/strato/column/User/{account_names[ account_number ][1]}/search/searchSafetyReadonly", {} )
         if settings["optInFiltering"] :
             print( f"Le compte {account} ne doit pas masquer les contenus offensants dans les recherches !" )
+            print( "Merci de vous connecter à ce compte et de décocher la case \"Masquer les contenus offensants\" dans \"Paramètres\" -> \"Confidentialité et sécurité\" -> \"Contenu que vous voyez\" -> \"Paramètres de recherche\"." )
             return False
         
-        print( f"Connexion à l'API de recherche de SNScrape réussie pour le compte {account} !")
+        print( f"Connexion à l'API de recherche réussie pour le compte {account} !")
     
     # Ca serait intéressant de tester avec un Tweet qui apparait dans une
     # recherche avec un compte Twitter, et pas dans une recherche en tant

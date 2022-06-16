@@ -71,9 +71,12 @@ lors de son indexation avec l'API de recherche risque d'être faussée, et le
 compte mal indexé.
 
 Ces comptes utilisés doivent pouvoir voir les médias sensibles dans les
-recherches ! OPTION A DECOCHER :
-Paramètres -> Confidentialité et sécurité -> Sécurité -> Filtres de recherche
--> Masquer les contenus offensants
+recherches ! Pour se faire, il faut :
+- Cocher la case "Afficher les médias au contenu potentiellement sensible" dans
+  "Paramètres" -> "Confidentialité et sécurité" -> "Contenu que vous voyez"
+- Décocher la case "Masquer les contenus offensants" dans "Paramètres" ->
+  "Confidentialité et sécurité" -> "Contenu que vous voyez" ->
+  "Paramètres de recherche"
 
 Il est très recommandé d'utiliser ici des comptes "inutiles", en cas de
 piratage du serveur (Et de vol des "auth_token" ci-dessous).
