@@ -347,6 +347,8 @@ class Link_Finder :
         if linktree != None :
             if not self._already_visited( "linktree", linktree ) :
                 scanner = Webpage_to_Twitter_Accounts( "https://linktr.ee/" + linktree )
+                if scanner._response.status_code == 404 :
+                    return []
                 # En vérité, on utilise BeautifulSoup juste pour aller chercher
                 # un JSON qui contient toutes les URLs
                 json_dict = json.loads(
@@ -365,6 +367,8 @@ class Link_Finder :
         if patreon != None :
             if not self._already_visited( "patreon", patreon ) :
                 scanner = Webpage_to_Twitter_Accounts( "https://www.patreon.com/" + patreon )
+                if scanner._response.status_code == 404 :
+                    return []
                 # Patreon sont vraiment chiant, on ne cible pas plus le contenu
                 scanner.soup = scanner.soup.find("body")
 #                scanner.soup = scanner.soup.find("main", {"id": "renderPageContentWrapper"})
