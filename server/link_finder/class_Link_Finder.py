@@ -34,6 +34,7 @@ from link_finder.class_Link_Finder_Result import Link_Finder_Result
 from link_finder.class_Link_Finder_Result import Not_an_URL
 from link_finder.class_Link_Finder_Result import Unsupported_Website
 from link_finder.class_Link_Finder_Result import Already_Visited
+from link_finder.class_Link_Finder_Result import Not_Visited
 
 
 # ^ = Début de la chaine, $ = Fin de la chaine
@@ -254,6 +255,9 @@ class Link_Finder :
         except Unsupported_Website :
             if self._DEBUG : print( f"[Link_Finder] Multiplexeur (Non supporté): {url}" )
             return None
+        except Not_Visited :
+            if self._DEBUG : print( f"[Link_Finder] Multiplexeur (Supporté, volontairement non-visité): {url}" )
+            return []
         if self._DEBUG :
             if to_return == None : print( f"[Link_Finder] Multiplexeur (Supporté, non reconnu): {url}" )
             else : print( f"[Link_Finder] Multiplexeur (Supporté et reconnu): {url}" )
@@ -284,7 +288,9 @@ class Link_Finder :
         
         # PROFIL SUR DEVIANTART
         deviantart = validate_deviantart_account_url( url )
-        if source != "deviantart_textarea" and deviantart != None :
+        if deviantart != None :
+            if source == "deviantart_textarea" :
+                raise Not_Visited
             if not self._already_visited( "deviantart", deviantart ) :
                 return self._deviantart.get_twitter_accounts( "", force_deviantart_account_name = deviantart,
                                                               multiplexer = self._link_mutiplexer )
@@ -292,7 +298,9 @@ class Link_Finder :
         
         # ILLUSTRATION SUR DEVIANTART
         # Permet aux boorus d'envoyer leur champs "source"
-        if source == "booru_source" and re.match( deviantart_url, url ) != None :
+        if re.match( deviantart_url, url ) != None :
+            if source != "booru_source" :
+                raise Not_Visited
             if not self._already_visited( "deviantart", url ) :
                 self.current_max_depth += 1 # Autoriser une profondeur de plus
                 to_return = self._deviantart.get_twitter_accounts( url,
@@ -316,7 +324,9 @@ class Link_Finder :
         
         # ILLUSTRATION SUR PIXIV
         # Permet aux boorus d'envoyer leur champs "source"
-        if source == "booru_source" and re.match( pixiv_url, url ) != None :
+        if re.match( pixiv_url, url ) != None :
+            if source != "booru_source" :
+                raise Not_Visited
             if not self._already_visited( "pixiv", url ) :
                 self.current_max_depth += 1 # Autoriser une profondeur de plus
                 to_return = self._pixiv.get_twitter_accounts( url,

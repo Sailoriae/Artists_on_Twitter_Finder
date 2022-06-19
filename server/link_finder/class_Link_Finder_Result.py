@@ -36,3 +36,10 @@ Utilisée uniquement en interne par le multiplexeur de liens.
 """
 class Already_Visited ( Exception ) :
     pass
+
+"""
+Exception si le site est supporté, mais la page n'a pas été explorée.
+Utilisée uniquement en interne par le multiplexeur de liens.
+"""
+class Not_Visited ( Exception ) :
+    pass
