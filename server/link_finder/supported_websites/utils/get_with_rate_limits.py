@@ -53,7 +53,7 @@ def get_with_rate_limits ( url, max_retry = 5, retry_on_those_http_errors = [] )
                 return to_return
         
         except http.client.RemoteDisconnected as error :
-            print( error )
+            print( f"{type(error).__name__}: {error}" )
             retry_count += 1
             if retry_count > max_retry :
                 raise error # Sera récupérée par le collecteur d'erreurs
@@ -61,17 +61,17 @@ def get_with_rate_limits ( url, max_retry = 5, retry_on_those_http_errors = [] )
         
         except urllib.error.HTTPError as error : # Je ne sais plus si c'est cette erreur peut tomber
             if error.code == 404 : # N'arrive pas en fait, la lib laisse passer les erreurs 404
-                print( error )
+                print( f"{type(error).__name__}: {error}" )
                 raise error # On peut raise tout de suite car 404
             else :
-                print( error )
+                print( f"{type(error).__name__}: {error}" )
                 retry_count += 1
                 if retry_count > max_retry :
                     raise error # Sera récupérée par le collecteur d'erreurs
                 sleep( uniform( 5, 15 ) )
         
         except Exception as error :
-            print( error )
+            print( f"{type(error).__name__}: {error}" )
             retry_count += 2
             if retry_count > max_retry :
                 raise error # Sera récupérée par le collecteur d'erreurs

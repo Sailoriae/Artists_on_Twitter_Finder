@@ -32,7 +32,7 @@ class Cursor_Iterator :
                         if not error.response.status_code in [503, 429, 500] :
                             raise error
                     print( "[Tweepy Cursor_It] Limite atteinte, on réessaye dans environ 60 secondes..." )
-                    print( error )
+                    print( f"{type(error).__name__}: {error}" )
                     time.sleep( uniform( 50, 70 ) )
             
             except tweepy.errors.TwitterServerError as error :

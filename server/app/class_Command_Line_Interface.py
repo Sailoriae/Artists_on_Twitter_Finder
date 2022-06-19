@@ -87,7 +87,7 @@ class Command_Line_Interface :
                 file.close()
                 
                 print( error_name, end = "" )
-                print( error )
+                print( f"{type(error).__name__}: {error}" )
                 print( "La pile d'appel complète a été écrite dans un fichier." )
                 
                 # Eviter de trop reboucler

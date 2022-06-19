@@ -132,7 +132,7 @@ class Tweets_Indexer :
             # Envoyé par la fonction get_tweet_image() qui n'a pas réussi
             except urllib.error.HTTPError as error :
                 print( f"[Tweets_Indexer] Erreur avec le Tweet ID {tweet_id} !" )
-                print( error )
+                print( f"{type(error).__name__}: {error}" )
                 print( "[Tweets_Indexer] Abandon !" )
                 
                 # Ne pas journaliser les erreurs connues qui arrivent souvent
@@ -154,7 +154,7 @@ class Tweets_Indexer :
             
             except Exception as error :
                 print( f"[Tweets_Indexer] Erreur avec le Tweet ID {tweet_id} !" )
-                print( error )
+                print( f"{type(error).__name__}: {error}" )
                 
                 if retry_count < 1 : # Essayer un coup d'attendre
                     print( "[Tweets_Indexer] On essaye d'attendre 10 secondes..." )

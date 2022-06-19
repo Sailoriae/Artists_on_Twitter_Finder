@@ -47,7 +47,7 @@ def error_collector( *args, **kwargs ) :
         file.close()
         
         print( error_name, end = "" )
-        print( error )
+        print( f"{type(error).__name__}: {error}" )
         print( "La pile d'appel complète a été écrite dans un fichier." )
 
 
@@ -147,7 +147,7 @@ def _error_collector( thread_procedure, thread_id : int, shared_memory_uri : str
             
             # Afficher dans le terminal
             print( error_name, end = "" )
-            print( error )
+            print( f"{type(error).__name__}: {error}" )
             print( "La pile d'appel complète a été écrite dans un fichier." )
             
             # Si on a crash en moins de 10 secondes, c'est qu'il y a un

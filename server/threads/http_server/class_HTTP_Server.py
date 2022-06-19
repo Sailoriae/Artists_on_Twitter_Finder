@@ -108,7 +108,7 @@ def http_server_container ( shared_memory_uri_arg ) :
                 file.close()
                 
                 print( error_name, end = "" )
-                print( error )
+                print( f"{type(error).__name__}: {error}" )
                 print( "La pile d'appel complète a été écrite dans un fichier." )
                 
                 # Ne pas chercher à envoyer une erreur 500, on a surement déjà

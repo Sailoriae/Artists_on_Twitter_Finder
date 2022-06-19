@@ -49,7 +49,7 @@ def thread_pyro_server( pyro_port = 3300, pool_size = 100000 ) :
         file.close()
         
         print( error_name, end = "" )
-        print( error )
+        print( f"{type(error).__name__}: {error}" )
         print( "La pile d'appel complète a été écrite dans un fichier." )
 
 

@@ -214,7 +214,7 @@ def check_parameters () :
             snscrape.search( query, save_tweet, RETRIES = 1 )
         except Exception as error :
             print( f"Echec de connexion à l'API de recherche de SNScrape pour le compte {account}...")
-#            print( error ) # SNScrape log déjà
+#            print( f"{type(error).__name__}: {error}" ) # SNScrape log déjà
             print( "Veuillez vérifier votre fichier \"parameters.py\" !" )
             print( "Notamment les clés suivantes : AUTH_TOKEN" )
             return False
@@ -276,7 +276,7 @@ def check_parameters () :
             bdd = SQLite_or_MySQL()
         except Exception as error:
             print( "Impossible de se connecter à la base de donées MySQL !" )
-            print( error )
+            print( f"{type(error).__name__}: {error}" )
             print( "Veuillez vérifier votre fichier \"parameters.py\" !" )
             print( "Notamment les clés suivantes : MYSQL_ADDRESS, MYSQL_PORT, MYSQL_USERNAME, MYSQL_PASSWORD, MYSQL_DATABASE_NAME")
             print( "Vérifiez aussi que ce serveur MySQL soit bien accessible !")

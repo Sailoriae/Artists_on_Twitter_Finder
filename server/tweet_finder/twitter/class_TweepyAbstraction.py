@@ -63,7 +63,7 @@ class TweepyAbstraction :
         
         except tweepy.errors.HTTPException as error :
             print( f"[Tweepy] Erreur en récupérant les informations du Tweet ID {tweet_id}." )
-            print( error )
+            print( f"{type(error).__name__}: {error}" )
             return None # Bien laisser le "return None" pour le check_parameters()
         
         except tweepy.errors.TwitterServerError as error :
@@ -133,7 +133,7 @@ class TweepyAbstraction :
 #                print( f"[Tweepy] Erreur en récupérant le nom du compte ID {account_name}." )
 #            else :
 #                print( f"[Tweepy] Erreur en récupérant l'ID du compte @{account_name}." )
-#            print( error )
+#            print( f"{type(error).__name__}: {error}" )
             if 50 in error.api_codes : # User not found
                 return None
             if 63 in error.api_codes : # User has been suspended

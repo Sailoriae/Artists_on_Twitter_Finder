@@ -103,7 +103,7 @@ if __name__ == "__main__" :
         # la version de la librairie Tweepy.
         else :
             print( "Il y a eu un problème lors de la vérification des librairies." )
-            print( error )
+            print( error ) # Ne pas ajouter le nom de la classe
         sys.exit(0)
     
     else :

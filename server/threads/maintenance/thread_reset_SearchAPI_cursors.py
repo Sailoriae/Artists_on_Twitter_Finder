@@ -113,7 +113,7 @@ def thread_reset_SearchAPI_cursors( thread_id : int, shared_memory ) :
             # curseur d'indexation
             except TypeError as error :
                  print( f"[reset_cursors_th{thread_id}] Le compte ID {account['account_id']} n'a pas de date de dernier reset de son curseur d'indexation. Pourtant il a une date de dernière indexation avec l'API de recherche, c'est pas normal. On égalise ces deux dates." )
-                 print( error )
+                 print( f"{type(error).__name__}: {error}" )
                  bdd.equalize_reset_account_SearchAPI_date( account['account_id'] )
                  continue # On ne force pas le reset, ça ne sert à rien
             

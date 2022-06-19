@@ -138,11 +138,11 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
                 request_image_pil = binary_image_to_PIL_image( query_image_as_bytes )
             except UnidentifiedImageError as error :
                 print( f"[step_3_th{thread_id}] L'image d'entrée est intraitable." )
-                print( error )
+                print( f"{type(error).__name__}: {error}" )
                 request.problem = "ERROR_DURING_REVERSE_SEARCH"
             except DecompressionBombError as error :
                 print( f"[step_3_th{thread_id}] L'image d'entrée est trop grande (Decompression Bomb)." )
-                print( error )
+                print( f"{type(error).__name__}: {error}" )
                 if len(request.image_urls) > image_id+1 :
                     image_id += 1 # Reboucler au "while True"
                     continue
