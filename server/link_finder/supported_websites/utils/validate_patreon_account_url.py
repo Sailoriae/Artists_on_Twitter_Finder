@@ -21,7 +21,7 @@ patreon_creator_page_regex = re.compile(
 # Faux-positifs connus (Ce ne sont pas des comptes)
 # On a aussi ajouté toutes les URL qu'ils se sont réservées
 # Permet de prévenir les emmerdes
-FALSE_POSITIVES =  [ "posts" ]
+FALSE_POSITIVES =  [ "posts", "policy" ]
 
 
 """
