@@ -43,3 +43,10 @@ Utilisée uniquement en interne par le multiplexeur de liens.
 """
 class Not_Visited ( Exception ) :
     pass
+
+"""
+Exception si on a atteint la pronfondeur maximale de recherche.
+Utilisée uniquement en interne par le multiplexeur de liens.
+"""
+class Max_Depth_Reached ( Exception ) :
+    pass

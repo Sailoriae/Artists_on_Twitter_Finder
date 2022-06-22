@@ -35,6 +35,7 @@ from link_finder.class_Link_Finder_Result import Not_an_URL
 from link_finder.class_Link_Finder_Result import Unsupported_Website
 from link_finder.class_Link_Finder_Result import Already_Visited
 from link_finder.class_Link_Finder_Result import Not_Visited
+from link_finder.class_Link_Finder_Result import Max_Depth_Reached
 
 
 # ^ = Début de la chaine, $ = Fin de la chaine
@@ -258,6 +259,9 @@ class Link_Finder :
         except Not_Visited :
             if self._DEBUG : print( f"[Link_Finder] Multiplexeur (Supporté, volontairement non-visité): {url}" )
             return []
+        except Max_Depth_Reached :
+            if self._DEBUG : print( f"[Link_Finder] Multiplexeur (Profondeur maximale atteinte): {url}" )
+            return None
         if self._DEBUG :
             if to_return == None : print( f"[Link_Finder] Multiplexeur (Supporté, non reconnu): {url}" )
             else : print( f"[Link_Finder] Multiplexeur (Supporté et reconnu): {url}" )
@@ -280,7 +284,7 @@ class Link_Finder :
             if call[3] == me :
                 call_count += 1
         if call_count > self.current_max_depth :
-            return None
+            raise Max_Depth_Reached
         
         # ====================================================================
         # DEVIANTART
