@@ -26,6 +26,10 @@ Est ce que cet URL est l'URL d'un profile Linktree ?
         Ou None si ce n'est pas un compte Linktree
 """
 def validate_linktree_account_url ( url : str ) -> str :
+    # Sécurité pour sortir les sous-domaines
+    if ".linktr.ee/" in url and not "www.linktr.ee/" in url :
+        return None
+    
     result = re.search( linktree_account_name_regex, url )
     if result != None : return result.group( 1 )
     return None

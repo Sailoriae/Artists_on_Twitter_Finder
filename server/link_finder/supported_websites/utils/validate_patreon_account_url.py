@@ -32,6 +32,10 @@ Est ce que cet URL est l'URL d'une page créateur Patreon ?
         Ou None si ce n'est pas un compte Patreon
 """
 def validate_patreon_account_url ( url : str ) -> str :
+    # Sécurité pour sortir les sous-domaines
+    if ".patreon.com/" in url and not "www.patreon.com/" in url :
+        return None
+    
     result = re.search( patreon_creator_page_regex, url )
     if result != None :
         result = result.group( 1 ) 
