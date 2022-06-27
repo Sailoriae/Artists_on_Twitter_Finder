@@ -136,6 +136,8 @@ Si le mode multi-processus est désactivé, les processus conteneurs disparaisse
 
 * **Cross-platform :** Le code est pensé pour être cross-platform. Il peut être exécuté facilement sur n'importe que système muni de l'interpréteur CPython, et ne nécessite aucune dépendance externe, mis à part optionnellement un serveur MySQL.
 
+* **Légèreté relative du serveur :** Même si Python n'est pas un langage connu pour son efficacité par rapport aux ressources qu'il consomme, AOTF est tout de même un moteur de recherche par image léger, puisqu'il ne fait ses recherches que sur une fraction de la base de données, et donc ne nécessite beaucoup moins de ressoures que s'il faisait des recherches dans toute sa BDD. Voir [`Réflexions_et_conclusions.md`](../doc/Réflexions_et_conclusions.md) pour plus de détails.
+
 
 ## Notes
 
