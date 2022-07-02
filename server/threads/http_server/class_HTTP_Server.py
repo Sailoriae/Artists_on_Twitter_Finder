@@ -237,18 +237,18 @@ def http_server_container ( shared_memory_uri_arg ) :
             elif endpoint == "/stats" :
                 http_code = 200
                 
-                if ( self.stats_cache == None or
-                     time() - self.stats_cache_date >= STATS_CACHE_TTL ) :
-                    self.stats_cache = json.dumps({
+                if ( HTTP_Server.stats_cache == None or
+                     time() - HTTP_Server.stats_cache_date >= STATS_CACHE_TTL ) :
+                    HTTP_Server.stats_cache = json.dumps({
                         "indexed_tweets_count" : HTTP_Server.shared_memory.tweets_count,
                         "indexed_accounts_count" : HTTP_Server.shared_memory.accounts_count,
                         "processing_user_requests_count" : HTTP_Server.user_requests.processing_requests_count,
                         "processing_scan_requests_count" : HTTP_Server.scan_requests.processing_requests_count,
                         "pending_tweets_count" : HTTP_Server.step_C_index_tweets_queue.qsize()
                     })
-                    self.stats_cache_date = time()
+                    HTTP_Server.stats_cache_date = time()
                 
-                response = self.stats_cache
+                response = HTTP_Server.stats_cache
                 response_is_json = True
             
             # Si on demande les informations sur le serveur
