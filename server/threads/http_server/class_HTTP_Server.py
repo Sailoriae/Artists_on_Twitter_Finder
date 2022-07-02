@@ -69,6 +69,10 @@ def http_server_container ( shared_memory_uri_arg ) :
         stats_cache_date = 0 # Besoin de rafraichir toutes les STATS_CACHE_TTL secondes
         
         def __init__( self, *args, **kwargs ) :
+            # En cas de crash, pour savoir si on peut envoyer un code 500
+            # Rappel : Cette classe est réinstanciée à chaque requête
+            self.header_sent = False
+            
             super(BaseHTTPRequestHandler, self).__init__(*args, **kwargs)
         
         # Ne pas afficher les logs par défaut dans la console
@@ -104,8 +108,12 @@ def http_server_container ( shared_memory_uri_arg ) :
                 print( f"{type(error).__name__}: {error}" )
                 print( "La pile d'appel complète a été écrite dans un fichier." )
                 
-                # Ne pas chercher à envoyer une erreur 500, on a surement déjà
-                # envoyé des données, et peut-être même les headers complets
+                if self.header_sent : return
+                
+                self.send_response(500)
+                self.send_header("Content-type", "text/plain; charset=utf-8")
+                self.end_headers()
+                self.wfile.write( "500 Internal Server Error\n".encode("utf-8") )
         
         # Notre méthode GET gère aussi le POST et le HEAD
         def _do_GET( self, method = "GET" ) :
@@ -272,6 +280,7 @@ def http_server_container ( shared_memory_uri_arg ) :
                 response = "404 Not Found\n"
             
             # Envoyer la réponse
+            self.header_sent = True
             self.send_response(http_code)
             if response_is_json :
                 self.send_header("Content-type", "application/json; charset=utf-8")
