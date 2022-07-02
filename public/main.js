@@ -34,9 +34,6 @@ function mainFunction ( new_loop = true ) {
 			} else if ( request.status === 429 ) {
 				await new Promise(r => setTimeout(r, 1000));
 				mainFunction( new_loop = false );
-			} else if ( request.status === 414 || request.status === 413 ) {
-				errorP.textContent = lang["URL_TOO_LONG"];
-				unlockUI();
 			} else if ( request.status === 503 ) {
 				errorP.textContent = lang["CANNOT_CONTACT_SERVER"];
 				unlockUI();

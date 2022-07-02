@@ -27,13 +27,6 @@ import parameters as param
 from shared_memory.open_proxy import open_proxy
 
 
-# Taille maximale de l'URI de la requête (Sinon, HTTP 414)
-# Cela contient aussi les paramètres
-MAX_URI_LENGTH = 512 # caractères
-
-# Taille maximale du contenu d'une requête POST (Sinon, HTTP 413)
-MAX_CONTENT_LENGTH = 1024 # octets
-
 # Taille maximale de l'URL d'un illustration (Sinon, "URL_TOO_LONG")
 # On sépare pour permettre une potentielle autre utilisation du POST
 MAX_ILLUST_URL_SIZE = 256 # caractères
@@ -152,23 +145,15 @@ def http_server_container ( shared_memory_uri_arg ) :
                 http_code = 429
                 response = "429 Too Many Requests\n"
             
-            # =================================================================
-            # HTTP 414
-            # =================================================================
-            # Vérifier la longueur de l'URL de requête, pour éviter que des
-            # petits malins viennent nous innonder notre mémoire vive
-            elif len( self.path ) > MAX_URI_LENGTH :
-                http_code = 414
-                response = "414 Request-URI Too Long\n"
+            # Ca ne sert à rien d'envoyer des erreurs HTTP 414 (URI Too Long),
+            # car on a déjà lu l'URI de la requête
             
-            # =================================================================
-            # HTTP 413
-            # =================================================================
-            # Vérifier la taille du contenu de la requête, pour éviter que des
-            # petits malins viennent nous innonder notre mémoire vive
-            elif method == "POST" and content_length > MAX_CONTENT_LENGTH :
-                http_code = 413
-                response = "413 Payload Too Large\n"
+            # Ce ne sert non plus à rien d'envoyer par défaut des erreurs HTTP
+            # 413 (Payload Too Large), car si on ne lit pas le contenu, il
+            # reste dans la socket (Où il est déjà)
+            
+            # Il faut quand même vérifier que l'utilisateur n'envoie pas trop
+            # de données (C'est ce qu'on fait pour l'API "/query")
             
             # =================================================================
             # HTTP 200
@@ -190,7 +175,15 @@ def http_server_container ( shared_memory_uri_arg ) :
                 
                 illust_url = None
                 if method == "POST" :
-                    if content_length != 0 :
+                    # UTF-8 prend 1 à 4 octets par caractères
+                    # Donc si on détasse 4 fois la taille maximale des URL qu'on peut
+                    # traiter, on ne lit rien et on retourne une erreur "URL_TOO_LONG"
+                    if content_length > MAX_ILLUST_URL_SIZE * 4 :
+#                        http_code = 413 # Payload Too Large
+                        response_dict["status"] = "END"
+                        response_dict["error"] = "URL_TOO_LONG"
+                    
+                    elif content_length != 0 :
                         try :
                             illust_url = self.rfile.read(content_length).decode('utf-8')
                         except UnicodeDecodeError :
@@ -205,10 +198,13 @@ def http_server_container ( shared_memory_uri_arg ) :
                 # On envoit forcément les mêmes champs, même si ils sont vides !
                 if illust_url == None :
                     if response_dict["error"] == None :
+#                        http_code = 400 # Bad Request
                         response_dict["status"] = "END"
                         response_dict["error"] = "NO_URL_FIELD"
                 
                 elif len( illust_url ) > MAX_ILLUST_URL_SIZE :
+#                    if method == "POST" : http_code = 413 # Payload Too Large
+#                    else : http_code = 414 # URI Too Long
                     response_dict["status"] = "END"
                     response_dict["error"] = "URL_TOO_LONG"
                 
@@ -261,8 +257,6 @@ def http_server_container ( shared_memory_uri_arg ) :
                     "limit_per_ip_address" : param.MAX_PROCESSING_REQUESTS_PER_IP_ADDRESS,
                     "ip_can_bypass_limit" : client_ip in param.UNLIMITED_IP_ADDRESSES,
                     "update_accounts_frequency" : param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE,
-                    "max_uri_length" : MAX_URI_LENGTH,
-                    "max_content_length" : MAX_CONTENT_LENGTH,
                     "max_illust_url_size" : MAX_ILLUST_URL_SIZE
                 }
                 

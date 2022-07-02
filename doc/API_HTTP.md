@@ -4,11 +4,7 @@ Le serveur AOTF est utilisable via son serveur HTTP, depuis la même machine (`h
 
 Cette documentation est très similaire à la [documentation de l'API sur l'interface web](../public/documentation.fr.html).
 
-Attention :
-- Le serveur limite chaque adresse IP à 1 requête HTTP par secondes (Uniquement pour les endpoints `/query`). Si dépassement, il renvoie une erreur HTTP 429.
-- Le serveur limite la taille de l'URL de requête. Si dépassement, il renvoie une erreur HTTP 414.
-- Le serveur limite la taille du contenu des requêtes `POST`. Si dépassement, il renvoie une erreur HTTP 413.
-
+Attention : Le serveur limite chaque adresse IP à 1 requête HTTP par secondes (Uniquement pour les endpoints `/query`). Si dépassement, il renvoie une erreur HTTP 429.
 
 ## Endpoint `GET /query`
 
@@ -114,6 +110,4 @@ Retourne un JSON contenant les champs suivants :
 - `limit_per_ip_address` : Nombre maximale de requêtes en cours de traitement par adresse IP (Paramètre `MAX_PROCESSING_REQUESTS_PER_IP_ADDRESS`).
 - `ip_can_bypass_limit` : Booléen indiquant si votre adresse IP est sur la liste des adresses qui peuvent dépasser la limite précédente (Paramètre `UNLIMITED_IP_ADDRESSES`).
 - `update_accounts_frequency` : Fréquence de la mise à jour automatique des comptes Twitter indexés, en jours. Un compte peut aussi être mis à jour lors d'une requête si l'illustration est trop récente (Paramètre `DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE`).
-- `max_uri_length` : Longueur maximale de l'URL de requête avant une erreur HTTP 414.
-- `max_content_length` : Taille maximale en octets du contenu d'une requête `POST` avant erreur HTTP 413.
 - `max_illust_url_size` : Longueur maximale de l'URL d'une illustration pour l'entrée de l'endpoint `/query`.
