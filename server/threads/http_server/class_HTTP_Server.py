@@ -129,6 +129,11 @@ def http_server_container ( shared_memory_uri_arg ) :
                 # Le param "Content-Length" est insensible à la casse
                 content_length = int(self.headers.get("Content-Length", 0))
             
+            # On mettra dans ces variables ce qu'on va retourner
+            http_code : int = 200
+            response_is_json : bool = False
+            response : str = ""
+            
             # A partie de maintenant, on fait un "if" puis que des "elif" pour
             # toutes les autres possibilités, puis un "else" final pour le 404
             
@@ -145,11 +150,7 @@ def http_server_container ( shared_memory_uri_arg ) :
             if ( endpoint not in [ "/stats", "/config" ] and
                  not HTTP_Server.http_limitator.can_request( client_ip ) ) :
                 http_code = 429
-                self.send_response(http_code)
-                self.send_header("Content-type", "text/plain; charset=utf-8")
-                self.end_headers()
-                
-                self.wfile.write( "429 Too Many Requests\n".encode("utf-8") )
+                response = "429 Too Many Requests\n"
             
             # =================================================================
             # HTTP 414
@@ -158,11 +159,7 @@ def http_server_container ( shared_memory_uri_arg ) :
             # petits malins viennent nous innonder notre mémoire vive
             elif len( self.path ) > MAX_URI_LENGTH :
                 http_code = 414
-                self.send_response(http_code)
-                self.send_header("Content-type", "text/plain; charset=utf-8")
-                self.end_headers()
-                
-                self.wfile.write( "414 Request-URI Too Long\n".encode("utf-8") )
+                response = "414 Request-URI Too Long\n"
             
             # =================================================================
             # HTTP 413
@@ -171,11 +168,7 @@ def http_server_container ( shared_memory_uri_arg ) :
             # petits malins viennent nous innonder notre mémoire vive
             elif method == "POST" and content_length > MAX_CONTENT_LENGTH :
                 http_code = 413
-                self.send_response(http_code)
-                self.send_header("Content-type", "text/plain; charset=utf-8")
-                self.end_headers()
-                
-                self.wfile.write( "413 Payload Too Large\n".encode("utf-8") )
+                response = "413 Payload Too Large\n"
             
             # =================================================================
             # HTTP 200
@@ -184,26 +177,15 @@ def http_server_container ( shared_memory_uri_arg ) :
             # GET /
             elif endpoint == "/" :
                 http_code = 200
-                self.send_response(http_code)
-                self.send_header("Content-type", "text/plain; charset=utf-8")
-                self.end_headers()
-                
-                to_send = "Artists of Twitter Finder\n"
-                to_send += "Vous êtes sur l'API d'AOTF. Merci de consulter sa documentation afin de l'utiliser.\n"
-                to_send += "You are on the AOTF API. Please check its documentation to use it.\n"
-                
-                self.wfile.write( to_send.encode("utf-8") )
+                response = "Artists of Twitter Finder\n"
+                response += "Vous êtes sur l'API d'AOTF. Merci de consulter sa documentation afin de l'utiliser.\n"
+                response += "You are on the AOTF API. Please check its documentation to use it.\n"
             
             # Si on veut lancer une requête ou obtenir son résultat
             # GET /query
             # GET /query?url=[URL de l'illustration de requête]
             elif endpoint == "/query" :
                 http_code = 200
-                self.send_response(http_code)
-                self.send_header("Content-type", "application/json; charset=utf-8")
-                self.send_header("Access-Control-Allow-Origin", "*")
-                self.end_headers()
-                
                 response_dict = get_user_request_json_model()
                 
                 illust_url = None
@@ -247,17 +229,13 @@ def http_server_container ( shared_memory_uri_arg ) :
                     else :
                         generate_user_request_json( request, response_dict )
                 
-                json_text = json.dumps( response_dict )
-                self.wfile.write( json_text.encode("utf-8") )
+                response = json.dumps( response_dict )
+                response_is_json = True
             
             # Si on demande les stats
             # GET /stats
             elif endpoint == "/stats" :
                 http_code = 200
-                self.send_response(http_code)
-                self.send_header("Content-type", "application/json; charset=utf-8")
-                self.send_header("Access-Control-Allow-Origin", "*")
-                self.end_headers()
                 
                 if ( self.stats_cache == None or
                      time() - self.stats_cache_date >= STATS_CACHE_TTL ) :
@@ -270,16 +248,13 @@ def http_server_container ( shared_memory_uri_arg ) :
                     })
                     self.stats_cache_date = time()
                 
-                self.wfile.write( self.stats_cache.encode("utf-8") )
+                response = self.stats_cache
+                response_is_json = True
             
             # Si on demande les informations sur le serveur
             # GET /config
             elif endpoint == "/config" :
                 http_code = 200
-                self.send_response(http_code)
-                self.send_header("Content-type", "application/json; charset=utf-8")
-                self.send_header("Access-Control-Allow-Origin", "*")
-                self.end_headers()
                 
                 # Ne peut pas être mis en cache car dépend de l'adresse IP
                 response_dict = {
@@ -291,8 +266,8 @@ def http_server_container ( shared_memory_uri_arg ) :
                     "max_illust_url_size" : MAX_ILLUST_URL_SIZE
                 }
                 
-                json_text = json.dumps( response_dict )
-                self.wfile.write( json_text.encode("utf-8") )
+                response = json.dumps( response_dict )
+                response_is_json = True
             
             # =================================================================
             # HTTP 404
@@ -300,11 +275,17 @@ def http_server_container ( shared_memory_uri_arg ) :
             # Sinon, page inconnue, erreur 404
             else :
                 http_code = 404
-                self.send_response(http_code)
+                response = "404 Not Found\n"
+            
+            # Envoyer la réponse
+            self.send_response(http_code)
+            if response_is_json :
+                self.send_header("Content-type", "application/json; charset=utf-8")
+                self.send_header("Access-Control-Allow-Origin", "*")
+            else :
                 self.send_header("Content-type", "text/plain; charset=utf-8")
-                self.end_headers()
-                
-                self.wfile.write( "404 Not Found\n".encode("utf-8") )
+            self.end_headers()
+            self.wfile.write( response.encode("utf-8") )
             
             print( "[HTTP]", client_ip, self.log_date_time_string(), method, self.path, "HTTP", http_code )
     
