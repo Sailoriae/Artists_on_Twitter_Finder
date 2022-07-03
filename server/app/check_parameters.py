@@ -111,7 +111,7 @@ def check_parameters () :
     check_list.append( test_parameter( "ENABLE_LOGGING", bool ) )
     
     if all( check_list ) :
-        print( "Vérification réussie !" )
+        print( "Vos paramètres sont utilisables !" )
     else :
         return False
     
