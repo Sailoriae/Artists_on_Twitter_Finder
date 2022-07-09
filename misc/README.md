@@ -8,6 +8,9 @@
 * Script [`analyze_results.py`](analyze_results.py) :
   Permet d'analyser les résultats du serveur AOTF.
 
+* Script [`test_twitter_rate_limits.py`](test_twitter_rate_limits.py) :
+  Permet de déterminer les API de timeline (Tweepy) et de recherche (SNScrape) sont limitées par adresse IP ou par clés d'authentification.
+
 
 ## Archives et anciennes fonctionnalités
 
@@ -16,12 +19,6 @@
   Ce modèle générait ainsi des vecteurs de longueur fixe (240 nombres réels entre 0 et 1). La recherche se faisait alors par des tests de distance dans l'espace vectoriel.
   Il a été remplacé car la recherche menait à beaucoup de faux positifs, et les vecteurs prenaient beaucoup de place dans la base de données.
   Aujourd'hui, le modèle qu'on utilise est pHash, qui génère des empreintes (64 bits).
-
-
-## Scripts inutiles
-
-* Script [`test_tweepy_rate_limits.py`](test_tweepy_rate_limits.py) :
-  Permet de déterminer si Tweepy (Et donc l'API publique de Twitter) est limité par adresse IP ou par clés d'authentification.
 
 
 ## Scripts et fonctionnalités de tests
