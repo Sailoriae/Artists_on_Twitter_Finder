@@ -140,7 +140,7 @@ class Metrics_Container :
             to_print += f"Etape B : Temps moyen pour lister avec TimelineAPI : {self._step_B_times.get_mean() :.5g} ({self._step_B_times.get_count()} listages)\n"
         
         if self._step_C_times.get_count() != 0 :
-            to_print += f"Etape C : Temps moyen pour indexer : {self._step_C_times.get_mean() :.5g} ({self._step_C_times.get_count()} Tweets)\n"
+            to_print += f"Etape C : Temps moyen pour indexer un Tweet : {self._step_C_times.get_mean() :.5g} ({self._step_C_times.get_count()} Tweets)\n"
         if self._step_C_download_image_times.get_count() != 0 :
             to_print += f" - Dont : Téléchargement d'une image : {self._step_C_download_image_times.get_mean() :.5g} ({self._step_C_download_image_times.get_count()} images)\n"
         if self._step_C_cbir_engine_times.get_count() != 0 :
@@ -158,7 +158,7 @@ class Metrics_Container :
         if self._step_3_iteration_times.get_count() != 0 :
             to_print += f" - Dont : Itérer sur les Tweets : {self._step_3_iteration_times.get_mean() :.5g} ({self._step_3_iteration_times.get_count()} itérations)\n"
         if self._step_3_usage_times.get_count() != 0 :
-            to_print += f" - Dont : Comparer les empreintes : {self._step_3_usage_times.get_mean()} ({self._step_3_usage_times.get_count() :.5g} images)\n"
+            to_print += f" - Dont : Comparer les empreintes : {self._step_3_usage_times.get_mean() :.5g} ({self._step_3_usage_times.get_count()} images)\n"
         
         if self._user_request_full_time.get_count() != 0 :
             to_print += f"Temps moyen pour traiter une requête utilisateur : {self._user_request_full_time.get_mean() :.5g} ({self._user_request_full_time.get_count()} requêtes)\n"
