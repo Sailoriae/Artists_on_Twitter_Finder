@@ -79,7 +79,7 @@ async function retryLoopOnError ( waitTime = 30 ) {
 }
 
 function displayError ( json ) {
-	errorP.textContent = lang[ json.error ];
+	errorP.textContent = lang[ json["error"] ];
 }
 
 function displayStatus ( json ) {

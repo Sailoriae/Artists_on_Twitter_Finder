@@ -5,14 +5,14 @@ function canDisplayTwitterAccounts ( json ) {
 		 ( json["status"] === "LINK_FINDER" ) ) {
 		return false;
 	}
-	if ( ( json.error === "NO_URL_FIELD" ) ||
-		 ( json.error === "URL_TOO_LONG" ) ||
-		 ( json.error === "NOT_AN_URL" ) ||
-		 ( json.error === "NOT_AN_ARTWORK_PAGE" ) ||
-		 ( json.error === "UNSUPPORTED_WEBSITE" ) ||
-		 ( json.error === "NO_TWITTER_ACCOUNT_FOUND" ) ||
-		 ( json.error === "NO_VALID_TWITTER_ACCOUNT_FOUND" ) ||
-		 ( json.error === "YOUR_IP_HAS_MAX_PROCESSING_REQUESTS" ) ) {
+	if ( ( json["error"] === "NO_URL_FIELD" ) ||
+		 ( json["error"] === "URL_TOO_LONG" ) ||
+		 ( json["error"] === "NOT_AN_URL" ) ||
+		 ( json["error"] === "NOT_AN_ARTWORK_PAGE" ) ||
+		 ( json["error"] === "UNSUPPORTED_WEBSITE" ) ||
+		 ( json["error"] === "NO_TWITTER_ACCOUNT_FOUND" ) ||
+		 ( json["error"] === "NO_VALID_TWITTER_ACCOUNT_FOUND" ) ||
+		 ( json["error"] === "YOUR_IP_HAS_MAX_PROCESSING_REQUESTS" ) ) {
 		 return false;
 	}
 
@@ -26,7 +26,7 @@ function displayTwitterAccounts ( json ) {
 		return;
 	}
 
-	var twitterAccounts = json['twitter_accounts'];
+	var twitterAccounts = json["twitter_accounts"];
 	var p = document.createElement('p');
 
 	if ( twitterAccounts.length === 0 ) {

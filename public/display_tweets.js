@@ -5,8 +5,8 @@ function canDisplayTweets ( json ) {
 	if ( !canDisplayTwitterAccounts( json ) )
 		return false;
 
-	if ( ( json.error === "ERROR_DURING_REVERSE_SEARCH" ) ||
-		 ( json.error === "QUERY_IMAGE_TOO_BIG" ) ) {
+	if ( json["error"] === "ERROR_DURING_REVERSE_SEARCH" ||
+		 json["error"] === "QUERY_IMAGE_TOO_BIG" ) {
 		return false;
 	}
 
@@ -46,7 +46,7 @@ function displayTweets ( json ) {
 				p.appendChild(a);
 				div1.appendChild(p);
 
-				const userPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+				const userPrefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
 				if (userPrefersDark) {
 					var theme = "dark";
 				} else {
