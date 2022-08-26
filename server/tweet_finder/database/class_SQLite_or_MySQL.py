@@ -33,6 +33,7 @@ if param.USE_MYSQL_INSTEAD_OF_SQLITE :
     
     # La version 8.0.29 peut retourner des chaines de caractères à la place de
     # données binaires (Pour le type BINARY)
+    # Dernière version testée : 8.0.30 (Tester et MàJ ici de temps en temps)
     if version( mysql.connector.__version__ ) > version( "8.0.28" ) :
         raise ModuleNotFoundError( "La version de la librairie MySQL-Connector-Python doit être inférieure à la 8.0.28 !" )
 else :
