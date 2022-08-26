@@ -105,7 +105,8 @@ class AOTF_Client :
                     raise Max_Processing_Requests_On_Server
                     break
                 else :
-                    if response["status"] == "END" :
+                    # Mettre en cache lorsque le traitement est terminé
+                    if response["status"] == None or response["status"] == "END" :
                         self._cached_response = response
                         self._cached_response_input_url = illust_url
                     return response

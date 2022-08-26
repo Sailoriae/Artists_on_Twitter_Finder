@@ -188,14 +188,12 @@ def http_server_container ( shared_memory_uri_arg ) :
                     # traiter, on ne lit rien et on retourne une erreur "URL_TOO_LONG"
                     if content_length > MAX_ILLUST_URL_SIZE * 4 :
 #                        http_code = 413 # Payload Too Large
-                        response_dict["status"] = "END"
                         response_dict["error"] = "URL_TOO_LONG"
                     
                     elif content_length != 0 :
                         try :
                             illust_url = self.rfile.read(content_length).decode('utf-8')
                         except UnicodeDecodeError :
-                            response_dict["status"] = "END"
                             response_dict["error"] = "NOT_AN_URL"
                 else :
                     try :
@@ -207,13 +205,11 @@ def http_server_container ( shared_memory_uri_arg ) :
                 if illust_url == None :
                     if response_dict["error"] == None :
 #                        http_code = 400 # Bad Request
-                        response_dict["status"] = "END"
                         response_dict["error"] = "NO_URL_FIELD"
                 
                 elif len( illust_url ) > MAX_ILLUST_URL_SIZE :
 #                    if method == "POST" : http_code = 413 # Payload Too Large
 #                    else : http_code = 414 # URI Too Long
-                    response_dict["status"] = "END"
                     response_dict["error"] = "URL_TOO_LONG"
                 
                 else :
@@ -226,7 +222,6 @@ def http_server_container ( shared_memory_uri_arg ) :
                     # cours de traitement, donc on renvoit l'erreur
                     # YOUR_IP_HAS_MAX_PROCESSING_REQUESTS
                     if request == None :
-                        response_dict["status"] = "END"
                         response_dict["error"] = "YOUR_IP_HAS_MAX_PROCESSING_REQUESTS"
                     
                     # Sinon, on envoit les informations sur la requête

@@ -62,6 +62,7 @@ Liste des statuts possibles (Dans l'ordre de traitement) :
 - `WAIT_IMAGE_REVERSE_SEARCH` : En attente de traitement par un thread de recherche d'image inversée.
 - `IMAGE_REVERSE_SEARCH` : En cours de traitement par un thread de recherche d'image inversée.
 - `END` : Fin de traitement.
+- Ou `null` si la requête n'a pas pu être lancée (Le champs `error` ne pas alors pas être à `null`).
 
 Liste des erreurs possibles :
 - `NO_URL_FIELD` : Si la méthode HTTP est `GET`, il n'y a pas de paramètre / argument `url` dans l'URL de requête. Si la méthode HTTP est `POST`, il n'y a pas de contenu dans la requête.
@@ -76,6 +77,7 @@ Liste des erreurs possibles :
 - `QUERY_IMAGE_TOO_BIG` : L'illustration de requête est trop grande pour être traitée.
 - `PROCESSING_ERROR` : Un thread de traitement a planté durant son traitement de cette requête. Il est donc impossible de terminer cette requête !
 - `YOUR_IP_HAS_MAX_PROCESSING_REQUESTS` : L'adresse IP qui a envoyé la requête a atteint son quota maximum de requêtes en cours de traitement. Il faut donc attendre que les autres requêtes envoyées par cette adresse IP finissent leur traitement.
+- Ou `null` s'il n'y a aucun problème n'est à signaler.
 
 Il existe aussi les erreurs suivantes pour les requêtes directes (Recherche dans toute la base de données ou sur un compte avec un fichier image), mais celles-ci sont utilisables uniquement avec la commnade `search` de la ligne de commande du serveur (Donc ces erreurs ne peuvent pas être obtenues via l'API) :
 - `CANNOT_GET_IMAGE` : Impossible d'obtenir l'image de l'URL entrée.

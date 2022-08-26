@@ -7,7 +7,7 @@ Obtenir le modèle du JSON d'une requête utilisateur.
 """
 def get_user_request_json_model () :
     return {
-        "status" : "",
+        "status" : None,
         "has_first_time_scan" : False,
         "twitter_accounts" : [],
         "results" : [],

@@ -16,7 +16,7 @@ function canDisplayTwitterAccounts ( json ) {
 		 return false;
 	}
 
-	return true;
+	return ( json["status"] !== null );
 }
 
 function displayTwitterAccounts ( json ) {

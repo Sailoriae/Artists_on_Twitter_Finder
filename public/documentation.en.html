@@ -88,7 +88,7 @@
 
 		<p>The JSON returned by <code>/api/query</code> always contains the following fields&nbsp;:</p>
 		<ul>
-			<li><code>status</code><br>A string describing the current status of the request. See the list of possible statuses below.</li>
+			<li><code>status</code><br>A string describing the current status of the request. See the list of possible statuses below. May be to <code>null</code> if the query could not be launched.</li>
 			<li><code>has_first_time_scan</code><br>A boolean set to <code>true</code> if one of the Twitter accounts found is not indexed. The processing will therefore be longer.</li>
 			<li><code>twitter_accounts</code><br>List of Twitter accounts found and validated (i.e. they are existing, public, and not suspended or deactivated). Can be an empty list. Each Twitter account contains the following fields&nbsp;:
 				<ul>
@@ -104,7 +104,7 @@
 					<li><code>distance</code><br>The number of bits of difference between the fingerprint of the query image and that of the found image. The lower it is, the closer the query image is to the found image.</li>
 				</ul>
 			</li>
-			<li><code>error</code><br>A string describing the error if the request was ever interrupted, <code>null</code> otherwise. See the list of possible errors below.</li>
+			<li><code>error</code><br>A string describing the error if the request was ever interrupted, or could not be launched. Defaults to <code>null</code> if there are no issues to report. See the list of possible errors below.</li>
 		</ul>
 
 		<p>List of possible statuses&nbsp;:</p>

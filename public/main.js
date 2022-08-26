@@ -61,7 +61,7 @@ function unlockUI () {
 async function waitAndUpdate ( json ) {
 	if ( json["error"] === "YOUR_IP_HAS_MAX_PROCESSING_REQUESTS" ) {
 		retryLoopOnError( waitTime = 30 )
-	} else if ( ! ( json["status"] === "END" ) ) {
+	} else if ( json["status"] !== null && json["status"] !== "END" ) {
 		await new Promise(r => setTimeout(r, 5000));
 		mainFunction( new_loop = false );
 	} else {
@@ -83,6 +83,11 @@ function displayError ( json ) {
 }
 
 function displayStatus ( json ) {
+	if ( json["status"] === null ) {
+		processStatusP.innerHTML = "";
+		return;
+	}
+
 	processStatusP.textContent = lang[ "STATUS" ];
 	processStatusP.textContent += lang[ json["status"] ]
 
