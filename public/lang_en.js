@@ -16,6 +16,7 @@ var lang = {
 	"URL_TOO_LONG" : "The URL entered is too long.",
 
 	"NEXT_TRY_IN" : "Retry in %s seconds.",
+	"NEXT_TRY_IN_SINGULAR" : "Retry in %s second.",
 
 	"STATUS" : "Processing status\xa0: ",
 

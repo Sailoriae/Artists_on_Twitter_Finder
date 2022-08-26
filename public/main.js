@@ -72,7 +72,7 @@ async function waitAndUpdate ( json ) {
 async function retryLoopOnError ( waitTime = 30 ) {
 	saveErrorP = errorP.innerHTML;
 	for ( var i = waitTime; i > 0; i-- ) {
-		errorP.innerHTML = saveErrorP + "<br/>" + parse( lang[ "NEXT_TRY_IN" ], i );
+		errorP.innerHTML = saveErrorP + "<br/>" + parse( i > 1 ? lang[ "NEXT_TRY_IN" ] : lang[ "NEXT_TRY_IN_SINGULAR" ], i );
 		await new Promise(r => setTimeout(r, 1000));
 	}
 	mainFunction( new_loop = false );

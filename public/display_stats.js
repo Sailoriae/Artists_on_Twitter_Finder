@@ -65,7 +65,7 @@ function displayStats() {
 async function retryLoopOnServerDown ( waitTime = 60 ) {
 	saveStatsP = statsP.innerHTML;
 	for ( var i = waitTime; i > 0; i-- ) {
-		statsP.innerHTML = saveStatsP + "<br/>" + parse( lang[ "NEXT_TRY_IN" ], i );
+		statsP.innerHTML = saveStatsP + "<br/>" + parse( i > 1 ? lang[ "NEXT_TRY_IN" ] : lang[ "NEXT_TRY_IN_SINGULAR" ], i );
 		await new Promise(r => setTimeout(r, 1000));
 	}
 	displayStats();

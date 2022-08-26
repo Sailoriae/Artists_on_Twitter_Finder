@@ -16,6 +16,7 @@ var lang = {
 	"URL_TOO_LONG" : "L'URL entrée est trop longue.",
 
 	"NEXT_TRY_IN" : "Nouvel essai dans %s secondes.",
+	"NEXT_TRY_IN_SINGULAR" : "Nouvel essai dans %s seconde.",
 
 	"STATUS" : "Statut du traitement : ",
 
