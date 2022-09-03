@@ -5,8 +5,8 @@
 Le fichier `apache2_example.conf` est un exemple de fichier de configuration pour créer un hôte virtuel dans le serveur HTTP Apache2.
 
 Si vous souhaitez l'utilisez, dupliquez-le vers `apache2.conf` pour y modifier les valeurs suivantes :
-* `/path/to/Artists_on_Twitter_Finder/public` par le chemin vers le répertoire `public` de "Artists on Twitter Finder",
-* Et `sub.domain.tld` par le nom de domaine utilisé.
+* `PATH_TO_AOTF` : Chemin vers votre installation d'AOTF.
+* `AOTF_DOMAIN` : Nom de domaine utilisé.
 
 Puis activez cet hôte virtuel Apache2 :
 ```
