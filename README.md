@@ -47,13 +47,11 @@ Lorsqu'on parle d'un "site supporté" par le serveur, on parle de l'un des sites
 * [`misc`](misc) : Sauvegarde de scripts divers.
 
 
-## Installation et utilisation du serveur
+## Utilisation d'AOTF, ou installation du serveur
 
-Voir le fichier [`server/README.md`](server/README.md) pour l'installation et l'utilisation du serveur AOTF.
+**Si vous souhaitez utiliser AOTF sans l'installer :** Il faut que vous trouviez quelqu'un qui héberge une instance d'AOTF et qui la rend accessible à tout le monde. Vous pouvez alors utiliser son interface web, et son API HTTP si vous êtes développeur. Vous pouvez consulter la documentation de l'API HTTP dans le fichier [`API_HTTP.md`](doc/API_HTTP.md), ou bien directement la page de documentation sur l'interface web de l'instance.
 
-Puis, si vous souhaitez activer l'interface web publique, consultez le fichier [`configs/README.md`](configs/README.md).
-
-Enfin, pour utiliser l'API HTTP d'un serveur AOTF (Que ce soit le votre ou un serveur publique), consultez le fichier [`API_HTTP.md`](doc/API_HTTP.md), ou directement la page de documentation sur son interface web.
+**Si vous souhaitez installer votre instance d'AOTF :** Le fichier [`server/README.md`](server/README.md) documente l'installation et l'utilisation du serveur AOTF. Puis, si vous souhaitez activer l'interface web publique, consultez le fichier [`configs/README.md`](configs/README.md).
 
 
 ## Note de fin
