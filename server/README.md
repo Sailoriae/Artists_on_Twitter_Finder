@@ -7,6 +7,7 @@ Lorsqu'il est démarré, il affiche une interface en ligne de commande. Tapez `h
 
 ## Installation
 
+0. Clonez ce dépôt (`git clone`), cela facilitera sa mise à jour (`git pull`). La branche pricipale contient toujours la dernière version fonctionnelle.
 1. Dupliquez le fichier [`parameters_sample.py`](parameters_sample.py) vers `parameters.py`, et configurez-le avec vos clés d'accès aux API. Il vous faut :
    - Un ou plusieurs comptes Twitter qui serviront à indexer les Tweets.
    - Un compte Twitter développeur. Pour se faire, demandez un accès développeur sur le portail suivant : https://developer.twitter.com
