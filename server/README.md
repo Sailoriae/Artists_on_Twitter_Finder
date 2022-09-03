@@ -14,7 +14,7 @@ Lorsqu'il est démarré, il affiche une interface en ligne de commande. Tapez `h
    - Et optionnellement un serveur MySQL (Sinon, le serveur utilise SQLite).
 2. Installez les librairies Python nécessaires : `pip install -r requirements.txt`
 
-Si vous n'êtes pas sous Windows ou MacOS, il est recommandé d'installer en plus la librairie PyReadline : `pip install pyreadline`
+Si êtes sous Windows ou MacOS, il est recommandé d'installer en plus la librairie PyReadline : `pip install pyreadline`
 
 Pour activer l'interface web via Apache et/ou le démarrage automatique du serveur, consultez [`../configs/README.md`](../configs/README.md).
 
