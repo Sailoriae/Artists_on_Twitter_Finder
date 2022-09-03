@@ -1,5 +1,7 @@
 # Artists on Twitter Finder
 
+*If you don't speak French, you can read the [English documentation](doc/English_documentation.md).*
+
 "Artists on Twitter Finder" (AOTF) est un moteur de recherche par image (Ou "recherche inversée d'image"), spécialisé dans les illustrations postées par des artistes sur Twitter.
 
 Contrairement aux moteurs de recherche par image généralistes, comme Google Images ou TinEye, celui-ci est très spécialisé : A partir d'une illustration postée sur un des sites supportés, il va chercher si l'artiste de cette illustration possède un compte Twitter, et, si oui, va chercher son ou ses Tweets contenant cette illustration.
