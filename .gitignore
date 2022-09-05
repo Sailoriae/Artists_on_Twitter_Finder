@@ -1,6 +1,5 @@
 # Répertoires de stockage des bytecodes Python
 __pycache__/
-*/__pycache__/
 
 # Bases de données
 *.db
