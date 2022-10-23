@@ -1,7 +1,7 @@
 numpy
 scipy
 urllib3
-mysql-connector-python>=8.0.24,<=8.0.28
+mysql-connector-python>=8.0.24,!=8.0.29,!=8.0.30
 requests
 tweepy>=4.0.0
 beautifulsoup4

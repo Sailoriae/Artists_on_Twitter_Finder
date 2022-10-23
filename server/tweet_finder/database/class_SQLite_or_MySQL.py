@@ -31,11 +31,11 @@ if param.USE_MYSQL_INSTEAD_OF_SQLITE :
     if version( mysql.connector.__version__ ) < version( "8.0.24" ) :
         raise ModuleNotFoundError( "La version de la librairie MySQL-Connector-Python doit être supérieure à la 8.0.24 !" )
     
-    # La version 8.0.29 peut retourner des chaines de caractères à la place de
-    # données binaires (Pour le type BINARY)
-    # Dernière version testée : 8.0.30 (Tester et MàJ ici de temps en temps)
-    if version( mysql.connector.__version__ ) > version( "8.0.28" ) :
-        raise ModuleNotFoundError( "La version de la librairie MySQL-Connector-Python doit être inférieure à la 8.0.28 !" )
+    # Les versions 8.0.29 et 8.0.30 peuvent retourner des chaines de caractères
+    # à la place de données binaires (Pour le type BINARY)
+    if ( version( mysql.connector.__version__ ) > version( "8.0.28" ) and
+         version( mysql.connector.__version__ ) < version( "8.0.31" ) ) :
+        raise ModuleNotFoundError( "Les versions 8.0.29 et 8.0.30 de la librairie MySQL-Connector-Python ne sont pas utilisables !" )
 else :
     import sqlite3
 
