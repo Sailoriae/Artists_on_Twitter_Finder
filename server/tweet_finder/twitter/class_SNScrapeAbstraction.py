@@ -148,6 +148,15 @@ class SNScrapeAbstraction :
         scraper = TwitterProfileScraper( account_id, retries = RETRIES )
         scraper.set_auth_token( self.auth_token )
         scraper.set_output_function( output_function )
+        last_tweet_id = None
         for tweet in scraper.get_items() :
-            if since_tweet_id and tweet.id == since_tweet_id :
+            # On vérifie que les IDs de Tweets soient décroissants
+            if last_tweet_id != None and tweet.id > last_tweet_id :
+                # Note : Les retweets ont des ID différents du tweet d'origine
+                raise Exception( "Les IDs de Tweets sont censés être décroissants sur un compte" ) # Doit tomber dans le collecteur d'erreurs
+            last_tweet_id = tweet.id
+            
+            # Les IDs de Tweets sont décroissants, donc si on est en dessous du
+            # Tweet de départ, on peut arrêter (Au cas où il ait été supprimé)
+            if since_tweet_id and tweet.id <= since_tweet_id :
                 break
