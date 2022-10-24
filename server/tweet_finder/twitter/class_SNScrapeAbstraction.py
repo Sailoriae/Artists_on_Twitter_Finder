@@ -144,20 +144,25 @@ class SNScrapeAbstraction :
         scraper = TwitterProfileScraper( account_id, retries = RETRIES )
         scraper.set_auth_token( self.auth_token )
         last_tweet_id = None
+        first_tweet_passed = False
         for tweet in scraper.get_items() :
             # On vérifie que les IDs de Tweets soient décroissants
+            # Le premier Tweet peut être le Tweet épinglé, on le passe
             if last_tweet_id != None and tweet.id > last_tweet_id :
                 # Note : Les retweets ont des ID différents du tweet d'origine
                 raise Exception( "Les IDs de Tweets sont censés être décroissants sur un compte" ) # Doit tomber dans le collecteur d'erreurs
-            last_tweet_id = tweet.id
+            if first_tweet_passed : last_tweet_id = tweet.id
             
             # On retourne avant de décider de s'arrêter
             yield tweet
             
             # Les IDs de Tweets sont décroissants, donc si on est en dessous du
             # Tweet de départ, on peut arrêter (Au cas où il ait été supprimé)
-            if since_tweet_id and tweet.id <= since_tweet_id :
+            # Attention au premier Tweet qui peut être le Tweet épinglé !
+            if first_tweet_passed and since_tweet_id and tweet.id <= since_tweet_id :
                 break
+            
+            first_tweet_passed = True
     
     """
     Obtenir plusieurs Tweets.
