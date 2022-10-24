@@ -18,7 +18,7 @@ if __name__ == "__main__" :
     path.append(get_wdir())
 
 import parameters as param
-from tweet_finder.analyse_tweet_json import analyse_tweet_json
+from tweet_finder.analyse_tweepy_response import analyse_tweepy_response
 from tweet_finder.database.class_SQLite_or_MySQL import SQLite_or_MySQL
 from tweet_finder.twitter.class_TweepyAbstraction import TweepyAbstraction
 from threads.maintenance.wait_until import wait_until
@@ -78,20 +78,21 @@ def thread_retry_failed_tweets( thread_id : int, shared_memory ) :
         # Obtenir les JSON de tous les Tweets à réessayer
         # Ne figurent pas dans cette liste les Tweets qui ont
         # étés supprimés
-        response = twitter.get_multiple_tweets( hundred_tweets, trim_user = True )
+        # On utilise l'API v2 car cette méthode n'a pas de limite
+        # supplémentaire par rapport à la v1.1 (Pas de Tweet Cap)
+        responses = twitter.get_multiple_tweets( hundred_tweets, use_api_v2 = True )
         
         # Analyser les JSON et les mettre dans la file d'attente
-        for tweet_json in response :
-            tweet = analyse_tweet_json( tweet_json._json )
-            if tweet == None :
-                # C'est possible que Twitter perdent des images et que les
-                # Tweets n'aient plus d'image associée
-                print( f"[retry_failed_tweets_th{thread_id}] Le Tweet ID {tweet_json._json['id_str']} n'a pas d'image associée." )
+        for response in responses :
+            if response.data == None :
+                if len( response.errors ) < len( hundred_tweets ) :
+                    raise Exception( "Pas assez d'erreurs pour aucun Tweet retourné" )
                 continue
-            print( f"[retry_failed_tweets_th{thread_id}] Demande de réindexation du Tweet ID {tweet['tweet_id']} envoyée !" )
-            tweet["was_failed_tweet"] = True
-            tweet["force_index"] = True
-            step_C_index_tweets_queue.put( tweet )
+            for tweet in analyse_tweepy_response( response ) :
+                print( f"[retry_failed_tweets_th{thread_id}] Demande de réindexation du Tweet ID {tweet['tweet_id']} envoyée !" )
+                tweet["was_failed_tweet"] = True
+                tweet["force_index"] = True
+                step_C_index_tweets_queue.put( tweet )
     
     # Tant que on ne nous dit pas de nous arrêter
     while shared_memory.keep_threads_alive :
