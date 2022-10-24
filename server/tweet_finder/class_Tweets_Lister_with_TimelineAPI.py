@@ -18,6 +18,7 @@ if __name__ == "__main__" :
 
 from tweet_finder.database.class_SQLite_or_MySQL import SQLite_or_MySQL
 from tweet_finder.twitter.class_TweepyAbstraction import TweepyAbstraction
+from tweet_finder.twitter.class_SNScrapeAbstraction import SNScrapeAbstraction
 from tweet_finder.analyse_tweet_json import analyse_tweet_json
 
 
@@ -42,7 +43,7 @@ class Tweets_Lister_with_TimelineAPI :
     @param add_step_B_time Fonction de la mémoire, objet
                            "Metrics_Container".
     """
-    def __init__( self, api_key, api_secret, oauth_token, oauth_token_secret,
+    def __init__( self, api_key, api_secret, oauth_token, oauth_token_secret, auth_token,
                         tweets_queue_put,
                         DEBUG : bool = False, ENABLE_METRICS : bool = False,
                         add_step_B_time = None, # Fonction de la mémoire partagée
@@ -53,6 +54,7 @@ class Tweets_Lister_with_TimelineAPI :
         self._add_step_B_time = add_step_B_time
         
         self._bdd = SQLite_or_MySQL()
+        self._snscrape = SNScrapeAbstraction( auth_token )
         self._twitter = TweepyAbstraction( api_key,
                                            api_secret,
                                            oauth_token,
@@ -157,11 +159,19 @@ class Tweets_Lister_with_TimelineAPI :
             start = time()
         
         since_tweet_id = self._bdd.get_account_TimelineAPI_last_tweet_id( account_id )
+        since_tweet_id = int( since_tweet_id ) if since_tweet_id else None
         last_tweet_id = None
         count = 0
         
         # Lister tous les Tweets depuis celui enregistré dans la base
-        for tweet in self._twitter.get_account_tweets( account_id, since_tweet_id ) :
+        # Tweepy ou SNScrape ?
+        # - Pb de Tweepy : API v1.1, donc il manque des médias lorsqu'il y en a
+        #   types différents ("mixed media", depuis le 05 octobre 2022).
+        # - Pb de SNScrape : Beaucoup plus lent que Tweepy (API privée).
+        # On a choisi SNScrape car c'est le téléchargement des images lors de
+        # l'indexation qui reste limitant.
+        for tweet in self._snscrape.user_tweets( int( account_id ), # Par sécurité
+                                                 since_tweet_id = since_tweet_id ) :
             # Le premier tweet est forcément le plus récent
             if last_tweet_id == None :
                 last_tweet_id = tweet.id
@@ -213,6 +223,7 @@ if __name__ == '__main__' :
                                              param.API_SECRET,
                                              param.TWITTER_API_KEYS[0]["OAUTH_TOKEN"],
                                              param.TWITTER_API_KEYS[0]["OAUTH_TOKEN_SECRET"],
+                                             param.TWITTER_API_KEYS[0]["AUTH_TOKEN"],
                                              print,
                                              DEBUG = True )
     engine.list_TimelineAPI_tweets( "rikatantan2nd" )

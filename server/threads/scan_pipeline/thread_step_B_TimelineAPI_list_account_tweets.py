@@ -56,6 +56,7 @@ def thread_step_B_TimelineAPI_list_account_tweets( thread_id : int, shared_memor
                                                          param.API_SECRET,
                                                          param.TWITTER_API_KEYS[ thread_id - 1 ]["OAUTH_TOKEN"],
                                                          param.TWITTER_API_KEYS[ thread_id - 1 ]["OAUTH_TOKEN_SECRET"],
+                                                         param.TWITTER_API_KEYS[ thread_id - 1 ]["AUTH_TOKEN"],
                                                          tweets_queue_put,
                                                          DEBUG = param.DEBUG,
                                                          ENABLE_METRICS = param.ENABLE_METRICS,
