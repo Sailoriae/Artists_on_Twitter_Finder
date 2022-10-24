@@ -35,5 +35,11 @@ L'objet `SNScrapeAbstraction` est une couche d'abstraction adaptée à l'utilisa
 
 Fonctions disponibles :
 
-* `search( self, query : str, output_function = print )` :
+* `search( self, query : str )` :
   Exécute la recherche `query`, et donne les JSON des Tweets à la fonction `output_function()`. Tous les Tweets de cette recherche sont retournés !
+
+* `user_tweets( self, account_id : int, since_tweet_id : int = None )` :
+  Alternative à `TweepyAbstraction.get_account_tweets()`. Toujours limité à 3 200 Tweets, mais plus moderne, ils ont tous leurs médias. Cependant plus lent.
+
+* `get_tweets( self, tweets_ids, RETRIES = 10 )` :
+  Alternative à `TweepyAbstraction.get_multiple_tweets()`. Plus moderne, ils ont tous leurs médias, mais cependant plus lent.
