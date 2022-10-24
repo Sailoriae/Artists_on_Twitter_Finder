@@ -17,12 +17,6 @@ SNScrape utilise l'API utilisée par l'UI web pour le moteur de recherche :
 https://api.twitter.com/2/search/adaptive.json
 """
 class TwitterAPIScraper ( snscrape.modules.twitter._TwitterAPIScraper ) :
-    def __init__ ( self, *args, **kwargs ) :
-        super().__init__(*args, **kwargs)
-        
-        self._output_function = None
-        self._legacy_version = not hasattr( snscrape.modules.twitter._TwitterAPIScraper, "_make_tweet" )
-    
     # Donner en douce à SNScraper le token pour s'authentifier comme le serait
     # un utilisateur sur l'UI web
     # Permet de recevoir les Tweets marqués sensibles
@@ -51,26 +45,18 @@ class TwitterAPIScraper ( snscrape.modules.twitter._TwitterAPIScraper ) :
     def _unset_guest_token ( self ) : pass
     
     # Override : Comme SNScraper ne nous donne pas le JSON original des Tweets,
-    # on remplace sa fonction pour le faire nous-même
+    # on l'insére en douce dans les objets Tweet qu'il retourne
     def _make_tweet ( self, *args, **kwargs ) :
-        if self._output_function != None :
-            self._output_function( args[0] )
-        
-        # On appel quand même sa fonction et on retourne ce qu'elle doit
-        # normalement retourner
-        return super()._make_tweet( *args, **kwargs )
+        tweet = super()._make_tweet( *args, **kwargs )
+        tweet._json = args[0]
+        return tweet
     
     # Même chose, mais pour les versions antérieures à la 0.4.4 (Non-comprise)
     def _tweet_to_tweet ( self, tweet, obj ) :
-        if self._legacy_version :
-            if self._output_function != None :
-                self._output_function( tweet )
-        
-        return super()._tweet_to_tweet( tweet, obj )
-    
-    # Setter de la fonction d'output pour l'override juste ci-dessus
-    def set_output_function ( self, output_function ) :
-        self._output_function = output_function
+        to_return = super()._tweet_to_tweet( tweet, obj )
+        if not hasattr( to_return, "_json" ) :
+            to_return._json = tweet
+        return to_return
     
     # Override : "This request requires a matching csrf cookie and header."
     def _check_api_response ( self, r ) :
@@ -108,13 +94,11 @@ class SNScrapeAbstraction :
     
     @param query Recherche à effectuer. Tous les Tweets retournés par cette
                  recherche seront retournés !
-    @param output_function Fonction où mettre les JSON des Tweets.
     
-    @return Un tuple contenant :
-            - La date Tweet trouvé le plus récent,
-            - Le nombre de Tweet trouvés.
+    @return Un itérateur d'objets Tweet de la librairie SNScrape (Ils ont un
+            attribut "_json" contenant ce que retourne l'API).
     """
-    def search( self, query : str, output_function = print, RETRIES = 10 ) :
+    def search( self, query : str, RETRIES = 10 ) :
         scraper = TwitterSearchScraper( query, retries = RETRIES )
         # Peut réessayer 10 fois, car il fait des attentes exponentielles
         # La somme de toutes ces attentes sera donc la suivante (en secondes):
@@ -126,21 +110,10 @@ class SNScrapeAbstraction :
         # Passer le token d'authentification
         scraper.set_auth_token( self.auth_token )
         
-        # Donner la fonction d'output
-        scraper.set_output_function( output_function )
-        
         # Lancer la recherche / Obtenir les Tweets
         # Sont dans l'ordre chronologique, car SNScrape met le paramètre
         # "tweet_search_mode" à "live" (Onglet "Récent" sur l'UI web)
-        count = 0
-        first_tweet_date = None # Le premier Tweet est forcément le plus récent
-        for tweet in scraper.get_items() :
-            count += 1
-            if first_tweet_date == None :
-                first_tweet_date = tweet.date
-        
-        # Retourner
-        return first_tweet_date, count
+        return scraper.get_items()
     
     """
     Obtenir les Tweets d'un compte avec SNScrape sur l'API utilisée par l'UI
@@ -154,13 +127,13 @@ class SNScrapeAbstraction :
                       fonction du type, int ou str, y faire attention).
     @param since_tweet_id ID du Tweet où s'arrêter (Les IDs de Tweets sont par
                           ordre décroissant lorsqu'on remonte un compte).
-    @param output_function Fonction où mettre les JSON des Tweets.
+    
+    @return Un itérateur d'objets Tweet de la librairie SNScrape (Ils ont un
+            attribut "_json" contenant ce que retourne l'API).
     """
-    def user_tweets( self, account_id : int, since_tweet_id : int = None,
-                     output_function = print, RETRIES = 10 ) :
+    def user_tweets( self, account_id : int, since_tweet_id : int = None, RETRIES = 10 ) :
         scraper = TwitterProfileScraper( account_id, retries = RETRIES )
         scraper.set_auth_token( self.auth_token )
-        scraper.set_output_function( output_function )
         last_tweet_id = None
         for tweet in scraper.get_items() :
             # On vérifie que les IDs de Tweets soient décroissants
@@ -168,6 +141,9 @@ class SNScrapeAbstraction :
                 # Note : Les retweets ont des ID différents du tweet d'origine
                 raise Exception( "Les IDs de Tweets sont censés être décroissants sur un compte" ) # Doit tomber dans le collecteur d'erreurs
             last_tweet_id = tweet.id
+            
+            # On retourne avant de décider de s'arrêter
+            yield tweet
             
             # Les IDs de Tweets sont décroissants, donc si on est en dessous du
             # Tweet de départ, on peut arrêter (Au cas où il ait été supprimé)

@@ -207,11 +207,9 @@ def check_parameters () :
         query = "from:@Twitter since:2020-08-11 until:2020-08-12"
         
         tweets_jsons = []
-        def save_tweet( tweet_json ) :
-            tweets_jsons.append( tweet_json )
-        
         try :
-            snscrape.search( query, save_tweet, RETRIES = 0 )
+            for tweet in snscrape.search( query, RETRIES = 0 ) :
+                tweets_jsons.append( tweet._json )
         except Exception as error :
             print( f"Echec de connexion à l'API de recherche de SNScrape pour le compte {account}...")
 #            print( f"{type(error).__name__}: {error}" ) # SNScrape log déjà

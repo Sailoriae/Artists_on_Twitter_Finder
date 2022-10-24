@@ -159,13 +159,25 @@ class Tweets_Lister_with_SearchAPI :
             start = time()
         
         since_date = self._bdd.get_account_SearchAPI_last_tweet_date( account_id )
+        first_tweet_date = None
+        count = 0
         
+        # Note : Plus besoin de faire de bidouille avec "filter:safe"
+        # On met le "@" à cause de @KIYOSATO_0928 qui renvoyait des erreurs 400
+        # Laisser "-filter:retweets", ça ne supprime pas les Tweets citant
+        query = f"from:@{account_name} filter:media -filter:retweets"
+        if since_date != None :
+            query += " since:" + since_date
         
-        # Fonction de converstion vers la fonction queue.put()
-        # Permet de filtre les Tweets sans images, et de les formater pour la
-        # fonction queue_put()
-        def output_function ( tweet_json ) :
-            tweet_dict = analyse_tweet_json( tweet_json )
+        # Lancer la recherche / Obtenir les Tweets
+        # Sont dans l'ordre chronologique, car SNScrape met le paramètre
+        # "tweet_search_mode" à "live" (Onglet "Récent" sur l'UI web)
+        for tweet in self._snscrape.search( query ) :
+            # Le premier tweet est forcément le plus récent
+            if first_tweet_date == None :
+                first_tweet_date = tweet.date
+            
+            tweet_dict = analyse_tweet_json( tweet._json )
             if tweet_dict != None :
                 # Re-filtrer au cas où
                 # Très important si jamais account_name ne correspond pas à
@@ -177,16 +189,7 @@ class Tweets_Lister_with_SearchAPI :
                     # vérifie que le Tweet ne soit pas déjà dans la BDD avant
                     # de l'analyser et de l'indexeur (Voir "Tweet_Indexer")
                     self._tweets_queue_put( tweet_dict )
-        
-        # Note : Plus besoin de faire de bidouille avec "filter:safe"
-        # On met le "@" à cause de @KIYOSATO_0928 qui renvoyait des erreurs 400
-        # Laisser "-filter:retweets", ça ne supprime pas les Tweets citant
-        query = f"from:@{account_name} filter:media -filter:retweets"
-        if since_date != None :
-            query += " since:" + since_date
-        
-        # Lancer la recherche
-        first_tweet_date, count = self._snscrape.search( query, output_function )
+            count += 1
         
         
         if self._DEBUG or self._ENABLE_METRICS :
