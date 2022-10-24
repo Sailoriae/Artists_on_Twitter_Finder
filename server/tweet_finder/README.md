@@ -14,6 +14,7 @@ La classe `Tweets_Indexer` indexe les Tweets trouvés par les classes de listage
 L'étape de listage communique ses Tweets trouvés à l'étape d'indexation via un objet `queue.Queue` (File d'attente), permettant de paralléliser ces deux étapes.
 Cet objet est stocké dans le pipeline de traitement des requêtes de scan (Objet `Scan_Requests_Pipeline`) de la mémoire partagée.
 Les Tweets sont insérés dans cette file sous la forme de dictionnaires, créés par la fonction `analyse_tweet_json()` à partie des JSON des Tweets renvoyés par les API de Twitter.
+On peut aussi créer ces dictionnaires à partir des résultats de l'API v2 de Twitter via Tweepy, grâce à la fonction `analyse_tweepy_response()`.
 
 Les étapes de listage peuvent aussi communiquer avec les Tweets des instructions d'enregistrement des curseurs. Ces instructions peuvent aussi permettre de mettre fin à la requête de scan d'un compte Twitter (Comment la classe `Tweets_Indexer` les utilise). Il est **très** important que les curseurs soient enregistrés à la fin de l'indexation de tous les Tweets trouvés par l'étape de listage. Cela permet d'avoir une base de données cohérente en cas d'extinction du serveur.
 
