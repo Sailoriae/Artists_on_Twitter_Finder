@@ -22,7 +22,10 @@ def analyse_tweet_json ( tweet_json : dict ) -> dict :
     # Supprimer les tweets qui sont des retweets
     # Ne supprime pas les Tweets citant un autre Tweet (Et donc pouvant
     # contenir des images)
-    if "retweeted_status" in tweet_json or "retweeted_status_id_str" in tweet_json :
+    if ( "retweeted_status" in tweet_json or
+         "retweeted_status_id_str" in tweet_json or
+         "retweeted_status_result" in tweet_json # API GraphQL (SNScrape)
+        ) :
         if tweet_json["full_text"][:4] != "RT @" :
             raise Exception( f"Le Tweet ID {tweet_json['id_str']} a été interprété comme un retweet alors qu'il n'y ressemble pas" ) # Doit tomber dans le collecteur d'erreurs
         return None

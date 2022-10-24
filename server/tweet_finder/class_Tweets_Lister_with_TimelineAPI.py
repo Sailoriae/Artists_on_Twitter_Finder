@@ -169,6 +169,7 @@ class Tweets_Lister_with_TimelineAPI :
             tweet_dict = analyse_tweet_json( tweet._json )
             if tweet_dict != None :
                 # Re-filtrer au cas où
+                # On n'est pas certain de bien sortir les RTs
                 if int( tweet_dict["user_id"] ) == int ( account_id ) :
                     # L'ajout dans la file se fait sans vérifier que l'ID du
                     # Tweet y est déjà présent, parce que ça serait trop long
