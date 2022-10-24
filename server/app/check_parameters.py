@@ -20,6 +20,9 @@ from tweet_finder.twitter.class_SNScrapeAbstraction import TwitterSearchScraper
 from tweet_finder.twitter.class_TweepyAbstraction import TweepyAbstraction
 from tweet_finder.database.class_SQLite_or_MySQL import SQLite_or_MySQL
 
+# Après SNScrapeAbstraction, car on y vérifie que SNScrape soit à jour
+from snscrape.modules.twitter import _TwitterAPIType
+
 
 """
 Fonction de vérification des paramètres.
@@ -220,7 +223,7 @@ def check_parameters () :
         # Obtenir le nom du compte
         scraper = TwitterSearchScraper( "nothing" )
         scraper.set_auth_token( token )
-        settings = scraper._get_api_data( "https://twitter.com/i/api/1.1/account/settings.json", {} )
+        settings = scraper._get_api_data( "https://twitter.com/i/api/1.1/account/settings.json", _TwitterAPIType.V2, {} )
         
         # Vérifier que le nom du compte soit le même qu'avec Tweepy
         if settings['screen_name'] != account_names[ account_number ][0] :
@@ -234,7 +237,7 @@ def check_parameters () :
         # Vérifier que la recherche affiche les médias sensibles
         scraper = TwitterSearchScraper( "nothing" )
         scraper.set_auth_token( token )
-        settings = scraper._get_api_data( f"https://twitter.com/i/api/1.1/strato/column/User/{account_names[ account_number ][1]}/search/searchSafetyReadonly", {} )
+        settings = scraper._get_api_data( f"https://twitter.com/i/api/1.1/strato/column/User/{account_names[ account_number ][1]}/search/searchSafetyReadonly", _TwitterAPIType.V2, {} )
         if settings["optInFiltering"] :
             print( f"Le compte {account} ne doit pas masquer les contenus offensants dans les recherches !" )
             print( "Merci de vous connecter à ce compte et de décocher la case \"Masquer les contenus offensants\" dans \"Paramètres\" -> \"Confidentialité et sécurité\" -> \"Contenu que vous voyez\" -> \"Paramètres de recherche\"." )

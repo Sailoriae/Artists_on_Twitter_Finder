@@ -10,6 +10,12 @@ from pkg_resources import parse_version as version
 if version( __version__ ) < version( "0.4.0" ) :
     raise ModuleNotFoundError( "La version de la librairie SNScrape doit être supérieure à la 0.4.0 !" )
 
+# Vérifier que SNScrape a les dernières fonctionnalités requises
+try :
+    from snscrape.modules.twitter import _TwitterAPIType
+except ImportError :
+    raise ModuleNotFoundError( "Merci de mettre à jour la librairie SNScrape !" )
+
 
 """
 Modifier un peu SNSCrape pour qu'il fasse exactement ce qu'on veut.
