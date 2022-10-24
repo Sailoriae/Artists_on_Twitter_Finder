@@ -47,6 +47,13 @@ class TweepyAbstraction :
         # Note : Ne pas utiliser l'option "retry_count"
         # Elle réessaye sur TOUTES les erreurs, pas seulement celles de connexion
         # Note : Tweepy met des timeouts de 60 secondes par défaut
+        
+        self._api_v2 = tweepy.Client( consumer_key = api_key,
+                                      consumer_secret = api_secret,
+                                      access_token = oauth_token,
+                                      access_token_secret = oauth_token_secret,
+                                      wait_on_rate_limit = True # Gérer les rate limits
+                                     )
     
     """
     Cette fonction est uniquement à utiliser dans "check_parameters()".
@@ -74,18 +81,29 @@ class TweepyAbstraction :
     
     """
     @param tweet_id Liste d'ID de Tweets
+    @param use_api_v2 Utiliser l'API v2 (Attention, c'est le bordel)
     @param retry_once Réessayer une fois sur une erreur de connexion
     
     @return Liste d'objet Status (= Tweet de la librairie Tweepy)
+            Ou liste d'objets Response (= Résultat de l'API v2, bon courage)
             None si il y a eu un problème
     """
-    def get_multiple_tweets ( self, tweets_ids, trim_user = False, retry_once = True ) :
+    def get_multiple_tweets ( self, tweets_ids, trim_user = False,
+                              use_api_v2 = False, retry_once = True ) :
         to_return = []
         
         # Séparer la liste "accounts_names" en sous-listes de 100 éléments
         for tweets_ids_sublist in [tweets_ids[i:i+100] for i in range(0,len(tweets_ids),100)] :
             try :
-                to_return += self._api.lookup_statuses( tweets_ids_sublist, trim_user = trim_user, tweet_mode = "extended" )
+                if use_api_v2 :
+                    to_return.append( self._api_v2.get_tweets(
+                        tweets_ids_sublist,
+                        expansions = [ "author_id", "attachments.media_keys", "referenced_tweets.id" ],
+                        media_fields = [ "type", "url" ],
+                        user_auth = True
+                    ) )
+                else :
+                    to_return += self._api.lookup_statuses( tweets_ids_sublist, trim_user = trim_user, tweet_mode = "extended" )
             
             except tweepy.errors.TwitterServerError as error :
                 if retry_once :
