@@ -44,7 +44,15 @@ def analyse_tweet_json ( tweet_json : dict ) -> dict :
     try :
         tweet_medias = tweet_json["extended_entities"]["media"]
     except KeyError : # Tweet sans média
+        # Il faut être très stricte en vérifiant que le Tweet n'ait
+        # effectivement pas de médias
+        if not "entities" in tweet_json :
+            raise Exception( f"Le Tweet ID {tweet_json['id_str']} n'a pas de champs \"entities\"" ) # Doit tomber dans le collecteur d'erreurs
+        if ( "media" in tweet_json["entities"] and
+             len( tweet_json["entities"]["media"] > 0 ) ) :
+            raise Exception( f"Le Tweet ID {tweet_json['id_str']} a des médias qui n'ont pas pu être trouvés" ) # Doit tomber dans le collecteur d'erreurs
         return None
+    
     for tweet_media in tweet_medias :
         if tweet_media["type"] == "photo" :
             # Sortir les vignettes de vidéos (De toutes manières, la BDD ne
