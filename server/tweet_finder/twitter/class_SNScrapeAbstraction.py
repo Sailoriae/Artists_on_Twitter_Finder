@@ -75,6 +75,9 @@ class TwitterSearchScraper ( TwitterAPIScraper, snscrape.modules.twitter.Twitter
 class TwitterProfileScraper ( TwitterAPIScraper, snscrape.modules.twitter.TwitterProfileScraper ) :
     pass
 
+class TwitterTweetScraper ( TwitterAPIScraper, snscrape.modules.twitter.TwitterTweetScraper ) :
+    pass
+
 
 """
 Couche d'abstraction à la librairie SNScrape.
@@ -149,3 +152,19 @@ class SNScrapeAbstraction :
             # Tweet de départ, on peut arrêter (Au cas où il ait été supprimé)
             if since_tweet_id and tweet.id <= since_tweet_id :
                 break
+    
+    """
+    Obtenir plusieurs Tweets.
+    Attention : Très lent, et très rate-limité !
+    
+    @param tweet_id Liste d'ID de Tweets.
+    
+    @return Un itérateur d'objets Tweet de la librairie SNScrape (Ils ont un
+            attribut "_json" contenant ce que retourne l'API).
+    """
+    def get_tweets( self, tweets_ids, RETRIES = 10 ) :
+        for tweet_id in tweets_ids :
+            scraper = TwitterTweetScraper( tweet_id, retries = RETRIES )
+            scraper.set_auth_token( self.auth_token )
+            for tweet in scraper.get_items() :
+                yield tweet
