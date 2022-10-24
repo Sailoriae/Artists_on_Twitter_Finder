@@ -2,6 +2,7 @@
 # coding: utf-8
 
 import snscrape.modules.twitter
+from secrets import token_hex
 
 # Vérifier que SNSCrape est à une version supérieure à la 0.4.0
 from snscrape.version import __version__
@@ -32,6 +33,18 @@ class TwitterAPIScraper ( snscrape.modules.twitter._TwitterAPIScraper ) :
                                   path = '/',
                                   secure = True,
                                   expires = None)
+        
+        # Pré-générer le CSRF-Token afin d'économiser une requête
+        # C'est ce qu'ils font dans Gallery-DL
+        # https://github.com/mikf/gallery-dl/blob/master/gallery_dl/extractor/twitter.py
+        # Tester en mettant "retries" à 0, sans ce code on a une 403
+        self._session.cookies.set("ct0",
+                                  token_hex(16),
+                                  domain = '.twitter.com',
+                                  path = '/',
+                                  secure = True,
+                                  expires = None)
+        self._apiHeaders['x-csrf-token'] = self._session.cookies['ct0']
     
     # Override : On n'utilise pas de guest_token
     def _ensure_guest_token ( self, url = None ) : pass

@@ -211,7 +211,7 @@ def check_parameters () :
             tweets_jsons.append( tweet_json )
         
         try :
-            snscrape.search( query, save_tweet, RETRIES = 1 )
+            snscrape.search( query, save_tweet, RETRIES = 0 )
         except Exception as error :
             print( f"Echec de connexion à l'API de recherche de SNScrape pour le compte {account}...")
 #            print( f"{type(error).__name__}: {error}" ) # SNScrape log déjà
