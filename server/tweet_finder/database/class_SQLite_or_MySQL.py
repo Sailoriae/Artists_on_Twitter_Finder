@@ -73,8 +73,7 @@ Couche d'abstraction à une base de données SQLite ou MySQL.
 """
 class SQLite_or_MySQL :
     """
-    Constructeur : Connexion à la base de données et création de tables si
-    elles n'existaient pas.
+    Constructeur : Connexion à la base de données.
     """
     def __init__( self ) :
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
@@ -89,7 +88,13 @@ class SQLite_or_MySQL :
             self._conn = sqlite3.connect(
                 param.SQLITE_DATABASE_NAME,
             )
-        
+    
+    """
+    Installer le serveur AOTF, c'est à dire créer nos tables et nos indexes.
+    Cette méthode peut être appelée à chaque démarrage, cela n'écrasera pas
+    les tables ni les indexes existants.
+    """
+    def install_database( self ) :
         c = self._conn.cursor()
         
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :

@@ -27,6 +27,7 @@ from snscrape.modules.twitter import _TwitterAPIType
 
 """
 Fonction de vérification des paramètres.
+Cette fonction est aussi responsable de l'installation de la base de données.
 @return True si on peut démarrer, False sinon.
 """
 def check_parameters () :
@@ -311,10 +312,12 @@ def check_parameters () :
             return False
         else :
             print( "Connexion à la BDD MySQL réussie !" )
+            bdd.install_database()
             tweets_count, accounts_count = bdd.get_stats()
     
     else :
         bdd = SQLite_or_MySQL()
+        bdd.install_database()
         tweets_count, accounts_count = bdd.get_stats()
     
     # ========================================================================

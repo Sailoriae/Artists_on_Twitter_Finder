@@ -114,7 +114,7 @@ if __name__ == "__main__" :
     # Avant de vérifier les paramètres, afin qu'il gère les signaux.
     threads_manager = Threads_Manager()
     
-    # Vérification des paramètres.
+    # Vérification des paramètres (Et installation de la BDD si besoin).
     # Voir le fichier "check_parameters.py".
     try :
         if not check_parameters() : sys.exit(0)
