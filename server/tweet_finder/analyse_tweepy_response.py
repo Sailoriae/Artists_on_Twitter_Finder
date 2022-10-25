@@ -1,6 +1,11 @@
 #!/usr/bin/python3
 # coding: utf-8
 
+import re
+
+# Duplication de code vers "analyse_tweet_json.py"
+tweet_image_regex = re.compile( r"^https://pbs\.twimg\.com/media/([A-Za-z0-9_\-]{15})\.(png|jpg)$" )
+
 
 """
 Fonction permettant d'analyser les Tweets dans les objets Response de l'API v2
@@ -61,6 +66,10 @@ def analyse_tweepy_response ( tweepy_response ) :
     
         if len(tweet_dict["images"]) == 0 :
             continue
+        
+        for image_url in tweet_dict["images"] :
+            if not re.fullmatch( tweet_image_regex, image_url ) :
+                raise Exception( f"Le Tweet ID {tweet_dict['tweet_id']} a une URL d'image non-reconnue\n{image_url}" )
         
         if len(tweet_dict["images"]) > 4 :
             raise Exception( f"Le Tweet ID {tweet_dict['tweet_id']} a été analysé avec plus de 4 images" ) # Doit tomber dans le collecteur d'erreurs
