@@ -11,6 +11,10 @@
 * Script [`test_twitter_rate_limits.py`](test_twitter_rate_limits.py) :
   Permet de déterminer les API de timeline (Tweepy) et de recherche (SNScrape) sont limitées par adresse IP ou par clés d'authentification.
 
+* Script [`find_retweets.py`](find_retweets.py) :
+  Vérifier que les Tweets dans la BDD ne sont pas des retweets. Ils sont traités par ordre chronologique décroissant.
+  Cela permet de vérifier de temps en temps qu'une API privée (Qu'on utilise via SNScrape) n'a pas changé.
+
 
 ## Archives et anciennes fonctionnalités
 
