@@ -15,6 +15,7 @@ if __name__ == "__main__" :
     path.append(get_wdir())
 
 import parameters as param
+from tweet_finder.analyse_tweet_json import analyse_tweet_json
 from tweet_finder.twitter.class_SNScrapeAbstraction import SNScrapeAbstraction
 from tweet_finder.twitter.class_SNScrapeAbstraction import TwitterSearchScraper
 from tweet_finder.twitter.class_TweepyAbstraction import TweepyAbstraction
@@ -262,10 +263,36 @@ def check_parameters () :
                 print( "SNScrape a bien accès aux images des Tweets !" )
     
     if not ok :
-        print( "SNScrape n'a pas accès aux images des Tweets !" )
-        print( "Il faut revoir son code !" )
+        print( "L'API de recherche via SNScrape n'a pas accès aux images des Tweets !" )
         print( "Ou alors le Tweet ID 1293239745695211520 n'existe plus." )
         return False
+    
+    # ========================================================================
+    
+    print( "Vérifications d'analyse des Tweets via SNScrape..." )
+    snscrape = SNScrapeAbstraction( param.TWITTER_API_KEYS[0]["AUTH_TOKEN"] )
+    
+    # Vérifier qu'on détecte bien les RTs de l'API de Timeline via SNScrape
+    # Le compte @HootHootyBot est connu pour faire uniquement des retweets
+    # On évite un éventuel Tweet épinglé en choisissant le deuxième Tweet
+    tweets = list( snscrape.user_tweets( "HootHootyBot",
+                                         since_tweet_id = 2**64 ) )
+    if analyse_tweet_json( tweets[1]._json ) != None :
+        print( "Impossible de détecter un retweet retourné par l'API de timeline via SNScrape !" )
+        print( "Ou alors le compte @HootHootyBot a changé de contenu." )
+        return False
+    
+    # Vérifier qu'on détecte bien les images de l'API de Timeline via SNScrape
+    # Le compte @hourlypony est connu pour publier uniquement des images
+    # On évite un éventuel Tweet épinglé en choisissant le deuxième Tweet
+    tweets = list( snscrape.user_tweets( "hourlypony",
+                                         since_tweet_id = 2**64 ) )
+    if analyse_tweet_json( tweets[1]._json ) == None :
+        print( "Impossible de détecter un Tweet avec médias retourné par l'API de timeline via SNScrape !" )
+        print( "Ou alors le compte @hourlypony a changé de contenu." )
+        return False
+    
+    print( "Les retweets et les images sont bien détectables !" )
     
     # ========================================================================
     
