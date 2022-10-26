@@ -175,9 +175,13 @@ class Tweets_Lister_with_TimelineAPI :
         for response in self._twitter.get_account_tweets( account_id,
                                                          since_tweet_id = since_tweet_id,
                                                          use_api_v2 = True ) :
+            # Aucun Tweet retourné (Peut arriver, car "since_id" n'est pas inclu)
+            if not ( response.data and len( response.data ) > 0 ) :
+                continue
+            
             # Le premier tweet est forcément le plus récent
             # CECI N'EST PAS VALABLE AVEC SNSCRAPE (Tweet épinglé)
-            if last_tweet_id == None and len( response.data ) > 0 :
+            if last_tweet_id == None :
                 last_tweet_id = response.data[0].id
             
             for tweet_dict in analyse_tweepy_response( response ) :

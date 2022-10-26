@@ -25,6 +25,12 @@ def analyse_tweepy_response ( tweepy_response ) :
     # Aucun Tweet avec médias
     if not "media" in tweepy_response.includes :
         yield from []
+        return # Pour bloquer la suite
+    
+    # Aucun Tweet retourné
+    if not tweepy_response.data :
+        yield from []
+        return # Pour bloquer la suite
     
     for tweet in tweepy_response.data :
         tweet_dict = {}
