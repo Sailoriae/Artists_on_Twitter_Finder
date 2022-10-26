@@ -42,7 +42,7 @@ def analyse_tweet_json ( tweet_json : dict ) -> dict :
             # Il est possible qu'un retweet soit inaccessible pour des raisons
             # de copyrights
             if ( "withheld_scope" in tweet_json and
-                 tweet_json["withheld_scope"] == "status" ) :
+                 tweet_json["withheld_scope"] in [ "user", "status" ] ) :
                 return None
             
             raise Exception( f"Le Tweet ID {tweet_json['id_str']} a été interprété comme un retweet alors qu'il n'y ressemble pas" ) # Doit tomber dans le collecteur d'erreurs

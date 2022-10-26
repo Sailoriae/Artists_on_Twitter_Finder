@@ -40,6 +40,17 @@ def analyse_tweepy_response ( tweepy_response ) :
         # contenir des images)
         if ( "referenced_tweets" in tweet and
              tweet["referenced_tweets"][0]["type"] == "retweeted" ) :
+            # L'API v2 peut nous sortir des RTs de comptes suspendus, mais on
+            # peut les détecter avec le texte, mais rien d'autre
+            if tweet["text"][-95:] == "'s account is temporarily unavailable because it violates the Twitter Media Policy. Learn more." :
+                return None
+            
+            # Il est possible qu'un retweet soit inaccessible pour des raisons
+            # de copyrights
+            if ( "withheld" in tweet and
+                 tweet["withheld"]["scope"] in [ "user", "status" ] ) :
+                return None
+            
             if tweet["text"][:4] != "RT @" :
                 raise Exception( f"Le Tweet ID {tweet.id} a été interprété comme un retweet alors qu'il n'y ressemble pas" ) # Doit tomber dans le collecteur d'erreurs
             continue
