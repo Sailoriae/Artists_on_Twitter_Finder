@@ -215,9 +215,23 @@ class TweepyAbstraction :
     
     @param account_id L'ID du compte Twitter (Ou son nom d'utilisateur)
     @param since_tweet_id L'ID du tweet depuis lequel scanner (OPTIONNEL)
+    @param use_api_v2 Utiliser l'API v2 (Attention, c'est le bordel)
     @return Un itérateur d'objets Status (= Tweet de la librairie Tweepy)
+            Ou itérateur d'objets Response (= Résultat de l'API v2)
     """
-    def get_account_tweets ( self, account_id : int, since_tweet_id : int = None ) :
+    def get_account_tweets ( self, account_id : int, since_tweet_id : int = None,
+                             use_api_v2 = False ) :
+        if use_api_v2 :
+            return tweepy.Paginator( self._api_v2.get_users_tweets,
+                                     id = account_id,
+                                     expansions = [ "author_id", "attachments.media_keys", "referenced_tweets.id" ],
+                                     media_fields = [ "type", "url" ],
+                                     max_results = 100,
+                                     since_id = since_tweet_id,
+                                     exclude = [ "retweets" ],
+                                     user_auth = True
+                                    )
+        
         # Attention ! Ne pas supprimer les réponses, des illustrations peuvent
         # être dans des réponses ! Laisser le code tel qu'il est.
         if since_tweet_id == None :
