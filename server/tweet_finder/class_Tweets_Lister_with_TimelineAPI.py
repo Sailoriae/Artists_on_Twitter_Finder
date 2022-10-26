@@ -19,7 +19,7 @@ if __name__ == "__main__" :
 from tweet_finder.database.class_SQLite_or_MySQL import SQLite_or_MySQL
 from tweet_finder.twitter.class_TweepyAbstraction import TweepyAbstraction
 from tweet_finder.twitter.class_SNScrapeAbstraction import SNScrapeAbstraction
-from tweet_finder.analyse_tweet_json import analyse_tweet_json
+from tweet_finder.analyse_tweepy_response import analyse_tweepy_response
 
 
 class Unfound_Account_on_Lister_with_TimelineAPI ( Exception ) :
@@ -167,17 +167,20 @@ class Tweets_Lister_with_TimelineAPI :
         # Tweepy ou SNScrape ?
         # - Pb de Tweepy : API v1.1, donc il manque des médias lorsqu'il y en a
         #   types différents ("mixed media", depuis le 05 octobre 2022).
-        # - Pb de SNScrape : Beaucoup plus lent que Tweepy (API privée).
-        # On a choisi SNScrape car c'est le téléchargement des images lors de
-        # l'indexation qui reste limitant.
-        for tweet in self._snscrape.user_tweets( int( account_id ), # Par sécurité
-                                                 since_tweet_id = since_tweet_id ) :
+        # - Pb de Tweepy avec l'API v2 : Limité à 2 M de Tweets par mois, et
+        #   par application, c'est carrément honteux bande d'ordures.
+        # - Pb de SNScrape : Beaucoup plus lent que Tweepy (API privée), et il
+        #   manque des Tweets (Par exemple dans les longs threads).
+        # On a choisi Tweepy avec l'API v2 parce qu'on n'a pas le choix.
+        for response in self._twitter.get_account_tweets( account_id,
+                                                         since_tweet_id = since_tweet_id,
+                                                         use_api_v2 = True ) :
             # Le premier tweet est forcément le plus récent
-            if last_tweet_id == None :
-                last_tweet_id = tweet.id
+            # CECI N'EST PAS VALABLE AVEC SNSCRAPE (Tweet épinglé)
+            if last_tweet_id == None and len( response.data ) > 0 :
+                last_tweet_id = response.data[0].id
             
-            tweet_dict = analyse_tweet_json( tweet._json )
-            if tweet_dict != None :
+            for tweet_dict in analyse_tweepy_response( response ) :
                 # Re-filtrer au cas où
                 # On n'est pas certain de bien sortir les RTs
                 if int( tweet_dict["user_id"] ) == int ( account_id ) :
@@ -187,7 +190,8 @@ class Tweets_Lister_with_TimelineAPI :
                     # vérifie que le Tweet ne soit pas déjà dans la BDD avant
                     # de l'analyser et de l'indexeur (Voir "Tweet_Indexer")
                     self._tweets_queue_put( tweet_dict )
-            count += 1
+            
+            count += len( response.data )
         
         if self._DEBUG or self._ENABLE_METRICS :
             print( f"[List_TimelineAPI] Il a fallu {time() - start} secondes pour lister {count} Tweets de @{account_name}." )

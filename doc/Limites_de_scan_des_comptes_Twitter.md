@@ -62,6 +62,8 @@ Note : Avant d'analyser un Tweet, le système vérifie qu'il n'est pas déjà pr
 
 Mise à jour : Le 05 octobre 2022, Twitter ont introduit les "mixed media", c'est à dire la possibilité d'insérer des médias de types différents dans un même Tweet (Des images, des vidéos et des GIFs). Cependant, l'API v1.1 `GET statuses/user_timeline` ne retourne que le premier média pour ce genre de Tweet. De plus, son équivalent sur l'API v2 n'est pas utilisable, car trop limité (2M de Tweets par mois). Ainsi, j'ai décidé d'utiliser son équivalent sur l'API privée, via la librairie (Comme on le fait déjà pour la recherche). Le listage est désormais bien plus lent, mais au moins le travail est bien fait.
 
+Re-mise à jour : Cependant, SNScrape a du mal à utiliser proprement l'API privé de Twitter, surtout que celle-ci ne lui donne pas tous les Tweets des longs threads. Bref, on utilise l'API v2 pour le listage avec l'API de timeline (Thread B), malgrès sa limitation honteuse de 2M de Tweets par mois. On conserve quand même SNScrape pour le listage avec l'API de recherche (Thread A).
+
 
 ## Limites de scan des comptes Twitter
 

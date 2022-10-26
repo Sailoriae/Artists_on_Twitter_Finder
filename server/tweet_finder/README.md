@@ -4,8 +4,8 @@ Le Tweet Finder est l'une des deux grandes parties du serveur "Artists on Twitte
 
 Les classes `Tweets_Lister_with_SearchAPI` et `Tweets_Lister_with_TimelineAPI` listent les Tweets de comptes Twitter à partir du dernier scan (Ou tous les Tweet si le compte n'a pas été encore scanné) :
 * `Tweets_Lister_with_SearchAPI` utilise la librairie SNScraper pour l'API Twitter utilisée par l'UI web https://twitter.com/search,
-* Et `Tweets_Lister_with_TimelineAPI` utilise aussi la librairie SNScraper pour l'API Twitter utilisée par l'UI web d'un profil.
-Elles utilisent une couche d'abstraction disponibles dans le module [`twitter`](twitter).
+* Et `Tweets_Lister_with_TimelineAPI` utilise la librairie Tweepy pour l'API Twitter publique.
+Elles utilisent les couches d'abstraction disponibles dans le module [`twitter`](twitter).
 
 La classe `Tweets_Indexer` indexe les Tweets trouvés par les classes de listage :
 1. Calcul de l'empreinte de chaque image de chaque Tweet, module [`cbir_engine`](cbir_engine), via la classe `Tweets_Indexer`,
