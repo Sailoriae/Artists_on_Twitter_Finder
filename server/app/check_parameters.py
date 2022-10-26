@@ -188,6 +188,12 @@ def check_parameters () :
     if not test_twitter( twitter, 0 ) :
         return False
     
+    # Vérifier au passage l'API v2
+    if twitter.get_tweet( 20, use_api_v2 = True ) == None :
+        print( "Votre application n'a pas accès à l'API Twitter v2 !" )
+        return False
+    print( "Votre application a bien accès à l'API Twitter v2 !" )
+    
     account_number = 0
     for creds in param.TWITTER_API_KEYS :
         twitter = TweepyAbstraction( param.API_KEY,

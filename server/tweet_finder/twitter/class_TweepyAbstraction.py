@@ -60,12 +60,16 @@ class TweepyAbstraction :
     
     @param tweet_id L'ID du Tweet
     @param retry_once Réessayer une fois sur une erreur de connexion
+    @param use_api_v2 Utiliser l'API v2
     
     @return Un objet Status (= Tweet de la librairie Tweepy)
             None si il y a eu un problème
     """
-    def get_tweet ( self, tweet_id, trim_user = False, retry_once = True ) :
+    def get_tweet ( self, tweet_id, trim_user = False, retry_once = True,
+                    use_api_v2 = False ) :
         try :
+            if use_api_v2 :
+                return self._api_v2.get_tweet( tweet_id, user_auth = True )
             return self._api.get_status( tweet_id, trim_user = trim_user, tweet_mode = 'extended' )
         
         except tweepy.errors.HTTPException as error :
