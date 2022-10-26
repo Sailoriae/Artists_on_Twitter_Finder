@@ -32,6 +32,13 @@ def analyse_tweet_json ( tweet_json : dict ) -> dict :
          "retweeted_status_result" in tweet_json # API GraphQL (SNScrape)
         ) :
         if tweet_json["full_text"][:4] != "RT @" :
+            # L'API de Timeline via SNScrape peut nous sortir des RTs de
+            # comptes suspendus, mais on peut les détecter avec le texte, et
+            # surtout le lien "Learn more", impossible à faire dans un Tweet
+            if ( tweet_json["full_text"][-95:] == "'s account is temporarily unavailable because it violates the Twitter Media Policy. Learn more." and
+                 tweet_json["entities"]["urls"][0]["display_url"] == "Learn more" ) :
+                return None
+            
             raise Exception( f"Le Tweet ID {tweet_json['id_str']} a été interprété comme un retweet alors qu'il n'y ressemble pas" ) # Doit tomber dans le collecteur d'erreurs
         return None
     
