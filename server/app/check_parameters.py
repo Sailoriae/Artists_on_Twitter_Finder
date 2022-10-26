@@ -15,7 +15,7 @@ if __name__ == "__main__" :
     path.append(get_wdir())
 
 import parameters as param
-from tweet_finder.analyse_tweet_json import analyse_tweet_json
+#from tweet_finder.analyse_tweet_json import analyse_tweet_json
 from tweet_finder.twitter.class_SNScrapeAbstraction import SNScrapeAbstraction
 from tweet_finder.twitter.class_SNScrapeAbstraction import TwitterSearchScraper
 from tweet_finder.twitter.class_TweepyAbstraction import TweepyAbstraction
@@ -270,6 +270,10 @@ def check_parameters () :
     
     # ========================================================================
     
+    # Plus besoin de faire ces tests, puisque le thread de listage B (Timeline)
+    # utilise désormais l'API v2 (Car SNScrape loupe des Tweets à cause de son
+    # API privée qu'il utilise)
+    """
     print( "Vérifications d'analyse des Tweets via SNScrape..." )
     snscrape = SNScrapeAbstraction( param.TWITTER_API_KEYS[0]["AUTH_TOKEN"] )
     
@@ -294,6 +298,7 @@ def check_parameters () :
         return False
     
     print( "Les retweets et les images sont bien détectables !" )
+    """
     
     # ========================================================================
     
