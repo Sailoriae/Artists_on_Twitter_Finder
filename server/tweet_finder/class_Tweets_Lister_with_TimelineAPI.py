@@ -230,7 +230,7 @@ class Tweets_Lister_with_TimelineAPI :
                     self._tweets_queue_put( tweet_dict )
         
         if self._DEBUG or self._ENABLE_METRICS :
-            print( f"[List_TimelineAPI] Il a fallu {time() - start} secondes pour lister {count} Tweets de @{account_name}." )
+            print( f"[List_TimelineAPI] Il a fallu {time() - start :.5g} secondes pour lister {count} Tweets de @{account_name}." )
             if self._add_step_B_time != None :
                 if count > 0 :
                     self._add_step_B_time( (time() - start) / count )
