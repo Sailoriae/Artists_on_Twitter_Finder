@@ -60,9 +60,14 @@ Leur implémentation est complètement indépendante, ce qui permet d'être cert
 
 Note : Avant d'analyser un Tweet, le système vérifie qu'il n'est pas déjà présent dans la base de données. Si c'est le cas, comme les Tweets ne sont pas modifiables, aucune analyse n'est exécutée, et le système passe au Tweet suivant.
 
-Mise à jour : Le 05 octobre 2022, Twitter ont introduit les "mixed media", c'est à dire la possibilité d'insérer des médias de types différents dans un même Tweet (Des images, des vidéos et des GIFs). Cependant, l'API v1.1 `GET statuses/user_timeline` ne retourne que le premier média pour ce genre de Tweet. De plus, son équivalent sur l'API v2 n'est pas utilisable, car trop limité (2M de Tweets par mois). Ainsi, j'ai décidé d'utiliser son équivalent sur l'API privée, via la librairie (Comme on le fait déjà pour la recherche). Le listage est désormais bien plus lent, mais au moins le travail est bien fait.
 
-Re-mise à jour : Cependant, SNScrape a du mal à utiliser proprement l'API privé de Twitter, surtout que celle-ci ne lui donne pas tous les Tweets des longs threads. Bref, on utilise l'API v2 pour le listage avec l'API de timeline (Thread B), malgrès sa limitation honteuse de 2M de Tweets par mois. On conserve quand même SNScrape pour le listage avec l'API de recherche (Thread A).
+## Mise à jour : Le problème des "mixed medias"
+
+Le 05 octobre 2022, Twitter ont introduit les "mixed media", c'est à dire la possibilité d'insérer des médias de types différents dans un même Tweet (Des images, des vidéos et des GIFs). Cependant, l'API v1.1 `GET statuses/user_timeline` ne retourne que le premier média pour ce genre de Tweet. Ainsi, les alternatives suivantes ont testés :
+- Son équivalent sur l'API v2 `GET /2/users/:id/tweets`, mais elle n'est pas utilisable, car elle est soumise au "Tweet Cap", qui limite l'application entière à 2 millions de Tweets par mois. Ce qui est carrément honteux, bande d'ordures !
+- Son équivalent sur l'API privée, via la librairie SNScrape (Comme on le fait déjà pour la recherche), mais elle n'est pas non plus utilisable, car elle ne retourne pas tous les Tweets, par exemple les longs threads (>3 Tweets) sont coupés.
+
+Ainsi, la solution suivante a été retenue : Continuer d'utiliser l'API v1.1, mais aller rechercher les Tweets sélectionnés sur l'API v2 `GET /2/tweets`, qui n'est pas soumise au Tweet Cap. La classe `Tweets_Lister_with_TimelineAPI` fait donc une deuxième série de requêtes sur cette API (Mais uniquement les Tweets qui ont des médias).
 
 
 ## Limites de scan des comptes Twitter

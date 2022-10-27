@@ -163,39 +163,71 @@ class Tweets_Lister_with_TimelineAPI :
         last_tweet_id = None
         count = 0
         
+        # L'API de Timeline v1.1 a un problème : Elle ne retourne que le
+        # premier média des Tweets qui ont des photos et des videos (Possible
+        # depuis le 05 octobre 2022, ça s'appelle les "mixed medias").
+        # Les alternatives suivantes ont étés testées :
+        # - Son équivalent sur l'API v2, mais elle est limité à 2 millions de
+        #   Tweets par mois ("Tweet Cap"), c'est honteux et inutilisable.
+        # - Son équivalent sur les API privées (Via SNScrape), mais c'est plus
+        #   lent et surtout il manque des Tweets (Dans les longs threads).
+        # Aucune de ces alternatives n'a été retenue. A la place, on va
+        # rechercher le contenu des Tweets trouvés avec l'API de Timeline v1
+        # sur l'API de Tweets v2, qui n'a pas de limitation honteuse. On perd
+        # plus de temps, mais c'est la solution la plus viable.
+        found_tweets = []
+        
         # Lister tous les Tweets depuis celui enregistré dans la base
-        # Tweepy ou SNScrape ?
-        # - Pb de Tweepy : API v1.1, donc il manque des médias lorsqu'il y en a
-        #   types différents ("mixed media", depuis le 05 octobre 2022).
-        # - Pb de Tweepy avec l'API v2 : Limité à 2 M de Tweets par mois, et
-        #   par application, c'est carrément honteux bande d'ordures.
-        # - Pb de SNScrape : Beaucoup plus lent que Tweepy (API privée), et il
-        #   manque des Tweets (Par exemple dans les longs threads).
-        # On a choisi Tweepy avec l'API v2 parce qu'on n'a pas le choix.
-        for response in self._twitter.get_account_tweets( account_id,
-                                                         since_tweet_id = since_tweet_id,
-                                                         use_api_v2 = True ) :
-            # Aucun Tweet retourné (Peut arriver, car "since_id" n'est pas inclu)
-            if not ( response.data and len( response.data ) > 0 ) :
-                continue
-            
+        for tweet in self._twitter.get_account_tweets( account_id,
+                                                       since_tweet_id = since_tweet_id ) :
             # Le premier tweet est forcément le plus récent
             # CECI N'EST PAS VALABLE AVEC SNSCRAPE (Tweet épinglé)
             if last_tweet_id == None :
-                last_tweet_id = response.data[0].id
+                last_tweet_id = tweet.id
             
-            for tweet_dict in analyse_tweepy_response( response ) :
-                # Re-filtrer au cas où
-                # On n'est pas certain de bien sortir les RTs
-                if int( tweet_dict["user_id"] ) == int ( account_id ) :
+            # Il compte les Tweets reçus (Idem dans Tweets_Lister_with_SearchAPI)
+            count += 1
+            
+            # Ne pas utiliser "analyse_tweet_json()" car elle sort le Tweet si
+            # son média est une vidéo (Or les "mixed medias" autorisent des
+            # images après cette vidéo)
+            if "retweeted_status" in tweet._json : # API v1.1
+                if tweet._json["full_text"][:4] != "RT @" :
+                    raise Exception( f"Le Tweet ID {tweet.id} a été interprété comme un retweet alors qu'il n'y ressemble pas" ) # Doit tomber dans le collecteur d'erreurs
+                continue
+            if int( tweet._json["user"]["id_str"] ) != int( account_id ) :
+                continue
+            if ( ( "media" in tweet._json["entities"] and
+                   len( tweet._json["entities"]["media"] ) > 0 ) or
+                 ( "extended_entities" in tweet._json and
+                   "media" in tweet._json["extended_entities"] and
+                   len( tweet._json["extended_entities"]["media"] ) > 0 ) ) :
+                found_tweets.append( tweet.id )
+        
+        # Réobtenir les Tweets trouvés avec l'API v2, afin d'être certain
+        # d'avoir toutes les images (En cas de "mixed medias")
+        # Cette méthode n'a pas de limite supplémentaire par rapport à son
+        # équivalent sur la v1.1 (Pas de "Tweet Cap")
+        cursor = 0
+        while True :
+            hundred_tweets = found_tweets[ cursor : cursor + 100 ]
+            if len( hundred_tweets ) == 0 : break
+            cursor += len( hundred_tweets )
+            
+            for response in self._twitter.get_multiple_tweets( hundred_tweets,
+                                                               use_api_v2 = True ) :
+                if response.data == None :
+                    if len( response.errors ) < len( hundred_tweets ) :
+                        raise Exception( "Pas assez d'erreurs pour aucun Tweet retourné" )
+                    continue
+                
+                for tweet_dict in analyse_tweepy_response( response ) :
                     # L'ajout dans la file se fait sans vérifier que l'ID du
                     # Tweet y est déjà présent, parce que ça serait trop long
                     # (La file peut être très très grande), et que l'indexeur
                     # vérifie que le Tweet ne soit pas déjà dans la BDD avant
                     # de l'analyser et de l'indexeur (Voir "Tweet_Indexer")
                     self._tweets_queue_put( tweet_dict )
-            
-            count += len( response.data )
         
         if self._DEBUG or self._ENABLE_METRICS :
             print( f"[List_TimelineAPI] Il a fallu {time() - start} secondes pour lister {count} Tweets de @{account_name}." )
