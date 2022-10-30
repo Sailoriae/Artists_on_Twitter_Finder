@@ -350,7 +350,7 @@ class Command_Line_Interface :
                "Relancez cette commande pour voir l'avancement de la requête.\n" +
                "\n" +
                "Afficher des statistiques de la base de données : stats\n" +
-               f"Afficher les threads et ce qu'ils font : threads\n" +
+               "Afficher les threads et ce qu'ils font : threads\n" +
                "Afficher la taille des files d'attente : queues\n" +
                "Afficher les mesures de temps d'exécution : metrics\n" +
                "Ecrire les piles d'appels dans un fichier : stacks\n" +

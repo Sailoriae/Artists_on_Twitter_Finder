@@ -57,7 +57,7 @@ def url_to_content ( url : str, max_size : int = MAX_SIZE ) -> bytes :
     
     # Vérifier la taille du contenu (Obtenu grâce au "HEAD")
     if response.length == None :
-        raise File_Too_Big( f"Taille inconnue" )
+        raise File_Too_Big( "Taille inconnue" )
     if response.length > max_size :
         raise File_Too_Big( f"{response.length/1024/1024} Mo contre {max_size/1024/1024} maximum" )
     
