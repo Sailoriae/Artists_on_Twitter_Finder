@@ -28,7 +28,7 @@ Supprimer la requête d'un compte Twitter d'une file d'attente de scan.
 def remove_account_id_from_queue ( input_queue : Pyro_Queue, account_id : int ) :
     # On utilise un objet Pyro_Queue() pour la conversion des URI lors de
     # l'utilisation de la méthode put().
-    temp_queue = Pyro_Queue( convert_uri = convert_uri._convert_uri )
+    temp_queue = Pyro_Queue( convert_uri = input_queue._convert_uri )
     
     while True :
         try :
