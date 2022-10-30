@@ -6,7 +6,6 @@ import sys
 import signal
 from time import sleep
 from datetime import datetime
-import traceback
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
 # Ainsi, si on veut utiliser ce script indépendamment (Notamment pour des

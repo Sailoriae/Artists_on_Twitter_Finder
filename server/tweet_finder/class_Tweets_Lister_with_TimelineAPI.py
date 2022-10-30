@@ -18,7 +18,6 @@ if __name__ == "__main__" :
 
 from tweet_finder.database.class_SQLite_or_MySQL import SQLite_or_MySQL
 from tweet_finder.twitter.class_TweepyAbstraction import TweepyAbstraction
-from tweet_finder.twitter.class_SNScrapeAbstraction import SNScrapeAbstraction
 from tweet_finder.analyse_tweepy_response import analyse_tweepy_response
 
 
@@ -43,7 +42,7 @@ class Tweets_Lister_with_TimelineAPI :
     @param add_step_B_time Fonction de la mémoire, objet
                            "Metrics_Container".
     """
-    def __init__( self, api_key, api_secret, oauth_token, oauth_token_secret, auth_token,
+    def __init__( self, api_key, api_secret, oauth_token, oauth_token_secret,
                         tweets_queue_put,
                         DEBUG : bool = False, ENABLE_METRICS : bool = False,
                         add_step_B_time = None, # Fonction de la mémoire partagée
@@ -54,7 +53,6 @@ class Tweets_Lister_with_TimelineAPI :
         self._add_step_B_time = add_step_B_time
         
         self._bdd = SQLite_or_MySQL()
-        self._snscrape = SNScrapeAbstraction( auth_token )
         self._twitter = TweepyAbstraction( api_key,
                                            api_secret,
                                            oauth_token,
