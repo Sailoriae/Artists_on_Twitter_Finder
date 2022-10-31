@@ -22,6 +22,7 @@
 	<script async src="display_twitter_accounts.js" charset="utf-8"></script>
 	<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 	<script async src="main.js" charset="utf-8"></script>
+	<script async src="hide.js" charset="utf-8"></script>
 </head>
 
 
@@ -54,10 +55,11 @@
 		<p>Currently supported websites :
 			<a href="https://www.deviantart.com/" target="_blank" rel="noopener">DeviantArt</a>,
 			<a href="https://www.pixiv.net/en/" target="_blank" rel="noopener">Pixiv</a>,
-			<a href="./danbooru">Danbooru</a>,
+			<a id="danbooru-link">Danbooru</a>,
 			<a href="https://derpibooru.org/" target="_blank" rel="noopener">Derpibooru</a>,
 			<a href="https://furbooru.org/" target="_blank" rel="noopener">Furbooru</a>.
 		</p>
+		<p id="danbooru-warning" class="display-none">Danbooru is a website with adult content and no filters.<br>Thus, you must be of legal age <a href="https://danbooru.donmai.us/" target="_blank" rel="noopener">to access it.</a></p>
 		<p id="display-infos"></p>
 		<p><a href="./faq">Frequently Asked Questions</a> &bull; <a href="./documentation">API Doc</a></p>
 		<p>Made with ❤️ on Oléron island, France, by <a href="https://twitter.com/Sailoriae" target="_blank" rel="noopener">@Sailoriae</a>.</p>

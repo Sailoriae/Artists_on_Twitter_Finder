@@ -50,6 +50,18 @@ a {
 	transition: 0.2s ease-in-out;
 }
 
+.display-none {
+	display: none;
+}
+
+/* Pour les <a> sans "href" */
+a {
+	text-decoration: underline;
+}
+a:hover {
+	cursor:pointer;
+}
+
 @media (prefers-color-scheme: light) {
 	body, input {
 		background-color: #fff;
