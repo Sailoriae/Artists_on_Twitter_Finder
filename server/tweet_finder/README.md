@@ -24,7 +24,7 @@ La classe `Reverse_Searcher` permet de rechercher un Tweet à partir d'une image
 3. Calcul la distance entre l'image de requête et chaque image de l'itérateur, module [`cbir_engine`](cbir_engine),
 4. Retourne le ou les Tweets correspondant.
 
-Cette classe permet aussi de faire une recherche exacte, c'est à dire que les images retournées ont exactement la même empreinte que l'image de requête. Cela permet d'être plus rapide, mais mène à un peu moins de 10% de faux-négatifs (C'est à dire des images identiques qui auraient dues être retournées). Cette statistique a été trouvée via l'analyse des résultats par la recherche classique (Voir le script `../../misc/analyze_results.py`).
+Cette classe permet aussi de faire une recherche exacte, c'est à dire que les images retournées ont exactement la même empreinte que l'image de requête. Cela permet d'être plus rapide, mais mène à un peu moins de 10% de faux-négatifs (C'est à dire des images identiques qui auraient dues être retournées). Cette statistique a été trouvée via l'analyse des résultats par la recherche classique (Voir le script [`analyze_results.py`](../../misc/analyze_results.py)).
 
 
 ## Sous-modules
