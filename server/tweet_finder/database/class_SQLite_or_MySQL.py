@@ -471,7 +471,7 @@ class SQLite_or_MySQL :
                 if image_hash != request_image_hash :
                     continue
                 
-                yield Image_in_DB (
+                to_yield = Image_in_DB (
                            tweet_line[0], # ID du compte Twitter
                            tweet_line[1], # ID du Tweet
                            tweet_line[2+i*2], # Nom de l'image
@@ -479,6 +479,11 @@ class SQLite_or_MySQL :
                            i+1, # Position de l'image
                            images_count # Nombre d'images dans le Tweet
                        )
+                
+                # Préciser que la distance est égale à 0
+                to_yield.distance = 0
+                
+                yield to_yield
     
     """
     API DE RECHERCHE
