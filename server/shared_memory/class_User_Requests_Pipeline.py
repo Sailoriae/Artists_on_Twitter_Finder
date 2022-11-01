@@ -190,6 +190,10 @@ class User_Requests_Pipeline :
     @param image_url URL de l'image à rechercher. Sert à identifier la requête !
     @param account_name Nom du compte Twitter sur lequel rechercher. Son ID
                         sera recherché par la recherche par image (Etape 3).
+    @param binary_image Image binaire. L'URL de l'image ne sert alors plus que
+                        d'identifiant pour retrouver la requête.
+    @param do_not_launch Ne pas lancer une nouvelle requête, et retourner
+                         "None" si aucune requête n'a été trouvée.
     
     @return L'objet User_Request créé.
             Ou l'objet User_Request déjà existant.
@@ -198,7 +202,9 @@ class User_Requests_Pipeline :
     pour l'entrée "image_url" et le compte "account_name".
     """
     def launch_direct_request ( self, image_url : str,
-                                      account_name : str = None ) -> User_Request :
+                                      account_name : str = None,
+                                      binary_image : bytes = None,
+                                      do_not_launch : bool = False ) -> User_Request :
         # Vérifier d'abord qu'on n'est pas déjà en train de traiter cette
         # image d'entrée.
         self._direct_requests_sem.acquire()
@@ -215,8 +221,12 @@ class User_Requests_Pipeline :
                     self._direct_requests_sem.release()
                     return open_proxy( self._direct_requests[key] )
         
+        if do_not_launch : return None
+        
         # Créer et ajouter l'objet User_Request à notre système.
-        request = self._root.register_obj( User_Request( image_url, is_direct = True ) )
+        request = self._root.register_obj( User_Request( image_url,
+                                                         is_direct = True,
+                                                         binary_image = binary_image ) )
         self._direct_requests[ image_url ] = request
         self._processing_requests_count += 1 # Augmenter le compteur du nombre de requêtes en cours de traitement
         

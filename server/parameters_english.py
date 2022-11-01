@@ -167,6 +167,12 @@ List of IP addresses not subject to limitation.
 UNLIMITED_IP_ADDRESSES = [ "127.0.0.1" ]
 
 """
+List of IP addresses that can use the advanced features of the API and thus of
+the web interface.
+"""
+ADVANCED_IP_ADDRESSES = [ "127.0.0.1" ]
+
+"""
 Activate the logging of the results.
 The results are then written in the "results.log" file. Each result is in JSON
 format, one JSON per line because one line per result.

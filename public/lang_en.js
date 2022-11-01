@@ -15,6 +15,10 @@ var lang = {
 	"YOUR_IP_HAS_MAX_PROCESSING_REQUESTS" : "Your IP address has reached its maximum quota of requests being processed.",
 	"URL_TOO_LONG" : "The URL entered is too long.",
 
+	"INVALID_TWITTER_ACCOUNT" : "The Twitter account to search does not exist, or is not available.",
+	"TWITTER_ACCOUNT_NOT_INDEXED" : "The Twitter account on which to search exists, is available, but is not indexed.",
+	"IMAGE_MISSING" : "Please select an image to search.",
+
 	"NEXT_TRY_IN" : "Retry in %s seconds.",
 	"NEXT_TRY_IN_SINGULAR" : "Retry in %s second.",
 
@@ -52,5 +56,6 @@ var lang = {
 	"WARNING_2" : "In addition, there are %s Tweets waiting to be indexed. If your query requires indexing, it may take even longer.",
 	"WARNING_3" : "There are %s Tweets waiting to be indexed. If your query requires indexing, it may take some time.",
 	"INFO" : "The number of requests being processed per IP address is limited to %s.",
-	"IP_CAN_BYPASS_LIMIT" : "You can bypass this limit from your current IP address."
+	"IP_CAN_BYPASS_LIMIT" : "You can bypass this limit from your current IP address.",
+	"IP_CAN_USE_ADVANCED" : "You can use the advanced features from your current IP address."
 };

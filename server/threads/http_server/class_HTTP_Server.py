@@ -7,6 +7,7 @@ import json
 from time import time
 from datetime import datetime
 import traceback
+from secrets import token_hex
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
 # Ainsi, si on veut utiliser ce script indépendamment (Notamment pour des
@@ -34,6 +35,9 @@ MAX_ILLUST_URL_SIZE = 256 # caractères
 # Nombre de secondes pendant lesquelles ont garde en cache le JSON retourné par
 # l'endpoint GET /stats (Au delà, il sera régénéré)
 STATS_CACHE_TTL = 3 # secondes
+
+# Taille maximale d'une image pour la recherche directe (Sinon HTTP 413)
+MAX_IMAGE_SIZE = 20971520 # octets = 20 Mo
 
 
 """
@@ -67,6 +71,10 @@ def http_server_container ( shared_memory_uri_arg ) :
         # Mise en cache
         stats_cache = None # Endpoint GET /stats
         stats_cache_date = 0 # Besoin de rafraichir toutes les STATS_CACHE_TTL secondes
+        
+        # Dictionnaires des requêtes directes
+        # Identifiant -> Compte sur lequel rechercher
+        direct_requests = {}
         
         def __init__( self, *args, **kwargs ) :
             # En cas de crash, pour savoir si on peut envoyer un code 500
@@ -114,6 +122,14 @@ def http_server_container ( shared_memory_uri_arg ) :
                 self.send_header("Content-type", "text/plain; charset=utf-8")
                 self.end_headers()
                 self.wfile.write( "500 Internal Server Error\n".encode("utf-8") )
+        
+        # Parce que XMLHttpRequest fait chier lors de l'envoi d'un fichier
+        def do_OPTIONS( self ) :
+            self.send_response(200)
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+            self.send_header("Access-Control-Allow-Headers", "Content-Type")
+            self.end_headers()
         
         # Notre méthode GET gère aussi le POST et le HEAD
         def _do_GET( self, method = "GET" ) :
@@ -164,7 +180,7 @@ def http_server_container ( shared_memory_uri_arg ) :
             # de données (C'est ce qu'on fait pour l'API "/query")
             
             # =================================================================
-            # HTTP 200
+            # HTTP 200 (Ou 403 pour les endpoints avancés)
             # =================================================================
             # Racine de l'API, affiche juste un petit message
             # GET /
@@ -259,12 +275,72 @@ def http_server_container ( shared_memory_uri_arg ) :
                 response_dict = {
                     "limit_per_ip_address" : param.MAX_PROCESSING_REQUESTS_PER_IP_ADDRESS,
                     "ip_can_bypass_limit" : client_ip in param.UNLIMITED_IP_ADDRESSES,
+                    "ip_can_use_advanced" : client_ip in param.ADVANCED_IP_ADDRESSES,
                     "update_accounts_frequency" : param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE,
                     "max_illust_url_size" : MAX_ILLUST_URL_SIZE
                 }
                 
                 response = json.dumps( response_dict )
                 response_is_json = True
+            
+            # Si on veut lancer une recherche par image ou obtenir son résultat
+            # GET /search
+            elif endpoint == "/search" :
+                if not client_ip in param.ADVANCED_IP_ADDRESSES :
+                    http_code = 403
+                    response = "403 Forbidden\n"
+                
+                else :
+                    http_code = 200
+                    response_dict = get_user_request_json_model()
+                    
+                    if method != "POST" and not "identifier" in parameters :
+                        response_dict["error"] = "IDENTIFIER_MISSING"
+                    
+                    elif method == "POST" and content_length == 0 :
+                        response_dict["error"] = "IMAGE_MISSING"
+                    
+                    elif method == "POST" and content_length > MAX_IMAGE_SIZE :
+                        response_dict["error"] = "QUERY_IMAGE_TOO_BIG"
+                    
+                    # Obtenir une requête
+                    elif method != "POST" and "identifier" in parameters :
+                        identifier = parameters["identifier"][0]
+                        account_name = HTTP_Server.direct_requests[identifier] if identifier in HTTP_Server.direct_requests else None
+                        
+                        request = HTTP_Server.user_requests.launch_direct_request( identifier,
+                                                                                   account_name = account_name,
+                                                                                   do_not_launch = True )
+                        
+                        if request == None :
+                            response_dict["error"] = "NO_SUCH_REQUEST"
+                        else :
+                            generate_user_request_json( request, response_dict )
+                            response_dict["identifier"] = identifier
+                    
+                    # Lancer une nouvelle requête
+                    elif method == "POST" and content_length > 0 :
+                        identifier = token_hex(16)
+                        
+                        account_name = None
+                        if "account_name" in parameters :
+                            account_name = parameters["account_name"][0]
+                        
+                        HTTP_Server.direct_requests[identifier] = account_name
+                        
+                        binary_image = self.rfile.read(content_length)
+                        request = HTTP_Server.user_requests.launch_direct_request( identifier,
+                                                                                   account_name = account_name,
+                                                                                   binary_image = binary_image )
+                        
+                        generate_user_request_json( request, response_dict )
+                        response_dict["identifier"] = identifier
+                    
+                    else :
+                        raise Exception( "Ligne impossible à atteindre !" )
+                    
+                    response = json.dumps( response_dict )
+                    response_is_json = True
             
             # =================================================================
             # HTTP 404
@@ -279,9 +355,9 @@ def http_server_container ( shared_memory_uri_arg ) :
             self.send_response(http_code)
             if response_is_json :
                 self.send_header("Content-type", "application/json; charset=utf-8")
-                self.send_header("Access-Control-Allow-Origin", "*")
             else :
                 self.send_header("Content-type", "text/plain; charset=utf-8")
+            self.send_header("Access-Control-Allow-Origin", "*")
             self.end_headers()
             self.wfile.write( response.encode("utf-8") )
             

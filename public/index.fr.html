@@ -36,9 +36,18 @@
 		<p id="display-stats"></p>
 		<p id="display-warning"></p>
 
-		<label for="illust-url">URL de l'illustration :</label>
-		<input type="text" id="illust-url" name="illust-url" placeholder="Par exemple : https://www.pixiv.net/en/artworks/83378073" required />
-		<input id="launch" type="button" value="Rechercher les Tweets de l'artiste" />
+		<div id="default-search">
+			<label for="illust-url">URL de l'illustration :</label>
+			<input type="text" id="illust-url" name="illust-url" placeholder="Par exemple : https://www.pixiv.net/en/artworks/83378073" />
+			<input id="launch-default" type="button" value="Rechercher les Tweets de l'artiste" />
+		</div>
+		<div id="direct-search" class="display-none">
+			<p>Avertissement : Rechercher dans toute la base de données peut mener à des faux négatifs (&lt;10%). Il est donc recommandé de préciser un compte Twitter.<p>
+			<label for="illust-url">Image à rechercher :</label>
+			<input type="file" id="image-file" name="image-file" accept="image/png, image/jpeg" />
+			<input type="text" id="account-name" name="account-name" placeholder="Compte Twitter sur lequel rechercher" />
+			<input id="launch-direct" type="button" value="Rechercher les Tweets de l'artiste" />
+		</div>
 
 		<div id="loader" class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
 
@@ -61,6 +70,10 @@
 		</p>
 		<p id="danbooru-warning" class="display-none">Danbooru est un site avec du contenu pour adulte et sans aucun filtre.<br>Ainsi, vous devez être majeur pour <a href="https://danbooru.donmai.us/" target="_blank" rel="noopener">y accéder</a>.</p>
 		<p id="display-infos"></p>
+		<p id="display-advanced" class="display-none">
+			<a id="display-direct-search">Faire une recherche directe</a>
+			<a id="display-default-search" class="display-none">Retour à la recherche classique</a>
+		</p>
 		<p><a href="./faq">Foire Aux Questions</a> &bull; <a href="./documentation">Documentation de l'API</a></p>
 		<p>Fait avec ❤️ sur l'île d'Oléron, par <a href="https://twitter.com/Sailoriae" target="_blank" rel="noopener">@Sailoriae</a>.</p>
 	</footer>

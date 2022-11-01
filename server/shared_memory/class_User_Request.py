@@ -31,13 +31,20 @@ class User_Request :
                      Finder. L'URL doit donc mener directemet à un fichier
                      image, et non à une page d'illustration sur un site
                      supporté.
+    @param binary_image Image binaire. L'URL de l'image ne sert alors plus que
+                        d'identifiant, et la requête sera une requête directe.
     """
     def __init__ ( self, input_url : str,
                          ip_address : str = None,
-                         is_direct : bool = False ) :
+                         is_direct : bool = False,
+                         binary_image = None ) :
+        if binary_image != None :
+            self._is_direct = True
+        
         self._input_url = input_url
         self._ip_address = ip_address
         self._is_direct = is_direct
+        self._binary_image = binary_image
         
         # Si jamais il y a eu un problème et qu'on ne peut pas traiter la
         # requête, on le met ici sous forme d'une string
@@ -46,7 +53,9 @@ class User_Request :
         # Résultat du Link Finder (Etape 1)
         # Image source de l'illustration
         self._image_urls = None
-        if is_direct : # Requête directe (L'URL d'entrée mène à une image)
+        
+        # En cas de requête directe où l'URL d'entrée mène à une image
+        if is_direct and binary_image == None :
             self._image_urls = [ input_url ]
         
         # Résultat du Link Finder (Etape 1)
@@ -110,6 +119,9 @@ class User_Request :
     
     @property
     def is_direct( self ) : return self._is_direct
+    
+    @property
+    def binary_image( self ) : return self._binary_image
     
     @property
     def problem( self ) : return self._problem

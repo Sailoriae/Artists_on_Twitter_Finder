@@ -438,11 +438,12 @@ class SQLite_or_MySQL :
             c.execute( update_count, ( account_id, ) )
             self._conn.commit()
         
+        where_hash = to_bin( request_image_hash )
         c = self._get_cursor( commit = account_id == 0 ) # Sinon on vient de faire un commit
         if account_id != 0 :
-            c.execute( request, ( request_image_hash, request_image_hash, request_image_hash, request_image_hash, account_id ) )
+            c.execute( request, ( where_hash, where_hash, where_hash, where_hash, account_id ) )
         else :
-            c.execute( request, ( request_image_hash, request_image_hash, request_image_hash, request_image_hash ) )
+            c.execute( request, ( where_hash, where_hash, where_hash, where_hash ) )
         
         # Itérer sur les Tweets ayant une image avec le même hash
         while True :

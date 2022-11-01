@@ -36,8 +36,16 @@
 		<p id="display-stats"></p>
 		<p id="display-warning"></p>
 
-		<label for="illust-url">Illustration URL :</label>
-		<input type="text" id="illust-url" name="illust-url" placeholder="For example : https://www.pixiv.net/en/artworks/83378073" required />
+		<div id="default-search">
+			<label for="illust-url">Illustration URL :</label>
+			<input type="text" id="illust-url" name="illust-url" placeholder="For example : https://www.pixiv.net/en/artworks/83378073" />
+		</div>
+		<div id="direct-search" class="display-none">
+			<p>Warning : Searching in the entire database can lead to false negatives (&lt;10%). It is therefore recommended to specify a Twitter account.<p>
+			<label for="illust-url">Image to search :</label>
+			<input type="file" id="image-file" name="image-file" accept="image/png, image/jpeg" />
+			<input type="text" id="account-name" name="account-name" placeholder="Par exemple : @SimzArts" />
+		</div>
 		<input id="launch" type="button" value="Search artist's Tweets" />
 
 		<div id="loader" class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
@@ -61,6 +69,10 @@
 		</p>
 		<p id="danbooru-warning" class="display-none">Danbooru is a website with adult content and no filters.<br>Thus, you must be of legal age <a href="https://danbooru.donmai.us/" target="_blank" rel="noopener">to access it.</a></p>
 		<p id="display-infos"></p>
+		<p id="display-advanced" class="display-none">
+			<a id="display-direct-search">Make a direct search</a>
+			<a id="display-default-search" class="display-none">Back to classic search</a>
+		</p>
 		<p><a href="./faq">Frequently Asked Questions</a> &bull; <a href="./documentation">API Doc</a></p>
 		<p>Made with ❤️ on Oléron island, France, by <a href="https://twitter.com/Sailoriae" target="_blank" rel="noopener">@Sailoriae</a>.</p>
 	</footer>

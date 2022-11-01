@@ -113,6 +113,12 @@ def check_parameters () :
             ip_address = param.UNLIMITED_IP_ADDRESSES[i]
             check_list.append( test_parameter_type( f"UNLIMITED_IP_ADDRESSES[{i}]", ip_address, str ) )
     
+    check_list.append( test_parameter( "ADVANCED_IP_ADDRESSES", list ) )
+    if check_list[-1] : # Eviter de crash si ce n'est pas une liste
+        for i in range( len( param.ADVANCED_IP_ADDRESSES ) ) :
+            ip_address = param.ADVANCED_IP_ADDRESSES[i]
+            check_list.append( test_parameter_type( f"ADVANCED_IP_ADDRESSES[{i}]", ip_address, str ) )
+    
     check_list.append( test_parameter( "ENABLE_LOGGING", bool ) )
     
     if all( check_list ) :

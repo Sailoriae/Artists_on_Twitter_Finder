@@ -95,7 +95,10 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
             try :
                 # ATTENTION : Bien utiliser url_to_content(), car elle contient
                 # une bidouille pour GET les image sur Pixiv
-                query_image_as_bytes = url_to_content( request.image_urls[image_id] )
+                if request.binary_image == None :
+                    query_image_as_bytes = url_to_content( request.image_urls[image_id] )
+                else :
+                    query_image_as_bytes = request.binary_image
             except File_Too_Big as error :
                 print( f"[step_3_th{thread_id}] L'image d'entrée est trop grande ({error})." )
                 if len(request.image_urls) > image_id+1 :

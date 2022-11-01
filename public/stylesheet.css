@@ -32,7 +32,9 @@ input {
 	padding: 10px;
 }
 
-input#illust-url {
+input#illust-url,
+input#image-file,
+input#account-name {
 	width: 90%;
 	max-width: 500px;
 }

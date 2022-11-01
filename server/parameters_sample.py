@@ -171,6 +171,12 @@ Liste des adresses IP non-soumises à la limitation.
 UNLIMITED_IP_ADDRESSES = [ "127.0.0.1" ]
 
 """
+Liste des adresses IP pouvant utiliser les fonctionnalités avancées de l'API et
+ainsi de l'interface web.
+"""
+ADVANCED_IP_ADDRESSES = [ "127.0.0.1" ]
+
+"""
 Activer la journalisation des résultats.
 Les résultats sont alors écrits dans le fichier "results.log". Chaque résultat
 est au format JSON, un JSON par ligne car une ligne par résultat.

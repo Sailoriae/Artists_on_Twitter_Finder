@@ -79,17 +79,30 @@ Liste des erreurs possibles :
 - `YOUR_IP_HAS_MAX_PROCESSING_REQUESTS` : L'adresse IP qui a envoyé la requête a atteint son quota maximum de requêtes en cours de traitement. Il faut donc attendre que les autres requêtes envoyées par cette adresse IP finissent leur traitement.
 - Ou `null` s'il n'y a aucun problème n'est à signaler.
 
-Il existe aussi les erreurs suivantes pour les requêtes directes (Recherche dans toute la base de données ou sur un compte avec un fichier image), mais celles-ci sont utilisables uniquement avec la commnade `search` de la ligne de commande du serveur (Donc ces erreurs ne peuvent pas être obtenues via l'API) :
+Il existe aussi les erreurs suivantes pour les requêtes directes (Recherche dans toute la base de données ou sur un compte avec un fichier image), mais celles-ci sont utilisables uniquement avec la commande `search` de la ligne de commande du serveur ou via l'endpoint `/search` (Donc l'adresse IP de l'utilisateur est autorisée à l'utiliser) :
 - `CANNOT_GET_IMAGE` : Impossible d'obtenir l'image de l'URL entrée.
 - `INVALID_TWITTER_ACCOUNT` : Le compte Twitter sur lequel rechercher n'existe pas, ou n'est pas disponible.
 - `TWITTER_ACCOUNT_NOT_INDEXED` : Le compte Twitter sur lequel rechercher existe et est accessible, mais n'est pas indexé.
 
+Et uniquement dans le cas d'une recherche avec un fichier image depuis l'endpoint `/search` (Voir ci-dessous) :
+- `IDENTIFIER_MISSING` : La requête doit contenir un champs `identifier`.
+- `IMAGE_MISSING` : La requête doit contenir une image (La méthode HTTP est `POST`).
+- `NO_SUCH_REQUEST` : L'identifiant de requête n'est pas reconnu (Elle a peut-être été délestée).
+
 
 ## Endpoint `POST /query`
 
-Fonctionne exactement de la même manière que `GET /api/query` (Voir ci-dessus), mais l'URL de requête est passée dans le contenu de la requête (Type `text/plain` encodé en UTF-8).
+Fonctionne exactement de la même manière que `GET /query` (Voir ci-dessus), mais l'URL de requête est passée dans le contenu de la requête (Type `text/plain` encodé en UTF-8).
 
 L'interface web d'AOTF (Voir les Javascripts du répertoire [`public`](../public)) utilise cette méthode plutôt que la précédente, afin de permettre aux utilisateurs novices d'entrer n'importe quel URL.
+
+
+## Endpoint `GET /search` ou `POST /search`
+
+Fonctionne de manière similaire à l'endpoint `/query` (Répond avec le même JSON), mais permet de faire une recherche à partir d'un fichier image.
+La première requête doit être réalisée avec la méthode `POST` pour envoyer l'image. Un champs `identifier` est alors ajouté au JSON retourné (Le même que ci-dessus), permettant d'obtenir l'état de la requête. Il suffit que les requêtes suivantes soient avec la méthode `GET`, en passant l'identifiant dans le paramètre `identifier` de l'URL de requête.
+
+Ceci est un endpoint avancé. Pour l'utiliser, l'adresse IP de l'utilisateur doit être dans la liste `ADVANCED_IP_ADDRESSES`.
 
 
 ## Endpoint `GET /stats`
@@ -111,5 +124,6 @@ Recevoir des informations sur le serveur.
 Retourne un JSON contenant les champs suivants :
 - `limit_per_ip_address` : Nombre maximale de requêtes en cours de traitement par adresse IP (Paramètre `MAX_PROCESSING_REQUESTS_PER_IP_ADDRESS`).
 - `ip_can_bypass_limit` : Booléen indiquant si votre adresse IP est sur la liste des adresses qui peuvent dépasser la limite précédente (Paramètre `UNLIMITED_IP_ADDRESSES`).
+- `ip_can_use_advanced` : Booléen indiquant si votre adresse IP est sur la liste des adresses qui peuvent utiliser les endpoints avancés (Paramètre `ADVANCED_IP_ADDRESSES`).
 - `update_accounts_frequency` : Fréquence de la mise à jour automatique des comptes Twitter indexés, en jours. Un compte peut aussi être mis à jour lors d'une requête si l'illustration est trop récente (Paramètre `DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE`).
 - `max_illust_url_size` : Longueur maximale de l'URL d'une illustration pour l'entrée de l'endpoint `/query`.
