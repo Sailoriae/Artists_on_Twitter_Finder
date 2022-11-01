@@ -192,11 +192,15 @@ class User_Requests_Pipeline :
                         sera recherché par la recherche par image (Etape 3).
     @param binary_image Image binaire. L'URL de l'image ne sert alors plus que
                         d'identifiant pour retrouver la requête.
+    @param ip_address L'adresse IP qui a émis cette requête. Elle sera
+                      enregistrée avec la requête.
     @param do_not_launch Ne pas lancer une nouvelle requête, et retourner
                          "None" si aucune requête n'a été trouvée.
     
     @return L'objet User_Request créé.
             Ou l'objet User_Request déjà existant.
+            Ou None si l'adresse IP passée a atteint son nombre maximum de
+            requêtes en cours de traitement (Et que do_not_launch=False).
     
     Cette fonction permet ainsi d'obtenir une requête si il en existe déjà une
     pour l'entrée "image_url" et le compte "account_name".
@@ -204,6 +208,7 @@ class User_Requests_Pipeline :
     def launch_direct_request ( self, image_url : str,
                                       account_name : str = None,
                                       binary_image : bytes = None,
+                                      ip_address : str = None,
                                       do_not_launch : bool = False ) -> User_Request :
         # Vérifier d'abord qu'on n'est pas déjà en train de traiter cette
         # image d'entrée.
@@ -223,8 +228,16 @@ class User_Requests_Pipeline :
         
         if do_not_launch : return None
         
+        # Faire +1 au nombre de requêtes en cours de traitement pour cette
+        # adresse IP. Si on ne peut pas, on retourne None.
+        if ip_address != None :
+            if not self._limit_per_ip_addresses_obj.add_ip_address( ip_address ) :
+                self._requests_sem.release()
+                return None
+        
         # Créer et ajouter l'objet User_Request à notre système.
         request = self._root.register_obj( User_Request( image_url,
+                                                         ip_address = ip_address,
                                                          is_direct = True,
                                                          binary_image = binary_image ) )
         self._direct_requests[ image_url ] = request

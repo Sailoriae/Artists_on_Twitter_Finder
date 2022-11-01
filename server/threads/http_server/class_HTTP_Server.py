@@ -331,10 +331,16 @@ def http_server_container ( shared_memory_uri_arg ) :
                         binary_image = self.rfile.read(content_length)
                         request = HTTP_Server.user_requests.launch_direct_request( identifier,
                                                                                    account_name = account_name,
-                                                                                   binary_image = binary_image )
+                                                                                   binary_image = binary_image,
+                                                                                   ip_address = client_ip )
                         
-                        generate_user_request_json( request, response_dict )
-                        response_dict["identifier"] = identifier
+                        # L'adresse IP a trop de requêtes en cours
+                        if request == None :
+                            response_dict["error"] = "YOUR_IP_HAS_MAX_PROCESSING_REQUESTS"
+                        
+                        else :
+                            generate_user_request_json( request, response_dict )
+                            response_dict["identifier"] = identifier
                     
                     else :
                         raise Exception( "Ligne impossible à atteindre !" )
