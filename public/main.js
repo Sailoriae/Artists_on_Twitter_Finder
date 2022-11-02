@@ -43,6 +43,9 @@ function mainFunction ( new_loop = true, isDirectRequest = false, identifier = n
 			} else if ( request.status === 503 ) {
 				errorP.textContent = lang["CANNOT_CONTACT_SERVER"];
 				unlockUI();
+			} else if ( request.status === 403 ) {
+				errorP.textContent = lang["FORBIDDEN"];
+				unlockUI();
 			}
 		}
 	});

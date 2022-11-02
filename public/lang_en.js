@@ -19,6 +19,8 @@ var lang = {
 	"TWITTER_ACCOUNT_NOT_INDEXED" : "The Twitter account on which to search exists, is available, but is not indexed.",
 	"IMAGE_MISSING" : "Please select an image to search.",
 
+	"FORBIDDEN" : "You cannot use this feature from your current IP address.",
+
 	"NEXT_TRY_IN" : "Retry in %s seconds.",
 	"NEXT_TRY_IN_SINGULAR" : "Retry in %s second.",
 
