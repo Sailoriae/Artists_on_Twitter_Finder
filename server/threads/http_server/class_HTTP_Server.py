@@ -128,8 +128,9 @@ def http_server_container ( shared_memory_uri_arg ) :
         # Parce que XMLHttpRequest fait chier lors de l'envoi d'un fichier
         def do_OPTIONS( self ) :
             self.send_response(200)
-            self.send_header("Access-Control-Allow-Origin", "*")
-            self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+            self.send_header("Allow", "GET, POST, HEAD, OPTIONS")
+            self.send_header("Access-Control-Allow-Origin", "*") # Pour le dév de l'UI web, doit être modifié par le proxy en production
+            self.send_header("Access-Control-Allow-Methods", "GET, POST, HEAD, OPTIONS")
             self.send_header("Access-Control-Allow-Headers", "Content-Type")
             self.end_headers()
         
@@ -381,7 +382,7 @@ def http_server_container ( shared_memory_uri_arg ) :
                 self.send_header("Content-type", "application/json; charset=utf-8")
             else :
                 self.send_header("Content-type", "text/plain; charset=utf-8")
-            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Access-Control-Allow-Origin", "*") # Pour le dév de l'UI web, doit être modifié par le proxy en production
             self.end_headers()
             if method != "HEAD" :
                 self.wfile.write( response.encode("utf-8") )
