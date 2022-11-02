@@ -122,7 +122,8 @@ def http_server_container ( shared_memory_uri_arg ) :
                 self.send_response(500)
                 self.send_header("Content-type", "text/plain; charset=utf-8")
                 self.end_headers()
-                self.wfile.write( "500 Internal Server Error\n".encode("utf-8") )
+                if method != "HEAD" :
+                    self.wfile.write( "500 Internal Server Error\n".encode("utf-8") )
         
         # Parce que XMLHttpRequest fait chier lors de l'envoi d'un fichier
         def do_OPTIONS( self ) :
@@ -382,7 +383,8 @@ def http_server_container ( shared_memory_uri_arg ) :
                 self.send_header("Content-type", "text/plain; charset=utf-8")
             self.send_header("Access-Control-Allow-Origin", "*")
             self.end_headers()
-            self.wfile.write( response.encode("utf-8") )
+            if method != "HEAD" :
+                self.wfile.write( response.encode("utf-8") )
             
             print( "[HTTP]", client_ip, self.log_date_time_string(), method, self.path, "HTTP", http_code )
     
