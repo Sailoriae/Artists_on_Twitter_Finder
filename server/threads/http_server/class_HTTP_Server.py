@@ -8,6 +8,7 @@ from time import time
 from datetime import datetime
 import traceback
 from secrets import token_hex
+from io import DEFAULT_BUFFER_SIZE
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
 # Ainsi, si on veut utiliser ce script indépendamment (Notamment pour des
@@ -211,6 +212,7 @@ def http_server_container ( shared_memory_uri_arg ) :
                             illust_url = self.rfile.read(content_length).decode('utf-8')
                         except UnicodeDecodeError :
                             response_dict["error"] = "NOT_AN_URL"
+                        content_length = 0 # Signaler que le contenu a été lu
                 else :
                     try :
                         illust_url = parameters["url"][0]
@@ -329,6 +331,8 @@ def http_server_container ( shared_memory_uri_arg ) :
                         HTTP_Server.direct_requests[identifier] = account_name
                         
                         binary_image = self.rfile.read(content_length)
+                        content_length = 0 # Signaler que le contenu a été lu
+                        
                         request = HTTP_Server.user_requests.launch_direct_request( identifier,
                                                                                    account_name = account_name,
                                                                                    binary_image = binary_image,
@@ -355,6 +359,19 @@ def http_server_container ( shared_memory_uri_arg ) :
             else :
                 http_code = 404
                 response = "404 Not Found\n"
+            
+            # Dans le cas d'un POST, il faut forcément lire le contenu envoyé,
+            # sinon Apache retourne à utilisateur une erreur "502 Bad Gateway"
+            # Confirmation : https://stackoverflow.com/a/28220558
+            # On est obligé de lire avant de répondre
+            if method == "POST" :
+                # On lit par tranches de DEFAULT_BUFFER_SIZE afin de ne pas
+                # saturer la mémoire vive
+                # TODO : Trouver un meilleur moyen pour vider la socket
+                # d'entrée sans la lire, c'est à dire sans charger le contenu
+                # dans la mémoire vive
+                for read_size in [ DEFAULT_BUFFER_SIZE ] * ( content_length // DEFAULT_BUFFER_SIZE ) + [ content_length % DEFAULT_BUFFER_SIZE] :
+                    self.rfile.read(read_size)
             
             # Envoyer la réponse
             self.header_sent = True
