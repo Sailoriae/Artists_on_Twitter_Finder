@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-import Pyro4
+import Pyro5.server
 from time import time
 from threading import Semaphore
 
@@ -10,7 +10,7 @@ from threading import Semaphore
 Objet permettant de limiter les requêtes HTTP sur le serveur HTTP / l'API à une
 seule requête par seconde. Sinon, l'API renvoit une erreur HTTP 429.
 """
-@Pyro4.expose
+@Pyro5.server.expose
 class HTTP_Requests_Limitator :
     def __init__ ( self ) :
         # Dictionnaire faisant correspondre un adresse IP à la date de la

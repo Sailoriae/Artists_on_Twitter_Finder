@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-import Pyro4
+import Pyro5.server
 import os
 import psutil
 
@@ -30,7 +30,7 @@ processus fils ! Voir le fichier "threads_launcher.py".
 ATTENTION : Pyro crée aussi pleins de threads (Mais pas des processus comme
 nous en mode multi-processus) qui ne sont pas enregistrés ici !
 """
-@Pyro4.expose
+@Pyro5.server.expose
 class Threads_Registry :
     def __init__ ( self, root_shared_memory ) :
         self._root = root_shared_memory
@@ -66,7 +66,7 @@ class Threads_Registry :
         if request == None :
             self._requests_dict[ thread_name ] = None
         else :
-            self._requests_dict[ thread_name ] = request.get_URI()
+            self._requests_dict[ thread_name ] = request._pyroUri
     
     """
     @param thread_name L'identifiant du thread.

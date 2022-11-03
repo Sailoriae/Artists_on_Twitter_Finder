@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-import Pyro4
+import Pyro5.server
 import threading
 import datetime
 import json
@@ -42,7 +42,7 @@ Proxy ne peut être utilisé que par un seul thread à la fois).
 Les files d'attente contiennent donc des URI, c'est à dire des chaines de
 caractères.
 """
-@Pyro4.expose
+@Pyro5.server.expose
 class User_Requests_Pipeline :
     def __init__ ( self, root_shared_memory ) :
         self._root = root_shared_memory

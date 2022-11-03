@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-import Pyro4
+import Pyro5.server
 import threading
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
@@ -24,7 +24,7 @@ import parameters as param
 Classe de gestion des adresses IP de requête.
 Permet de limiter le nombre de requêtes en cours de traitement par adresse IP.
 """
-@Pyro4.expose
+@Pyro5.server.expose
 class Limit_per_IP_Address :
     def __init__ ( self ) :
         # Dictionnaire contenant le nombre de requêtes en cours de traitement

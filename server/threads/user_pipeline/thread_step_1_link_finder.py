@@ -168,7 +168,7 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
         shared_memory_execution_metrics.add_step_1_times( time() - start )
         
         # Forcer la fermeture du proxy
-        request.release_proxy()
+        request._pyroRelease()
     
     print( f"[step_1_th{thread_id}] Arrêté !" )
     return

@@ -1,14 +1,14 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-import Pyro4
+import Pyro5.server
 from time import sleep
 
 
 """
 Objet pour passer des messages aux processus fils du serveur AOTF.
 """
-@Pyro4.expose
+@Pyro5.server.expose
 class Processes_Registry :
     def __init__ ( self, root_shared_memory ) :
         self._root = root_shared_memory

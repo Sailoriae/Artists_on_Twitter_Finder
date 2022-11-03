@@ -112,10 +112,10 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
                                                                                is_prioritary = True )
                     
                     # On suit la progression de cette requête
-                    request.scan_requests += [ scan_request.get_URI() ] # Ne peut pas faire de append avec Pyro
+                    request.scan_requests += [ scan_request._pyroUri ] # Ne peut pas faire de append avec Pyro
                     
                     # Forcer la fermeture du proxy
-                    scan_request.release_proxy()
+                    scan_request._pyroRelease()
                     
                     # On indique qu'on a des indexations pour la première fois
                     request.has_first_time_scan = True
@@ -146,10 +146,10 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
                                                                                    is_prioritary = True )
                         
                         # On suit la progression de cette requête
-                        request.scan_requests += [ scan_request.get_URI() ] # Ne peut pas faire de append avec Pyro
+                        request.scan_requests += [ scan_request._pyroUri ] # Ne peut pas faire de append avec Pyro
                         
                         # Forcer la fermeture du proxy
-                        scan_request.release_proxy()
+                        scan_request._pyroRelease()
                     
                     else :
                         print( f"[step_2_th{thread_id}] @{account_name} est déjà dans la BDD, et on peut sauter son scan !" )
@@ -184,7 +184,7 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
                 continue
             
             # Forcer la fermeture du proxy
-            scan_request.release_proxy()
+            scan_request._pyroRelease()
         
         # Dire qu'on n'est plus en train de traiter cette requête
         shared_memory_threads_registry.set_request( f"thread_step_2_tweets_indexer_th{thread_id}", None )
@@ -192,14 +192,14 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
         # Si l'une des requêtes de scan a eu un problème, on arrête tout avec
         # cette requête utilisateur
         if double_continue :
-            request.release_proxy()
+            request._pyroRelease()
             continue
         
         # Si toutes nos requêtes ne sont pas finies, on remet la requête en
         # haut de NOTRE file d'attente
         if not all( check_list ) :
             shared_memory_user_requests_step_2_tweets_indexer_queue.put( request )
-            request.release_proxy()
+            request._pyroRelease()
             continue
         
         # Sinon, on peut vider la liste des requêtes de scan
@@ -211,7 +211,7 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
         shared_memory_user_requests.set_request_to_next_step( request )
         
         # Forcer la fermeture du proxy
-        request.release_proxy()
+        request._pyroRelease()
     
     print( f"[step_2_th{thread_id}] Arrêté !" )
     return

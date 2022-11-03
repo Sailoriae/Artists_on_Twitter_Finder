@@ -363,7 +363,7 @@ class Tweets_Indexer :
                 request = open_proxy( instruction["request_uri"] )
                 request.finished_SearchAPI_indexing = True
                 can_save_cursor = self._end_request( request )
-                request.release_proxy()
+                request._pyroRelease()
                 if can_save_cursor :
                     self._save_last_tweet_date( instruction["account_id"], instruction["save_SearchAPI_cursor"] )
             
@@ -382,7 +382,7 @@ class Tweets_Indexer :
                 request = open_proxy( instruction["request_uri"] )
                 request.finished_TimelineAPI_indexing = True
                 can_save_cursor = self._end_request( request )
-                request.release_proxy()
+                request._pyroRelease()
                 if can_save_cursor :
                     self._save_last_tweet_id( instruction["account_id"], instruction["save_TimelineAPI_cursor"] )
            

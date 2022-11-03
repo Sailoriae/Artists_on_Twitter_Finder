@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-import Pyro4
+import Pyro5.server
 import queue
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
@@ -25,10 +25,11 @@ Comme les files d'attentes contiennent des sémaphores, et qu'ils ne peuvent pas
 être partagés, il faut faire cette couche pour qu'ils restent sur le serveur,
 et ne soient pas transférés.
 """
-@Pyro4.expose
+@Pyro5.server.expose
 class Pyro_Queue :
     """
-    @param convert_uri Convertir les URI vers des Pyro4.Proxy, et inversement.
+    @param convert_uri Convertir les URI vers des Pyro5.client.Proxy, et
+                       inversement.
     """
     def __init__ ( self, convert_uri = False ) :
         self._convert_uri = convert_uri
@@ -45,7 +46,7 @@ class Pyro_Queue :
     
     def put ( self, item ) :
         if self._convert_uri :
-            self._queue.put( item.get_URI() )
+            self._queue.put( item._pyroUri )
         else :
             self._queue.put( item )
     

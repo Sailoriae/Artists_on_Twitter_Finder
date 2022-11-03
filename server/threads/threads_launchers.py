@@ -8,7 +8,8 @@ import threading
 import multiprocessing
 from datetime import datetime
 import traceback
-import Pyro4
+#import Pyro5 # Pour Pyro5.config
+import Pyro5.errors
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
 # Ainsi, si on veut utiliser ce script indépendamment (Notamment pour des
@@ -65,7 +66,7 @@ def subprocess ( parent_pid, procedure, *arguments ) :
         # Si le processus racine a été tué, on peut s'arrêter maintenant
         # On le détecte avec une erreur de connexion au serveur Pyro
         # On ne peut pas le détecter avec le PID
-        if isinstance( error, Pyro4.errors.CommunicationError ) :
+        if isinstance( error, Pyro5.errors.CommunicationError ) :
             sys.exit(0) # Nos threads ont leur attribut "daemon" à "True"
         
         error_name = f"Erreur dans la procédure du processus fils PID {os.getpid()} !\n"
@@ -96,7 +97,7 @@ les ordres venenant de la mémoire partagée.
 """
 def subprocess_procedure ( threads_list, shared_memory_uri ) :
     # On est ici forcément en mode multi-processus
-    Pyro4.config.SERIALIZER = "pickle"
+#    Pyro5.config.SERIALIZER = "pickle"
     shared_memory = open_proxy( shared_memory_uri )
     
     # Maintenir ouverts certains proxies vers la mémoire partagée

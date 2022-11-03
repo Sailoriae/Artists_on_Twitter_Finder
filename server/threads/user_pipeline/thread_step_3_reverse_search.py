@@ -121,7 +121,7 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
                         request.problem = "CANNOT_GET_IMAGE"
                         break # Sortir pour terminer le requête proprement
                     # Sinon, on plante en indiquant que c'est de la faute du Link Finder
-                    request.release_proxy()
+                    request._pyroRelease()
                     message = "Impossible d'obtenir une image trouvée par le Link Finder."
                     message += "\nCe n'est pas de la faute du thread de recherche inversée (Même si c'est lui qui plante)."
                     message += "\nLe problème est soit dans le Link Finder, soit chez le site supporté."
@@ -224,7 +224,7 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
         shared_memory_user_requests.set_request_to_next_step( request )
         
         # Forcer la fermeture du proxy
-        request.release_proxy()
+        request._pyroRelease()
     
     print( f"[step_3_th{thread_id}] Arrêté !" )
     return

@@ -5,7 +5,7 @@ mysql-connector-python>=8.0.24,!=8.0.29,!=8.0.30
 requests
 tweepy>=4.0.0
 beautifulsoup4
-Pyro4
+Pyro5
 git+https://github.com/JustAnotherArchivist/snscrape.git#egg=snscrape
 python-dateutil
 pillow>=8.3.2

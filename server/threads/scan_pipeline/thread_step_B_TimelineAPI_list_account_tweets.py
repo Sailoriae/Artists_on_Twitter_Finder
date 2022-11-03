@@ -105,7 +105,7 @@ def thread_step_B_TimelineAPI_list_account_tweets( thread_id : int, shared_memor
             
             # Lacher le sémaphore et arrêter là, on ne peut pas la traiter
             shared_memory_scan_requests_queues_sem.release()
-            request.release_proxy()
+            request._pyroRelease()
             continue
         
         # Dire qu'on a commencé à traiter cette requête
@@ -119,7 +119,7 @@ def thread_step_B_TimelineAPI_list_account_tweets( thread_id : int, shared_memor
         # AVANT de se déclarer au registre des threads
         if shared_memory_scan_requests.is_blacklisted( int( request.account_id ) ) :
             print( f"[step_B_th{thread_id}] Le compte Twitter @{request.account_name} est sur notre liste noire ! Ses Tweets ne seront pas listés." )
-            request.release_proxy()
+            request._pyroRelease()
             continue
         
         # Dire qu'on est en train de traiter cette requête
@@ -130,7 +130,7 @@ def thread_step_B_TimelineAPI_list_account_tweets( thread_id : int, shared_memor
         try :
             timelineAPI_lister.list_TimelineAPI_tweets( request.account_name,
                                                         account_id = request.account_id,
-                                                        request_uri = request.get_URI() )
+                                                        request_uri = request._pyroUri )
         except Unfound_Account_on_Lister_with_TimelineAPI :
             print( f"[step_B_th{thread_id}] Le compte Twitter @{request.account_name} (ID {request.account_id}) n'existe pas." )
             request.unfound_account = True
@@ -151,7 +151,7 @@ def thread_step_B_TimelineAPI_list_account_tweets( thread_id : int, shared_memor
             request.has_failed = True # A faire avant
             timelineAPI_lister._send_save_cursor_instruction( request.account_name,
                                                               request.account_id,
-                                                              request.get_URI(),
+                                                              request._pyroUri,
                                                               unchange_cursor = True )
             raise error # Passer au collecteur d'erreurs
         
@@ -159,7 +159,7 @@ def thread_step_B_TimelineAPI_list_account_tweets( thread_id : int, shared_memor
         shared_memory_threads_registry.set_request( f"thread_step_B_TimelineAPI_list_account_tweets_th{thread_id}", None )
         
         # Forcer la fermeture du proxy
-        request.release_proxy()
+        request._pyroRelease()
     
     print( f"[step_B_th{thread_id}] Arrêté !" )
     return

@@ -235,7 +235,7 @@ class Threads_Manager :
             self._threads_xor_process.extend(
                 launch_threads_in_container( threads_to_start,
                                              container_name,
-                                             self._shared_memory.get_URI() ) )
+                                             self._shared_memory._pyroUri ) )
         
         self._launch_in_progress = False
     

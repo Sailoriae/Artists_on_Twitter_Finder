@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-import Pyro4
+import Pyro5 # Pour Pyro5.config
+import Pyro5.server
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
 # Ainsi, si on veut utiliser ce script indépendamment (Notamment pour des
@@ -35,7 +36,7 @@ serveur Pyro, et pas l'objet directement (Car Pyro ne peut pas exécuter sur le
 serveur les méthodes des sous-objets), et pas le Proxy vers l'objet (Car un
 Proxy ne peut être utilisé que par un seul thread à la fois).
 """
-@Pyro4.expose
+@Pyro5.server.expose
 class Shared_Memory :
     """
     @param pyro_port Port du serveur Pyro.
@@ -50,12 +51,12 @@ class Shared_Memory :
                      autorisé de descripteurs de fichiers.
     """
     def __init__ ( self, pyro_port, pool_size ) :
-        # Initialisation du serveur Pyro4
+        # Initialisation du serveur Pyro5
         if param.ENABLE_MULTIPROCESSING :
-            Pyro4.config.THREADPOOL_SIZE = pool_size
-            Pyro4.config.SERIALIZERS_ACCEPTED = { "pickle" }
-            Pyro4.config.SERIALIZER = "pickle"
-            self._daemon = Pyro4.Daemon( port = pyro_port )
+            Pyro5.config.THREADPOOL_SIZE = pool_size
+#            Pyro5.config.SERIALIZERS_ACCEPTED = { "pickle" }
+#            Pyro5.config.SERIALIZER = "pickle"
+            self._daemon = Pyro5.server.Daemon( port = pyro_port )
         
         # Variable pour éteindre tout le système.
         self._keep_threads_alive = True
@@ -170,7 +171,7 @@ class Shared_Memory :
     """
     def register_obj ( self, obj ) :
         if param.ENABLE_MULTIPROCESSING :
-            return self._daemon.register( obj ).asString()
+            return str( self._daemon.register( obj ) )
         else :
             return obj
     
@@ -180,7 +181,7 @@ class Shared_Memory :
     @return L'ID de cet objet, sous la forme d'une string.
     """
     def _uri_to_id ( self, uri ) :
-        return Pyro4.URI( uri ).object
+        return Pyro5.core.URI( uri ).object
     
     """
     Obtenir un objet Python à partir de son URI.

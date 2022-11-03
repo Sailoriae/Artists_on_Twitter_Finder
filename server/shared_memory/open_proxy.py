@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-from Pyro4 import Proxy
+import Pyro5.client
 from types import MethodType
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
@@ -21,18 +21,10 @@ import parameters as param
 
 
 """
-Méthode à ajouter à tous les objets qu'on renvoit.
+Méthode à ajouter aux objets.
 """
-if param.ENABLE_MULTIPROCESSING :
-    class Custom_Proxy ( Proxy ) :
-        def get_URI ( self ) :
-            return self._pyroUri.asString()
-        def release_proxy ( self ) :
-            self._pyroRelease()
-else:
-    def get_URI ( self ) :
-        return self
-    def release_proxy ( self ) :
+if not param.ENABLE_MULTIPROCESSING :
+    def _pyroRelease ( self ) :
         pass
 
 
@@ -44,16 +36,17 @@ Si le multi-processus est activé, ouvre un Proxy vers l'objet Pyro distant.
 Si le multi-processus est désactivé, retourne simplement l'objet.
 @param obj Objet à retourner.
 @return Le même objet, non modifié.
+        Il a en plus un attribut "_pyroUri" et une méthode "_pyroRelease()".
 
-Ne jamais ouvrir un proxy en appelant Pyro4.Proxy() ! Cela casserait la
+Ne jamais ouvrir un proxy en appelant Pyro5.client.Proxy() ! Cela casserait la
 désactivation du serveur Pyro si le serveur n'est pas exécuté en mode
 multi-processus.
 """
 if param.ENABLE_MULTIPROCESSING :
     def open_proxy ( uri : str ) :
-        return Custom_Proxy( uri )
+        return Pyro5.client.Proxy( uri )
 else :
     def open_proxy ( obj : object ) :
-        obj.get_URI = MethodType( get_URI, obj )
-        obj.release_proxy = MethodType( release_proxy, obj )
+        obj._pyroUri = obj
+        obj._pyroRelease = MethodType( _pyroRelease, obj )
         return obj

@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-import Pyro4
+import Pyro5.server
 from time import time
 
 
@@ -17,7 +17,7 @@ serveur Pyro, et pas l'objet directement (Car Pyro ne peut pas exécuter sur le
 serveur les méthodes des sous-objets), et pas le Proxy vers l'objet (Car un
 Proxy ne peut être utilisé que par un seul thread à la fois).
 """
-@Pyro4.expose
+@Pyro5.server.expose
 class Scan_Request :
     # Type de requête, pour la reconnaitre plus facilement dans le collecteur
     # d'erreurs

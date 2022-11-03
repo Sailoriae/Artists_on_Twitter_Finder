@@ -2,9 +2,9 @@
 
 Lors de l'éxécution du serveur AOTF, les threads (Et les processus conteneurs en mode mode multi-processus) ont besoin de partager des données, par exemple les files d'attentes avant une étape dans l'un des deux pipelines de traitement ([`user_pipeline`](../threads/user_pipeline) et [`scan_pipeline`](../threads/scan_pipeline)). La mémoire partagée permet de stocker et restituer ces données.
 
-Celle-ci consiste en un objet racine, `Shared_Memory`, et recursivement des sous-objets stockés dans les attributs. Si le serveur est démarré en mode multi-processus (`ENABLE_MULTIPROCESSING` est à `True`), la mémoire partagée est un serveur tournant avec la librairie Python `Pyro4`. Sinon, l'objet racine peut être simplement partagé entre les threads.
+Celle-ci consiste en un objet racine, `Shared_Memory`, et recursivement des sous-objets stockés dans les attributs. Si le serveur est démarré en mode multi-processus (`ENABLE_MULTIPROCESSING` est à `True`), la mémoire partagée est un serveur tournant avec la librairie Python Pyro5. Sinon, l'objet racine peut être simplement partagé entre les threads.
 
-Documentation de la librairie Pyro4 : https://pyro4.readthedocs.io/en/stable/index.html
+Documentation de la librairie Pyro5 : https://pyro5.readthedocs.io/en/stable/index.html
 
 Cette librairie permet de partager des objets entre des processus (Car nous sommes obligés de faire du multi-processus et non du multi-threading à cause du GIL). Elle peut aussi permettre de faire un système distribué. "Artists on Twitter Finder" pourrait donc être distribué sur plusieurs serveurs (En modifiant un peu le code).
 
@@ -17,7 +17,7 @@ Et faire du multi-processus rend l'utilisation d'une mémoire partagée impossib
 
 Ainsi, j'ai exploré deux solutions de serveur de mémoire partagée :
 - Les "Managers" du module `multiprocessing`. Leur gros problème est qu'ils n'acceptent qu'une liste restreinte d'objets, ce qui transforme complétement la mémoire partagée et leur utilisation.
-- La librairie `Pyro4`. Peut supporter des classes, et exécuter coté-serveur le code de leurs attributs, mais pas pour les sous-objets ! Cependant, une parade a été trouvée pour pallier ce problème, et faire une mémoire partagée efficace, voir ci-dessous.
+- La librairie `Pyro5`. Peut supporter des classes, et exécuter coté-serveur le code de leurs attributs, mais pas pour les sous-objets ! Cependant, une parade a été trouvée pour pallier ce problème, et faire une mémoire partagée efficace, voir ci-dessous.
 
 
 ## Initialisation de la mémoire partagée
@@ -33,10 +33,9 @@ Note : Le script `thread_pyro_server.py` peut aussi être exécuté indépendamm
 
 En revanche, il peut être intéressant d'accéder à la mémoire partagée afin de débugger le serveur AOTF. Pour se faire, exécutez le code suivant dans une console Python (IPython par exemple) :
 ```python
-import Pyro4
-Pyro4.config.SERIALIZER = "pickle"
+from Pyro5.client import Proxy
 
-e = Pyro4.Proxy( "PYRO:shared_memory@localhost:3300" )
+e = Proxy( "PYRO:shared_memory@localhost:3300" )
 ```
 
 
@@ -44,7 +43,7 @@ e = Pyro4.Proxy( "PYRO:shared_memory@localhost:3300" )
 
 L'objet racine de la mémoire partagée est `Shared_Memory`. Lorsqu’un objet est créé, sa méthode `register_obj` est appelée afin d'enregistrer le nouvel objet sur le serveur Pyro (Elle ne fait rien si le serveur n'est pas démarré en mode multi-processus). Cela permet de faire des "pseudos-sous-objets".
 
-En effet, Pyro permet d'exécuter les méthodes des objets sur le serveur, mais pas des sous-objets ! Afin de pallier à ce problème (Et afin d'utiliser des sémaphores, qui ne se sont pas transférables car non-sérialisables), on enregistre les URI des enregistrements des objets, et non les objets eux-mêmes. Ainsi, lorsqu'un getter est appelé, il renvoi un objet `Pyro4.Proxy` qui est connecté au sous-objet.
+En effet, Pyro permet d'exécuter les méthodes des objets sur le serveur, mais pas des sous-objets ! Afin de pallier à ce problème (Et afin d'utiliser des sémaphores, qui ne se sont pas transférables car non-sérialisables), on enregistre les URI des enregistrements des objets, et non les objets eux-mêmes. Ainsi, lorsqu'un getter est appelé, il renvoi un objet `Pyro5.client.Proxy` qui est connecté au sous-objet.
 
 Ainsi, l'utilisation est transparente dans le reste du serveur AOTF !
 Autre avantage : Toutes les méthodes de tous les objets présents dans ce module sont exécutées coté serveur Pyro.
@@ -80,12 +79,10 @@ Voir chaque classe pour plus de documentation.
 
 ## Notes
 
-Les objets `Pyro4.Proxy` ferment leur connexion lorsqu'ils arrivent dans le garbage collector. [Source](https://github.com/irmen/Pyro4/blob/79de6434259ff82d202090cbd0901673d4b8344b/src/Pyro4/core.py#L264).
+Les objets `Pyro5.cient.Proxy` ferment leur connexion lorsqu'ils arrivent dans le garbage collector. [Source](https://github.com/irmen/Pyro5/blob/8d58a8906c7d8ac53d0f3b772a8c31c82473d699/Pyro5/client.py#L88).
 
 Comme expliqué précédemment, si les paramètres `ENABLE_MULTIPROCESSING` est à `False`, c'est à dire que le serveur ne crée pas de processus fils, le serveur Pyro n'est pas lancé, et la mémoire partagée fonctionne comme un simple objet Python, partagé entre les Threads.
 
 Ainsi, il faut toujours utiliser la fonction `open_proxy()` !
-Celle-ci renvoie un `Pyro4.Proxy` si le serveur est démarré en mode multi-processus, ou directement l'objet sinon.
-Dans ces deux cas, elle ajoute au proxy ou à l'objet deux méthodes, pour ne pas avoir à utiliser les méthodes et attributs privés `_pyro*` :
-* `get_URI()` : Retourne l'URI du proxy, ou simplement l'objet.
-* `release_proxy()` : Ferme le proxy, ou ne fait rien.
+Celle-ci renvoie un `Pyro5.client.Proxy` si le serveur est démarré en mode multi-processus, ou directement l'objet sinon.
+Dans ce second cas, elle ajoute l'attribut `_pyroUri` et la méthode `_pyroRelease()` afin qu'ils soient utilisés lorsque le mode multi-processus est désactivé. Cela permet que notre code reste le même dans ces deux cas.

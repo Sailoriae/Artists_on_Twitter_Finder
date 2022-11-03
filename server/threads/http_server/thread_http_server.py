@@ -35,7 +35,7 @@ def thread_http_server( thread_id : int, shared_memory ) :
         raise AssertionError( "Ce thread doit être unique, et doit pas conséquent avoir 1 comme identifiant (\"thread_id\") !" )
     
     # Obtenir la classe du serveur HTTP
-    HTTP_Server = http_server_container( shared_memory.get_URI() )
+    HTTP_Server = http_server_container( shared_memory._pyroUri )
     
     # http.server.ThreadingHTTPServer() fait lui-même le multi-threads du
     # serveur HTTP

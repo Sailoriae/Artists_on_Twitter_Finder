@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-import Pyro4
+import Pyro5.server
 
 
 """
@@ -36,7 +36,7 @@ class Mean_Container:
 """
 Conteneur des mesures des temps d'exécutions.
 """
-@Pyro4.expose
+@Pyro5.server.expose
 class Metrics_Container :
     def __init__ ( self ) :
         # Classe Tweets_Lister_with_SearchAPI
