@@ -36,7 +36,6 @@ serveur Pyro, et pas l'objet directement (Car Pyro ne peut pas exécuter sur le
 serveur les méthodes des sous-objets), et pas le Proxy vers l'objet (Car un
 Proxy ne peut être utilisé que par un seul thread à la fois).
 """
-@Pyro5.server.expose
 class Shared_Memory :
     """
     @param pyro_port Port du serveur Pyro.
@@ -105,41 +104,55 @@ class Shared_Memory :
     """
     Getters et setters pour Pyro.
     """
+    @Pyro5.server.expose
     @property
     def keep_threads_alive( self ) : return self._keep_threads_alive
+    @Pyro5.server.expose
     @keep_threads_alive.setter
     def keep_threads_alive( self, value ) : self._keep_threads_alive = value
     
+    @Pyro5.server.expose
     @property
     def keep_pyro_alive( self ) : return self._keep_pyro_alive
+    @Pyro5.server.expose
     @keep_pyro_alive.setter
     def keep_pyro_alive( self, value ) : self._keep_pyro_alive = value
     
+    @Pyro5.server.expose
     @property
     def user_requests( self ) : return open_proxy( self._user_requests )
     
+    @Pyro5.server.expose
     @property
     def scan_requests( self ) : return open_proxy( self._scan_requests )
     
+    @Pyro5.server.expose
     @property
     def tweets_count( self ) : return self._tweets_count
+    @Pyro5.server.expose
     @tweets_count.setter
     def tweets_count( self, value ) : self._tweets_count = value
     
+    @Pyro5.server.expose
     @property
     def accounts_count( self ) : return self._accounts_count
+    @Pyro5.server.expose
     @accounts_count.setter
     def accounts_count( self, value ) : self._accounts_count = value
     
+    @Pyro5.server.expose
     @property
     def http_limitator( self ) : return open_proxy( self._http_limitator )
     
+    @Pyro5.server.expose
     @property
     def execution_metrics( self ) : return open_proxy( self._execution_metrics )
     
+    @Pyro5.server.expose
     @property
     def threads_registry( self ) : return open_proxy( self._threads_registry )
     
+    @Pyro5.server.expose
     @property
     def processes_registry( self ) :
         if param.ENABLE_MULTIPROCESSING :
@@ -149,6 +162,7 @@ class Shared_Memory :
     """
     Lancer le sevreur de mémoire partagée, avec Pyro.
     """
+    # Méthode interne à la mémoire partagée
     def launch_pyro_server ( self ) :
         if not param.ENABLE_MULTIPROCESSING :
             raise AssertionError( "Mode multi-processus désactivé, le serveur Pyro ne peut pas être démarré !" )
@@ -159,6 +173,7 @@ class Shared_Memory :
     """
     Getter pour éteindre le serveur Pyro.
     """
+    # Méthode interne à la mémoire partagée
     def keep_running ( self ) :
         return self._keep_pyro_alive
     
@@ -169,6 +184,7 @@ class Shared_Memory :
     @param obj L'objet Python à partager.
     @return L'URI vers cet objet, sous la forme d'une string.
     """
+    # Méthode interne à la mémoire partagée
     def register_obj ( self, obj ) :
         if param.ENABLE_MULTIPROCESSING :
             return str( self._daemon.register( obj ) )
@@ -180,6 +196,7 @@ class Shared_Memory :
     @param L'URI vers un objet, sous la forme d'une string.
     @return L'ID de cet objet, sous la forme d'une string.
     """
+    # Méthode privée
     def _uri_to_id ( self, uri ) :
         return Pyro5.core.URI( uri ).object
     
@@ -190,6 +207,7 @@ class Shared_Memory :
     @param L'URI vers cet objet, sous la forme d'une string.
     @return L'objet Python associé à cet URI.
     """
+    # Méthode interne à la mémoire partagée
     def get_obj ( self, uri ) :
         if param.ENABLE_MULTIPROCESSING :
             object_id = self._uri_to_id( uri )
@@ -203,6 +221,7 @@ class Shared_Memory :
     Désenregistrer un objet.
     @param L'URI vers cet objet.
     """
+    # Méthode interne à la mémoire partagée
     def unregister_obj ( self, uri ) :
         if param.ENABLE_MULTIPROCESSING :
             object_id = self._uri_to_id( uri )

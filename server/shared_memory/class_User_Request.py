@@ -17,7 +17,6 @@ serveur Pyro, et pas l'objet directement (Car Pyro ne peut pas exécuter sur le
 serveur les méthodes des sous-objets), et pas le Proxy vers l'objet (Car un
 Proxy ne peut être utilisé que par un seul thread à la fois).
 """
-@Pyro5.server.expose
 class User_Request :
     # Type de requête, pour la reconnaitre plus facilement dans le collecteur
     # d'erreurs
@@ -108,74 +107,101 @@ class User_Request :
     """
     Getters et setters pour Pyro.
     """
+    @Pyro5.server.expose
     @property
     def request_type( self ) : return self._request_type
     
+    @Pyro5.server.expose
     @property
     def input_url( self ) : return self._input_url
     
+    @Pyro5.server.expose
     @property
     def ip_address( self ) : return self._ip_address
     
+    @Pyro5.server.expose
     @property
     def is_direct( self ) : return self._is_direct
     
+    @Pyro5.server.expose
     @property
     def binary_image( self ) : return self._binary_image
     
+    @Pyro5.server.expose
     @property
     def problem( self ) : return self._problem
+    @Pyro5.server.expose
     @problem.setter
     def problem( self, value ) : self._problem = value
     
+    @Pyro5.server.expose
     @property
     def image_urls( self ) : return self._image_urls
+    @Pyro5.server.expose
     @image_urls.setter
     def image_urls( self, value ) : self._image_urls = value
     
+    @Pyro5.server.expose
     @property
     def twitter_accounts_with_id( self ) : return self._twitter_accounts_with_id
+    @Pyro5.server.expose
     @twitter_accounts_with_id.setter
     def twitter_accounts_with_id( self, value ) : self._twitter_accounts_with_id = value
     
+    @Pyro5.server.expose
     @property
     def utc_timestamp( self ) : return self._utc_timestamp
+    @Pyro5.server.expose
     @utc_timestamp.setter
     def utc_timestamp( self, value ) : self._utc_timestamp = value
     
+    @Pyro5.server.expose
     @property
     def scan_requests( self ) : return self._scan_requests
+    @Pyro5.server.expose
     @scan_requests.setter
     def scan_requests( self, value ) : self._scan_requests = value
     
+    @Pyro5.server.expose
     @property
     def last_seen_indexer( self ) : return self._last_seen_indexer
+    @Pyro5.server.expose
     @last_seen_indexer.setter
     def last_seen_indexer( self, value ) : self._last_seen_indexer = value
     
+    @Pyro5.server.expose
     @property
     def has_first_time_scan( self ) : return self._has_first_time_scan
+    @Pyro5.server.expose
     @has_first_time_scan.setter
     def has_first_time_scan( self, value ) : self._has_first_time_scan = value
     
+    @Pyro5.server.expose
     @property
     def found_tweets( self ) : return self._found_tweets
+    @Pyro5.server.expose
     @found_tweets.setter
     def found_tweets( self, value ) : self._found_tweets = value
     
+    @Pyro5.server.expose
     @property
     def status( self ) : return self._status
+    @Pyro5.server.expose
     @status.setter
     def status( self, value ) : self._status = value
     
+    @Pyro5.server.expose
     @property
     def start( self ) : return self._start
     
+    @Pyro5.server.expose
     @property
     def finished_date( self ) : return self._finished_date
+    @Pyro5.server.expose
     @finished_date.setter
     def finished_date( self, value ) : self._finished_date = value
     
+    @Pyro5.server.expose
     def get_status_string( self ) :
         if self._status == 0 :
             return "WAIT_LINK_FINDER"

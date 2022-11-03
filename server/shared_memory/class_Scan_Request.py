@@ -17,7 +17,6 @@ serveur Pyro, et pas l'objet directement (Car Pyro ne peut pas exécuter sur le
 serveur les méthodes des sous-objets), et pas le Proxy vers l'objet (Car un
 Proxy ne peut être utilisé que par un seul thread à la fois).
 """
-@Pyro5.server.expose
 class Scan_Request :
     # Type de requête, pour la reconnaitre plus facilement dans le collecteur
     # d'erreurs
@@ -71,59 +70,81 @@ class Scan_Request :
     """
     Getters et setters pour Pyro.
     """
+    @Pyro5.server.expose
     @property
     def request_type( self ) : return self._request_type
     
+    @Pyro5.server.expose
     @property
     def account_id( self ) : return self._account_id
     
+    @Pyro5.server.expose
     @property
     def account_name( self ) : return self._account_name
     
+    @Pyro5.server.expose
     @property
     def is_prioritary( self ) : return self._is_prioritary
+    @Pyro5.server.expose
     @is_prioritary.setter
     def is_prioritary( self, value ) : self._is_prioritary = value
     
+    @Pyro5.server.expose
     @property
     def unfound_account( self ) : return self._unfound_account
+    @Pyro5.server.expose
     @unfound_account.setter
     def unfound_account( self, value ) : self._unfound_account = value
     
+    @Pyro5.server.expose
     @property
     def has_failed( self ) : return self._has_failed
+    @Pyro5.server.expose
     @has_failed.setter
     def has_failed( self, value ) : self._has_failed = value
     
+    @Pyro5.server.expose
     @property
     def started_SearchAPI_listing( self ) : return self._started_SearchAPI_listing
+    @Pyro5.server.expose
     @started_SearchAPI_listing.setter
     def started_SearchAPI_listing( self, value ) : self._started_SearchAPI_listing = value
     
+    @Pyro5.server.expose
     @property
     def started_TimelineAPI_listing( self ) : return self._started_TimelineAPI_listing
+    @Pyro5.server.expose
     @started_TimelineAPI_listing.setter
     def started_TimelineAPI_listing( self, value ) : self._started_TimelineAPI_listing = value
     
+    @Pyro5.server.expose
     @property
     def blocks_list( self ) : return self._blocks_list
+    @Pyro5.server.expose
     @blocks_list.setter
     def blocks_list( self, value ) : self._blocks_list = value
     
+    @Pyro5.server.expose
     @property
     def finished_SearchAPI_indexing( self ) : return self._finished_SearchAPI_indexing
+    @Pyro5.server.expose
     @finished_SearchAPI_indexing.setter
     def finished_SearchAPI_indexing( self, value ) : self._finished_SearchAPI_indexing = value
     
+    @Pyro5.server.expose
     @property
     def finished_TimelineAPI_indexing( self ) : return self._finished_TimelineAPI_indexing
+    @Pyro5.server.expose
     @finished_TimelineAPI_indexing.setter
     def finished_TimelineAPI_indexing( self, value ) : self._finished_TimelineAPI_indexing = value
     
+    @Pyro5.server.expose
     @property
     def start( self ) : return self._start
     
+    @Pyro5.server.expose
     @property
     def finished_date( self ) : return self._finished_date
+    @Pyro5.server.expose
     @finished_date.setter
     def finished_date( self, value ) : self._finished_date = value

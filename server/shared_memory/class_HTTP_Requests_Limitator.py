@@ -10,7 +10,6 @@ from threading import Semaphore
 Objet permettant de limiter les requêtes HTTP sur le serveur HTTP / l'API à une
 seule requête par seconde. Sinon, l'API renvoit une erreur HTTP 429.
 """
-@Pyro5.server.expose
 class HTTP_Requests_Limitator :
     def __init__ ( self ) :
         # Dictionnaire faisant correspondre un adresse IP à la date de la
@@ -26,6 +25,7 @@ class HTTP_Requests_Limitator :
             peut donc lui répondre.
             False si il faut lui envoyer une erreur HTTP 429.
     """
+    @Pyro5.server.expose
     def can_request ( self, ip_address ) :
         self._sem.acquire()
         now = time()
@@ -44,6 +44,7 @@ class HTTP_Requests_Limitator :
     """
     Vider le dictionnaire de cet objet.
     """
+    @Pyro5.server.expose
     def reset ( self ) :
         self._sem.acquire()
         self._time_per_ip_address = {}

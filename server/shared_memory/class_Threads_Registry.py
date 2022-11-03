@@ -30,7 +30,6 @@ processus fils ! Voir le fichier "threads_launcher.py".
 ATTENTION : Pyro crée aussi pleins de threads (Mais pas des processus comme
 nous en mode multi-processus) qui ne sont pas enregistrés ici !
 """
-@Pyro5.server.expose
 class Threads_Registry :
     def __init__ ( self, root_shared_memory ) :
         self._root = root_shared_memory
@@ -50,6 +49,7 @@ class Threads_Registry :
     Enregistrer un thread.
     @param thread_name L'identifiant du thread.
     """
+    @Pyro5.server.expose
     def register_thread ( self, thread_name : str, pid : int ) :
         if thread_name in self._pid_dict :
             raise AssertionError( f"Le thread \"{thread_name}\" a déjà été enregistré !" )
@@ -60,6 +60,7 @@ class Threads_Registry :
     @param request Le proxy vers la requête qu'il est en train de traiter, ou
                    None s'il est en attente.
     """
+    @Pyro5.server.expose
     def set_request ( self, thread_name, request ) :
         if not thread_name in self._pid_dict :
             raise AssertionError( f"Le thread \"{thread_name}\" n'a pas été enregistré !" )
@@ -73,6 +74,7 @@ class Threads_Registry :
     @return Un proxy vers la requête qu'il est en train de traiter, ou None si
             aucune requête n'est associée au thread.
     """
+    @Pyro5.server.expose
     def get_request ( self, thread_name ) :
         if not thread_name in self._pid_dict :
             raise AssertionError( f"Le thread \"{thread_name}\" n'a pas été enregistré !" )
@@ -86,6 +88,7 @@ class Threads_Registry :
     @return Une chaine de caractères à afficher, indiquant le status de tous
             les threads.
     """
+    @Pyro5.server.expose
     def get_status ( self ) :
         to_print = ""
         total_memory_size = 0

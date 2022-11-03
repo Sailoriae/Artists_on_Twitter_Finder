@@ -42,7 +42,6 @@ Proxy ne peut être utilisé que par un seul thread à la fois).
 Les files d'attente contiennent donc des URI, c'est à dire des chaines de
 caractères.
 """
-@Pyro5.server.expose
 class User_Requests_Pipeline :
     def __init__ ( self, root_shared_memory ) :
         self._root = root_shared_memory
@@ -96,25 +95,32 @@ class User_Requests_Pipeline :
     """
     Getters et setters pour Pyro.
     """
+    @Pyro5.server.expose
     @property
     def step_1_link_finder_queue( self ) : return open_proxy( self._step_1_link_finder_queue )
     
+    @Pyro5.server.expose
     @property
     def step_2_tweets_indexer_queue( self ) : return open_proxy( self._step_2_tweets_indexer_queue )
     
+    @Pyro5.server.expose
     @property
     def step_3_reverse_search_queue( self ) : return open_proxy( self._step_3_reverse_search_queue )
     
+    @Pyro5.server.expose
     @property
     def limit_per_ip_addresses( self ) : return open_proxy( self._limit_per_ip_addresses )
     
+    @Pyro5.server.expose
     @property
     def thread_step_2_tweets_indexer_sem( self ) : return open_proxy( self._thread_step_2_tweets_indexer_sem )
     
+    @Pyro5.server.expose
     @property
     def processing_requests_count( self ) : return self._processing_requests_count
     
     # Obtenir le nombre de requêtes en mémoire
+    @Pyro5.server.expose
     def get_size( self ) :
         # Pas besoin de prendre le sémaphore, le GIL Pyhton fait son job
         return len( self._requests ) + len( self._direct_requests )
@@ -143,6 +149,7 @@ class User_Requests_Pipeline :
     Cette fonction permet ainsi d'obtenir une requête si il en existe déjà une
     pour l'entrée "image_url".
     """
+    @Pyro5.server.expose
     def launch_request ( self, illust_url : str,
                                ip_address : str = None ) -> User_Request :
         # Vérifier d'abord qu'on n'est pas déjà en train de traiter cette
@@ -205,6 +212,7 @@ class User_Requests_Pipeline :
     Cette fonction permet ainsi d'obtenir une requête si il en existe déjà une
     pour l'entrée "image_url" et le compte "account_name".
     """
+    @Pyro5.server.expose
     def launch_direct_request ( self, image_url : str,
                                       account_name : str = None,
                                       binary_image : bytes = None,
@@ -261,6 +269,7 @@ class User_Requests_Pipeline :
     traitement. Et utilise obligatoirement cette méthode pour modifier le
     status d'une requête.
     """
+    @Pyro5.server.expose
     def set_request_to_next_step ( self, request : User_Request, force_end : bool = False ) :
         if force_end :
             request.status = 6
@@ -301,11 +310,13 @@ class User_Requests_Pipeline :
     """
     Délester les anciennes requêtes.
     """
+    @Pyro5.server.expose
     def shed_requests ( self ) :
         # On doit le faire deux fois, pour nos deux dictionnaires de requêtes
         self._shed_requests( direct_requests = False )
         self._shed_requests( direct_requests = True )
     
+    # Méthode privée
     def _shed_requests ( self, direct_requests : bool = False ) :
         # On prend la date actuelle
         now = time()

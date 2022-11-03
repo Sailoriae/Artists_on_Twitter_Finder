@@ -36,7 +36,6 @@ class Mean_Container:
 """
 Conteneur des mesures des temps d'exécutions.
 """
-@Pyro5.server.expose
 class Metrics_Container :
     def __init__ ( self ) :
         # Classe Tweets_Lister_with_SearchAPI
@@ -68,6 +67,7 @@ class Metrics_Container :
     @param step_A_time Temps d'exécution MOYEN pour le listage des Tweets avec
                        la librairie SearchAPI.
     """
+    @Pyro5.server.expose
     def add_step_A_time ( self, step_A_time ) :
         self._step_A_times.add_one( step_A_time )
     
@@ -75,6 +75,7 @@ class Metrics_Container :
     @param step_B_time Temps d'exécution MOYEN pour le listage des Tweets avec
                        l'API Twitter publique.
     """
+    @Pyro5.server.expose
     def add_step_B_time ( self, step_A_time ) :
         self._step_B_times.add_one( step_A_time )
     
@@ -87,6 +88,7 @@ class Metrics_Container :
     @param step_C_insert_into_times Liste des temps d'exécution pour insérer
                                     un Tweet dans la BDD.
     """
+    @Pyro5.server.expose
     def add_step_C_times ( self, step_C_times, step_C_download_image_times, step_C_cbir_engine_times, step_C_insert_into_times ) :
         self._step_C_times.add_many( step_C_times )
         self._step_C_download_image_times.add_many( step_C_download_image_times )
@@ -96,6 +98,7 @@ class Metrics_Container :
     """
     @param step_1_times Temps d'exécution global à l'étape 1.
     """
+    @Pyro5.server.expose
     def add_step_1_times ( self, step_1_times : float ) :
         self._step_1_times.add_one( step_1_times )
     
@@ -107,6 +110,7 @@ class Metrics_Container :
                                   la base de données.
     @param step_3_usage_times Liste des temps d'exécution de l'utilisation.
     """
+    @Pyro5.server.expose
     def add_step_3_times ( self, step_3_times, step_3_select_times, step_3_iteration_times, step_3_usage_times ) :
         self._step_3_times.add_many( step_3_times )
         self._step_3_select_times.add_one( step_3_select_times )
@@ -117,6 +121,7 @@ class Metrics_Container :
     Enregistrer le temps de traitement complet d'une requête utilisateur.
     @param scan_request_full_time Temps d'exécution.
     """
+    @Pyro5.server.expose
     def add_user_request_full_time ( self, user_request_full_time : float ) :
         self._user_request_full_time.add_one( user_request_full_time )
     
@@ -124,12 +129,14 @@ class Metrics_Container :
     Enregistrer le temps de traitement complet d'une requête de scan.
     @param scan_request_full_time Temps d'exécution.
     """
+    @Pyro5.server.expose
     def add_scan_request_full_time ( self, scan_request_full_time : float ) :
         self._scan_request_full_time.add_one( scan_request_full_time )
     
     """
     @return Une chaine de caractères à afficher.
     """
+    @Pyro5.server.expose
     def get_metrics ( self ) :
         to_print = ""
         

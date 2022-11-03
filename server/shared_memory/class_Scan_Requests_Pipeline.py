@@ -46,7 +46,6 @@ Proxy ne peut être utilisé que par un seul thread à la fois).
 Les files d'attente contiennent donc des URI, c'est à dire des chaines de
 caractères.
 """
-@Pyro5.server.expose
 class Scan_Requests_Pipeline :
     def __init__ ( self, root_shared_memory ) :
         self._root = root_shared_memory
@@ -118,34 +117,43 @@ class Scan_Requests_Pipeline :
     """
     Getters et setters pour Pyro.
     """
+    @Pyro5.server.expose
     @property
     def step_A_SearchAPI_list_account_tweets_prior_queue( self ) : return open_proxy( self._step_A_SearchAPI_list_account_tweets_prior_queue )
     
+    @Pyro5.server.expose
     @property
     def step_A_SearchAPI_list_account_tweets_queue( self ) : return open_proxy( self._step_A_SearchAPI_list_account_tweets_queue )
     
+    @Pyro5.server.expose
     @property
     def step_B_TimelineAPI_list_account_tweets_prior_queue( self ) : return open_proxy( self._step_B_TimelineAPI_list_account_tweets_prior_queue )
     
+    @Pyro5.server.expose
     @property
     def step_B_TimelineAPI_list_account_tweets_queue( self ) : return open_proxy( self._step_B_TimelineAPI_list_account_tweets_queue )
     
+    @Pyro5.server.expose
     @property
     def queues_sem( self ) : return open_proxy( self._queues_sem )
     
+    @Pyro5.server.expose
     @property
     def step_C_index_tweets_queue( self ) : return open_proxy( self._step_C_index_tweets_queue )
     
+    @Pyro5.server.expose
     @property
     def processing_requests_count( self ) : return self._processing_requests_count
     
     # Obtenir le nombre de requêtes en mémoire
+    @Pyro5.server.expose
     def get_size( self ) :
         # Pas besoin de prendre le sémaphore, le GIL Pyhton fait son job
         return len( self._requests )
     
     # Savoir si un ID de compte est dans la liste noire ou pas
     # Permet de ne pas transférer la liste (Lourde en mémoire)
+    @Pyro5.server.expose
     def is_blacklisted( self, account_id : int ) -> bool :
         return int( account_id ) in self._blacklist
     
@@ -171,6 +179,7 @@ class Scan_Requests_Pipeline :
     @return L'objet Scan_Request créé.
             Ou l'objet Scan_Request déjà existant.
     """
+    @Pyro5.server.expose
     def launch_request ( self, account_id : int,
                                account_name : str,
                                is_prioritary : bool = False ) -> Scan_Request :
@@ -259,6 +268,7 @@ class Scan_Requests_Pipeline :
     @return Un objet Scan_Request,
             Ou None si la requête est inconnue.
     """
+    @Pyro5.server.expose
     def get_request ( self, account_id : int ) -> Scan_Request :
         account_id = int(account_id) # Sécurité, pour unifier
         
@@ -292,6 +302,7 @@ class Scan_Requests_Pipeline :
     Il faut donc appeler cette fonction à chaque fois qu'un thread d'indexation
     rencontre une instruction d'enregistrement de curseur.
     """
+    @Pyro5.server.expose
     def end_request ( self, request : Scan_Request, get_stats = None ) :
         # Vérifier que les threads d'indexations avancent et ne sont pas
         # bloqués avec un Tweet placé dans la file de l'étape C avant
@@ -361,6 +372,7 @@ class Scan_Requests_Pipeline :
     """
     Délester les anciennes requêtes.
     """
+    @Pyro5.server.expose
     def shed_requests ( self ) :
         # On prend la date actuelle
         now = time()
@@ -418,6 +430,7 @@ class Scan_Requests_Pipeline :
             fonction "analyse_tweet_json()".
             Ou None si la file est vide.
     """
+    @Pyro5.server.expose
     def get_tweet_to_index ( self, thread_name, first_time = False ) -> dict :
         self._step_C_sem.acquire()
         if first_time and thread_name in self._indexing_ids_dict :
@@ -446,6 +459,7 @@ class Scan_Requests_Pipeline :
     @return Un tuple, contenant l'ID du Tweet, et l'ID du compte Twitter
             associé, ou (None, None) se le thread est en attente.
     """
+    @Pyro5.server.expose
     def get_indexing_ids ( self, thread_name : str ) :
         if not thread_name in self._indexing_ids_dict :
             raise AssertionError( f"Le thread \"{thread_name}\" ne s'est pas enregistré comme thread d'indexation (Etape C) !" )

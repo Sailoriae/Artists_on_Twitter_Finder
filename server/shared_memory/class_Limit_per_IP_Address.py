@@ -24,7 +24,6 @@ import parameters as param
 Classe de gestion des adresses IP de requête.
 Permet de limiter le nombre de requêtes en cours de traitement par adresse IP.
 """
-@Pyro5.server.expose
 class Limit_per_IP_Address :
     def __init__ ( self ) :
         # Dictionnaire contenant le nombre de requêtes en cours de traitement
@@ -42,6 +41,7 @@ class Limit_per_IP_Address :
             False si l'adresse IP a atteint son nombre maximum de requêtes en
             cours de traitement.
     """
+    @Pyro5.server.expose
     def add_ip_address ( self, ip_address : str ) -> bool :
         if ip_address in param.UNLIMITED_IP_ADDRESSES :
             return True
@@ -68,6 +68,7 @@ class Limit_per_IP_Address :
     
     @param ip_address L'adresse IP à concernée.
     """
+    @Pyro5.server.expose
     def remove_ip_address ( self, ip_address : str ) :
         self._dict_of_ip_addresses_sem.acquire()
         try :

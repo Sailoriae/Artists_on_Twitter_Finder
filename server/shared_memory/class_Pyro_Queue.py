@@ -25,7 +25,6 @@ Comme les files d'attentes contiennent des sémaphores, et qu'ils ne peuvent pas
 être partagés, il faut faire cette couche pour qu'ils restent sur le serveur,
 et ne soient pas transférés.
 """
-@Pyro5.server.expose
 class Pyro_Queue :
     """
     @param convert_uri Convertir les URI vers des Pyro5.client.Proxy, et
@@ -35,6 +34,7 @@ class Pyro_Queue :
         self._convert_uri = convert_uri
         self._queue = queue.Queue()
     
+    @Pyro5.server.expose
     def get ( self, block = True ) :
         try :
             if self._convert_uri :
@@ -44,14 +44,13 @@ class Pyro_Queue :
         except queue.Empty :
             return None
     
+    @Pyro5.server.expose
     def put ( self, item ) :
         if self._convert_uri :
             self._queue.put( item._pyroUri )
         else :
             self._queue.put( item )
     
+    @Pyro5.server.expose
     def qsize ( self ) :
         return self._queue.qsize()
-    
-    @property
-    def convert_uri ( self ) : return self._convert_uri

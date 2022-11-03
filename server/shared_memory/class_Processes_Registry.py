@@ -8,7 +8,6 @@ from time import sleep
 """
 Objet pour passer des messages aux processus fils du serveur AOTF.
 """
-@Pyro5.server.expose
 class Processes_Registry :
     def __init__ ( self, root_shared_memory ) :
         self._root = root_shared_memory
@@ -26,6 +25,7 @@ class Processes_Registry :
     Enregistrer un processus fils du serveur AOTF.
     @param pid PID du processus fils.
     """
+    @Pyro5.server.expose
     def register_process ( self, pid : int ) -> None:
         if pid in self._pids :
             raise AssertionError( f"Le processus {pid} a déjà été enregistré !" )
@@ -35,6 +35,7 @@ class Processes_Registry :
     Donner aux processus fils l'ordre d'écriture des piles d'appels de leurs
     threads qu'ils éxécutent.
     """
+    @Pyro5.server.expose
     def write_stacks ( self ) -> None :
         for pid in self._pids :
             self._write_stacks[ int(pid) ] = True
@@ -44,6 +45,7 @@ class Processes_Registry :
     Cette fonction dure au maximum 1 minute avant de retourner None
     @param pid PID du processus fils.
     """
+    @Pyro5.server.expose
     def get_message ( self, pid : int ) -> str :
         iteration = 0
         while self._root.keep_threads_alive :
