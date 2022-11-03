@@ -53,8 +53,7 @@ class Shared_Memory :
         # Initialisation du serveur Pyro5
         if param.ENABLE_MULTIPROCESSING :
             Pyro5.config.THREADPOOL_SIZE = pool_size
-#            Pyro5.config.SERIALIZERS_ACCEPTED = { "pickle" }
-#            Pyro5.config.SERIALIZER = "pickle"
+            Pyro5.config.SERIALIZER = "serpent"
             self._daemon = Pyro5.server.Daemon( port = pyro_port )
         
         # Variable pour éteindre tout le système.

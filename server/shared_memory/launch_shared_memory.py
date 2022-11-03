@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-#import Pyro5 # Pour Pyro5.config
+import Pyro5 # Pour Pyro5.config
 import Pyro5.errors
 import threading
 from random import randint
@@ -74,7 +74,7 @@ def _launch_with_pyro ( pool_size : int ) :
     thread_pyro.start()
     
     # On prépare la connexion au serveur.
-#    Pyro5.config.SERIALIZER = "pickle"
+    Pyro5.config.SERIALIZER = "serpent"
     shared_memory_uri = "PYRO:shared_memory@localhost:" + str( pyro_port )
     
     # On test pendant 30 secondes que la connection s'établisse.

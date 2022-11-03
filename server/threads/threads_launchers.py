@@ -8,7 +8,7 @@ import threading
 import multiprocessing
 from datetime import datetime
 import traceback
-#import Pyro5 # Pour Pyro5.config
+import Pyro5 # Pour Pyro5.config
 import Pyro5.errors
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
@@ -97,7 +97,7 @@ les ordres venenant de la mémoire partagée.
 """
 def subprocess_procedure ( threads_list, shared_memory_uri ) :
     # On est ici forcément en mode multi-processus
-#    Pyro5.config.SERIALIZER = "pickle"
+    Pyro5.config.SERIALIZER = "serpent"
     shared_memory = open_proxy( shared_memory_uri )
     
     # Maintenir ouverts certains proxies vers la mémoire partagée

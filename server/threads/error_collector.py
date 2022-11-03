@@ -5,7 +5,7 @@ from os import getpid
 import traceback
 import time
 from datetime import datetime
-#import Pyro5 # Pour Pyro5.config
+import Pyro5 # Pour Pyro5.config
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
 # Ainsi, si on veut utiliser ce script indépendamment (Notamment pour des
@@ -20,7 +20,7 @@ if __name__ == "__main__" :
     change_wdir( ".." )
     path.append(get_wdir())
 
-#import parameters as param
+import parameters as param
 from shared_memory.open_proxy import open_proxy
 from threads.network_crash import is_network_crash
 from threads.network_crash import network_available
@@ -68,8 +68,8 @@ peuvent l'être.
 """
 def _error_collector( thread_procedure, thread_id : int, shared_memory_uri : str ) :
     # Connexion au serveur de mémoire partagée
-#    if param.ENABLE_MULTIPROCESSING :
-#        Pyro5.config.SERIALIZER = "pickle"
+    if param.ENABLE_MULTIPROCESSING :
+        Pyro5.config.SERIALIZER = "serpent"
     shared_memory = open_proxy( shared_memory_uri )
     
     # Enregistrer le thread / le procesus

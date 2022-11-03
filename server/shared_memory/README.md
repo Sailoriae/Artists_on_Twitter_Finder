@@ -33,8 +33,10 @@ Note : Le script `thread_pyro_server.py` peut aussi être exécuté indépendamm
 
 En revanche, il peut être intéressant d'accéder à la mémoire partagée afin de débugger le serveur AOTF. Pour se faire, exécutez le code suivant dans une console Python (IPython par exemple) :
 ```python
-from Pyro5.client import Proxy
+import Pyro5
+Pyro5.config.SERIALIZER = "serpent"
 
+from Pyro5.client import Proxy
 e = Proxy( "PYRO:shared_memory@localhost:3300" )
 ```
 
@@ -86,3 +88,7 @@ Comme expliqué précédemment, si les paramètres `ENABLE_MULTIPROCESSING` est 
 Ainsi, il faut toujours utiliser la fonction `open_proxy()` !
 Celle-ci renvoie un `Pyro5.client.Proxy` si le serveur est démarré en mode multi-processus, ou directement l'objet sinon.
 Dans ce second cas, elle ajoute l'attribut `_pyroUri` et la méthode `_pyroRelease()` afin qu'ils soient utilisés lorsque le mode multi-processus est désactivé. Cela permet que notre code reste le même dans ces deux cas.
+
+On utilise le sérializer par défaut, `serpent`, car `json` ne supporte pas le type `bytes` [1], et `marshal` serait intéressant pour ses perfomances mais nous fait planter au démarrage du serveur AOTF. A noter que `serpent` reste un bon choix puisqu'il est développé par la même personne qui fait Pyro, les deux fonctionnent donc bien ensemble.
+
+[1] https://pyro5.readthedocs.io/en/latest/tipstricks.html#binary-data-transfer-file-transfer
