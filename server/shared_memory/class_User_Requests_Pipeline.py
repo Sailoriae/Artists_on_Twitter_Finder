@@ -3,7 +3,7 @@
 
 import Pyro5.server
 import threading
-import datetime
+from time import time
 import json
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
@@ -277,7 +277,7 @@ class User_Requests_Pipeline :
             self._step_3_reverse_search_queue_obj.put( request )
         
         if request.status == 6 :
-            request.finished_date = datetime.datetime.now()
+            request.finished_date = time()
             
             # Descendre le compteur de requêtes en cours de traitement dans le
             # pipeline
@@ -308,7 +308,7 @@ class User_Requests_Pipeline :
     
     def _shed_requests ( self, direct_requests : bool = False ) :
         # On prend la date actuelle
-        now = datetime.datetime.now()
+        now = time()
         
         # On bloque l'accès la liste des requêtes
         if direct_requests : self._direct_requests_sem.acquire()
@@ -329,7 +329,7 @@ class User_Requests_Pipeline :
                 
                 # Si la date de fin est à moins de 3 heures de maintenant, on
                 # peut peut-être garder cette requête
-                if now - request.finished_date < datetime.timedelta( hours = 3 ) :
+                if now - request.finished_date < 3*3600 :
                     # Si la requête s'est terminée en erreur
                     if request.problem != None :
                         # Si l'URL de requête est invalide ou le site n'est pas
@@ -339,7 +339,7 @@ class User_Requests_Pipeline :
                                                   "NOT_AN_ARTWORK_PAGE",
                                                   "UNSUPPORTED_WEBSITE"] or
                              direct_requests and request.problem in [ "ERROR_DURING_REVERSE_SEARCH" ] ) :
-                            if now - request.finished_date < datetime.timedelta( minutes = 10 ) :
+                            if now - request.finished_date < 10*60 :
                                 new_requests_dict[ key ] = request_uri
                             
                             else : # On désenregistre la requête
@@ -347,7 +347,7 @@ class User_Requests_Pipeline :
                         
                         # Sinon, on la garde 1 heure
                         else :
-                            if now - request.finished_date < datetime.timedelta( hours = 1 ) :
+                            if now - request.finished_date < 3600 :
                                 new_requests_dict[ key ] = request_uri
                             
                             else : # On désenregistre la requête

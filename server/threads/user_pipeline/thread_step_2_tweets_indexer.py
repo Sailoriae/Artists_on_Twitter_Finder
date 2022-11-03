@@ -3,8 +3,7 @@
 
 import queue
 from time import sleep, time
-from dateutil.tz import tzlocal, UTC
-import datetime
+from dateutil.tz import UTC
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
 # Ainsi, si on veut utiliser ce script indépendamment (Notamment pour des
@@ -48,9 +47,6 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
     
     # Dire qu'on ne fait rien
     shared_memory_threads_registry.set_request( f"thread_step_2_tweets_indexer_th{thread_id}", None )
-    
-    # Timezone locale
-    local_tz = tzlocal()
     
     # Accès direct à la base de données
     # N'UTILISER QUE DES METHODES QUI FONT SEULEMENT DES SELECT !
@@ -124,21 +120,15 @@ def thread_step_2_tweets_indexer( thread_id : int, shared_memory ) :
                 else :
                     min_date = min( last_scan_1, last_scan_2 )
                     
-                    # On a besoin de mettre le fuseau horaire dans la
-                    # date minimale
-                    min_date = min_date.replace( tzinfo = local_tz )
-                    
-                    # Si la date de l'image de requête n'a pas d'info sur sa
-                    # timezone, on la met en UTC
-                    if request.datetime.tzinfo == None :
-                        request.datetime = request.datetime.replace( tzinfo = UTC )
+                    # Convertir la date minimale en timestamp UTC
+                    min_date = min_date.replace( tzinfo = UTC ).timestamp()
                     
                     # N = ARTIST_TWEET_ILLUST_MARGIN
                     # Si cette mise à jour moins N jours est plus
                     # vielle que la date de l'illustration, il faut MàJ
                     # (On laisse N jours de marge à l'artiste pour
                     # publier sur Twitter)
-                    if min_date - datetime.timedelta( days = ARTIST_TWEET_ILLUST_MARGIN ) < request.datetime :
+                    if min_date - ARTIST_TWEET_ILLUST_MARGIN * 24 * 3600 < request.utc_timestamp :
                         print( f"[step_2_th{thread_id}] @{account_name} est déjà dans la BDD, mais il faut le MàJ car l'illustration de requête est trop récente !" )
                         
                         scan_request = shared_memory_scan_requests.launch_request( account_id,

@@ -3,6 +3,7 @@
 
 import queue
 from time import sleep, time
+from dateutil.tz import UTC
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
 # Ainsi, si on veut utiliser ce script indépendamment (Notamment pour des
@@ -156,7 +157,7 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
             # Enregistrer les données trouvées dans l'objet User_Request
             # data.twitter_accounts a déjà été enregistré
             request.image_urls = data.image_urls
-            request.datetime = data.publish_date
+            request.utc_timestamp = data.publish_date.replace( tzinfo = UTC ).timestamp()
             
             # On passe la requête à l'étape suivante
             shared_memory_user_requests.set_request_to_next_step( request )

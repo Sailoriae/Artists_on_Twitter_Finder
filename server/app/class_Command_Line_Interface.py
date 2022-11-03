@@ -205,7 +205,7 @@ class Command_Line_Interface :
                 print( f"    - A terminé l'indexation SearchAPI : {'OUI' if scan_request.finished_SearchAPI_indexing else 'NON'}, TimelineAPI : {'OUI' if scan_request.finished_TimelineAPI_indexing else 'NON'}" )
         
         if request.finished_date != None :
-            print( f"Fin du traitement : {request.finished_date}" )
+            print( f"Fin du traitement : {datetime.fromtimestamp( request.finished_date )}" )
         
         if request.status > 1 : # Si a dépassé le Link Finder (Etape 1)
             if len( request.twitter_accounts_with_id ) > 0 :
@@ -272,7 +272,7 @@ class Command_Line_Interface :
                 print( f"Problème : {request.problem}" )
             
             if request.finished_date != None :
-                print( f"Fin du traitement : {request.finished_date}" )
+                print( f"Fin du traitement : {datetime.fromtimestamp( request.finished_date )}" )
             
             if request.status == 6 : # Si a dépassé la recherche inverée (Etape 3)
                 if len( request.found_tweets ) > 0 :

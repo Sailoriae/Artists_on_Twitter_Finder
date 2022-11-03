@@ -65,8 +65,8 @@ class User_Request :
         self._twitter_accounts_with_id = []
         
         # Résultat du Link Finder (Etape 1)
-        # Objet datetime de la date de publication de l'image
-        self._datetime = None
+        # Timestamp UTC de la date de publication de l'image
+        self._utc_timestamp = None
         
         # Cache de l'indexer (Etape 2)
         # Liste les requêtes de ses comptes dans le système d'indexation / de
@@ -139,9 +139,9 @@ class User_Request :
     def twitter_accounts_with_id( self, value ) : self._twitter_accounts_with_id = value
     
     @property
-    def datetime( self ) : return self._datetime
-    @datetime.setter
-    def datetime( self, value ) : self._datetime = value
+    def utc_timestamp( self ) : return self._utc_timestamp
+    @utc_timestamp.setter
+    def utc_timestamp( self, value ) : self._utc_timestamp = value
     
     @property
     def scan_requests( self ) : return self._scan_requests

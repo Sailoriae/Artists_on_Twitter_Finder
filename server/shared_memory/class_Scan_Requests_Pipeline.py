@@ -3,7 +3,6 @@
 
 import Pyro5.server
 import threading
-import datetime
 from time import time, sleep
 import queue
 import copy
@@ -341,7 +340,7 @@ class Scan_Requests_Pipeline :
         # Si la requête n'a pas déjà été marquée comme terminée
         if request.finished_date == None :
             # On indique la date de fin du scan
-            request.finished_date = datetime.datetime.now()
+            request.finished_date = time()
             
             # On fais -1 au compteur du nombre de requêtes en cours de traitement
             self._processing_requests_count -= 1
@@ -364,7 +363,7 @@ class Scan_Requests_Pipeline :
     """
     def shed_requests ( self ) :
         # On prend la date actuelle
-        now = datetime.datetime.now()
+        now = time()
         
         # On bloque l'accès la liste des requêtes
         self._requests_sem.acquire()
@@ -382,7 +381,7 @@ class Scan_Requests_Pipeline :
                 
                 # Si la date de fin est à moins de 24h de maintenant, on garde
                 # cette requête
-                if now - request.finished_date < datetime.timedelta( hours = 24 ) :
+                if now - request.finished_date < 24*3600 :
                     new_requests_dict[ key ] = request_uri
                 
                 else : # On désenregistre la requête
