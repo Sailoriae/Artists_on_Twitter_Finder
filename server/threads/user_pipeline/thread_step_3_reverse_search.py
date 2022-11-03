@@ -5,6 +5,7 @@ import queue
 from time import sleep, time
 import urllib
 from PIL.Image import UnidentifiedImageError, DecompressionBombError
+from base64 import b64decode # Merci Serpent (Pyro5)
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
 # Ainsi, si on veut utiliser ce script indépendamment (Notamment pour des
@@ -99,6 +100,8 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
                     query_image_as_bytes = url_to_content( request.image_urls[image_id] )
                 else :
                     query_image_as_bytes = request.binary_image
+                    if type( query_image_as_bytes ) == dict : # Merci Serpent (Pyro5)
+                        query_image_as_bytes = b64decode( query_image_as_bytes["data"] )
             except File_Too_Big as error :
                 print( f"[step_3_th{thread_id}] L'image d'entrée est trop grande ({error})." )
                 if len(request.image_urls) > image_id+1 :
