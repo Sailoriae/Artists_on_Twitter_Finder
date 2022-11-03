@@ -54,16 +54,8 @@ De plus, cela serait une grosse faille de sécurité. Voir ce que sont les
 # Fonction contenant la classe, permettant de passer le paramètre shared_memory
 def http_server_container ( shared_memory_uri_arg ) :
     class HTTP_Server( BaseHTTPRequestHandler ) :
-        # Pyro permet de partager un Proxy entre threads, et un thread est
-        # créé à chaque requête HTTP, avec cet objet, et est détruit à la fin
-        # de la requête.
-        # On peut donc garder en attribut de classe des proxies vers la mémoire
-        # partagée. Cela permet de ne pas ouvrir un proxy à chaque requête.
-        shared_memory = open_proxy( shared_memory_uri_arg )
-        http_limitator = shared_memory.http_limitator
-        user_requests = shared_memory.user_requests
-        scan_requests = shared_memory.scan_requests
-        step_C_index_tweets_queue = scan_requests.step_C_index_tweets_queue
+        # Pyro5 ne permet plus de partager un Proxy entre threads (Snif)
+        shared_memory_uri = shared_memory_uri_arg
         
         # Envoyer un header "Server" personnalisé
         server_version = "Artists on Twitter Finder"
@@ -154,6 +146,11 @@ def http_server_container ( shared_memory_uri_arg ) :
             response_is_json : bool = False
             response : str = ""
             
+            # Connexion au serveur de mémoire partagée
+            # On crée une connexion à chaque requête, parce que Pyro5 ne permet
+            # plus de partager un Proxy entre threads
+            shared_memory = open_proxy( HTTP_Server.shared_memory_uri )
+            
             # A partie de maintenant, on fait un "if" puis que des "elif" pour
             # toutes les autres possibilités, puis un "else" final pour le 404
             
@@ -168,7 +165,7 @@ def http_server_container ( shared_memory_uri_arg ) :
             # - "/stats" peut être mise en cache
             # - "/config" est légère
             if ( endpoint not in [ "/stats", "/config" ] and
-                 not HTTP_Server.http_limitator.can_request( client_ip ) ) :
+                 not shared_memory.http_limitator.can_request( client_ip ) ) :
                 http_code = 429
                 response = "429 Too Many Requests\n"
             
@@ -234,8 +231,8 @@ def http_server_container ( shared_memory_uri_arg ) :
                 
                 else :
                     # Lance une nouvelle requête, ou donne la requête déjà existante
-                    request = HTTP_Server.user_requests.launch_request( illust_url,
-                                                                        ip_address = client_ip )
+                    request = shared_memory.user_requests.launch_request( illust_url,
+                                                                          ip_address = client_ip )
                     
                     # Si request == None, c'est qu'on ne peut pas lancer une
                     # nouvelle requête car l'adresse IP a trop de requêtes en
@@ -256,14 +253,17 @@ def http_server_container ( shared_memory_uri_arg ) :
             elif endpoint == "/stats" :
                 http_code = 200
                 
+                # Eviter d'ouvrir deux fois ce proxy
+                shared_memory_scan_requests = shared_memory.scan_requests
+                
                 if ( HTTP_Server.stats_cache == None or
                      time() - HTTP_Server.stats_cache_date >= STATS_CACHE_TTL ) :
                     HTTP_Server.stats_cache = json.dumps({
-                        "indexed_tweets_count" : HTTP_Server.shared_memory.tweets_count,
-                        "indexed_accounts_count" : HTTP_Server.shared_memory.accounts_count,
-                        "processing_user_requests_count" : HTTP_Server.user_requests.processing_requests_count,
-                        "processing_scan_requests_count" : HTTP_Server.scan_requests.processing_requests_count,
-                        "pending_tweets_count" : HTTP_Server.step_C_index_tweets_queue.qsize()
+                        "indexed_tweets_count" : shared_memory.tweets_count,
+                        "indexed_accounts_count" : shared_memory.accounts_count,
+                        "processing_user_requests_count" : shared_memory.user_requests.processing_requests_count,
+                        "processing_scan_requests_count" : shared_memory_scan_requests.processing_requests_count,
+                        "pending_tweets_count" : shared_memory_scan_requests.step_C_index_tweets_queue.qsize()
                     })
                     HTTP_Server.stats_cache_date = time()
                 
@@ -312,9 +312,9 @@ def http_server_container ( shared_memory_uri_arg ) :
                         identifier = parameters["identifier"][0]
                         account_name = HTTP_Server.direct_requests[identifier] if identifier in HTTP_Server.direct_requests else None
                         
-                        request = HTTP_Server.user_requests.launch_direct_request( identifier,
-                                                                                   account_name = account_name,
-                                                                                   do_not_launch = True )
+                        request = shared_memory.user_requests.launch_direct_request( identifier,
+                                                                                     account_name = account_name,
+                                                                                     do_not_launch = True )
                         
                         if request == None :
                             response_dict["error"] = "NO_SUCH_REQUEST"
@@ -335,10 +335,10 @@ def http_server_container ( shared_memory_uri_arg ) :
                         binary_image = self.rfile.read(content_length)
                         content_length = 0 # Signaler que le contenu a été lu
                         
-                        request = HTTP_Server.user_requests.launch_direct_request( identifier,
-                                                                                   account_name = account_name,
-                                                                                   binary_image = binary_image,
-                                                                                   ip_address = client_ip )
+                        request = shared_memory.user_requests.launch_direct_request( identifier,
+                                                                                     account_name = account_name,
+                                                                                     binary_image = binary_image,
+                                                                                     ip_address = client_ip )
                         
                         # L'adresse IP a trop de requêtes en cours
                         if request == None :
