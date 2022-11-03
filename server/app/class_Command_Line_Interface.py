@@ -217,7 +217,7 @@ class Command_Line_Interface :
         if request.status == 6 : # Si a dépassé la recherche inverée (Etape 3)
             if len( request.found_tweets ) > 0 :
                 s = f"{'s' if len( request.found_tweets ) > 1 else ''}"
-                print( f"Tweet{s} trouvé{s} : {', '.join( [ f'ID {tweet.tweet_id} (Distance {tweet.distance})' for tweet in request.found_tweets ] )}" )
+                print( f"Tweet{s} trouvé{s} : " + ", ".join( [ f"ID {tweet['tweet_id']} (Distance {tweet['distance']})" for tweet in request.found_tweets ] ) )
             else :
                 print( "Aucun Tweet trouvé !" )
             
@@ -277,7 +277,7 @@ class Command_Line_Interface :
             if request.status == 6 : # Si a dépassé la recherche inverée (Etape 3)
                 if len( request.found_tweets ) > 0 :
                     s = f"{'s' if len( request.found_tweets ) > 1 else ''}"
-                    print( f"Tweet{s} trouvé{s} : {', '.join( [ f'ID {tweet.tweet_id} (Distance {tweet.distance})' for tweet in request.found_tweets ] )}" )
+                    print( f"Tweet{s} trouvé{s} : " + ", ".join( [ f"ID {tweet['tweet_id']} (Distance {tweet['distance']})" for tweet in request.found_tweets ] ) )
                 else :
                     print( "Aucun Tweet trouvé !" )
     

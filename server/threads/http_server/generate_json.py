@@ -31,10 +31,10 @@ def generate_user_request_json ( request, response_dict = None ) -> dict :
         response_dict["twitter_accounts"].append( account_dict )
     
     for result in request.found_tweets :
-        tweet_dict = { "tweet_id" : str(result.tweet_id),
-                       "account_id" : str(result.account_id),
-                       "image_position" : f"{result.image_position}/{result.images_count}",
-                       "distance" : result.distance }
+        tweet_dict = { "tweet_id" : str(result["tweet_id"]),
+                       "account_id" : str(result["account_id"]),
+                       "image_position" : f"{result['image_position']}/{result['images_count']}",
+                       "distance" : result["distance"] }
         response_dict["results"].append( tweet_dict )
     
     response_dict["error"] = request.problem

@@ -194,11 +194,11 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
             # différentes avec les mêmes rate-limits (900 requêtes par tranches
             # de 15 minutes), on ne ralentit par vraiment le traitement
             if CHECK_TWEETS_EXISTENCE :
-                check_found_tweets = twitter.get_multiple_tweets( [ x.tweet_id for x in request.found_tweets ], trim_user = True )
+                check_found_tweets = twitter.get_multiple_tweets( [ x["tweet_id"] for x in request.found_tweets ], trim_user = True )
                 check_found_tweets = [ int( x.id ) for x in check_found_tweets ]
                 filtered_found_tweets = []
                 for found_tweet in request.found_tweets :
-                    if int( found_tweet.tweet_id ) in check_found_tweets :
+                    if int( found_tweet["tweet_id"] ) in check_found_tweets :
                         filtered_found_tweets.append( found_tweet )
                 request.found_tweets = filtered_found_tweets
             
@@ -208,12 +208,12 @@ def thread_step_3_reverse_search( thread_id : int, shared_memory ) :
             # Note : Les ID de Tweets sont dans l'ordre temporel
             # Source : https://stackoverflow.com/a/31951852
             request.found_tweets = sorted( request.found_tweets,
-                                           key = lambda x: (x.distance, x.images_count, x.tweet_id),
+                                           key = lambda x: (x["distance"], x["images_count"], x["tweet_id"]),
                                            reverse = False )
             
             if len( request.found_tweets ) > 0 :
                 s = f"{'s' if len( request.found_tweets ) > 1 else ''}"
-                print( f"[step_3_th{thread_id}] Tweet{s} trouvé{s} (Du plus au moins proche) : {', '.join( [ f'ID {tweet.tweet_id} (Distance {tweet.distance})' for tweet in request.found_tweets ] )}" )
+                print( f"[step_3_th{thread_id}] Tweet{s} trouvé{s} (Du plus au moins proche) : " + ", ".join( [ f"ID {tweet['tweet_id']} (Distance {tweet['distance']})" for tweet in request.found_tweets ] ) )
             else :
                 print( f"[step_3_th{thread_id}] Aucun Tweet trouvé !" )
         

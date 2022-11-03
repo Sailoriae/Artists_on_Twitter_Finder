@@ -59,7 +59,7 @@ class Reverse_Searcher :
     @param account_id ID du compte, vérifié récemment ! (OPTIONNEL)
                       Prime sur "account_name" si nen correspondent pas
     
-    @return Liste d'objets Image_in_DB, contenant les attributs suivants :
+    @return Liste de dictionnaires, contenant les champs suivants :
             - account_id : L'ID du compte Twitter
             - tweet_id : L'ID du Tweet contenant l'image
             - distance : La distance calculée avec l'image de requête
@@ -122,7 +122,7 @@ class Reverse_Searcher :
     @param account_id ID du compte, vérifié récemment ! (OPTIONNEL)
                       Prime sur "account_name" si nen correspondent pas
     
-    @return Liste d'objets Image_in_DB, contenant les attributs suivants :
+    @return Liste de dictionnaires, contenant les champs suivants :
             - account_id : L'ID du compte Twitter
             - tweet_id : L'ID du Tweet contenant l'image
             - distance : La distance calculée avec l'image de requête

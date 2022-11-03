@@ -57,5 +57,14 @@ Avec :
 
 Cette fonction retourne alors une liste contenant les objets de l'itérateurs qui ont étés sélectionnés comme images identiques à l'image de requêtes. Cette liste peut être vide.
 
-C'est la classe `Image_in_DB` du module [`database`](../database) qui représente une image indexée.
+Les images indexées sont représentées par des dictionnaires (Parce que c'est plus simple à faire passer dans Pyro).
+Ces dictionnaires continenent les champs suivants :
+- `account_id` : ID du compte Twitter ayant tweeté l'image,
+- `tweet_id` : ID du Tweet contenant l'image,
+- `image_name` : Nom de l'image, permettant de la retrouver en un GET HTTP,
+- `image_hash` : Empreinte de l'image,
+- `image_position` : La position de l'image (1-4) dans le Tweet (Car un tweet peut contenir au maximum 4 images),
+- `images_count` : Le nombre d'images dans le Tweet (1-4).
+- `distance` : La distance entre cette image et celle de requête (`None` par  défaut).
+
 L'itérateur est la méthode `get_images_in_db_iterator()` de la classe `SQLite_or_MySQL`.

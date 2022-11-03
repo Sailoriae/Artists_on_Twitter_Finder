@@ -19,7 +19,6 @@ if __name__ == "__main__" :
     path.append(get_wdir())
 
 import parameters as param
-from tweet_finder.database.class_Image_in_DB import Image_in_DB
 from tweet_finder.cbir_engine.class_CBIR_Engine import HASH_SIZE
 
 if param.USE_MYSQL_INSTEAD_OF_SQLITE :
@@ -316,7 +315,7 @@ class SQLite_or_MySQL :
     Récupérer les résultats CBIR de toutes les images d'un compte Twitter, ou
     de toutes les images dans la base de données.
     @param account_id L'ID du compte Twitter (OPTIONNEL)
-    @return Un itérateur d'objets Image_in_DB
+    @return Un itérateur de dictionnaires représentant les images de Tweets
     """
     def get_images_in_db_iterator( self, account_id : int = 0, add_step_3_times = None ) :
         request = "SELECT * FROM tweets"
@@ -393,14 +392,14 @@ class SQLite_or_MySQL :
                 if param.ENABLE_METRICS :
                     usage_start = time()
                 
-                yield Image_in_DB (
-                           tweet_line[0], # ID du compte Twitter
-                           tweet_line[1], # ID du Tweet
-                           tweet_line[2+i*2], # Nom de l'image
-                           to_int( tweet_line[3+i*2] ), # Empreinte de l'image
-                           i+1, # Position de l'image
-                           images_count # Nombre d'images dans le Tweet
-                       )
+                yield { "account_id" :     tweet_line[0],               # ID du compte Twitter
+                        "tweet_id" :       tweet_line[1],               # ID du Tweet
+                        "image_name" :     tweet_line[2+i*2],           # Nom de l'image
+                        "image_hash" :     to_int( tweet_line[3+i*2] ), # Empreinte de l'image
+                        "image_position" : i+1,                         # Position de l'image
+                        "images_count" :   images_count,                # Nombre d'images dans le Tweet
+                        "distance" :       None                         # Défini par défaut
+                       }
                 
                 if param.ENABLE_METRICS :
                     usage_times.append( time() - usage_start )
@@ -410,7 +409,7 @@ class SQLite_or_MySQL :
     dans la base de données.
     @param image_hash Le hash de l'image à chercher
     @param account_id L'ID du compte Twitter (OPTIONNEL)
-    @return Un itérateur d'objets Image_in_DB
+    @return Un itérateur de dictionnaires représentant les images de Tweets
     """
     def exact_image_hash_search( self, request_image_hash : int, account_id : int = 0 ) :
         if param.USE_MYSQL_INSTEAD_OF_SQLITE :
@@ -471,19 +470,14 @@ class SQLite_or_MySQL :
                 if image_hash != request_image_hash :
                     continue
                 
-                to_yield = Image_in_DB (
-                           tweet_line[0], # ID du compte Twitter
-                           tweet_line[1], # ID du Tweet
-                           tweet_line[2+i*2], # Nom de l'image
-                           image_hash, # Empreinte de l'image
-                           i+1, # Position de l'image
-                           images_count # Nombre d'images dans le Tweet
-                       )
-                
-                # Préciser que la distance est égale à 0
-                to_yield.distance = 0
-                
-                yield to_yield
+                yield { "account_id" :     tweet_line[0],     # ID du compte Twitter
+                        "tweet_id" :       tweet_line[1],     # ID du Tweet
+                        "image_name" :     tweet_line[2+i*2], # Nom de l'image
+                        "image_hash" :     image_hash,        # Empreinte de l'image
+                        "image_position" : i+1,               # Position de l'image
+                        "images_count" :   images_count,      # Nombre d'images dans le Tweet
+                        "distance" :       0                  # Est égale à 0
+                       }
     
     """
     API DE RECHERCHE

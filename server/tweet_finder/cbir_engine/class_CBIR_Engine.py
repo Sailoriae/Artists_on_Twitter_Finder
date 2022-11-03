@@ -98,7 +98,7 @@ class CBIR_Engine :
     
     @param image Image de requête, au format PIL.Image.
     @param images_iterator Itérateur sur la base de données, revoyant des
-                           objets contenant les attributs suivants :
+                           dictionnaires contenant les champs suivants :
                            - image_hash : L'empreinte de l'image,
                            - distance : Un attribut pour stocker la distance
                              avec l'image de requête.
@@ -120,13 +120,13 @@ class CBIR_Engine :
         # On itére sur toutes les images que nous propose l'itérateur
         for image in images_iterator :
             # Calcul de la distance de Hamming
-            distance = self._hamming_distance( query_hash, image.image_hash )
+            distance = self._hamming_distance( query_hash, image["image_hash"] )
             
             # Si la distance est inférieure à un certain seuil, on ajoute
             # l'identifiant de l'image en cours sur l'itérateur à notre liste
             # de résultats
             if distance <= MAX_DIFFERENT_BITS :
-                image.distance = distance
+                image["distance"] = distance
                 results.append( image )
         
         return results
