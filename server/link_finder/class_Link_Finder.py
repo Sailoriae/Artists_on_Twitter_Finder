@@ -4,6 +4,7 @@
 import re
 import inspect
 import json
+import requests
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
 # Ainsi, si on veut utiliser ce script indépendamment (Notamment pour des
@@ -36,6 +37,7 @@ from link_finder.class_Link_Finder_Result import Unsupported_Website
 from link_finder.class_Link_Finder_Result import Already_Visited
 from link_finder.class_Link_Finder_Result import Not_Visited
 from link_finder.class_Link_Finder_Result import Max_Depth_Reached
+from utils import constants as const
 
 
 # ^ = Début de la chaine, $ = Fin de la chaine
@@ -353,16 +355,37 @@ class Link_Finder :
                 scanner = Webpage_to_Twitter_Accounts( "https://linktr.ee/" + linktree )
                 if scanner._response.status_code == 404 :
                     return None # Non-reconnu, comme sur les sites supportés
+                
                 # En vérité, on utilise BeautifulSoup juste pour aller chercher
                 # un JSON qui contient toutes les URLs
                 json_dict = json.loads(
                     "".join( scanner.soup.find("script", {"id": "__NEXT_DATA__"}).contents ) )
+                
                 twitter_accounts = []
                 account_obj = json_dict["props"]["pageProps"]["account"]
+                
+                sensitive_links_ids = []
                 for link_objs in account_obj["links"] + account_obj["socialLinks"] :
+                    # Pour le contenu sensible, il faudra faire une autre requête
+                    if ( link_objs["url"] == None and
+                         len( link_objs["rules"]["gate"]["activeOrder"] ) > 0 and
+                         link_objs["rules"]["gate"]["activeOrder"][0] == "sensitiveContent" ) :
+                        sensitive_links_ids.append( link_objs["id"] )
+                        continue
+                    
                     get_multiplex = self._link_mutiplexer( link_objs["url"] )
                     if get_multiplex != None :
                         twitter_accounts += get_multiplex
+                
+                # Obtenir les URL du contenu sensible
+                resp = requests.post( "https://linktr.ee/api/profiles/validation/gates",
+                                      headers = { "User-Agent" : const.USER_AGENT },
+                                      json = { "accountId" : account_obj["id"], "validationInput" : { "acceptedSensitiveContent" : sensitive_links_ids }, "requestSource" : { "referrer" : None } } )
+                for link_objs in resp.json()["links"] :
+                    get_multiplex = self._link_mutiplexer( link_objs["url"] )
+                    if get_multiplex != None :
+                        twitter_accounts += get_multiplex
+                
                 return twitter_accounts
             raise Already_Visited
         
