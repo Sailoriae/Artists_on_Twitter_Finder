@@ -147,10 +147,10 @@ test( "https://www.deviantart.com/nopeys/art/Azula-847851539",
       image_url_contains_mode = True ) )
 
 check_list.append(
-test( "https://www.deviantart.com/lifeisafiction/art/Miku-Hatsune-Cosplay-844482485",
-      "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/0c0cb37c-d32a-4d6e-bd8b-eca7649b1e38/ddys6ut-4baf136e-de68-4211-94c5-278176db8f25.jpg/v1/fill/w_1280,h_854,q_75,strp/miku_hatsune___cosplay_by_lifeisafiction_ddys6ut-fullview.jpg?token=",
-      ['xlifeisafiction'],
-      datetime.fromisoformat( "2020-06-05T10:31:38-07:00" ),
+test( "https://www.deviantart.com/p-l-u-m-b-u-m/art/grom-night-851740125",
+      "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/3e886cad-dc83-418e-949a-0e1ff3474b54/de33qvx-d2699767-ece2-45a9-8ea9-b3b1eb2795fa.png?token=",
+      ['p_l_u_m_b_u_m'],
+      datetime.fromisoformat( "2020-08-11 19:10:14-07:00" ),
       image_url_contains_mode = True ) )
 
 # Attention, test de NSFW
@@ -162,10 +162,10 @@ test( "https://www.deviantart.com/dandonfuga/art/Harley-x-Ivy-YURI-NUDITY-warnin
       image_url_contains_mode = True ) )
 
 check_list.append(
-test( "https://www.deviantart.com/curiouscatcosplay/art/Survivor-872238942",
-      "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/ca0003c1-d466-4ceb-ae8e-8561c7345493/defb3vi-e6d48d51-5fff-4fb0-ae6e-109fb5923e84.png/v1/fill/w_1280,h_1920,q_80,strp/survivor_by_curiouscatcosplay_defb3vi-fullview.jpg?token=",
-      ['curiouscatcos'],
-      datetime.fromisoformat( "2021-03-04 15:56:41-08:00" ),
+test( "https://www.deviantart.com/valery-himera/art/Bastet-cosplay-871459551",
+      "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/a220de42-e9e9-41af-bb79-d7899678832f/deeuehr-c754943d-1689-4f81-9ffb-757b7bdfa405.jpg/v1/fill/w_1280,h_854,q_75,strp/bastet_cosplay_by_valery_himera_deeuehr-fullview.jpg?token=",
+      ['valeryhimera'],
+      datetime.fromisoformat( "2021-02-25 00:43:29-08:00" ),
       image_url_contains_mode = True ) )
 
 
