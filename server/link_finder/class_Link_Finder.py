@@ -31,6 +31,7 @@ from link_finder.supported_websites.utils.validate_pixiv_account_url import vali
 from link_finder.supported_websites.utils.validate_twitter_account_url import validate_twitter_account_url
 from link_finder.supported_websites.utils.validate_linktree_account_url import validate_linktree_account_url
 from link_finder.supported_websites.utils.validate_patreon_account_url import validate_patreon_account_url
+from link_finder.supported_websites.utils.validate_carrd_account_url import validate_carrd_account_url
 from link_finder.class_Link_Finder_Result import Link_Finder_Result
 from link_finder.class_Link_Finder_Result import Not_an_URL
 from link_finder.class_Link_Finder_Result import Unsupported_Website
@@ -399,6 +400,23 @@ class Link_Finder :
                 # Patreon sont vraiment chiant, on ne cible pas plus le contenu
                 scanner.soup = scanner.soup.find("body")
 #                scanner.soup = scanner.soup.find("main", {"id": "renderPageContentWrapper"})
+                twitter_accounts = []
+                for link in scanner.scan( validator_function = validate_url ) :
+                    get_multiplex = self._link_mutiplexer( link )
+                    if get_multiplex != None :
+                        twitter_accounts += get_multiplex
+                return twitter_accounts
+            raise Already_Visited
+        
+        # CAARD.CO
+        caard = validate_carrd_account_url( url )
+        if caard != None :
+            if not self._already_visited( "caard", caard ) :
+                scanner = Webpage_to_Twitter_Accounts( f"https://{caard}/" )
+                if scanner._response.status_code == 404 :
+                    return None # Non-reconnu, comme sur les sites supportés
+                # Impossible de cibler le contenu car ultra personnalisable
+                scanner.soup = scanner.soup.find("body")
                 twitter_accounts = []
                 for link in scanner.scan( validator_function = validate_url ) :
                     get_multiplex = self._link_mutiplexer( link )

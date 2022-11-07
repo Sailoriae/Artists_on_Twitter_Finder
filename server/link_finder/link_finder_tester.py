@@ -244,6 +244,22 @@ check_list.append(
 test_multiplexer( "https://linktr.ee/reubenwu",
                   ['reuben_wu'] ) )
 
+check_list.append(
+test_multiplexer( "https://linktr.ee/creepyistaken",
+                  ['creepyistaken'] ) )
+
+
+print( "" )
+print( "TEST DE CARRD :" )
+
+check_list.append(
+test_multiplexer( "https://marcycart.carrd.co/",
+                  ['marcymarmar28'] ) )
+
+check_list.append(
+test_multiplexer( "https://makshin.carrd.co",
+                  ['makshin__'] ) )
+
 
 print( "" )
 if all( check_list ) :
