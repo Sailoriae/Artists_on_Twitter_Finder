@@ -13,7 +13,7 @@ deviantart_account_name_regex_new = re.compile(
 
 # Ancien format : artiste.deviantart.com
 deviantart_account_name_regex_old = re.compile(
-    r"((?:http(?:s)?:\/\/)?(?:([a-zA-Z0-9\-]+)\.)deviantart\.com)" )
+    r"((?:http(?:s)?:\/\/)?([a-zA-Z0-9\-]+)\.deviantart\.com(?:\/|$))" )
 
 
 # Attention : Certaines URL peuvent être des URL de redirection. Ainsi, la
@@ -70,8 +70,10 @@ if __name__ == '__main__' :
     test.append( validate_deviantart_account_url( "https://deviantart.com/mauroz/" ) )
     test.append( validate_deviantart_account_url( "https://deviantart.com" ) )
     test.append( validate_deviantart_account_url( "https://www.deviantart.com/mauroz/art/test" ) )
+    test.append( validate_deviantart_account_url( "https://mauroz.deviantart.com/art/test" ) )
+    test.append( validate_deviantart_account_url( "https://test.deviantart.com.another" ) )
     
-    if test == ['mauroz', 'mauroz', 'mauroz', 'mauroz', None, None] :
+    if test == ['mauroz', 'mauroz', 'mauroz', 'mauroz', None, None, None, None] :
         print( "Tests OK !" )
     else :
         print( "Tests échoués !" )
