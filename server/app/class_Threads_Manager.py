@@ -100,6 +100,15 @@ class Threads_Manager :
         
         self._debug.write( f"[Threads_Manager] Signal {signal.Signals(signum).name} reçu." )
         
+        # Lorsque le serveur est démarré par Cron (@reboot) et qu'il doit
+        # s'arrêter au shutdown, il reçoit bien le SIGHUP (La ligne ci-dessus
+        # est exécutée et le fichier de débug écrit), mais plus rien ne se
+        # passe ! On peut ajouter n'importe quelle instruction ici, elle ne
+        # sera pas exécutée. Et ceci ne se produit pas au shutdown si le
+        # serveur a été démarré "manuellement".
+        # TODO : Chercher pourquoi, et/ou trouver une solution, parce que je
+        # n'ai rien trouvé pour le moment.
+        
         # Si on a reçu un signal "SIGHUP", c'est très certainement que la
         # screen dans laquelle on est contenu n'existe plus, et donc que STDOUT
         # est fermé. Il faut informer nos processus fils si on est en mode
