@@ -66,7 +66,7 @@ class Command_Line_Interface :
         print( "Vous êtes en ligne de commande.")
         print( "Tapez `help` pour afficher l'aide.")
         
-        while True :
+        while not self._threads_manager._stop_started :
             try :
                 self._do_cli_loop()
             except Exception as error :
