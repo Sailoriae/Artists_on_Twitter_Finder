@@ -69,6 +69,8 @@ If you are on Windows or MacOS, it is recommended to install the PyReadline libr
 
 To enable the web interface through Apache and/or automatic server startup, see the last two paragraphs of this document.
 
+If you are using MySQL, you can backup the database of the AOTF server automatically (Cron Task) or manually by running the [`mysqldump_backup.py`](../maintenance/mysqldump_backup.py) script. This script creates MySQL dumps that are placed in the [`../backups`](../backups) directory. The AOTF server does not need to be shut down. For more information, see the file [`Stratégie_de_sauvegarde.md`](../doc/Stratégie_de_sauvegarde.md), but it's written in french. Just remember that the `--hex-blob` and `--single-transaction` options are mandatory in your dump command (`mysqldump`).
+
 
 ## Using the server
 

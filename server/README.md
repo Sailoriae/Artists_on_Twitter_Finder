@@ -18,6 +18,8 @@ Si êtes sous Windows ou MacOS, il est recommandé d'installer en plus la librai
 
 Pour activer l'interface web via Apache et/ou le démarrage automatique du serveur, consultez [`../configs/README.md`](../configs/README.md).
 
+Si vous utilisez MySQL, vous pouvez sauvegarder automatiquement (Tâche Cron) ou manuellement la base de données du serveur AOTF en exécutant le script [`mysqldump_backup.py`](../maintenance/mysqldump_backup.py). Ce script crée des dumps MySQL qui sont placés dans le répertoire [`../backups`](../backups). Le serveur AOTF n'a pas besoin d'être éteint. Pour plus d'informations, consultez le fichier [`Stratégie_de_sauvegarde.md`](../doc/Stratégie_de_sauvegarde.md).
+
 
 ## Utilisation
 
