@@ -63,3 +63,14 @@ Si vous souhaitez faire l'opération inverse, c'est à dire à partir d'un Tweet
 * [Twitter-SauceNAO](https://github.com/FujiMakoto/twitter-saucenao) : Un robot qui permet à partir d'un Tweet de retrouver sa source via SauceNAO.
 
 SauceNAO est l'inverse de "Artists on Twitter Finder", car il indexe les images sur les sites sources. Ici, on indexe les images sur Twitter
+
+
+## Licence
+
+Copyright (C) 2020-2022 Sailoriae ([Site web](http://uneprincesse.fr), [Github](https://github.com/Sailoriae), [Twitter](https://twitter.com/Sailoriae))
+
+Ce programme est un logiciel libre : vous pouvez le redistribuer et/ou le modifier selon les termes de la licence publique générale GNU Affero telle que publiée par la Free Software Foundation, soit la version 3 de la licence, soit (à votre choix) toute version ultérieure.
+
+Ce programme est distribué dans l'espoir qu'il sera utile, mais SANS AUCUNE GARANTIE; sans même la garantie implicite de COMMERCIALISATION ou d'ADÉQUATION À UN USAGE PARTICULIER. Voir la licence publique générale GNU Affero pour plus de détails.
+
+Vous devriez avoir reçu une copie de la licence publique générale GNU Affero avec ce programme. Si ce n'est pas le cas, consultez https://www.gnu.org/licenses/.

@@ -137,3 +137,14 @@ If you want AOTF to start automatically when your server starts, edit the contab
 ```
 
 The stopping of the server will be done cleanly during the shutdown because the AOTF server handles the `SIGTERM` and `SIGHUP` signals
+
+
+## License
+
+Copyright (C) 2020-2022 Sailoriae ([Website](http://uneprincesse.fr), [Github](https://github.com/Sailoriae), [Twitter](https://twitter.com/Sailoriae))
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License along with this program. If not, see https://www.gnu.org/licenses/.
