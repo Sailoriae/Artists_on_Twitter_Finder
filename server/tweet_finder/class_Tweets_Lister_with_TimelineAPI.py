@@ -220,6 +220,9 @@ class Tweets_Lister_with_TimelineAPI :
                     continue
                 
                 for tweet_dict in analyse_tweepy_response( response ) :
+                    if self._DEBUG :
+                        tweet_dict["screen_name"] = account_name
+                    
                     # L'ajout dans la file se fait sans vérifier que l'ID du
                     # Tweet y est déjà présent, parce que ça serait trop long
                     # (La file peut être très très grande), et que l'indexeur

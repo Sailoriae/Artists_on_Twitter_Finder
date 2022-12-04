@@ -179,6 +179,9 @@ class Tweets_Lister_with_SearchAPI :
             
             tweet_dict = analyse_tweet_json( tweet._json )
             if tweet_dict != None :
+                if self._DEBUG :
+                    tweet_dict["screen_name"] = account_name
+                
                 # Re-filtrer au cas où
                 # Très important si jamais account_name ne correspond pas à
                 # account_id (Intérêt en plus du thread de reset des curseurs)
