@@ -143,13 +143,21 @@ class Tweets_Lister_with_TimelineAPI :
             print( f"[List_TimelineAPI] Compte @{account_name} introuvable !" )
             raise Unfound_Account_on_Lister_with_TimelineAPI
         
-        blocks_me = self._twitter.blocks_me( account_id )
+        blocks_me, real_account_name = self._twitter.blocks_me( account_id, append_account_name = True )
         if blocks_me == None :
             print( f"[List_TimelineAPI] Compte @{account_name} introuvable !" )
             raise Unfound_Account_on_Lister_with_TimelineAPI
         if blocks_me :
             print( f"[List_TimelineAPI] Le compte @{account_name} nous bloque, impossible de le scanner !" )
             raise Blocked_by_User_with_TimelineAPI
+        
+        # C'est important avec l'API de recherche, mais pas ici, puisqu'on
+        # utilise uniquement l'ID du compte (Son screen name sert uniquement
+        # aux messages affichés). Mais on le vérifie quand même (Et c'est
+        # symétrique par rapport au listage avec l'API de recherche).
+        if real_account_name != account_name :
+            print( f"[List_TimelineAPI] Le compte ID {account_id} se nomme @{real_account_name} et non @{account_name}." )
+            account_name = real_account_name
         
         if self._DEBUG :
             print( f"[List_TimelineAPI] Listage des Tweets de @{account_name}." )
