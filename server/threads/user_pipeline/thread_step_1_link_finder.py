@@ -23,6 +23,7 @@ from link_finder.class_Link_Finder import Link_Finder
 from link_finder.class_Link_Finder import Not_an_URL
 from link_finder.class_Link_Finder import Unsupported_Website
 from tweet_finder.twitter.class_TweepyAbstraction import TweepyAbstraction
+from utils.class_Warnings_File import Warnings_File
 
 
 """
@@ -118,6 +119,10 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
             print( f"[step_1_th{thread_id}] Aucun compte Twitter trouvé pour l'artiste de cette illustration !" )
             can_proceed = False
         
+        # Avoir trouvé plus de 10 comptes Twitter est étrange
+        if can_proceed and len( data.twitter_accounts ) >= 10 :
+            Warnings_File().write( f"Le Link Finder a trouvé {len(data.twitter_accounts)} comptes Twitter pour la requête suivante : {request.input_url}" )
+        
         # On vérifie la liste des comptes Twitter
         if can_proceed :
             twitter_accounts_with_id = twitter.get_multiple_accounts_ids( data.twitter_accounts )
@@ -166,7 +171,12 @@ def thread_step_1_link_finder( thread_id : int, shared_memory ) :
         shared_memory_threads_registry.set_request( f"thread_step_1_link_finder_th{thread_id}", None )
         
         # Enregistrer le temps qu'on a mis pour traiter cette requête
-        shared_memory_execution_metrics.add_step_1_times( time() - start )
+        duration = time() - start
+        shared_memory_execution_metrics.add_step_1_times( duration )
+        
+        # Un traitement de plus de 30 secondes est étrange
+        if duration >= 30 :
+            Warnings_File().write( f"La requête suivante a pris {duration} secondes dans le Link Finder : {request.input_url}" )
         
         # Forcer la fermeture du proxy
         request._pyroRelease()
