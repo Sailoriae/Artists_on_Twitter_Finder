@@ -103,11 +103,39 @@ class Threads_Manager :
         # Lorsque le serveur est démarré par Cron (@reboot) et qu'il doit
         # s'arrêter au shutdown, il reçoit bien le SIGHUP (La ligne ci-dessus
         # est exécutée et le fichier de débug écrit), mais plus rien ne se
-        # passe ! On peut ajouter n'importe quelle instruction ici, elle ne
-        # sera pas exécutée. Et ceci ne se produit pas au shutdown si le
-        # serveur a été démarré "manuellement".
-        # TODO : Chercher pourquoi, et/ou trouver une solution, parce que je
-        # n'ai rien trouvé pour le moment.
+        # passe ! Et ceci ne se produit pas au shutdown si le serveur a été
+        # démarré "manuellement".
+        #
+        # L'explication : Le démon Cron a l'option "KillMode=process". Ce qui
+        # fait que les processus qu'il a créé et qui tournent toujours lors de
+        # son arrêt sont laissés tels quels.
+        # Doc : https://www.freedesktop.org/software/systemd/man/systemd.kill.html
+        # Note that it is not recommended to set KillMode= to process, as this
+        # allows processes to escape the service manager's lifecycle and
+        # resource management, and to remain running even while their service
+        # is considered stopped and is assumed to not consume any resources.
+        #
+        # Ainsi, ces "left-over process" sont arrêtés après tous les services
+        # Systemd.
+        # On peut vérifier en comparant l'horaire du dernier log de Systemd, et
+        # celui de la réception du signal SIGHUP dans notre fichier de débug.
+        # Dernier log Systemd du dernier boot : journalctl -xeb -1
+        # Cron s'arrête bien avant AOTF : journalctl -xeb -1 -u cron
+        #
+        # Cependant, ces "left-over process" profitent toujours des 90 secondes
+        # entre les SIGTERM et le SIGKILL. Il n'y a pas de raison que AOTF ne
+        # s'arrête pas proprement.
+        #
+        # Sauf que notre restauration du STDOUT sur /dev/null a l'air de
+        # bloquer, et l'instruction d'arrêt du serveur n'est jamais atteinte.
+        #
+        # Solution : Ne plus restaurer STDOUT par défaut, de toutes manières on
+        # gère déjà ce cas (Voir notre "print()" modifié dans "app.py").
+        # On le restaure vers un fichier "sighup.log" en mode débug !
+        #
+        # Question : Est-ce que c'est parce que "/dev/null" n'est plus
+        # accessible dans ce cas ? Mais OSEF, il faudrait plutôt démarrer le
+        # serveur avec Systemd, car cela permet de gérer la dépendance à MySQL.
         
         # Si on a reçu un signal "SIGHUP", c'est très certainement que la
         # screen dans laquelle on est contenu n'existe plus, et donc que STDOUT
@@ -117,16 +145,29 @@ class Threads_Manager :
         try : is_sighup = signum == signal.SIGHUP.numerator
         except AttributeError : pass # Windows
         if is_sighup :
-            if param.ENABLE_MULTIPROCESSING :
+            # Nouvelle restauration de STDOUT, uniquement en mode débug.
+            # On a déjà une protection "custom_print()" dans "app.py".
+            if param.DEBUG :
+                try :
+                    sys.stdout = open( "sighup.log", "a", buffering = 1 ) # Vider le buffer à chaque "\n"
+                    print( f"[Threads_Manager] STDOUT restauré ici le {datetime.now().strftime('%Y-%m-%d à %H:%M:%S')}." )
+                except Exception as error :
+                    self._debug.write( f"[Threads_Manager] Impossible de restaurer STDOUT : {type(error).__name__} ({error})" )
+            
+            # Uniquement en mode débug, parce que nos processus fils ne
+            # l'utilisent que dans ce cas.
+            if param.DEBUG and param.ENABLE_MULTIPROCESSING :
                 for process in self._threads_xor_process :
                     try :
                         os.kill( process.pid, signal.SIGHUP )
                     except Exception as error :
                         self._debug.write( f"[Threads_Manager] Impossible d'arrêter le processus PID {process.pid} : {type(error).__name__} ({error})" )
-            try :
-                sys.stdout = open( os.devnull, "w" )
-            except Exception as error :
-                self._debug.write( f"[Threads_Manager] Impossible de restaurer STDOUT : {type(error).__name__} ({error})" )
+            
+            # Ancienne restauration de STDOUT, qui peut bloquer.
+#            try :
+#                sys.stdout = open( os.devnull, "w" )
+#            except Exception as error :
+#                self._debug.write( f"[Threads_Manager] Impossible de restaurer STDOUT : {type(error).__name__} ({error})" )
         
         self.stop_threads()
     

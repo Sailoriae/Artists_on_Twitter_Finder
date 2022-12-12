@@ -50,7 +50,7 @@ def custom_print ( *args, **kwargs ) :
         # On force le vidage du buffer de sortie à chaque appel.
         builtin_print( *args, **dict( kwargs, flush = True) )
     # On gère le cas où STDOUT est fermé. Cela arrive notamment lorsqu'on
-    # reçoit un signal SIGHUP (Voir la gestion de ce signal plus bas).
+    # reçoit un signal SIGHUP (Notre Screen est morte).
     except OSError as error :
         if error.errno == 5 : pass # I/O error
         else : raise error

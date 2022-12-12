@@ -52,8 +52,10 @@ def subprocess ( parent_pid, procedure, *arguments ) :
     signal.signal(signal.SIGINT, on_sigterm)
     signal.signal(signal.SIGTERM, on_sigterm)
     
+    # Voir "Threads_Manager.on_sigterm()"
     def on_sighup ( signum, frame ) :
-        sys.stdout = open( os.devnull, "w" )
+        if param.DEBUG :
+            sys.stdout = open( "sighup.log", "a", buffering = 1 ) # Vider le buffer à chaque "\n"
     
     try : signal.signal(signal.SIGHUP, on_sighup)
     except AttributeError : pass # Windows
@@ -84,6 +86,9 @@ def subprocess ( parent_pid, procedure, *arguments ) :
         print( f"{type(error).__name__}: {error}" )
         print( "La pile d'appel complète a été écrite dans un fichier." )
     
+    # Note : Les threads s'arrêtent si la mémoire partagée leur en a donné
+    # l'ordre, ou bien s'ils ont planté parce que celle-ci n'est plus
+    # accesssible (Beaucoup de fichiers logs seront alors générés).
     for thread in threads_list :
         thread.join()
 
