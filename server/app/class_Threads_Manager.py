@@ -145,6 +145,16 @@ class Threads_Manager :
         try : is_sighup = signum == signal.SIGHUP.numerator
         except AttributeError : pass # Windows
         if is_sighup :
+            # Test d'un "print()", permet d'alerter en mode débug.
+            # Ca serait mieux d'utiliser le "Warnings_File", mais il n'a pas
+            # les protections du "Debug_File".
+            # Avant de restaurer STDOUT, parce qu'il faut que ce test soit
+            # valable avec et sans mode débug.
+            try :
+                print( "[Threads_Manager] La fonction \"print()\" a été vérifiée après un SIGHUP." )
+            except Exception as error :
+                Debug_File().write( f"[Threads_Manager] La fonction \"print()\" est cassée : {type(error).__name__} ({error})\nIl faudrait vérifier que notre bidouille \"custom_print()\" fonctionne toujours." )
+            
             # Nouvelle restauration de STDOUT, uniquement en mode débug.
             # On a déjà une protection "custom_print()" dans "app.py".
             if param.DEBUG :
