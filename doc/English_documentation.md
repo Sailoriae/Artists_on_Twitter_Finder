@@ -129,16 +129,6 @@ sudo service apache2 restart
 ```
 
 
-## Automatic startup
-
-If you want AOTF to start automatically when your server starts, edit the contab of the user you installed it with (`sudo crontab -e -u user`) and add the following line:
-```
-@reboot screen -dmS twitter python3 /path/to/Artists_on_Twitter_Finder/server/app.py
-```
-
-The stopping of the server will be done cleanly during the shutdown because the AOTF server handles the `SIGTERM` and `SIGHUP` signals
-
-
 ## License
 
 Copyright (C) 2020-2022 Sailoriae ([Website](http://uneprincesse.fr), [Github](https://github.com/Sailoriae), [Twitter](https://twitter.com/Sailoriae))

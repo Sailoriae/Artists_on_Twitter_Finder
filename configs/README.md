@@ -61,3 +61,5 @@ Pour se faire, éditez la table de cet utilisateur (`sudo crontab -e -u utilisat
 ```
 
 L'arrêt du serveur se fera proprement lors du shutdown car le serveur AOTF gère les signaux `SIGTERM` et `SIGHUP`. Vous pouvez vérifier la bonne extinction du serveur via le fichier `debug.log`, ce qui nécessite l'activation du paramètre `DEBUG` dans votre fichier `parameters.py`. Si le message `Arrêt terminé.` y a été écrit, c'est que le serveur AOTF s'est bien arrêté proprement.
+
+Cependant, **cette méthode n'est pas recommandée si vous utilisez un serveur MySQL**, car ce dernier sera éteint avant AOTF lors du shutdown, ce qui n'est pas propre (Même si ça ne pose pas de problème pour les données).
