@@ -6,6 +6,7 @@ import sys
 import signal
 from time import sleep
 from datetime import datetime
+from threading import Semaphore
 
 # Les importations se font depuis le répertoire racine du serveur AOTF
 # Ainsi, si on veut utiliser ce script indépendamment (Notamment pour des
@@ -81,6 +82,7 @@ class Threads_Manager :
         self._threads_xor_process = []
         
         # Permet de ne pas démarrer deux fois le serveur
+        self._launch_sem = Semaphore() # N'est jamais lâché une fois acqui
         self._launch_started = False
         
         # Permet de ne pas oublie des processus fils si on éteint le serveur
@@ -88,6 +90,7 @@ class Threads_Manager :
         self._launch_in_progress = False
         
         # Permet de ne lancer qu'une seule fois la procédure d'extinction
+        self._stop_sem = Semaphore() # N'est jamais lâché une fois acqui
         self._stop_started = False
     
     """
@@ -199,7 +202,7 @@ class Threads_Manager :
     doivent être exécutés dans un processus conteneur.
     """
     def launch_threads ( self ) :
-        if self._launch_started : return
+        if not self._launch_sem.acquire( blocking = False ) : return
         if self._stop_started : return
         self._launch_started = True
         self._launch_in_progress = True
@@ -326,7 +329,7 @@ class Threads_Manager :
     """
     def stop_threads ( self ) :
         # Vérifier que la procédure d'arrêt n'a pas déjà été appelée.
-        if self._stop_started : return
+        if not self._stop_sem.acquire( blocking = False ) : return
         self._stop_started = True
         
         self._debug.write( "[Threads_Manager] Arrêt initié." )
