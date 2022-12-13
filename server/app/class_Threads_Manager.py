@@ -68,6 +68,9 @@ class Threads_Manager :
         try : signal.signal(signal.SIGHUP, self.on_sigterm)
         except AttributeError : pass # Windows
         
+        # Permet de traiter qu'une seul fois un SIGHUP
+        self._sighup_sem = Semaphore()
+        
         # Fichier de débug
         self._debug = Debug_File()
         
@@ -147,7 +150,7 @@ class Threads_Manager :
         is_sighup = False
         try : is_sighup = signum == signal.SIGHUP.numerator
         except AttributeError : pass # Windows
-        if is_sighup :
+        if is_sighup and self._sighup_sem.acquire( blocking = False ) :
             # Test d'un "print()", permet d'alerter en mode débug.
             # Ca serait mieux d'utiliser le "Warnings_File", mais il n'a pas
             # les protections du "Debug_File".
