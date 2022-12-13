@@ -1,21 +1,12 @@
 [Unit]
 Description = Artists on Twitter Finder
-After = screen-cleanup.service network.target mysql.service
+After = screen-cleanup.service network-online.target mysql.service
 Requires = mysql.service
-Conflicts = shutdown.target reboot.target halt.target
 
 [Service]
-User = username																								# MODIFIER ICI
 Type = forking
-
-ExecStart = screen -dmS twitter /usr/bin/python3 /path/to/Artists_on_Twitter_Finder/server/app.py			# MODIFIER ICI
-
-RemainAfterExit = false
-KillMode = none
-TimeoutStopSec = 1min
-Restart = on-failure
-RestartForceExitStatus = 0
-RestartSec = 10s
+User = username
+ExecStart = screen -dmS twitter /usr/bin/python3 /path/to/Artists_on_Twitter_Finder/server/app.py
 
 [Install]
 WantedBy = multi-user.target

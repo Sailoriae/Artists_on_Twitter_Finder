@@ -49,7 +49,7 @@ sudo chown root:root /etc/systemd/system/artist-on-twitter.service
 
 Puis activez ce service, et démarrez-le :
 ```
-sudo systemctl enable /path/to/Artists_on_Twitter_Finder/configs/artist-on-twitter.service
+sudo systemctl enable artist-on-twitter.service
 ```
 
 ## Alternative au service
