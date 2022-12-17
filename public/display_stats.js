@@ -50,7 +50,7 @@ function displayStats() {
 				displayStats();
 			} else if ( request.status === 503 ) {
 				statsP.textContent = lang[ "CANNOT_DISPLAY_STATS" ];
-				statsP.innerHTML += "<br/>" + lang[ "SERVER_IS_DOWN" ];
+				statsP.innerHTML += "<br/>" + parse( lang[ "SERVER_IS_DOWN" ], "<a href=\"https://twitter.com/" + contactScreenName + "\" target=\"_blank\" rel=\"noopener\">@" + contactScreenName + "</a>" );
 				retryLoopOnServerDown();
 			} else {
 				statsP.textContent = lang[ "WRONG_WEBSERVER_CONFIG" ];
