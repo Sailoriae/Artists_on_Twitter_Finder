@@ -462,8 +462,9 @@ class Tweets_Indexer :
             
             # Enregistrer les mesures des temps d'exécution tous les 100
             # Tweets (Ces temps sont calculés par la méthode "_index_tweet()").
-            if len(self._times) >= 100 :
-                self._display_and_save_metrics()
+            if self._DEBUG or self._ENABLE_METRICS :
+                if len(self._times) >= 100 :
+                    self._display_and_save_metrics()
             
             # Traiter les instructions d'enregistrement de curseurs
             # Cette fonction permet de vérifier que c'est bien une instruction
