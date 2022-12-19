@@ -36,28 +36,34 @@ def check_parameters () :
     # Tester le type d'une variable
     def test_parameter_type ( name : str, # Sert uniquement à faire des "print()"
                               value, # Valeur dont on veut tester le type
-                              expected_type : type # Type que l'on doit obtenir
+                              expected_type : type, # Type que l'on doit obtenir
+                              can_be_none : bool = False # Autoriser la valeur None
                              ) -> bool :
         if type( value ) == expected_type :
+            return True
+        if can_be_none and type( value ) == type( None ) :
             return True
         print( f"Le paramètre \"{name}\" est de type \"{type( value )}\" alors qu'il doit être de type \"{expected_type}\" !" )
         return False
     
     # Tester l'existence et le type d'un paramètre
     def test_parameter ( name : str, # Nom du paramètre dont on veut tester le type
-                         expected_type : type # Type que l'on doit obtenir
+                         expected_type : type, # Type que l'on doit obtenir
+                         can_be_none : bool = False # Autoriser la valeur None
                         ) -> bool :
         try :
             value = getattr( param, name )
         except AttributeError :
             print( f"Le paramètre \"{name}\" n'existe pas !" )
             return False
-        return test_parameter_type( name, value, expected_type )
+        return test_parameter_type( name, value, expected_type, can_be_none = can_be_none )
     
     # Tester l'existence, le type, et la positivé stricte d'un paramètre
-    def test_strictly_postive_int_parameter ( name : str # Nom du paramètre à tester
+    def test_strictly_postive_int_parameter ( name : str, # Nom du paramètre à tester
+                                              can_be_none : bool = False # Autoriser la valeur None
                                              ) -> bool :
-        if not test_parameter ( name, int ) : return False
+        if not test_parameter ( name, int, can_be_none = can_be_none ) : return False
+        if can_be_none and getattr( param, name ) == None : return True
         if getattr( param, name ) > 0 : return True
         print( f"Le paramètre \"{name}\" doit être strictement positif !" )
         return False
@@ -103,8 +109,8 @@ def check_parameters () :
     
     check_list.append( test_parameter( "DEBUG", bool ) )
     check_list.append( test_parameter( "ENABLE_METRICS", bool ) )
-    check_list.append( test_strictly_postive_int_parameter( "DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE" ) )
-    check_list.append( test_strictly_postive_int_parameter( "RESET_SEARCHAPI_CURSORS_PERIOD" ) )
+    check_list.append( test_strictly_postive_int_parameter( "DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE", can_be_none = True ) )
+    check_list.append( test_strictly_postive_int_parameter( "RESET_SEARCHAPI_CURSORS_PERIOD", can_be_none = True ) )
     check_list.append( test_strictly_postive_int_parameter( "MAX_PROCESSING_REQUESTS_PER_IP_ADDRESS" ) )
     
     check_list.append( test_parameter( "UNLIMITED_IP_ADDRESSES", list ) )
@@ -345,12 +351,26 @@ def check_parameters () :
     # On est limité à 900 requêtes toutes les 15 minutes
     # Nombre de fenêtres dans une journée (24h) : 24*60 / 15 = 96
     # Nombre de requêtes par jours sur l'API :    900 * 96 = 86400
-    estimation = accounts_count / param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE
-    estimation += accounts_count / param.RESET_SEARCHAPI_CURSORS_PERIOD
+    estimation = 0
+    if param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE != None :
+        estimation = accounts_count / param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE
+    if param.RESET_SEARCHAPI_CURSORS_PERIOD != None :
+        estimation += accounts_count / param.RESET_SEARCHAPI_CURSORS_PERIOD
     if estimation > 86400 :
         print( f"Votre base de données a trop de comptes pour mettre à jour ses comptes tous les {param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE} jours et reset les curseurs d'indexation tous les {param.RESET_SEARCHAPI_CURSORS_PERIOD} jours." )
         print( "Merci d'augmenter la valeur des clés suivantes : DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE, RESET_SEARCHAPI_CURSORS_PERIOD" )
         return False
+    
+    # ========================================================================
+    
+    # Avertissement si désactivation de fonctionnalités
+    if param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE == None :
+        print( "Vous avez choisi de désactiver la mise à jour automatique des comptes indexés dans votre base de données." )
+    if param.RESET_SEARCHAPI_CURSORS_PERIOD == None :
+        print( "Vous avez choisi de désactiver le relistage complet et périodique des Tweets avec l'API de recherche." )
+        if param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE != None :
+            print( "Cependant, ce n'est pas logique de ne pas désactiver aussi la mise à jour automatique." )
+            return False
     
     # ========================================================================
     

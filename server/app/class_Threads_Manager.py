@@ -274,10 +274,13 @@ class Threads_Manager :
         to_start["thread_http_server_container"] = [ thread_http_server ]
         
         # Threads des procédures de maintenance (Doivent être uniques)
-        to_start["threads_maintenance_container"] = [ thread_auto_update_accounts,
-                                                      thread_reset_SearchAPI_cursors,
-                                                      thread_remove_finished_requests,
-                                                      thread_retry_failed_tweets ]
+        to_start["threads_maintenance_container"] = []
+        if param.DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE != None :
+            to_start["threads_maintenance_container"].append( thread_auto_update_accounts )
+        if param.RESET_SEARCHAPI_CURSORS_PERIOD != None :
+            to_start["threads_maintenance_container"].append( thread_reset_SearchAPI_cursors )
+        to_start["threads_maintenance_container"].append( thread_remove_finished_requests )
+        to_start["threads_maintenance_container"].append( thread_retry_failed_tweets )
         
         # Compteur des procédures rencontrées lors du lancement
         # Permet de ne pas avoir deux threads qui ont le même ID

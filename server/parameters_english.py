@@ -139,10 +139,15 @@ Number of days without scanning the Twitter account to update it automatically.
 Warning : In order to spread the updates over time, the automatic update system
 can go ahead and launch the update of an account before this number of days has
 elapsed.
+
+Set this value to "None" to disable this feature. This can be interesting if
+you start your AOTF server once in a while, but the accounts will be updated
+only on a request.
 """
 DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE = 30 # days
 
 """
+Complete and periodic re-listing of Tweets with the search API.
 Period in days to reset the indexing cursors with the search API.
 Indeed : Twitter's search engine fluctuates, and is fairly poorly documented.
 Some Tweets can be de-indexed or re-indexed.
@@ -153,6 +158,10 @@ So the speed depends mainly on the listing thread.
 
 Warning: As for the automatic update, the reset system of the cursors can
 launch an indexing in advance, in order to spread them in time.
+
+Set this value to "None" to disable this feature. This can be interesting if
+you start your AOTF server once in a while, but the indexing could remain
+incomplete.
 """
 RESET_SEARCHAPI_CURSORS_PERIOD = 365 # days
 

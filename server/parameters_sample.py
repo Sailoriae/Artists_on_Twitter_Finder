@@ -142,10 +142,15 @@ automatiquement.
 Attention : Afin de répartir les mises à jour dans le temps, le système de mise
 à jour automatique peut prendre de l'avance et lancer la mise à jour d'un
 compte avant ce nombre de jours ne se soit écoulé.
+
+Réglez cette valeur à "None" pour désactiver cette fonctionnalité. Cela peut
+être intéressant si vous démarrez votre serveur AOTF une fois de temps en
+temps, mais les comptes seront mis à jour uniquement lors d'une requête.
 """
 DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE = 30 # jours
 
 """
+Relistage complet et périodique des Tweets avec l'API de recherche.
 Période en jours pour reset les curseurs d'indexation avec l'API de recherche.
 En effet : Le moteur de recherche de Twitter fluctue, et est assez mal
 documenté. Certains Tweets peuvent être désindexés ou réindexés.
@@ -157,6 +162,10 @@ La vitesse dépend donc essentiellement du thread de listage.
 Attention : Comme pour la mise à jour automatique, le système de reset des
 curseurs peut lancer une indexation en avance, afin de les répartir dans le
 temps.
+
+Réglez cette valeur à "None" pour désactiver cette fonctionnalité. Cela peut
+être intéressant si vous démarrez votre serveur AOTF une fois de temps en
+temps, mais l'indexation pourrait rester incomplète.
 """
 RESET_SEARCHAPI_CURSORS_PERIOD = 365 # jours
 

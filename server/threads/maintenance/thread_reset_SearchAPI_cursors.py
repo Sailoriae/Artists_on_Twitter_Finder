@@ -27,6 +27,8 @@ from tweet_finder.twitter.class_TweepyAbstraction import TweepyAbstraction
 """
 ATTENTION ! CE THREAD DOIT ETRE UNIQUE !
 
+Relistage complet et périodique des Tweets avec l'API de recherche.
+
 Le moteur de recherche de Twitter fluctue, et est assez mal documenté. Certains
 Tweets peuvent être désindexés ou réindexés.
 Il est donc intéressant de temps en temps de réintialiser le curseur
