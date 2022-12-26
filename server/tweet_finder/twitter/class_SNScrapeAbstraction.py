@@ -122,7 +122,14 @@ class SNScrapeAbstraction :
         # Lancer la recherche / Obtenir les Tweets
         # Sont dans l'ordre chronologique, car SNScrape met le paramètre
         # "tweet_search_mode" à "live" (Onglet "Récent" sur l'UI web)
-        return scraper.get_items()
+        last_tweet_id = None
+        for tweet in scraper.get_items() :
+            # On vérifie que les IDs de Tweets soient décroissants
+            if last_tweet_id != None and tweet.id > last_tweet_id :
+                raise Exception( "Les IDs de Tweets sont censés être décroissants dans une recherche" ) # Doit tomber dans le collecteur d'erreurs
+            last_tweet_id = tweet.id
+            
+            yield tweet
     
     """
     Obtenir les Tweets d'un compte avec SNScrape sur l'API utilisée par l'UI
