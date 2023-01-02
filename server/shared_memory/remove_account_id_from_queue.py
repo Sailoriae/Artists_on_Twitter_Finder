@@ -24,12 +24,14 @@ Supprimer la requête d'un compte Twitter d'une file d'attente de scan.
 @param queue La file d'attente à traiter, sous forme d'objet Pyro_Queue.
              Attention : Ne doit pas être un proxy vers cet objet !
 @param account_id L'ID du compte Twitter dont la requête est à supprimer.
+@param True si la requête a été trouvée, False sinon.
 """
-def remove_account_id_from_queue ( input_queue : Pyro_Queue, account_id : int ) :
+def remove_account_id_from_queue ( input_queue : Pyro_Queue, account_id : int ) -> bool :
     # On utilise un objet Pyro_Queue() pour la conversion des URI lors de
     # l'utilisation de la méthode put().
     temp_queue = Pyro_Queue( convert_uri = input_queue._convert_uri )
     
+    to_return = False
     while True :
         try :
             # Passer par la méthode get() qui nous ouvre les proxies.
@@ -38,6 +40,8 @@ def remove_account_id_from_queue ( input_queue : Pyro_Queue, account_id : int ) 
             request = None
         if request == None :
             input_queue._queue = temp_queue._queue
-            return
+            return to_return
         if request.account_id != account_id :
             temp_queue.put( request )
+        else :
+            to_return = True

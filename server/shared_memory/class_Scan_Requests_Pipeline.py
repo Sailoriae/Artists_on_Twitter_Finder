@@ -213,12 +213,13 @@ class Scan_Requests_Pipeline :
                     if not request.started_SearchAPI_listing :
                         # On doit démonter et remonter la file en enlevant la
                         # requête.
-                        remove_account_id_from_queue(
+                        found = remove_account_id_from_queue(
                             self._step_A_SearchAPI_list_account_tweets_queue_obj,
                             account_id )
                         
                         # On met la requête dans la file d'attente prioritaire.
-                        self._step_A_SearchAPI_list_account_tweets_prior_queue_obj.put( request )
+                        if found :
+                            self._step_A_SearchAPI_list_account_tweets_prior_queue_obj.put( request )
                     
                     # Si est dans une file d'attente de listage des Tweets avec
                     # l'API de timeline, on la sort, pour la mettre dans la même
@@ -226,12 +227,13 @@ class Scan_Requests_Pipeline :
                     if not request.started_TimelineAPI_listing :
                         # On doit démonter et remonter la file en enlevant la
                         # requête.
-                        remove_account_id_from_queue(
+                        found = remove_account_id_from_queue(
                             self._step_B_TimelineAPI_list_account_tweets_queue_obj,
                             account_id )
                         
                         # On met la requête dans la file d'attente prioritaire.
-                        self._step_B_TimelineAPI_list_account_tweets_prior_queue_obj.put( request )
+                        if found :
+                            self._step_B_TimelineAPI_list_account_tweets_prior_queue_obj.put( request )
                 
                 queues_sem.release()
                 requests_sem.release()
