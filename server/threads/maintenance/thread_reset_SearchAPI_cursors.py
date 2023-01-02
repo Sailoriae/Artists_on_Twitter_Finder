@@ -95,6 +95,9 @@ def thread_reset_SearchAPI_cursors( thread_id : int, shared_memory ) :
         # dans l'ordre du moins récemment reset au plus récemment reset
         oldest_reseted_account_iterator = bdd.get_oldest_reseted_account()
         
+        # Noter qu'on a passé le premier compte
+        first_account = True
+        
         # Pour chaque compte dans la BDD
         for account in oldest_reseted_account_iterator :
             # Vérifier quand même qu'il ne faut pas s'arrêter
@@ -121,7 +124,10 @@ def thread_reset_SearchAPI_cursors( thread_id : int, shared_memory ) :
             
             # Si la période de reset des curseurs n'est pas à appliquer
             # strictement, on étale tout simplement les resets dans le temps
-            if not param.STRICTLY_ENFORCE_PERIODS :
+            # Seule exception pour le premier compte qu'on croise, afin de ne
+            # pas créer un trop gros décallage en cas de nombreux redémarrages,
+            # du serveur AOTF, c'est notamment utile pour les petites BDD
+            if not param.STRICTLY_ENFORCE_PERIODS and not first_account :
                 wait_time = reset_period / shared_memory.accounts_count
                 end_sleep_time = time() + wait_time
                 print( f"[reset_cursors_th{thread_id}] Reprise dans {int(wait_time)} secondes, pour reset le curseur d'indexation avec l'API de recherche du compte ID {account['account_id']}." )
@@ -165,6 +171,9 @@ def thread_reset_SearchAPI_cursors( thread_id : int, shared_memory ) :
                 # modifications, et ce thread est unique (Ou bien des nouveaux
                 # comptes)
                 # L'itérateur se terminera donc naturellement
+            
+            # On a plus besoin de savoir qu'on est au premier compte
+            first_account = False
             
             # Prendre l'instant juste avant la MàJ (Prend aussi l'appel à l'API
             # Twitter qui est une requête HTTP donc longue)

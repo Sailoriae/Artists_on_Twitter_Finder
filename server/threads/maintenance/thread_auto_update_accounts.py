@@ -72,6 +72,9 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
         # dans l'ordre du moins récemment mise à jour au plus récemment mis à jour
         oldest_updated_account_iterator = bdd.get_oldest_updated_account()
         
+        # Noter qu'on a passé le premier compte
+        first_account = True
+        
         # Pour chaque compte dans la BDD
         for oldest_updated_account in oldest_updated_account_iterator  :
             # Vérifier quand même qu'il ne faut pas s'arrêter
@@ -84,7 +87,10 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
             
             # Si la période de MàJ automatique n'est pas à appliquer
             # strictement, on étale tout simplement les MàJ dans le temps
-            if not param.STRICTLY_ENFORCE_PERIODS :
+            # Seule exception pour le premier compte qu'on croise, afin de ne
+            # pas créer un trop gros décallage en cas de nombreux redémarrages
+            # du serveur AOTF, c'est notamment utile pour les petites BDD
+            if not param.STRICTLY_ENFORCE_PERIODS and not first_account :
                 wait_time = update_period / shared_memory.accounts_count
                 end_sleep_time = time() + wait_time
                 print( f"[auto_update_th{thread_id}] Reprise dans {int(wait_time)} secondes, pour lancer la mise à jour du compte ID {oldest_updated_account['account_id']}." )
@@ -139,6 +145,9 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
                     # dire nos modifications, et ce thread est unique (Ou bien
                     # des nouveaux comptes)
                     # L'itérateur se terminera donc naturellement
+            
+            # On a plus besoin de savoir qu'on est au premier compte
+            first_account = False
             
             # Prendre l'instant juste avant la MàJ (Prend aussi l'appel à l'API
             # Twitter qui est une requête HTTP donc longue)
