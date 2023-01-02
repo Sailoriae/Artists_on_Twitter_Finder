@@ -175,6 +175,8 @@ class Scan_Requests_Pipeline :
     @param account_name Le nom du compte Twitter. Attention, c'est lui qui est
                         revérifié et scanné !
     @param is_prioritary Est ce que cette requête est prioritaire ?
+    @param reset_SearchAPI_cursor Faire un listage complet avec l'API de
+                                  recherche (Etape A du traitement).
     
     @return L'objet Scan_Request créé.
             Ou l'objet Scan_Request déjà existant.
@@ -182,7 +184,8 @@ class Scan_Requests_Pipeline :
     @Pyro5.server.expose
     def launch_request ( self, account_id : int,
                                account_name : str,
-                               is_prioritary : bool = False ) -> Scan_Request :
+                               is_prioritary : bool = False,
+                               reset_SearchAPI_cursor : bool = False ) -> Scan_Request :
         account_id = int(account_id) # Sécurité, pour unifier
         
         requests_sem = self._requests_sem
@@ -235,6 +238,15 @@ class Scan_Requests_Pipeline :
                         if found :
                             self._step_B_TimelineAPI_list_account_tweets_prior_queue_obj.put( request )
                 
+                # Si la requête n'a pas encore commencé son listage avec l'API
+                # de recherche, on peut lui indiquer qu'il faut reset le
+                # curseur d'indexation avec cette API
+                if reset_SearchAPI_cursor :
+                    # Note : Le thread A lâche le sémaphore APRÈS avoir indiqué
+                    # que started_SearchAPI_listing = True
+                    if not request.started_SearchAPI_listing :
+                        request.reset_SearchAPI_cursor = True
+                
                 queues_sem.release()
                 requests_sem.release()
                 return request
@@ -242,7 +254,8 @@ class Scan_Requests_Pipeline :
         # Créer et ajouter l'objet Scan_Request à notre système.
         request = self._root.register_obj( Scan_Request( account_id,
                                                          account_name,
-                                                         is_prioritary = is_prioritary ) )
+                                                         is_prioritary = is_prioritary,
+                                                         reset_SearchAPI_cursor = reset_SearchAPI_cursor ) )
         self._processing_requests_count += 1 # Augmenter le compteur du nombre de requêtes en cours de traitement
         self._requests[ account_id ] = request # On passe ici l'URI de l'objet.
         

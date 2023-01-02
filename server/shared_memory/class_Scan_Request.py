@@ -28,13 +28,16 @@ class Scan_Request :
     @param acount_name Le nom du compte Twitter à indexer / scanner. Attention,
                        c'est lui qui est revérifié et scanné !
     @param is_prioritary Est ce que cette requête est prioritaire ?
+    @param reset_SearchAPI_cursor Faire un listage complet avec SearchAPI.
     """
     def __init__ ( self, account_id : int,
                          acount_name : str,
-                         is_prioritary : bool = False ) :
+                         is_prioritary : bool = False,
+                         reset_SearchAPI_cursor : bool = False ) :
         self._account_id = account_id
         self._account_name = acount_name
         self._is_prioritary = is_prioritary
+        self._reset_SearchAPI_cursor = reset_SearchAPI_cursor
         
         # Si le compte est introuvable
         self._unfound_account = False
@@ -88,6 +91,13 @@ class Scan_Request :
     @Pyro5.server.expose
     @is_prioritary.setter
     def is_prioritary( self, value ) : self._is_prioritary = value
+    
+    @Pyro5.server.expose
+    @property
+    def reset_SearchAPI_cursor( self ) : return self._reset_SearchAPI_cursor
+    @Pyro5.server.expose
+    @reset_SearchAPI_cursor.setter
+    def reset_SearchAPI_cursor( self, value ) : self._reset_SearchAPI_cursor = value
     
     @Pyro5.server.expose
     @property

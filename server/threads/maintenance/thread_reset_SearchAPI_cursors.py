@@ -173,11 +173,6 @@ def thread_reset_SearchAPI_cursors( thread_id : int, shared_memory ) :
             # On cherche le nom du compte Twitter
             account_name = twitter.get_account_id( account["account_id"], invert_mode = True )
             
-            # Dans tous les cas, on reset son curseur
-            # Note : Cela ne supprime pas la date locale d'indexation, afin de
-            # ne pas interférer avec le thread de mise à jour automatique
-            bdd.reset_account_SearchAPI_last_tweet_date( account["account_id"] )
-            
             # Si l'ID du compte Twitter n'existe plus, on le laisse tel quel,
             # avec son curseur reset
             if account_name == None :
@@ -189,7 +184,6 @@ def thread_reset_SearchAPI_cursors( thread_id : int, shared_memory ) :
                 print( f"[reset_cursors_th{thread_id}] Reset du curseur d'indexation avec l'API de recherche du compte @{account_name} (ID {account['account_id']}) et lancement de sa mise à jour." )
                 account["account_name"] = account_name # On enregistre le nom du compte pour ne pas avoir à le re-résoudre
                 account["last_try"] = 0 # Date du dernier essai dans notre file d'attente
-                account["reset_time"] = time() # Date de reset du curseur
                 to_reset_queue.put( account )
             
             # A chaque itération, on parcours la file d'attente des comptes
@@ -198,10 +192,10 @@ def thread_reset_SearchAPI_cursors( thread_id : int, shared_memory ) :
                 try : account = to_reset_queue.get( block = False )
                 except queue.Empty : break
                 
-                # On réessaye de lancer une requête toutes les 24 heures
+                # On réessaye de lancer une requête toutes les heures
                 # Attention : On ne remet pas directement dans la file
                 # d'attente pour éviter un bouclage infini
-                if time() - account["last_try"] <= 86400 :
+                if time() - account["last_try"] <= 3600 :
                     to_reset_temp_queue.put( account )
                     continue
                 account["last_try"] = time()
@@ -210,24 +204,22 @@ def thread_reset_SearchAPI_cursors( thread_id : int, shared_memory ) :
                 # voir si la requête d'indexation de ce compte n'existe pas déjà
                 request = shared_memory_scan_requests.launch_request( account['account_id'],
                                                                       account_name,
-                                                                      is_prioritary = False )
+                                                                      is_prioritary = False,
+                                                                      reset_SearchAPI_cursor = reset_SearchAPI_cursor )
                 
-                # Si la requête est plus jeune que le reset du curseur, c'est
-                # que nous ou quelqu'un d'autre l'a lancée, mais elle a pris
-                # le curseur reset (A None, donc va tout relister)
-                # Donc on peut laisser ce compte tranquille
-                if request.start > account["reset_time"] :
+                # Vérifier que notre demande de reset du curseur avec l'API de
+                # recherche ait bien été prise en compte
+                # Car en vérité, c'est le thread A qui reset le curseur, juste
+                # avant de lancer son listage
+                if request.reset_SearchAPI_cursor :
                     continue
                 
-                # Si la requête a commencé le listage avec l'API de recherche
-                # on remet le compte dans notre file d'attente
+                # Sinon, c'est que la requête est déjà au listage de l'étape A,
+                # ou bien a terminé cette étape
+                # On remet donc le compte dans notre file d'attente
                 # Attention : On ne remet pas directement dans la file
                 # d'attente pour éviter un bouclage infini
-                if request.started_SearchAPI_listing :
-                    to_reset_temp_queue.put( account )
-                
-                # Sinon, on peut laisser ce compte tranquille, le listage
-                # prendra bien le curseur reset
+                to_reset_temp_queue.put( account )
             
             # Vider la file temporaire dans la vraie file des comptes dont il
             # faut reset leur curseur

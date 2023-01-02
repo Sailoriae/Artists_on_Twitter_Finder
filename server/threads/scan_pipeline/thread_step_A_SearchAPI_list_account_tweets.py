@@ -117,6 +117,11 @@ def thread_step_A_SearchAPI_list_account_tweets( thread_id : int, shared_memory 
         # Lacher le sémaphore
         shared_memory_scan_requests_queues_sem.release()
         
+        # Si demandé, reset le curseur d'indexation de ce compte
+        # On va donc relister tous ses Tweets (Avec l'API de recherche)
+        if request.reset_SearchAPI_cursor :
+            searchAPI_lister._bdd.reset_account_SearchAPI_last_tweet_date( request.account_id )
+        
         # Vérifier si ce compte n'est pas dans notre liste noire
         # AVANT de se déclarer au registre des threads
         if shared_memory_scan_requests.is_blacklisted( int( request.account_id ) ) :
