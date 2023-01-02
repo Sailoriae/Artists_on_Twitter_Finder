@@ -170,6 +170,25 @@ temps, mais l'indexation pourrait rester incomplète.
 RESET_SEARCHAPI_CURSORS_PERIOD = 365 # jours
 
 """
+Faut-il appliquer strictement les périodes de MàJ automatique et de relistage
+automatique ci-dessus ?
+
+Si oui, un scan d'un compte sera lancé dès que la période est atteinte, ou
+avant pour prendre de l'avance. Si non, les scan seront étalés de manière
+homogène sur la période.
+
+Dans les cas où votre serveur AOTF n'a pas démarré durant plusieurs jours, ou
+si vous restaurez une ancienne sauvegarde :
+- La première option peut mener à des vagues de scan, rendant le serveur AOTF
+  inutilisable.
+- La seconde peut mener à des comptes dont la MàJ  et le relistage sont plus
+  vieux que ces périodes respectives.
+
+Il est recommandé de laisser ce paramètre à "False".
+"""
+STRICTLY_ENFORCE_PERIODS = False
+
+"""
 Limitation du nombre de requêtes (Via l'API HTTP) par adresse IP.
 """
 MAX_PROCESSING_REQUESTS_PER_IP_ADDRESS = 10

@@ -82,8 +82,21 @@ def thread_auto_update_accounts( thread_id : int, shared_memory ) :
             if shared_memory_scan_requests.get_request( oldest_updated_account["account_id"] ) != None :
                 continue
             
+            # Si la période de MàJ automatique n'est pas à appliquer
+            # strictement, on étale tout simplement les MàJ dans le temps
+            if not param.STRICTLY_ENFORCE_PERIODS :
+                wait_time = update_period / shared_memory.accounts_count
+                end_sleep_time = time() + wait_time
+                print( f"[auto_update_th{thread_id}] Reprise dans {int(wait_time)} secondes, pour lancer la mise à jour du compte ID {oldest_updated_account['account_id']}." )
+                
+                # Si la boucle d'attente a été cassée, c'est que le serveur
+                # doit s'arrêter, il faut retourner à la boucle
+                # "while shared_memory.keep_threads_alive"
+                if not wait_until( end_sleep_time, break_wait ) :
+                    break
+            
             # Si une des deux dates est à NULL, on force le scan
-            if oldest_updated_account["last_SearchAPI_indexing_local_date"] == None or oldest_updated_account["last_TimelineAPI_indexing_local_date"] == None :
+            elif oldest_updated_account["last_SearchAPI_indexing_local_date"] == None or oldest_updated_account["last_TimelineAPI_indexing_local_date"] == None :
                pass
             
             # Sinon, on prendre la date minimale

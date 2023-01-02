@@ -111,6 +111,7 @@ def check_parameters () :
     check_list.append( test_parameter( "ENABLE_METRICS", bool ) )
     check_list.append( test_strictly_postive_int_parameter( "DAYS_WITHOUT_UPDATE_TO_AUTO_UPDATE", can_be_none = True ) )
     check_list.append( test_strictly_postive_int_parameter( "RESET_SEARCHAPI_CURSORS_PERIOD", can_be_none = True ) )
+    check_list.append( test_parameter( "STRICTLY_ENFORCE_PERIODS", bool ) )
     check_list.append( test_strictly_postive_int_parameter( "MAX_PROCESSING_REQUESTS_PER_IP_ADDRESS" ) )
     
     check_list.append( test_parameter( "UNLIMITED_IP_ADDRESSES", list ) )

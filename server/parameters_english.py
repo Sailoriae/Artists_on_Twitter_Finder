@@ -166,6 +166,23 @@ incomplete.
 RESET_SEARCHAPI_CURSORS_PERIOD = 365 # days
 
 """
+Should the above automatic update and automatic re-listing periods be strictly
+enforced ?
+
+If yes, a scan of an account will be launched as soon as the period is reached,
+or before to get ahead. If no, the scans will be spread evenly over the period.
+
+In cases where your AOTF server has not started for several days, or if you are
+restoring an old backup :
+- The first option may lead to waves of scans, making the AOTF server unusable.
+- The second one can lead to accounts whose update and re-listing are older
+  than these respective periods.
+
+It is recommended to leave this setting at "False".
+"""
+STRICTLY_ENFORCE_PERIODS = False
+
+"""
 Limit the number of requests (Through the HTTP API) per IP address.
 """
 MAX_PROCESSING_REQUESTS_PER_IP_ADDRESS = 10

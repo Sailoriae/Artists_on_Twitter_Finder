@@ -119,10 +119,23 @@ def thread_reset_SearchAPI_cursors( thread_id : int, shared_memory ) :
                  bdd.equalize_reset_account_SearchAPI_date( account['account_id'] )
                  continue # On ne force pas le reset, ça ne sert à rien
             
+            # Si la période de reset des curseurs n'est pas à appliquer
+            # strictement, on étale tout simplement les resets dans le temps
+            if not param.STRICTLY_ENFORCE_PERIODS :
+                wait_time = reset_period / shared_memory.accounts_count
+                end_sleep_time = time() + wait_time
+                print( f"[reset_cursors_th{thread_id}] Reprise dans {int(wait_time)} secondes, pour reset le curseur d'indexation avec l'API de recherche du compte ID {account['account_id']}." )
+                
+                # Si la boucle d'attente a été cassée, c'est que le serveur
+                # doit s'arrêter, il faut retourner à la boucle
+                # "while shared_memory.keep_threads_alive"
+                if not wait_until( end_sleep_time, break_wait ) :
+                    break
+            
             # Si le reset du curseur de ce compte est à moins de
             # param.RESET_SEARCHAPI_CURSORS_PERIOD jours d'aujourd'hui,
             # il faut attendre
-            if diff < reset_period :
+            elif diff < reset_period :
                 # Reprise dans (reset_period - (now - account["last_cursor_reset_date"]))
                 wait_time = reset_period - diff
                 
