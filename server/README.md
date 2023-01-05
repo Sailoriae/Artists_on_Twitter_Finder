@@ -148,8 +148,8 @@ Si le mode multi-processus est désactivé, les processus conteneurs disparaisse
 
 * Lorsque l'on parle de l'URL d'une requête, ou de l'URL d'une illustration, on parle de l'**URL de la page web** qui contient l'illustration, et non l'URL menant directement à l'image.
   Exemple :
-  - Ceci est une URL d'illustration, elle peut être traitée par le serveur : https://danbooru.donmai.us/posts/3991989
-  - Ceci est une URL menant directement à l'image, elle sera rejetée par serveur : https://danbooru.donmai.us/data/__hatsune_miku_vocaloid_drawn_by_bibboss39__cac99a60fa84a778d5b048daec05e7b1.jpg
+  - Ceci est une URL d'illustration, elle peut être traitée par le serveur : https://derpibooru.org/images/639483
+  - Ceci est une URL menant directement à l'image, elle sera rejetée par serveur : https://derpicdn.net/img/view/2014/5/28/639483.jpg
 
 * Si l'image d'un Tweet a été perdue par Twitter, ou qu'il s'est produit une erreur, elle est de toutes manières enregistrée dans la base de données, et son empreinte est mise à `NULL` (Mais son nom est quand même enregistré).
   S’il se produit une erreur, elle sera journalisée ici.

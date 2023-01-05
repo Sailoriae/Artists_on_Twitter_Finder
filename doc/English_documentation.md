@@ -32,7 +32,7 @@ When we talk about a "supported website" by the server, we mean one of the follo
 
 * DeviantArt : https://www.deviantart.com/
 * Pixiv : https://www.pixiv.net/en/
-* Danbooru : https://danbooru.donmai.us/ (Warning, may contain NSFW directly on the home page)
+* Danbooru (Website with adult content)
 * Derpibooru : https://derpibooru.org/
 * Furbooru : https://furbooru.org/
 
